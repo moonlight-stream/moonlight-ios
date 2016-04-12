@@ -9,10 +9,14 @@
 import XCTest
 @testable import Moonlight
 
+/**
+ Tests the `Controller.swift` class
+ */
 class ControllerUnitTests: XCTestCase {
-  let controllerUnderTest = Controller()
+  var controllerUnderTest: Controller!
   
   override func setUp() {
+    controllerUnderTest = Controller()
     XCTAssertNotNil(controllerUnderTest, "controllerUnderTest is nil, and should not be for this test. See line \(#line) \n")
   }
   
@@ -45,7 +49,7 @@ class ControllerUnitTests: XCTestCase {
    - parameter expected: The expected value for the property
    - parameter actual:   The actual value for the property
    
-   - returns: A string with the failure in it formatted to stated actual, expected, and the failure line.
+   - returns: A string with the failure in it. Formatted to state actual, expected, and the failure line.
    */
   func displayCIntFailure(name: String, expected: CInt, actual: CInt) -> String {
     return "\(name) failed to set CInt correctly \n. Expected: \(expected)\n. Actual: \(actual) \n. See line \(#line) \n"
@@ -58,10 +62,23 @@ class ControllerUnitTests: XCTestCase {
    - parameter expected: The expected value for the property
    - parameter actual:   The actual value for the property
    
-   - returns: A string with the failure in it formatted to state the actual, expected, and the failure line.
+   - returns: A string with the failure in it. Formatted to state actual, expected, and the failure line.
    */
   func displayCShortFailure(name: String, expected: CShort, actual: CShort) -> String {
     return "\(name) failed to set CShort correctly \n. Expected: \(expected)\n. Actual: \(actual) \n. See line \(#line) \n"
+  }
+  
+  /**
+   Displays "*name* failed to set CCHar correctly." Shows expected and actual, as well as the failure line.
+   
+   - parameter name:     The property being tested
+   - parameter expected: The expected value for the property
+   - parameter actual:   The actual value for the property
+   
+   - returns: A string with the failure in it. Formatted to state actual, expected, and the failure line.
+   */
+  func displayCCharFailure(name: String, expected: CChar, actual: CChar) -> String {
+    return "\(name) failed to set CChar correctly \n. Expected: \(expected)\n. Actual: \(actual) \n. See line \(#line) \n"
   }
   
   
@@ -95,7 +112,7 @@ class ControllerUnitTests: XCTestCase {
   /**
    Asserts that the `lastLeftStickX` is of type `CShort` and can be set and gotten from properly
    */
-  func test_Assert_lastLeftSickX_Sets_To_CShort() {
+  func test_Assert_lastLeftStickX_Sets_To_CShort() {
     // Assert type hasn't changed
     XCTAssertTrue(controllerUnderTest.lastLeftStickX.dynamicType == CShort.self, "Expected lastLeftStickX to be of type CShort. See line \(#line) \n")
     
@@ -108,7 +125,7 @@ class ControllerUnitTests: XCTestCase {
   /**
    Asserts that lastLeftStickY` is of type `CShort` and can be set and gotten from properly
    */
-  func test_Assert_lastLeftSitckY_Sets_To_CShort() {
+  func test_Assert_lastLeftStickY_Sets_To_CShort() {
     // Assert type hasn't changed
     XCTAssertTrue(controllerUnderTest.lastLeftStickY.dynamicType == CShort.self, "Expected lastLeftStickY to be of type CShort. See line \(#line) \n")
     
@@ -116,6 +133,60 @@ class ControllerUnitTests: XCTestCase {
     let expected = CShort(1)
     controllerUnderTest.lastLeftStickY = expected
     XCTAssertTrue(controllerUnderTest.lastLeftStickY == expected, displayCShortFailure("lastLeftStickY", expected: expected, actual: controllerUnderTest.lastLeftStickY))
-
   }
+  
+  /**
+   Asserts that the `lastRightStickX` is of type `CShort` and can be set and gotten from properly
+   */
+  func test_Assert_lastRightStickX_SetsTo_CShort() {
+    // Assert type hasn't changed
+    XCTAssertTrue(controllerUnderTest.lastRightStickX.dynamicType == CShort.self, "Expected lastRightStickX to be of type CShort. See line \(#line) \n")
+    
+    // Assert value is assigned properly.
+    let expected = CShort(1)
+    controllerUnderTest.lastRightStickX = expected
+    XCTAssertTrue(controllerUnderTest.lastRightStickX == expected, displayCShortFailure("lastRightStickX", expected: expected, actual: controllerUnderTest.lastRightStickX))
+  }
+  
+  /**
+   Asserts that the `lastRightStickY` is of type `CShort` and can be set and gotten from properly
+   */
+  func test_Assert_lastRightStickY_Sets_To_CShort() {
+    // Assert type hasn't changed
+    XCTAssertTrue(controllerUnderTest.lastRightStickY.dynamicType == CShort.self, "Expected lastRightStickY to be of type CShort. See line \(#line) \n")
+    
+    // Assert value is assigned properly.
+    let expected = CShort(1)
+    controllerUnderTest.lastRightStickY = expected
+    XCTAssertTrue(controllerUnderTest.lastRightStickY == expected, displayCShortFailure("lastRightStickY", expected: expected, actual: controllerUnderTest.lastRightStickY))
+  }
+  
+  /**
+   Asserts that the `lastLeftTrigger` is of type `CChar` and can be set and gotten from properly
+   */
+  func test_Assert_lastLeftTrigger_Sets_To_CChar() {
+    // Assert type hasn't changed
+    XCTAssertTrue(controllerUnderTest.lastLeftTrigger.dynamicType == CChar.self, "Expected lastLeftTrigger to be of type CChar. See line \(#line) \n")
+    
+    // Assert value is assigned properly.
+    let expected = CChar(1)
+    controllerUnderTest.lastLeftTrigger = expected
+    XCTAssertTrue(controllerUnderTest.lastLeftTrigger == expected, displayCCharFailure("lastLeftTrigger", expected: expected, actual: controllerUnderTest.lastLeftTrigger))
+    
+  }
+  
+  /**
+   Asserts that the `lastRightTrigger` is of type `CChar` and can be set and gotten from properly
+   */
+  func test_Assert_lastRightTrigger_Sets_To_CChar() {
+    // Assert type hasn't changed
+    XCTAssertTrue(controllerUnderTest.lastRightTrigger.dynamicType == CChar.self, "Expected lastRightTrigger to be of type CChar. See line \(#line) \n")
+    
+    // Assert value is assigned properly.
+    let expected = CChar(1)
+    controllerUnderTest.lastRightTrigger = expected
+    XCTAssertTrue(controllerUnderTest.lastRightTrigger == expected, displayCCharFailure("lastRightTrigger", expected: expected, actual: controllerUnderTest.lastRightTrigger))
+    
+  }
+  
 }
