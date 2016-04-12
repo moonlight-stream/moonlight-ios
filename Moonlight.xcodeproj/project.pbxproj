@@ -18,6 +18,7 @@
 		9E5D60131A5A5A3900689918 /* Roboto-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9E5D60001A5A5A3900689918 /* Roboto-Medium.ttf */; };
 		9E5D60151A5A5A3900689918 /* Roboto-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9E5D60021A5A5A3900689918 /* Roboto-Regular.ttf */; };
 		9E5D60161A5A5A3900689918 /* Roboto-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9E5D60031A5A5A3900689918 /* Roboto-Thin.ttf */; };
+		D4746EEC1CBC740C006FB401 /* Controller.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4746EEB1CBC740C006FB401 /* Controller.swift */; };
 		FB1D59971BBCCB6400F482CA /* ComputerScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = FB1D59961BBCCB6400F482CA /* ComputerScrollView.m */; };
 		FB1D599A1BBCCD7E00F482CA /* AppCollectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = FB1D59991BBCCD7E00F482CA /* AppCollectionView.m */; };
 		FB290CF219B2C406004C83CF /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB290CF119B2C406004C83CF /* Foundation.framework */; };
@@ -111,6 +112,8 @@
 		9E5D60001A5A5A3900689918 /* Roboto-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-Medium.ttf"; sourceTree = "<group>"; };
 		9E5D60021A5A5A3900689918 /* Roboto-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-Regular.ttf"; sourceTree = "<group>"; };
 		9E5D60031A5A5A3900689918 /* Roboto-Thin.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-Thin.ttf"; sourceTree = "<group>"; };
+		D4746EEA1CBC740C006FB401 /* Moonlight-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "Moonlight-Bridging-Header.h"; path = "Input/Moonlight-Bridging-Header.h"; sourceTree = "<group>"; };
+		D4746EEB1CBC740C006FB401 /* Controller.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Controller.swift; sourceTree = "<group>"; };
 		FB1D59951BBCCB6400F482CA /* ComputerScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ComputerScrollView.h; sourceTree = "<group>"; };
 		FB1D59961BBCCB6400F482CA /* ComputerScrollView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ComputerScrollView.m; sourceTree = "<group>"; };
 		FB1D59981BBCCD7E00F482CA /* AppCollectionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppCollectionView.h; sourceTree = "<group>"; };
@@ -360,7 +363,7 @@
 			isa = PBXGroup;
 			children = (
 				98AB2E7F1CAD46830089BB98 /* moonlight-common.xcodeproj */,
-				FB290CF919B2C406004C83CF /* Limelight */,
+				FB290CF919B2C406004C83CF /* Moonlight */,
 				FB290CF019B2C406004C83CF /* Frameworks */,
 				FB290CEF19B2C406004C83CF /* Products */,
 			);
@@ -393,9 +396,10 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		FB290CF919B2C406004C83CF /* Limelight */ = {
+		FB290CF919B2C406004C83CF /* Moonlight */ = {
 			isa = PBXGroup;
 			children = (
+				D4746EEA1CBC740C006FB401 /* Moonlight-Bridging-Header.h */,
 				9E5D5FF61A5A5A3900689918 /* Font */,
 				FB89460419F646E200339C8A /* Crypto */,
 				FB89460919F646E200339C8A /* Input */,
@@ -421,6 +425,7 @@
 				FB1D59981BBCCD7E00F482CA /* AppCollectionView.h */,
 				FB1D59991BBCCD7E00F482CA /* AppCollectionView.m */,
 			);
+			name = Moonlight;
 			path = Limelight;
 			sourceTree = "<group>";
 		};
@@ -455,6 +460,7 @@
 				FB89460B19F646E200339C8A /* ControllerSupport.m */,
 				FB9AFD411A7F0C6900872C98 /* Controller.h */,
 				FB9AFD421A7F0C6900872C98 /* Controller.m */,
+				D4746EEB1CBC740C006FB401 /* Controller.swift */,
 				FB89460C19F646E200339C8A /* StreamView.h */,
 				FB89460D19F646E200339C8A /* StreamView.m */,
 				FB4678EB1A50C40900377732 /* OnScreenControls.h */,
@@ -774,6 +780,7 @@
 		FB290CE619B2C406004C83CF /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0730;
 				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "Moonlight Stream";
 				TargetAttributes = {
@@ -883,6 +890,7 @@
 				FB89462A19F646E200339C8A /* ControllerSupport.m in Sources */,
 				FB9AFD3D1A7E111600872C98 /* AppAssetResponse.m in Sources */,
 				FBD349621A0089F6002D2A60 /* DataManager.m in Sources */,
+				D4746EEC1CBC740C006FB401 /* Controller.swift in Sources */,
 				FBFCB3351B50B29400089F8A /* App.m in Sources */,
 				FB4A23B81A9D3637004D2EF2 /* LoadingFrameViewController.m in Sources */,
 				FB9AFD3A1A7E05CE00872C98 /* ServerInfoResponse.m in Sources */,
@@ -992,6 +1000,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				ENABLE_BITCODE = NO;
@@ -1005,6 +1014,7 @@
 					"$(PROJECT_DIR)/libs/**",
 				);
 				INFOPLIST_FILE = "Limelight/Limelight-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/libs/opus/lib",
@@ -1014,6 +1024,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SKIP_INSTALL = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "Limelight/Input/Moonlight-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -1022,6 +1034,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				ENABLE_BITCODE = NO;
@@ -1035,6 +1048,7 @@
 					"$(PROJECT_DIR)/libs/**",
 				);
 				INFOPLIST_FILE = "Limelight/Limelight-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/libs/opus/lib",
@@ -1044,6 +1058,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SKIP_INSTALL = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "Limelight/Input/Moonlight-Bridging-Header.h";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
