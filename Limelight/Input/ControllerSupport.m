@@ -8,8 +8,11 @@
 
 #import "ControllerSupport.h"
 #import "OnScreenControls.h"
-#import "Controller.h"
+//#import "Controller.h"
 #include "Limelight.h"
+
+#import "Moonlight-Swift.h"
+@class Controller;
 
 @import GameController;
 
