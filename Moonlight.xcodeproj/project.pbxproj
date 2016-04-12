@@ -18,6 +18,7 @@
 		9E5D60131A5A5A3900689918 /* Roboto-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9E5D60001A5A5A3900689918 /* Roboto-Medium.ttf */; };
 		9E5D60151A5A5A3900689918 /* Roboto-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9E5D60021A5A5A3900689918 /* Roboto-Regular.ttf */; };
 		9E5D60161A5A5A3900689918 /* Roboto-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9E5D60031A5A5A3900689918 /* Roboto-Thin.ttf */; };
+		D46A73A31CBC7CB60039F1EE /* MoonlightUnitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46A73A21CBC7CB60039F1EE /* MoonlightUnitTests.swift */; };
 		D4746EEC1CBC740C006FB401 /* Controller.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4746EEB1CBC740C006FB401 /* Controller.swift */; };
 		FB1D59971BBCCB6400F482CA /* ComputerScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = FB1D59961BBCCB6400F482CA /* ComputerScrollView.m */; };
 		FB1D599A1BBCCD7E00F482CA /* AppCollectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = FB1D59991BBCCD7E00F482CA /* AppCollectionView.m */; };
@@ -94,6 +95,13 @@
 			remoteGlobalIDString = FB290E2D19B37A4E004C83CF;
 			remoteInfo = "moonlight-common";
 		};
+		D46A73A51CBC7CB60039F1EE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FB290CE619B2C406004C83CF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FB290CED19B2C406004C83CF;
+			remoteInfo = Moonlight;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -111,6 +119,9 @@
 		9E5D60001A5A5A3900689918 /* Roboto-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-Medium.ttf"; sourceTree = "<group>"; };
 		9E5D60021A5A5A3900689918 /* Roboto-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-Regular.ttf"; sourceTree = "<group>"; };
 		9E5D60031A5A5A3900689918 /* Roboto-Thin.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-Thin.ttf"; sourceTree = "<group>"; };
+		D46A73A01CBC7CB60039F1EE /* MoonlightUnitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MoonlightUnitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D46A73A21CBC7CB60039F1EE /* MoonlightUnitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoonlightUnitTests.swift; sourceTree = "<group>"; };
+		D46A73A41CBC7CB60039F1EE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D4746EEA1CBC740C006FB401 /* Moonlight-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "Moonlight-Bridging-Header.h"; path = "Input/Moonlight-Bridging-Header.h"; sourceTree = "<group>"; };
 		D4746EEB1CBC740C006FB401 /* Controller.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Controller.swift; sourceTree = "<group>"; };
 		FB1D59951BBCCB6400F482CA /* ComputerScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ComputerScrollView.h; sourceTree = "<group>"; };
@@ -303,6 +314,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		D46A739D1CBC7CB60039F1EE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FB290CEB19B2C406004C83CF /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -356,11 +374,21 @@
 			path = Roboto;
 			sourceTree = "<group>";
 		};
+		D46A73A11CBC7CB60039F1EE /* MoonlightUnitTests */ = {
+			isa = PBXGroup;
+			children = (
+				D46A73A21CBC7CB60039F1EE /* MoonlightUnitTests.swift */,
+				D46A73A41CBC7CB60039F1EE /* Info.plist */,
+			);
+			path = MoonlightUnitTests;
+			sourceTree = "<group>";
+		};
 		FB290CE519B2C406004C83CF = {
 			isa = PBXGroup;
 			children = (
 				98AB2E7F1CAD46830089BB98 /* moonlight-common.xcodeproj */,
 				FB290CF919B2C406004C83CF /* Moonlight */,
+				D46A73A11CBC7CB60039F1EE /* MoonlightUnitTests */,
 				FB290CF019B2C406004C83CF /* Frameworks */,
 				FB290CEF19B2C406004C83CF /* Products */,
 			);
@@ -370,6 +398,7 @@
 			isa = PBXGroup;
 			children = (
 				FB290CEE19B2C406004C83CF /* Moonlight.app */,
+				D46A73A01CBC7CB60039F1EE /* MoonlightUnitTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -751,6 +780,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		D46A739F1CBC7CB60039F1EE /* MoonlightUnitTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D46A73A91CBC7CB60039F1EE /* Build configuration list for PBXNativeTarget "MoonlightUnitTests" */;
+			buildPhases = (
+				D46A739C1CBC7CB60039F1EE /* Sources */,
+				D46A739D1CBC7CB60039F1EE /* Frameworks */,
+				D46A739E1CBC7CB60039F1EE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D46A73A61CBC7CB60039F1EE /* PBXTargetDependency */,
+			);
+			name = MoonlightUnitTests;
+			productName = MoonlightUnitTests;
+			productReference = D46A73A01CBC7CB60039F1EE /* MoonlightUnitTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		FB290CED19B2C406004C83CF /* Moonlight */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = FB290D2019B2C406004C83CF /* Build configuration list for PBXNativeTarget "Moonlight" */;
@@ -779,6 +826,10 @@
 				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "Moonlight Stream";
 				TargetAttributes = {
+					D46A739F1CBC7CB60039F1EE = {
+						CreatedOnToolsVersion = 7.3;
+						TestTargetID = FB290CED19B2C406004C83CF;
+					};
 					FB290CED19B2C406004C83CF = {
 						DevelopmentTeam = DM46QST4M7;
 					};
@@ -803,6 +854,7 @@
 			projectRoot = "";
 			targets = (
 				FB290CED19B2C406004C83CF /* Moonlight */,
+				D46A739F1CBC7CB60039F1EE /* MoonlightUnitTests */,
 			);
 		};
 /* End PBXProject section */
@@ -818,6 +870,13 @@
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
+		D46A739E1CBC7CB60039F1EE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FB290CEC19B2C406004C83CF /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -840,6 +899,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		D46A739C1CBC7CB60039F1EE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D46A73A31CBC7CB60039F1EE /* MoonlightUnitTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FB290CEA19B2C406004C83CF /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -900,6 +967,11 @@
 			name = "moonlight-common";
 			targetProxy = 98AB2E851CAD468B0089BB98 /* PBXContainerItemProxy */;
 		};
+		D46A73A61CBC7CB60039F1EE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FB290CED19B2C406004C83CF /* Moonlight */;
+			targetProxy = D46A73A51CBC7CB60039F1EE /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
@@ -914,6 +986,47 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		D46A73A71CBC7CB60039F1EE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				INFOPLIST_FILE = MoonlightUnitTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.MoonlightUnitTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Moonlight.app/Moonlight";
+			};
+			name = Debug;
+		};
+		D46A73A81CBC7CB60039F1EE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				INFOPLIST_FILE = MoonlightUnitTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.MoonlightUnitTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Moonlight.app/Moonlight";
+			};
+			name = Release;
+		};
 		FB290D1E19B2C406004C83CF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1060,6 +1173,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		D46A73A91CBC7CB60039F1EE /* Build configuration list for PBXNativeTarget "MoonlightUnitTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D46A73A71CBC7CB60039F1EE /* Debug */,
+				D46A73A81CBC7CB60039F1EE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		FB290CE919B2C406004C83CF /* Build configuration list for PBXProject "Moonlight" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
