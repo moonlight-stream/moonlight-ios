@@ -75,10 +75,10 @@
 		C627B7CC1CE952E00060E0C1 /* Limelight.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = FB290D0519B2C406004C83CF /* Limelight.xcdatamodeld */; };
 		C627B7CD1CE952E30060E0C1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FB290D0819B2C406004C83CF /* Images.xcassets */; };
 		C627B7F91CE957320060E0C1 /* libmoonlight-common-tvos.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C627B7F81CE957320060E0C1 /* libmoonlight-common-tvos.a */; };
-		C627B8011CE958710060E0C1 /* libcrypto_tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C627B7FE1CE958710060E0C1 /* libcrypto_tvOS.a */; };
-		C627B8021CE958710060E0C1 /* libopus.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C627B7FF1CE958710060E0C1 /* libopus.a */; };
-		C627B8031CE958710060E0C1 /* libssl_tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C627B8001CE958710060E0C1 /* libssl_tvOS.a */; };
 		C627B8041CE95CD60060E0C1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FB290D0319B2C406004C83CF /* AppDelegate.m */; };
+		C627B8081CEA108C0060E0C1 /* libcrypto_tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C627B8051CEA108C0060E0C1 /* libcrypto_tvOS.a */; };
+		C627B8091CEA108C0060E0C1 /* libopus.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C627B8061CEA108C0060E0C1 /* libopus.a */; };
+		C627B80A1CEA108C0060E0C1 /* libssl_tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C627B8071CEA108C0060E0C1 /* libssl_tvOS.a */; };
 		D46A73AD1CBC7D090039F1EE /* ControllerUnitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46A73AC1CBC7D090039F1EE /* ControllerUnitTests.swift */; };
 		D4746EEC1CBC740C006FB401 /* Controller.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4746EEB1CBC740C006FB401 /* Controller.swift */; };
 		FB1D59971BBCCB6400F482CA /* ComputerScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = FB1D59961BBCCB6400F482CA /* ComputerScrollView.m */; };
@@ -163,6 +163,13 @@
 			remoteGlobalIDString = C627B7F51CE957110060E0C1;
 			remoteInfo = "moonlight-common-tvos";
 		};
+		C627B80B1CEA10BA0060E0C1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 98AB2E7F1CAD46830089BB98 /* moonlight-common.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = C627B7D61CE957110060E0C1;
+			remoteInfo = "moonlight-common-tvos";
+		};
 		D46A73A51CBC7CB60039F1EE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = FB290CE619B2C406004C83CF /* Project object */;
@@ -192,9 +199,9 @@
 		C627B78B1CE9515C0060E0C1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C627B78D1CE9515C0060E0C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C627B7911CE9516A0060E0C1 /* tvosStory.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = tvosStory.storyboard; sourceTree = "<group>"; };
-		C627B7FE1CE958710060E0C1 /* libcrypto_tvOS.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libcrypto_tvOS.a; sourceTree = "<group>"; };
-		C627B7FF1CE958710060E0C1 /* libopus.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libopus.a; sourceTree = "<group>"; };
-		C627B8001CE958710060E0C1 /* libssl_tvOS.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libssl_tvOS.a; sourceTree = "<group>"; };
+		C627B8051CEA108C0060E0C1 /* libcrypto_tvOS.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcrypto_tvOS.a; path = "libs-tvos/libcrypto_tvOS.a"; sourceTree = "<group>"; };
+		C627B8061CEA108C0060E0C1 /* libopus.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopus.a; path = "libs-tvos/libopus.a"; sourceTree = "<group>"; };
+		C627B8071CEA108C0060E0C1 /* libssl_tvOS.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libssl_tvOS.a; path = "libs-tvos/libssl_tvOS.a"; sourceTree = "<group>"; };
 		D46A73A01CBC7CB60039F1EE /* MoonlightUnitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MoonlightUnitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D46A73A41CBC7CB60039F1EE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D46A73AB1CBC7D080039F1EE /* MoonlightUnitTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MoonlightUnitTests-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -397,13 +404,13 @@
 			files = (
 				C627B7F91CE957320060E0C1 /* libmoonlight-common-tvos.a in Frameworks */,
 				C627B7941CE951E20060E0C1 /* CoreFoundation.framework in Frameworks */,
-				C627B8021CE958710060E0C1 /* libopus.a in Frameworks */,
+				C627B8091CEA108C0060E0C1 /* libopus.a in Frameworks */,
 				C627B7981CE951E20060E0C1 /* libiconv.dylib in Frameworks */,
 				C627B7991CE951E20060E0C1 /* libxml2.dylib in Frameworks */,
 				C627B79A1CE951E20060E0C1 /* libbz2.dylib in Frameworks */,
 				C627B79B1CE951E20060E0C1 /* libz.dylib in Frameworks */,
-				C627B8031CE958710060E0C1 /* libssl_tvOS.a in Frameworks */,
-				C627B8011CE958710060E0C1 /* libcrypto_tvOS.a in Frameworks */,
+				C627B80A1CEA108C0060E0C1 /* libssl_tvOS.a in Frameworks */,
+				C627B8081CEA108C0060E0C1 /* libcrypto_tvOS.a in Frameworks */,
 				C627B79C1CE951E20060E0C1 /* Foundation.framework in Frameworks */,
 				C627B79D1CE951E20060E0C1 /* CoreGraphics.framework in Frameworks */,
 				C627B79E1CE951E20060E0C1 /* UIKit.framework in Frameworks */,
@@ -534,9 +541,9 @@
 		FB290CF019B2C406004C83CF /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				C627B7FE1CE958710060E0C1 /* libcrypto_tvOS.a */,
-				C627B7FF1CE958710060E0C1 /* libopus.a */,
-				C627B8001CE958710060E0C1 /* libssl_tvOS.a */,
+				C627B8051CEA108C0060E0C1 /* libcrypto_tvOS.a */,
+				C627B8061CEA108C0060E0C1 /* libopus.a */,
+				C627B8071CEA108C0060E0C1 /* libssl_tvOS.a */,
 				FB6DDEF31AE739100096499A /* libmoonlight-common.a */,
 				FB4679001A57048000377732 /* CoreFoundation.framework */,
 				FBD349571A003F05002D2A60 /* libsqlite3.dylib */,
@@ -922,6 +929,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				C627B80C1CEA10BA0060E0C1 /* PBXTargetDependency */,
 			);
 			name = "Moonlight tvOS";
 			productName = "Moonlight tvOS";
@@ -980,9 +988,6 @@
 					D46A739F1CBC7CB60039F1EE = {
 						CreatedOnToolsVersion = 7.3;
 						TestTargetID = FB290CED19B2C406004C83CF;
-					};
-					FB290CED19B2C406004C83CF = {
-						DevelopmentTeam = D9D8AS23NF;
 					};
 				};
 			};
@@ -1189,6 +1194,11 @@
 			name = "moonlight-common";
 			targetProxy = 98AB2E851CAD468B0089BB98 /* PBXContainerItemProxy */;
 		};
+		C627B80C1CEA10BA0060E0C1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "moonlight-common-tvos";
+			targetProxy = C627B80B1CEA10BA0060E0C1 /* PBXContainerItemProxy */;
+		};
 		D46A73A61CBC7CB60039F1EE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = FB290CED19B2C406004C83CF /* Moonlight */;
@@ -1231,9 +1241,10 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/libs-tvos/",
+					"$(PROJECT_DIR)/libs-tvos",
 				);
 				MTL_ENABLE_DEBUG_INFO = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.apocolipse.Moonlight-tvOS.Moonlight-tvOS";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.Moonlight-tvOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
 				SWIFT_OBJC_BRIDGING_HEADER = "Limelight/Input/Moonlight-Bridging-Header.h";
@@ -1268,9 +1279,10 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/libs-tvos/",
+					"$(PROJECT_DIR)/libs-tvos",
 				);
 				MTL_ENABLE_DEBUG_INFO = NO;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.apocolipse.Moonlight-tvOS.Moonlight-tvOS";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.Moonlight-tvOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
 				SWIFT_OBJC_BRIDGING_HEADER = "Limelight/Input/Moonlight-Bridging-Header.h";
