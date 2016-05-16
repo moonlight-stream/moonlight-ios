@@ -58,7 +58,13 @@ static NSString* bitrateFormat = @"Bitrate: %.1f Mbps";
 #if TARGET_OS_IOS
 #elif TARGET_OS_TV
 - (void) bitrateButtonPressed:(UIButton *)sender {
-  Log(LOG_I, @"Pressed button %@", sender);
+    if (sender == self.bitrateUpButton) {
+        _bitrate += BITRATE_INTERVAL;
+    } else {
+        _bitrate -= BITRATE_INTERVAL;
+    }
+  
+    [self updateBitrateText];
 }
 #endif
 - (void) newResolutionFpsChosen {
