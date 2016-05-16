@@ -178,7 +178,6 @@
                     <simulatedOrientationMetrics key="simulatedOrientationMetrics" orientation="landscapeRight"/>
                     <connections>
                         <segue destination="baW-rW-rBd" kind="custom" identifier="sw_front" customClass="SWRevealViewControllerSegueSetController" id="RBe-eP-uG6"/>
-                        <segue destination="BsV-3c-455" kind="custom" identifier="sw_rear" customClass="SWRevealViewControllerSegueSetController" id="eWM-vc-Fj1"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="lUU-kb-wrO" userLabel="First Responder" sceneMemberID="firstResponder"/>
