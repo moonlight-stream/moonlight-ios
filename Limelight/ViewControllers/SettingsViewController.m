@@ -35,18 +35,32 @@ static NSString* bitrateFormat = @"Bitrate: %.1f Mbps";
     } else {
         resolution = 0;
     }
+#if TARGET_OS_IOS
     NSInteger onscreenControls = [currentSettings.onscreenControls integerValue];
-    
+#elif TARGET_OS_TV
+    NSInteger onscreenControls = 0; // no onscreen for tvOS
+#endif
     [self.resolutionSelector setSelectedSegmentIndex:resolution];
     [self.resolutionSelector addTarget:self action:@selector(newResolutionFpsChosen) forControlEvents:UIControlEventValueChanged];
     [self.framerateSelector setSelectedSegmentIndex:framerate];
     [self.framerateSelector addTarget:self action:@selector(newResolutionFpsChosen) forControlEvents:UIControlEventValueChanged];
     [self.onscreenControlSelector setSelectedSegmentIndex:onscreenControls];
+#if TARGET_OS_IOS
     [self.bitrateSlider setValue:(_bitrate / BITRATE_INTERVAL) animated:YES];
     [self.bitrateSlider addTarget:self action:@selector(bitrateSliderMoved) forControlEvents:UIControlEventValueChanged];
+#elif TARGET_OS_TV
+    [self.bitrateUpButton addTarget:self action:@selector(bitrateButtonPressed:) forControlEvents:UIControlEventPrimaryActionTriggered];
+    [self.bitrateDownButton addTarget:self action:@selector(bitrateButtonPressed:) forControlEvents:UIControlEventPrimaryActionTriggered];
+#endif
     [self updateBitrateText];
 }
 
+#if TARGET_OS_IOS
+#elif TARGET_OS_TV
+- (void) bitrateButtonPressed:(UIButton *)sender {
+  Log(LOG_I, @"Pressed button %@", sender);
+}
+#endif
 - (void) newResolutionFpsChosen {
     NSInteger frameRate = [self getChosenFrameRate];
     NSInteger resHeight = [self getChosenStreamHeight];
@@ -62,17 +76,28 @@ static NSString* bitrateFormat = @"Bitrate: %.1f Mbps";
     }
     // 720p30 is 5 Mbps
     else {
+#if TARGET_OS_IOS
         defaultBitrate = 5000;
+#elif TARGET_OS_TV
+        defaultBitrate = 20000; // default 1080p on tvOS
+#endif
     }
     
     _bitrate = defaultBitrate;
-    [self.bitrateSlider setValue:defaultBitrate / BITRATE_INTERVAL animated:YES];
-    
+#if TARGET_OS_IOS
+  [self.bitrateSlider setValue:defaultBitrate / BITRATE_INTERVAL animated:YES];
+#elif TARGET_OS_TV
+#endif
     [self updateBitrateText];
 }
 
 - (void) bitrateSliderMoved {
+#if TARGET_OS_IOS
     _bitrate = BITRATE_INTERVAL * (int)self.bitrateSlider.value;
+#elif TARGET_OS_TV
+#endif
+  Log(LOG_I, [NSString stringWithFormat:@"Moved Slider %ld", (long)_bitrate]);
+
     [self updateBitrateText];
 }
 
@@ -86,7 +111,11 @@ static NSString* bitrateFormat = @"Bitrate: %.1f Mbps";
 }
 
 - (NSInteger) getChosenStreamHeight {
-    return [self.resolutionSelector selectedSegmentIndex] == 0 ? 720 : 1080;
+#if TARGET_OS_IOS
+  return [self.resolutionSelector selectedSegmentIndex] == 0 ? 720 : 1080;
+#elif TARGET_OS_TV
+    return 1080; // default 1080p on tvOS
+#endif
 }
 
 - (NSInteger) getChosenStreamWidth {

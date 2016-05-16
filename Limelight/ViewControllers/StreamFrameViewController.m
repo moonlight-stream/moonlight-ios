@@ -26,7 +26,9 @@
     [super viewDidLoad];
     
     [self.navigationController setNavigationBarHidden:YES animated:YES];
-    
+
+    Log(LOG_I, @"Screen Width: %f, Height: %f", self.view.frame.size.width,self.view.frame.size.height);
+  
     [self.stageLabel setText:@"Starting App"];
     [self.stageLabel sizeToFit];
     self.stageLabel.center = CGPointMake(self.view.frame.size.width / 2, self.view.frame.size.height / 2);
