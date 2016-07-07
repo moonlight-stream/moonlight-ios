@@ -18,9 +18,14 @@ static NSOperationQueue* mainQueue;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    [[UILabel appearance] setFont:[UIFont fontWithName:@"Roboto-Regular" size:[UIFont systemFontSize]]];
-    [[UIButton appearance].titleLabel setFont:[UIFont fontWithName:@"Roboto-Regular" size:[UIFont systemFontSize]]];
+#if TARGET_OS_IOS
+    CGFloat systemFontSize = [UIFont systemFontSize];
+#elif TARGET_OS_TV
+    CGFloat systemFontSize = 12.0f;
+#endif
 
+    [[UILabel appearance] setFont:[UIFont fontWithName:@"Roboto-Regular" size:systemFontSize]];
+    [[UIButton appearance].titleLabel setFont:[UIFont fontWithName:@"Roboto-Regular" size:systemFontSize]];
 
     // Generate selected segment background image
     CGSize borderImageSize = CGSizeMake(1.f, 100.f);
@@ -40,12 +45,12 @@ static NSOperationQueue* mainQueue;
     
     // Set selected segment background image
     [[UISegmentedControl appearance] setBackgroundImage:[selectedSegmentBG imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate] forState:UIControlStateSelected barMetrics:UIBarMetricsDefault];
-    
+  
+  
     // Change font on UISegmentedControl
     [[UISegmentedControl appearance] setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:
                                                              [UIColor whiteColor], NSForegroundColorAttributeName,
-                                                             [UIFont fontWithName:@"Roboto-Regular" size:[UIFont systemFontSize]], NSFontAttributeName, nil] forState:UIControlStateNormal];
-    
+                                                             [UIFont fontWithName:@"Roboto-Regular" size:systemFontSize], NSFontAttributeName, nil] forState:UIControlStateNormal];
     return YES;
 }
 
@@ -151,7 +156,11 @@ static NSOperationQueue* mainQueue;
 // Returns the URL to the application's Documents directory.
 - (NSURL *)applicationDocumentsDirectory
 {
+#if TARGET_OS_IOS
     return [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
+#elif TARGET_OS_TV
+    return [[[NSFileManager defaultManager] URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask] lastObject];
+#endif
 }
 
 - (NSURL*) getStoreURL {

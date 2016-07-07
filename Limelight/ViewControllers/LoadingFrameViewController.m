@@ -17,6 +17,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // center the loading spinner
+    Log(LOG_I, @"Screen Width: %d, Height: %d", self.view.frame.size.width,self.view.frame.size.height);
     self.loadingSpinner.center = CGPointMake(self.view.frame.size.width / 2, self.view.frame.size.height / 2);
 }
 

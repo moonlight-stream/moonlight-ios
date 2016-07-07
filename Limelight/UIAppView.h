@@ -19,5 +19,5 @@
 
 - (id) initWithApp:(TemporaryApp*)app cache:(NSCache*)cache andCallback:(id<AppCallback>)callback;
 - (void) updateAppImage;
-
+- (TemporaryApp*) getApp;
 @end

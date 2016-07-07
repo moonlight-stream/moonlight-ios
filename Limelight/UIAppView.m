@@ -18,6 +18,9 @@
 }
 
 static UIImage* noImage;
+-(TemporaryApp*) getApp {
+    return _app;
+}
 
 - (id) initWithApp:(TemporaryApp*)app cache:(NSCache*)cache andCallback:(id<AppCallback>)callback {
     self = [super init];
@@ -30,13 +33,20 @@ static UIImage* noImage;
     if (noImage == nil) {
         noImage = [UIImage imageNamed:@"NoAppImage"];
     }
-    
+  
+#if TARGET_OS_IOS
     _appButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [_appButton setBackgroundImage:noImage forState:UIControlStateNormal];
+#elif TARGET_OS_TV
+    _appButton = [UIButton buttonWithType:UIButtonTypeSystem];
+#endif
     [_appButton setContentEdgeInsets:UIEdgeInsetsMake(0, 4, 0, 4)];
     [_appButton sizeToFit];
+#if TARGET_OS_IOS
     [_appButton addTarget:self action:@selector(appClicked) forControlEvents:UIControlEventTouchUpInside];
-    
+#elif TARGET_OS_TV
+    [_appButton addTarget:self action:@selector(appClicked) forControlEvents:UIControlEventPrimaryActionTriggered];
+#endif
     [self addSubview:_appButton];
     [self sizeToFit];
     
@@ -67,7 +77,11 @@ static UIImage* noImage;
         _appOverlay.layer.shadowOffset = CGSizeMake(0, 0);
         _appOverlay.layer.shadowOpacity = 1;
         _appOverlay.layer.shadowRadius = 2.0;
-        
+#if TARGET_OS_IOS
+#elif TARGET_OS_TV
+        _appOverlay.adjustsImageWhenAncestorFocused = YES;
+        _appOverlay.userInteractionEnabled=YES;
+#endif
         [self addSubview:_appOverlay];
         
         _appOverlay.frame = CGRectMake(0, 0, noImage.size.width / 2.f, noImage.size.height / 4.f);

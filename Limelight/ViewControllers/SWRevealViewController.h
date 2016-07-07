@@ -134,6 +134,10 @@
 
 
 #import <UIKit/UIKit.h>
+#if TARGET_OS_IOS
+#elif TARGET_OS_TV
+@import GameController;
+#endif
 
 @class SWRevealViewController;
 @protocol SWRevealViewControllerDelegate;
@@ -177,8 +181,11 @@ typedef NS_ENUM(NSInteger, SWRevealToggleAnimationType)
     SWRevealToggleAnimationTypeEaseOut,   // <- produces an ease out curve animation
 };
 
-
+#if TARGET_OS_IOS
 @interface SWRevealViewController : UIViewController
+#elif TARGET_OS_TV
+@interface SWRevealViewController : GCEventViewController
+#endif
 
 /* Basic API */
 

@@ -38,8 +38,11 @@ static CGFloat statusBarAdjustment( UIView* view )
     CGFloat adjustment = 0.0f;
     UIApplication *app = [UIApplication sharedApplication];
     CGRect viewFrame = [view convertRect:view.bounds toView:[app keyWindow]];
+#if TARGET_OS_IOS
     CGRect statusBarFrame = [app statusBarFrame];
-    
+#elif TARGET_OS_TV
+    CGRect statusBarFrame = CGRectMake(0, 0, 100, 80);
+#endif
     if ( CGRectIntersectsRect(viewFrame, statusBarFrame) )
         adjustment = fminf(statusBarFrame.size.width, statusBarFrame.size.height);
 
@@ -1377,8 +1380,10 @@ const int FrontViewPositionNone = 0xff;
     void (^animations)() = ^()
     {
         // Calling this in the animation block causes the status bar to appear/dissapear in sync with our own animation
+#if TARGET_OS_IOS
         [self setNeedsStatusBarAppearanceUpdate];
-        
+#elif TARGET_OS_TV
+#endif
         // We call the layoutSubviews method on the contentView view and send a delegate, which will
         // occur inside of an animation block if any animated transition is being performed
         [_contentView layoutSubviews];

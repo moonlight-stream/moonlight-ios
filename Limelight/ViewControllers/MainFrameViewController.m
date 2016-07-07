@@ -36,7 +36,11 @@
     AppAssetManager* _appManager;
     StreamConfiguration* _streamConfig;
     UIAlertController* _pairAlert;
+#if TARGET_OS_IOS
     UIScrollView* hostScrollView;
+#elif TARGET_OS_TV
+    ComputerScrollView* hostScrollView;
+#endif
     int currentPosition;
     NSArray* _sortedAppList;
     NSCache* _boxArtCache;
@@ -495,14 +499,26 @@ static NSMutableSet* hostList;
     [self dismissViewControllerAnimated:YES completion:nil];
     [self enableNavigation];
 }
+#if TARGET_OS_IOS
+#elif TARGET_OS_TV
+- (void)pushSettings:(id)sender {
+  UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"tvosStory" bundle:nil];
+  SettingsViewController *vc = [mainStoryboard instantiateViewControllerWithIdentifier:@"settingsViewController"];
+  [self.navigationController pushViewController:vc animated:YES];
+}
+
+#endif
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
     
     // Set the side bar button action. When it's tapped, it'll show the sidebar.
+#if TARGET_OS_IOS
     [_limelightLogoButton addTarget:self.revealViewController action:@selector(revealToggle:) forControlEvents:UIControlEventTouchDown];
-    
+#elif TARGET_OS_TV
+    [_limelightLogoButton addTarget:self action:@selector(pushSettings:) forControlEvents:UIControlEventPrimaryActionTriggered];
+#endif
     // Set the host name button action. When it's tapped, it'll show the host selection view.
     [_computerNameButton setTarget:self];
     [_computerNameButton setAction:@selector(showHostSelectionView)];
@@ -550,8 +566,10 @@ static NSMutableSet* hostList;
     
     self.collectionView.delaysContentTouches = NO;
     self.collectionView.allowsMultipleSelection = NO;
-    self.collectionView.multipleTouchEnabled = NO;
-    
+#if TARGET_OS_IOS
+  self.collectionView.multipleTouchEnabled = NO;
+#elif TARGET_OS_TV
+#endif
     [self retrieveSavedHosts];
     _discMan = [[DiscoveryManager alloc] initWithHosts:[hostList allObjects] andCallback:self];
     
@@ -622,6 +640,18 @@ static NSMutableSet* hostList;
         }
     }
 }
+#if TARGET_OS_IOS
+#elif TARGET_OS_TV
+- (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
+{
+    UIView *next =context.nextFocusedView;
+    UIView *prev =context.previouslyFocusedView;
+    if ([next isMemberOfClass:[UIButton class]]) {
+      next.layer.shadowColor = [[UIColor greenColor] CGColor];
+      prev.layer.shadowColor = [[UIColor blackColor] CGColor];
+    }
+}
+#endif
 
 - (void) updateAllHosts:(NSArray *)hosts {
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -759,8 +789,11 @@ static NSMutableSet* hostList;
     
     cell.layer.borderColor = [[UIColor colorWithRed:0 green:0 blue:0 alpha:0.3f] CGColor];
     cell.layer.borderWidth = 1;
-    cell.exclusiveTouch = YES;
 
+#if TARGET_OS_IOS
+    cell.exclusiveTouch = YES;
+#elif TARGET_OS_TV
+#endif
     return cell;
 }
 
@@ -803,5 +836,76 @@ static NSMutableSet* hostList;
 - (void) enableNavigation {
     self.navigationController.navigationBar.topItem.rightBarButtonItem.enabled = YES;
 }
+#if TARGET_OS_IOS
+#elif TARGET_OS_TV
+- (BOOL)collectionView:(UICollectionView *)collectionView canFocusItemAtIndexPath:(NSIndexPath *)indexPath {
+    return TRUE;
+}
 
+- (BOOL)collectionView:(UICollectionView *)colView shouldUpdateFocusInContext:(nonnull UICollectionViewFocusUpdateContext *)context {
+    return YES;
+}
+
+-(void)collectionView:(UICollectionView *)collectionView didUpdateFocusInContext:(nonnull UICollectionViewFocusUpdateContext *)context withAnimationCoordinator:(nonnull UIFocusAnimationCoordinator *)coordinator {
+  
+  
+    UIView *next = context.nextFocusedView;
+    UIView *prev = context.previouslyFocusedView;
+  
+    //UIAppView *app = next.subviews[0];
+    next.backgroundColor = [UIColor greenColor];
+    next.layer.shadowColor = [UIColor greenColor].CGColor;
+  
+    prev.backgroundColor = [UIColor clearColor];
+    prev.layer.shadowColor = [UIColor blackColor].CGColor;
+  
+    //Log(LOG_I, @"App : %@",[app getApp].name);
+  
+}
+
+-(BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath {
+    return YES;
+}
+
+-(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
+    UICollectionViewCell* cell = (UICollectionViewCell*)[collectionView cellForItemAtIndexPath:indexPath];
+  
+    UIAppView *app = cell.subviews[0];
+    [self appClicked:[app getApp]];
+}
+
+- (void)collectionView:(UICollectionView *)colView didHighlightItemAtIndexPath:(NSIndexPath *)indexPath {
+    UICollectionViewCell* cell = [colView cellForItemAtIndexPath:indexPath];
+    Log(LOG_I, @"Highlight row:%d, section:%d",indexPath.row,indexPath.section);
+  
+    UIAppView *app = cell.subviews[0];
+    Log(LOG_I, @"App : %@",[app getApp].name);
+  
+    //set color with animation
+    [UIView animateWithDuration:0.1
+                          delay:0
+                        options:(UIViewAnimationOptionAllowUserInteraction)
+                     animations:^{
+                        [cell setBackgroundColor:[UIColor colorWithRed:232/255.0f green:232/255.0f blue:232/255.0f alpha:1]];
+                     }
+                     completion:nil];
+}
+
+- (void)collectionView:(UICollectionView *)colView  didUnhighlightItemAtIndexPath:(NSIndexPath *)indexPath {
+    UICollectionViewCell* cell = [colView cellForItemAtIndexPath:indexPath];
+    //set color with animation
+    [UIView animateWithDuration:0.1
+                          delay:0
+                        options:(UIViewAnimationOptionAllowUserInteraction)
+                     animations:^{
+                        [cell setBackgroundColor:[UIColor clearColor]];
+                     }
+                     completion:nil ];
+}
+
+- (BOOL)collectionView:(UICollectionView *)collectionView shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    return YES;
+}
+#endif
 @end

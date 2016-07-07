@@ -133,7 +133,13 @@
         // create a new settings object with the default values
         NSEntityDescription* entity = [NSEntityDescription entityForName:@"Settings" inManagedObjectContext:_managedObjectContext];
         Settings* settings = [[Settings alloc] initWithEntity:entity insertIntoManagedObjectContext:_managedObjectContext];
+#if TARGET_OS_IOS
+#elif TARGET_OS_TV
+        settings.bitrate = [NSNumber numberWithInt:20000];
+        settings.width = [NSNumber numberWithInt:1920];
+        settings.height = [NSNumber numberWithInt:1080];
         
+#endif
         return settings;
     } else {
         // we should only ever have 1 settings object stored
