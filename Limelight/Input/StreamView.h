@@ -20,4 +20,6 @@
 - (void) setupOnScreenControls:(ControllerSupport*)controllerSupport swipeDelegate:(id<EdgeDetectionDelegate>)swipeDelegate;
 - (void) setMouseDeltaFactors:(float)x y:(float)y;
 
+@property (nonatomic, retain) IBOutlet UITextField* textToSend;
+
 @end

@@ -11,6 +11,7 @@
 #import "OnScreenControls.h"
 #import "DataManager.h"
 #import "ControllerSupport.h"
+#import "keyboard_translation.h"
 
 @implementation StreamView {
     CGPoint touchLocation;
@@ -58,6 +59,9 @@
                                                    selector:@selector(onDragStart:)
                                                    userInfo:nil
                                                     repeats:NO];
+        } else if ([[event allTouches] count] == 3 && !isDragging) {
+            [_textToSend becomeFirstResponder];
+            [_textToSend addTarget:self action:@selector(onKeyboardPressed:) forControlEvents:UIControlEventEditingChanged];
         }
     }
 }
@@ -145,5 +149,13 @@
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
 }
 
+-(void)onKeyboardPressed :(UITextField *)textToSend{
+    short keyCode = [textToSend.text characterAtIndex:0];
+    struct translatedKeycode keyCodeStructure = translateKeycode(keyCode);
+    LiSendKeyboardEvent(keyCodeStructure.keycode, 0x03, keyCodeStructure.modifier);
+    usleep(100 * 1000);
+    LiSendKeyboardEvent(keyCodeStructure.keycode, 0x04, keyCodeStructure.modifier);
+    textToSend.text = @"";
+}
 
 @end
