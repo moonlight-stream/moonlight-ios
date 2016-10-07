@@ -60,6 +60,8 @@
                                                    userInfo:nil
                                                     repeats:NO];
         } else if ([[event allTouches] count] == 3 && !isDragging) {
+            _textToSend.delegate = self;
+            _textToSend.text = @"0";
             [_textToSend becomeFirstResponder];
             [_textToSend addTarget:self action:@selector(onKeyboardPressed:) forControlEvents:UIControlEventEditingChanged];
         }
@@ -149,13 +151,29 @@
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
 }
 
+//Detect and send the ENTER key
+- (BOOL)textFieldShouldReturn:(UITextField *)textToSend {
+    LiSendKeyboardEvent(0x0d, 0x03, 0);
+    usleep(100 * 1000);
+    LiSendKeyboardEvent(0x0d, 0x04, 0);
+    return YES;
+}
+
+//Capture the keycode of the last entered character in the textToSend Textfield, translate it and send it to GFE
 -(void)onKeyboardPressed :(UITextField *)textToSend{
-    short keyCode = [textToSend.text characterAtIndex:0];
-    struct translatedKeycode keyCodeStructure = translateKeycode(keyCode);
+    struct translatedKeycode keyCodeStructure;
+    if ([textToSend.text  isEqual: @""]){
+        //If the textfield is empty, send a BACKSPACE
+        keyCodeStructure.keycode = 8;
+        keyCodeStructure.modifier = 0;
+    } else {
+        short keyCode = [textToSend.text characterAtIndex:1];
+        keyCodeStructure = translateKeycode(keyCode);
+    }
     LiSendKeyboardEvent(keyCodeStructure.keycode, 0x03, keyCodeStructure.modifier);
     usleep(100 * 1000);
     LiSendKeyboardEvent(keyCodeStructure.keycode, 0x04, keyCodeStructure.modifier);
-    textToSend.text = @"";
+    textToSend.text = @"0";
 }
 
 @end

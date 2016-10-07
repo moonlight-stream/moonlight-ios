@@ -15,7 +15,7 @@
 
 @end
 
-@interface StreamView : UIView
+@interface StreamView : UIView <UITextFieldDelegate>
 
 - (void) setupOnScreenControls:(ControllerSupport*)controllerSupport swipeDelegate:(id<EdgeDetectionDelegate>)swipeDelegate;
 - (void) setMouseDeltaFactors:(float)x y:(float)y;
