@@ -48,21 +48,26 @@ static NSMutableSet* hostList;
         _pairAlert = [UIAlertController alertControllerWithTitle:@"Pairing"
                                                          message:[NSString stringWithFormat:@"Enter the following PIN on the host machine: %@", PIN]
                                                   preferredStyle:UIAlertControllerStyleAlert];
+        [_pairAlert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDestructive handler:^(UIAlertAction* action) {
+            [_discMan startDiscovery];
+            [self hideLoadingFrame];
+        }]];
         [self presentViewController:_pairAlert animated:YES completion:nil];
     });
 }
 
 - (void)pairFailed:(NSString *)message {
     dispatch_async(dispatch_get_main_queue(), ^{
-        [_pairAlert dismissViewControllerAnimated:YES completion:nil];
-        _pairAlert = [UIAlertController alertControllerWithTitle:@"Pairing Failed"
-                                                         message:message
-                                                  preferredStyle:UIAlertControllerStyleAlert];
-        [_pairAlert addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDestructive handler:nil]];
-        [self presentViewController:_pairAlert animated:YES completion:nil];
-        
-        [_discMan startDiscovery];
-        [self hideLoadingFrame];
+        [_pairAlert dismissViewControllerAnimated:YES completion:^{
+            _pairAlert = [UIAlertController alertControllerWithTitle:@"Pairing Failed"
+                                                             message:message
+                                                      preferredStyle:UIAlertControllerStyleAlert];
+            [_pairAlert addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDestructive handler:nil]];
+            [self presentViewController:_pairAlert animated:YES completion:nil];
+            
+            [_discMan startDiscovery];
+            [self hideLoadingFrame];
+        }];
     });
 }
 
@@ -166,7 +171,6 @@ static NSMutableSet* hostList;
         for (TemporaryApp* savedApp in host.appList) {
             if ([app.id isEqualToString:savedApp.id]) {
                 savedApp.name = app.name;
-                savedApp.isRunning = app.isRunning;
                 appAlreadyInList = YES;
                 break;
             }
@@ -441,7 +445,7 @@ static NSMutableSet* hostList;
                                             }
                                             // If it succeeds and we're to start streaming, segue to the stream and return
                                             else if (![app.id isEqualToString:currentApp.id]) {
-                                                currentApp.isRunning = NO;
+                                                app.host.currentGame = @"0";
                                                 
                                                 dispatch_async(dispatch_get_main_queue(), ^{
                                                     [self updateAppsForHost:app.host];
@@ -452,7 +456,7 @@ static NSMutableSet* hostList;
                                             }
                                             // Otherwise, display a dialog to notify the user that the app was quit
                                             else {
-                                                currentApp.isRunning = NO;
+                                                app.host.currentGame = @"0";
                                                 
                                                 alert = [UIAlertController alertControllerWithTitle:@"Quitting App"
                                                                                             message:@"The app was quit successfully."
@@ -475,7 +479,7 @@ static NSMutableSet* hostList;
 
 - (TemporaryApp*) findRunningApp:(TemporaryHost*)host {
     for (TemporaryApp* app in host.appList) {
-        if (app.isRunning) {
+        if ([app.id isEqualToString:host.currentGame]) {
             return app;
         }
     }
@@ -582,8 +586,8 @@ static NSMutableSet* hostList;
 
 -(void)handleReturnToForeground
 {
-    // This will refresh the applist
-    if (_selectedHost != nil) {
+    // This will refresh the applist when a paired host is selected
+    if (_selectedHost != nil && _selectedHost.pairState == PairStatePaired) {
         [self hostClicked:_selectedHost view:nil];
     }
 }
