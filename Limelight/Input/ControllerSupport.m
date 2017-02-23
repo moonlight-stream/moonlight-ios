@@ -9,6 +9,7 @@
 #import "ControllerSupport.h"
 #import "OnScreenControls.h"
 #include "Limelight.h"
+#include "DataManager.h"
 
 // Swift
 #import "Moonlight-Swift.h"
@@ -27,6 +28,8 @@
     Controller *_player0osc;
     
     char _controllerNumbers;
+    
+    ControllerTriggerStyle _controllerTriggerStyle;
     
 #define EMULATING_SELECT     0x1
 #define EMULATING_SPECIAL    0x2
@@ -207,8 +210,13 @@
                 rightStickX = gamepad.rightThumbstick.xAxis.value * 0x7FFE;
                 rightStickY = gamepad.rightThumbstick.yAxis.value * 0x7FFE;
                 
-                leftTrigger = gamepad.leftTrigger.value * 0xFF;
-                rightTrigger = gamepad.rightTrigger.value * 0xFF;
+                if(_controllerTriggerStyle == ControllerTriggerStyleAnalog) {
+                    leftTrigger = gamepad.leftTrigger.value * 0xFF;
+                    rightTrigger = gamepad.rightTrigger.value * 0xFF;
+                }else if(_controllerTriggerStyle == ControllerTriggerStyleDigital) {
+                    leftTrigger = gamepad.leftTrigger.isPressed ? 0xFF : 0x00;
+                    rightTrigger = gamepad.rightTrigger.isPressed ? 0xFF : 0x00;
+                }
                 
                 [self updateLeftStick:limeController x:leftStickX y:leftStickY];
                 [self updateRightStick:limeController x:rightStickX y:rightStickY];
@@ -313,6 +321,9 @@
     _player0osc = [[Controller alloc] init];
     _player0osc.playerIndex = 0;
     
+    DataManager* dataMan = [[DataManager alloc] init];
+    _controllerTriggerStyle = (ControllerTriggerStyle)[[dataMan getSettings].controllerTriggerStyle integerValue];
+
     Log(LOG_I, @"Number of controllers connected: %ld", (long)[[GCController controllers] count]);
     for (GCController* controller in [GCController controllers]) {
         [self assignController:controller];

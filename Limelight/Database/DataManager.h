@@ -14,7 +14,7 @@
 
 @interface DataManager : NSObject
 
-- (void) saveSettingsWithBitrate:(NSInteger)bitrate framerate:(NSInteger)framerate height:(NSInteger)height width:(NSInteger)width onscreenControls:(NSInteger)onscreenControls;
+- (void) saveSettingsWithBitrate:(NSInteger)bitrate framerate:(NSInteger)framerate height:(NSInteger)height width:(NSInteger)width onscreenControls:(NSInteger)onscreenControls controllerTriggerStyle:(NSInteger)controllerTriggerStyle;
 
 - (NSArray*) getHosts;
 - (void) updateHost:(TemporaryHost*)host;

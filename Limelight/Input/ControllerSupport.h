@@ -16,6 +16,11 @@
 
 @interface ControllerSupport : NSObject
 
+typedef NS_ENUM(NSInteger, ControllerTriggerStyle) {
+    ControllerTriggerStyleAnalog,
+    ControllerTriggerStyleDigital,
+};
+
 -(id) init;
 -(void) initAutoOnScreenControlMode:(OnScreenControls*)osc;
 -(void) cleanup;

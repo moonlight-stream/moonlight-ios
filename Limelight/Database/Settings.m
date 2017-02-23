@@ -17,5 +17,6 @@
 @dynamic width;
 @dynamic onscreenControls;
 @dynamic uniqueId;
+@dynamic controllerTriggerStyle;
 
 @end
