@@ -57,12 +57,14 @@ static NSString* bitrateFormat = @"Bitrate: %.1f Mbps";
         resolution = 0;
     }
     NSInteger onscreenControls = [currentSettings.onscreenControls integerValue];
+    NSInteger controllerTriggerStyle = [currentSettings.controllerTriggerStyle integerValue];
     
     [self.resolutionSelector setSelectedSegmentIndex:resolution];
     [self.resolutionSelector addTarget:self action:@selector(newResolutionFpsChosen) forControlEvents:UIControlEventValueChanged];
     [self.framerateSelector setSelectedSegmentIndex:framerate];
     [self.framerateSelector addTarget:self action:@selector(newResolutionFpsChosen) forControlEvents:UIControlEventValueChanged];
     [self.onscreenControlSelector setSelectedSegmentIndex:onscreenControls];
+    [self.controllerTriggerStyleSelector setSelectedSegmentIndex:controllerTriggerStyle];
     [self.bitrateSlider setValue:(_bitrate / BITRATE_INTERVAL) animated:YES];
     [self.bitrateSlider addTarget:self action:@selector(bitrateSliderMoved) forControlEvents:UIControlEventValueChanged];
     [self updateBitrateText];
@@ -120,7 +122,8 @@ static NSString* bitrateFormat = @"Bitrate: %.1f Mbps";
     NSInteger height = [self getChosenStreamHeight];
     NSInteger width = [self getChosenStreamWidth];
     NSInteger onscreenControls = [self.onscreenControlSelector selectedSegmentIndex];
-    [dataMan saveSettingsWithBitrate:_bitrate framerate:framerate height:height width:width onscreenControls:onscreenControls];
+    NSInteger controllerTriggerStyle = [self.controllerTriggerStyleSelector selectedSegmentIndex];
+    [dataMan saveSettingsWithBitrate:_bitrate framerate:framerate height:height width:width onscreenControls:onscreenControls controllerTriggerStyle:controllerTriggerStyle];
 }
 
 - (void)didReceiveMemoryWarning {
