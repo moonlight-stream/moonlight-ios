@@ -14,8 +14,10 @@
 
 - (id)initWithView:(UIView*)view;
 
+- (void)setupWithVideoFormat:(int)videoFormat;
+
 - (void)updateBufferForRange:(CMBlockBufferRef)existingBuffer data:(unsigned char *)data offset:(int)offset length:(int)nalLength;
 
-- (int)submitDecodeBuffer:(unsigned char *)data length:(int)length;
+- (int)submitDecodeBuffer:(unsigned char *)data length:(int)length bufferType:(int)bufferType;
 
 @end

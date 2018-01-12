@@ -583,6 +583,7 @@ static CGFloat scaledValue( CGFloat v1, CGFloat min2, CGFloat max2, CGFloat min1
     FrontViewPosition _panInitialFrontPosition;
     NSMutableArray *_animationQueue;
     BOOL _userInteractionStore;
+    UIViewController *_primaryViewController;
 }
 
 const int FrontViewPositionNone = 0xff;
@@ -1364,6 +1365,33 @@ const int FrontViewPositionNone = 0xff;
     _enqueue( [theSelf _performTransitionOperation:operation withViewController:newViewController animated:animated] );
 }
 
+- (void)setPrimaryViewController:(UIViewController*)viewController
+{
+    _primaryViewController = viewController;
+
+    // These are derived from the primary view controller
+    if (@available(iOS 11.0, *)) {
+        // iOS 11 betas (which are still installed in some places :\) crash with
+        // doesNotRecognizeSelector since this wasn't added until after the iPhone X
+        // announcement.
+        if ([self respondsToSelector: @selector(setNeedsUpdateOfHomeIndicatorAutoHidden)]) {
+            [self setNeedsUpdateOfHomeIndicatorAutoHidden];
+        }
+        if ([self respondsToSelector: @selector(setNeedsUpdateOfScreenEdgesDeferringSystemGestures)]) {
+            [self setNeedsUpdateOfScreenEdgesDeferringSystemGestures];
+        }
+    }
+}
+
+- (UIViewController*)childViewControllerForHomeIndicatorAutoHidden
+{
+    return _primaryViewController;
+}
+
+- (UIViewController*)childViewControllerForScreenEdgesDeferringSystemGestures
+{
+    return _primaryViewController;
+}
 
 #pragma mark Animated view controller deployment and layout
 

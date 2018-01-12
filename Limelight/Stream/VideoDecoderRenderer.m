@@ -14,9 +14,10 @@
     UIView *_view;
     
     AVSampleBufferDisplayLayer* displayLayer;
-    Boolean waitingForSps, waitingForPps;
+    Boolean waitingForSps, waitingForPps, waitingForVps;
+    int videoFormat;
     
-    NSData *spsData, *ppsData;
+    NSData *spsData, *ppsData, *vpsData;
     CMVideoFormatDescriptionRef formatDesc;
 }
 
@@ -43,6 +44,8 @@
     spsData = nil;
     waitingForPps = true;
     ppsData = nil;
+    waitingForVps = true;
+    vpsData = nil;
     
     if (formatDesc != nil) {
         CFRelease(formatDesc);
@@ -61,11 +64,46 @@
     return self;
 }
 
+- (void)setupWithVideoFormat:(int)videoFormat
+{
+    self->videoFormat = videoFormat;
+}
+
 #define FRAME_START_PREFIX_SIZE 4
 #define NALU_START_PREFIX_SIZE 3
 #define NAL_LENGTH_PREFIX_SIZE 4
-#define NAL_TYPE_SPS 0x7
-#define NAL_TYPE_PPS 0x8
+
+- (Boolean)readyForPictureData
+{
+    if (videoFormat & VIDEO_FORMAT_MASK_H264) {
+        return !waitingForSps && !waitingForPps;
+    }
+    else {
+        // H.265 requires VPS in addition to SPS and PPS
+        return !waitingForVps && !waitingForSps && !waitingForPps;
+    }
+}
+
+- (Boolean)isNalReferencePicture:(unsigned char)nalType
+{
+    if (videoFormat & VIDEO_FORMAT_MASK_H264) {
+        return nalType == 0x65;
+    }
+    else {
+        // HEVC has several types of reference NALU types
+        switch (nalType) {
+            case 0x20:
+            case 0x22:
+            case 0x24:
+            case 0x26:
+            case 0x28:
+            case 0x2A:
+                return true;
+            default:
+                return false;
+        }
+    }
+}
 
 - (void)updateBufferForRange:(CMBlockBufferRef)existingBuffer data:(unsigned char *)data offset:(int)offset length:(int)nalLength
 {
@@ -133,11 +171,89 @@
     }
 }
 
-// This function must free data
-- (int)submitDecodeBuffer:(unsigned char *)data length:(int)length
+// This function must free data for bufferType == BUFFER_TYPE_PICDATA
+- (int)submitDecodeBuffer:(unsigned char *)data length:(int)length bufferType:(int)bufferType
 {
-    unsigned char nalType = data[FRAME_START_PREFIX_SIZE] & 0x1F;
+    unsigned char nalType = data[FRAME_START_PREFIX_SIZE];
     OSStatus status;
+    
+    if (bufferType != BUFFER_TYPE_PICDATA) {
+        if (bufferType == BUFFER_TYPE_VPS) {
+            Log(LOG_I, @"Got VPS");
+            vpsData = [NSData dataWithBytes:&data[FRAME_START_PREFIX_SIZE] length:length - FRAME_START_PREFIX_SIZE];
+            waitingForVps = false;
+            
+            // We got a new VPS so wait for a new SPS to match it
+            waitingForSps = true;
+        }
+        else if (bufferType == BUFFER_TYPE_SPS) {
+            Log(LOG_I, @"Got SPS");
+            spsData = [NSData dataWithBytes:&data[FRAME_START_PREFIX_SIZE] length:length - FRAME_START_PREFIX_SIZE];
+            waitingForSps = false;
+            
+            // We got a new SPS so wait for a new PPS to match it
+            waitingForPps = true;
+        } else if (bufferType == BUFFER_TYPE_PPS) {
+            Log(LOG_I, @"Got PPS");
+            ppsData = [NSData dataWithBytes:&data[FRAME_START_PREFIX_SIZE] length:length - FRAME_START_PREFIX_SIZE];
+            waitingForPps = false;
+        }
+        
+        // See if we've got all the parameter sets we need for our video format
+        if ([self readyForPictureData]) {
+            if (videoFormat & VIDEO_FORMAT_MASK_H264) {
+                const uint8_t* const parameterSetPointers[] = { [spsData bytes], [ppsData bytes] };
+                const size_t parameterSetSizes[] = { [spsData length], [ppsData length] };
+                
+                Log(LOG_I, @"Constructing new H264 format description");
+                status = CMVideoFormatDescriptionCreateFromH264ParameterSets(kCFAllocatorDefault,
+                                                                             2, /* count of parameter sets */
+                                                                             parameterSetPointers,
+                                                                             parameterSetSizes,
+                                                                             NAL_LENGTH_PREFIX_SIZE,
+                                                                             &formatDesc);
+                if (status != noErr) {
+                    Log(LOG_E, @"Failed to create H264 format description: %d", (int)status);
+                    formatDesc = NULL;
+                }
+            }
+            else {
+                const uint8_t* const parameterSetPointers[] = { [vpsData bytes], [spsData bytes], [ppsData bytes] };
+                const size_t parameterSetSizes[] = { [vpsData length], [spsData length], [ppsData length] };
+                
+                Log(LOG_I, @"Constructing new HEVC format description");
+                if (@available(iOS 11.0, *)) {
+                    status = CMVideoFormatDescriptionCreateFromHEVCParameterSets(kCFAllocatorDefault,
+                                                                                 3, /* count of parameter sets */
+                                                                                 parameterSetPointers,
+                                                                                 parameterSetSizes,
+                                                                                 NAL_LENGTH_PREFIX_SIZE,
+                                                                                 nil,
+                                                                                 &formatDesc);
+                } else {
+                    // This means Moonlight-common-c decided to give us an HEVC stream
+                    // even though we said we couldn't support it. All we can do is abort().
+                    abort();
+                }
+                
+                if (status != noErr) {
+                    Log(LOG_E, @"Failed to create HEVC format description: %d", (int)status);
+                    formatDesc = NULL;
+                }
+            }
+        }
+        
+        // Data is NOT to be freed here. It's a direct usage of the caller's buffer.
+        
+        // No frame data to submit for these NALUs
+        return DR_OK;
+    }
+    
+    if (formatDesc == NULL) {
+        // Can't decode if we haven't gotten our parameter sets yet
+        free(data);
+        return DR_NEED_IDR;
+    }
     
     // Check for previous decoder errors before doing anything
     if (displayLayer.status == AVQueuedSampleBufferRenderingStatusFailed) {
@@ -147,58 +263,8 @@
         [self reinitializeDisplayLayer];
         
         // Request an IDR frame to initialize the new decoder
+        free(data);
         return DR_NEED_IDR;
-    }
-    
-    if (nalType == NAL_TYPE_SPS || nalType == NAL_TYPE_PPS) {
-        if (nalType == NAL_TYPE_SPS) {
-            Log(LOG_I, @"Got SPS");
-            spsData = [NSData dataWithBytes:&data[FRAME_START_PREFIX_SIZE] length:length - FRAME_START_PREFIX_SIZE];
-            waitingForSps = false;
-            
-            // We got a new SPS so wait for a new PPS to match it
-            waitingForPps = true;
-        } else if (nalType == NAL_TYPE_PPS) {
-            Log(LOG_I, @"Got PPS");
-            ppsData = [NSData dataWithBytes:&data[FRAME_START_PREFIX_SIZE] length:length - FRAME_START_PREFIX_SIZE];
-            waitingForPps = false;
-        }
-        
-        // See if we've got all the parameter sets we need
-        if (!waitingForSps && !waitingForPps) {
-            const uint8_t* const parameterSetPointers[] = { [spsData bytes], [ppsData bytes] };
-            const size_t parameterSetSizes[] = { [spsData length], [ppsData length] };
-            
-            Log(LOG_I, @"Constructing new format description");
-            status = CMVideoFormatDescriptionCreateFromH264ParameterSets(kCFAllocatorDefault,
-                                                                         2, /* count of parameter sets */
-                                                                         parameterSetPointers,
-                                                                         parameterSetSizes,
-                                                                         NAL_LENGTH_PREFIX_SIZE,
-                                                                         &formatDesc);
-            if (status != noErr) {
-                Log(LOG_E, @"Failed to create format description: %d", (int)status);
-                formatDesc = NULL;
-            }
-        }
-        
-        // Free the data buffer
-        free(data);
-        
-        // No frame data to submit for these NALUs
-        return DR_OK;
-    }
-    
-    if (formatDesc == NULL) {
-        // Can't decode if we haven't gotten our parameter sets yet
-        free(data);
-        return DR_OK;
-    }
-    
-    if (nalType != 0x1 && nalType != 0x5) {
-        // Don't submit parameter set data
-        free(data);
-        return DR_OK;
     }
     
     // Now we're decoding actual frame data here
@@ -252,7 +318,7 @@
     CFDictionarySetValue(dict, kCMSampleAttachmentKey_DisplayImmediately, kCFBooleanTrue);
     CFDictionarySetValue(dict, kCMSampleAttachmentKey_IsDependedOnByOthers, kCFBooleanTrue);
     
-    if (nalType == 1) {
+    if (![self isNalReferencePicture:nalType]) {
         // P-frame
         CFDictionarySetValue(dict, kCMSampleAttachmentKey_NotSync, kCFBooleanTrue);
         CFDictionarySetValue(dict, kCMSampleAttachmentKey_DependsOnOthers, kCFBooleanTrue);
