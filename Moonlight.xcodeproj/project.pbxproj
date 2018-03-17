@@ -818,7 +818,6 @@
 						TestTargetID = FB290CED19B2C406004C83CF;
 					};
 					FB290CED19B2C406004C83CF = {
-						DevelopmentTeam = DM46QST4M7;
 						LastSwiftMigration = 0920;
 					};
 				};
@@ -1129,6 +1128,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = DQ6R9YE8BF;
 				ENABLE_BITCODE = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Limelight/Limelight-Prefix.pch";
@@ -1146,7 +1146,7 @@
 					"$(PROJECT_DIR)/libs/opus/lib",
 					"$(PROJECT_DIR)/libs/openssl/lib",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = fkx.customMoon;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SKIP_INSTALL = NO;
@@ -1165,6 +1165,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = DQ6R9YE8BF;
 				ENABLE_BITCODE = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Limelight/Limelight-Prefix.pch";
@@ -1182,7 +1183,7 @@
 					"$(PROJECT_DIR)/libs/opus/lib",
 					"$(PROJECT_DIR)/libs/openssl/lib",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = fkx.customMoon;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SKIP_INSTALL = NO;

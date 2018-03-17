@@ -409,6 +409,7 @@ static NSMutableSet* hostList;
     _streamConfig.height = [streamSettings.height intValue];
     _streamConfig.width = [streamSettings.width intValue];
     _streamConfig.gamepadMask = [ControllerSupport getConnectedGamepadMask];
+    _streamConfig.streamingRemotely = [streamSettings.streamingRemotely intValue];
     
     [_appManager stopRetrieving];
     
