@@ -8,8 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		DC0F7508205C04A90087B187 /* keepAlive.m in Sources */ = {isa = PBXBuildFile; fileRef = DC0F7507205C04A90087B187 /* keepAlive.m */; };
-		DC153B39205A990900E7559B /* ControllerSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = DC153B37205A990900E7559B /* ControllerSupport.m */; };
-		DC153B3B205A998F00E7559B /* Controller.m in Sources */ = {isa = PBXBuildFile; fileRef = DC153B3A205A998F00E7559B /* Controller.m */; };
 		DC2634D4205438DC00D44F88 /* keyboardTranslation.m in Sources */ = {isa = PBXBuildFile; fileRef = DC2634D3205438DC00D44F88 /* keyboardTranslation.m */; };
 		DC2F170E205DA33800C3021E /* TemporaryApp.m in Sources */ = {isa = PBXBuildFile; fileRef = DC2F1702205DA33800C3021E /* TemporaryApp.m */; };
 		DC2F170F205DA33800C3021E /* TemporaryHost.m in Sources */ = {isa = PBXBuildFile; fileRef = DC2F1703205DA33800C3021E /* TemporaryHost.m */; };
@@ -47,8 +45,6 @@
 		DC4522D920531714003A7AF4 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC4522D420531714003A7AF4 /* Foundation.framework */; };
 		DC4522DA20531714003A7AF4 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC4522D520531714003A7AF4 /* CoreFoundation.framework */; };
 		DC4522DB20531714003A7AF4 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC4522D620531714003A7AF4 /* CoreGraphics.framework */; };
-		DC535F5220534B4C00B23E32 /* Moonlight_macOS.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = DC535F4C20534B4C00B23E32 /* Moonlight_macOS.xcdatamodeld */; };
-		DC5EF54A2052FBDB00C9BF55 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DC5EF5492052FBDB00C9BF55 /* AppDelegate.m */; };
 		DC5EF54D2052FBDB00C9BF55 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DC5EF54C2052FBDB00C9BF55 /* ViewController.m */; };
 		DC5EF5522052FBDB00C9BF55 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DC5EF5512052FBDB00C9BF55 /* Assets.xcassets */; };
 		DC5EF5582052FBDB00C9BF55 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = DC5EF5572052FBDB00C9BF55 /* main.m */; };
@@ -61,6 +57,10 @@
 		DC5FA900205DC0AF008B7054 /* libmoonlight-common.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DCECF42F205DBBAC00831862 /* libmoonlight-common.a */; };
 		DC62AC29205D9D3800FE4681 /* libopus_mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DC62AC28205D9D3800FE4681 /* libopus_mac.a */; };
 		DC7029D5205B28340016D44B /* LICENSE.txt in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DC7029D4205B28340016D44B /* LICENSE.txt */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		DC9CD51F20601658001A5DCD /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DC9CD51E20601658001A5DCD /* AppDelegate.m */; };
+		DCAF051C205F3E6A00AD1DBA /* Limelight.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = DCAF0516205F3E6A00AD1DBA /* Limelight.xcdatamodeld */; };
+		DCAF0522205FCADB00AD1DBA /* Controller.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCAF051F205FCADA00AD1DBA /* Controller.swift */; };
+		DCAF0523205FCADB00AD1DBA /* ControllerSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = DCAF0521205FCADA00AD1DBA /* ControllerSupport.m */; };
 		DCAF13E620530BE100896C35 /* StreamView.m in Sources */ = {isa = PBXBuildFile; fileRef = DCAF13E120530BE100896C35 /* StreamView.m */; };
 		DCC01DF12055BD0D00D1D8CE /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC01DEF2055BD0D00D1D8CE /* SettingsViewController.m */; };
 		DCC05DA5205D9DB90011DBBD /* libopus_mac.a in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DC62AC28205D9D3800FE4681 /* libopus_mac.a */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -127,10 +127,6 @@
 		DC0F7506205C04A90087B187 /* keepAlive.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = keepAlive.h; sourceTree = "<group>"; };
 		DC0F7507205C04A90087B187 /* keepAlive.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = keepAlive.m; sourceTree = "<group>"; };
 		DC153B34205A990800E7559B /* Moonlight macOS-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Moonlight macOS-Bridging-Header.h"; sourceTree = "<group>"; };
-		DC153B36205A990900E7559B /* ControllerSupport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ControllerSupport.h; sourceTree = "<group>"; };
-		DC153B37205A990900E7559B /* ControllerSupport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ControllerSupport.m; sourceTree = "<group>"; };
-		DC153B3A205A998F00E7559B /* Controller.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Controller.m; sourceTree = "<group>"; };
-		DC153B3C205A999B00E7559B /* Controller.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Controller.h; sourceTree = "<group>"; };
 		DC2634D3205438DC00D44F88 /* keyboardTranslation.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = keyboardTranslation.m; sourceTree = "<group>"; };
 		DC2634D5205438FD00D44F88 /* keyboardTranslation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = keyboardTranslation.h; sourceTree = "<group>"; };
 		DC2F16FE205DA33800C3021E /* App+CoreDataProperties.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "App+CoreDataProperties.h"; sourceTree = "<group>"; };
@@ -190,14 +186,7 @@
 		DC4522D420531714003A7AF4 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		DC4522D520531714003A7AF4 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		DC4522D620531714003A7AF4 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		DC535F4D20534B4C00B23E32 /* Limelight.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Limelight.xcdatamodel; sourceTree = "<group>"; };
-		DC535F4E20534B4C00B23E32 /* Moonlight v1.0-2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Moonlight v1.0-2.xcdatamodel"; sourceTree = "<group>"; };
-		DC535F4F20534B4C00B23E32 /* Limelight 0.3.1.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Limelight 0.3.1.xcdatamodel"; sourceTree = "<group>"; };
-		DC535F5020534B4C00B23E32 /* Moonlight v1.0.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Moonlight v1.0.xcdatamodel"; sourceTree = "<group>"; };
-		DC535F5120534B4C00B23E32 /* Limelight 0.3.0.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Limelight 0.3.0.xcdatamodel"; sourceTree = "<group>"; };
 		DC5EF5452052FBDB00C9BF55 /* Moonlight macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Moonlight macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		DC5EF5482052FBDB00C9BF55 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
-		DC5EF5492052FBDB00C9BF55 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		DC5EF54B2052FBDB00C9BF55 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		DC5EF54C2052FBDB00C9BF55 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		DC5EF5512052FBDB00C9BF55 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -300,6 +289,16 @@
 		DC5FA8FB205DBEE3008B7054 /* VideoDecoderRenderer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoDecoderRenderer.m; sourceTree = "<group>"; };
 		DC62AC28205D9D3800FE4681 /* libopus_mac.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libopus_mac.a; sourceTree = "<group>"; };
 		DC7029D4205B28340016D44B /* LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
+		DC9CD51E20601658001A5DCD /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = Limelight/AppDelegate.m; sourceTree = SOURCE_ROOT; };
+		DCAF04FD205F38B100AD1DBA /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Limelight/AppDelegate.h; sourceTree = SOURCE_ROOT; };
+		DCAF0517205F3E6A00AD1DBA /* Limelight.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Limelight.xcdatamodel; sourceTree = "<group>"; };
+		DCAF0518205F3E6A00AD1DBA /* Moonlight v1.0-2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Moonlight v1.0-2.xcdatamodel"; sourceTree = "<group>"; };
+		DCAF0519205F3E6A00AD1DBA /* Limelight 0.3.1.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Limelight 0.3.1.xcdatamodel"; sourceTree = "<group>"; };
+		DCAF051A205F3E6A00AD1DBA /* Moonlight v1.0.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Moonlight v1.0.xcdatamodel"; sourceTree = "<group>"; };
+		DCAF051B205F3E6A00AD1DBA /* Limelight 0.3.0.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Limelight 0.3.0.xcdatamodel"; sourceTree = "<group>"; };
+		DCAF051F205FCADA00AD1DBA /* Controller.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Controller.swift; path = Limelight/Input/Controller.swift; sourceTree = SOURCE_ROOT; };
+		DCAF0520205FCADA00AD1DBA /* ControllerSupport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ControllerSupport.h; path = Limelight/Input/ControllerSupport.h; sourceTree = SOURCE_ROOT; };
+		DCAF0521205FCADA00AD1DBA /* ControllerSupport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ControllerSupport.m; path = Limelight/Input/ControllerSupport.m; sourceTree = SOURCE_ROOT; };
 		DCAF13D72053059C00896C35 /* libxml2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.tbd; path = usr/lib/libxml2.tbd; sourceTree = SDKROOT; };
 		DCAF13DD20530BE100896C35 /* StreamView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StreamView.h; sourceTree = "<group>"; };
 		DCAF13E120530BE100896C35 /* StreamView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StreamView.m; sourceTree = "<group>"; };
@@ -476,6 +475,9 @@
 		DC5EF5472052FBDB00C9BF55 /* Moonlight macOS */ = {
 			isa = PBXGroup;
 			children = (
+				DC9CD51E20601658001A5DCD /* AppDelegate.m */,
+				DCAF0516205F3E6A00AD1DBA /* Limelight.xcdatamodeld */,
+				DCAF04FD205F38B100AD1DBA /* AppDelegate.h */,
 				DC5FA8F3205DBEE3008B7054 /* Stream */,
 				DCC23C28205DAEB600BF3C25 /* Mac.storyboard */,
 				DC2F1751205DA48D00C3021E /* Limelight-Prefix.pch */,
@@ -483,12 +485,9 @@
 				DC2F171C205DA35700C3021E /* Network */,
 				DC2F16FD205DA33800C3021E /* Database */,
 				DC390F2B2053E5BE0047EA70 /* Moonlight macOS.entitlements */,
-				DC535F4C20534B4C00B23E32 /* Moonlight_macOS.xcdatamodeld */,
 				DCD464DD2053413000CC8950 /* ViewController */,
 				DCAF13DB20530BE100896C35 /* Input */,
 				DC5EF5962052FC4300C9BF55 /* Utility */,
-				DC5EF5482052FBDB00C9BF55 /* AppDelegate.h */,
-				DC5EF5492052FBDB00C9BF55 /* AppDelegate.m */,
 				DC5EF5512052FBDB00C9BF55 /* Assets.xcassets */,
 				DC5EF5562052FBDB00C9BF55 /* Info.plist */,
 				DC5EF5572052FBDB00C9BF55 /* main.m */,
@@ -716,13 +715,12 @@
 		DCAF13DB20530BE100896C35 /* Input */ = {
 			isa = PBXGroup;
 			children = (
-				DC153B36205A990900E7559B /* ControllerSupport.h */,
-				DC153B37205A990900E7559B /* ControllerSupport.m */,
+				DCAF051F205FCADA00AD1DBA /* Controller.swift */,
+				DCAF0520205FCADA00AD1DBA /* ControllerSupport.h */,
+				DCAF0521205FCADA00AD1DBA /* ControllerSupport.m */,
 				DCAF13DD20530BE100896C35 /* StreamView.h */,
 				DCAF13E120530BE100896C35 /* StreamView.m */,
 				DC153B34205A990800E7559B /* Moonlight macOS-Bridging-Header.h */,
-				DC153B3A205A998F00E7559B /* Controller.m */,
-				DC153B3C205A999B00E7559B /* Controller.h */,
 				DC38D53E205ACC360045FE93 /* Control.h */,
 				DC38D53F205ACC360045FE93 /* Control.m */,
 			);
@@ -910,8 +908,9 @@
 				DC5EF54D2052FBDB00C9BF55 /* ViewController.m in Sources */,
 				DC2F173F205DA35700C3021E /* AppAssetManager.m in Sources */,
 				DC2F173E205DA35700C3021E /* MDNSManager.m in Sources */,
-				DC153B39205A990900E7559B /* ControllerSupport.m in Sources */,
 				DC2F1745205DA35700C3021E /* AppAssetRetriever.m in Sources */,
+				DCAF0523205FCADB00AD1DBA /* ControllerSupport.m in Sources */,
+				DCAF0522205FCADB00AD1DBA /* Controller.swift in Sources */,
 				DC2F1739205DA35700C3021E /* CryptoManager.m in Sources */,
 				DCC01DF12055BD0D00D1D8CE /* SettingsViewController.m in Sources */,
 				DC2F173C205DA35700C3021E /* HttpResponse.m in Sources */,
@@ -922,10 +921,9 @@
 				DC2F1741205DA35700C3021E /* AppAssetResponse.m in Sources */,
 				DCC23C26205DAC5C00BF3C25 /* Settings.m in Sources */,
 				DCD464E22053417800CC8950 /* StreamFrameViewController.m in Sources */,
-				DC153B3B205A998F00E7559B /* Controller.m in Sources */,
 				DC5EF5582052FBDB00C9BF55 /* main.m in Sources */,
 				DC2F173A205DA35700C3021E /* WakeOnLanManager.m in Sources */,
-				DC535F5220534B4C00B23E32 /* Moonlight_macOS.xcdatamodeld in Sources */,
+				DCAF051C205F3E6A00AD1DBA /* Limelight.xcdatamodeld in Sources */,
 				DC0F7508205C04A90087B187 /* keepAlive.m in Sources */,
 				DC2634D4205438DC00D44F88 /* keyboardTranslation.m in Sources */,
 				DC2F1743205DA35700C3021E /* DiscoveryManager.m in Sources */,
@@ -937,7 +935,6 @@
 				DC2F1714205DA33800C3021E /* App.m in Sources */,
 				DC38D540205ACC360045FE93 /* Control.m in Sources */,
 				DC2F174E205DA39600C3021E /* Utils.m in Sources */,
-				DC5EF54A2052FBDB00C9BF55 /* AppDelegate.m in Sources */,
 				DC2F170E205DA33800C3021E /* TemporaryApp.m in Sources */,
 				DCAF13E620530BE100896C35 /* StreamView.m in Sources */,
 				DCC23C25205DAC5C00BF3C25 /* DataManager.m in Sources */,
@@ -947,6 +944,7 @@
 				DCC23C27205DAC5C00BF3C25 /* TemporarySettings.m in Sources */,
 				DC2F1746205DA35700C3021E /* PairManager.m in Sources */,
 				DC5FA8FE205DBEE3008B7054 /* Connection.m in Sources */,
+				DC9CD51F20601658001A5DCD /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1128,6 +1126,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "fkx.Moonlight-macOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Moonlight macOS/Input/Moonlight macOS-Bridging-Header.h";
+				SWIFT_OBJC_INTERFACE_HEADER_NAME = "Moonlight-Swift.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.0;
 				VALIDATE_PRODUCT = YES;
@@ -1176,6 +1175,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "fkx.Moonlight-macOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Moonlight macOS/Input/Moonlight macOS-Bridging-Header.h";
+				SWIFT_OBJC_INTERFACE_HEADER_NAME = "Moonlight-Swift.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.0;
 				VALIDATE_PRODUCT = YES;
@@ -1185,6 +1185,7 @@
 		DC5EF5762052FBDB00C9BF55 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -1200,6 +1201,7 @@
 		DC5EF5772052FBDB00C9BF55 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -1215,6 +1217,7 @@
 		DC5EF5792052FBDB00C9BF55 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = DQ6R9YE8BF;
@@ -1229,6 +1232,7 @@
 		DC5EF57A2052FBDB00C9BF55 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = DQ6R9YE8BF;
@@ -1282,17 +1286,18 @@
 /* End XCConfigurationList section */
 
 /* Begin XCVersionGroup section */
-		DC535F4C20534B4C00B23E32 /* Moonlight_macOS.xcdatamodeld */ = {
+		DCAF0516205F3E6A00AD1DBA /* Limelight.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
-				DC535F4D20534B4C00B23E32 /* Limelight.xcdatamodel */,
-				DC535F4E20534B4C00B23E32 /* Moonlight v1.0-2.xcdatamodel */,
-				DC535F4F20534B4C00B23E32 /* Limelight 0.3.1.xcdatamodel */,
-				DC535F5020534B4C00B23E32 /* Moonlight v1.0.xcdatamodel */,
-				DC535F5120534B4C00B23E32 /* Limelight 0.3.0.xcdatamodel */,
+				DCAF0517205F3E6A00AD1DBA /* Limelight.xcdatamodel */,
+				DCAF0518205F3E6A00AD1DBA /* Moonlight v1.0-2.xcdatamodel */,
+				DCAF0519205F3E6A00AD1DBA /* Limelight 0.3.1.xcdatamodel */,
+				DCAF051A205F3E6A00AD1DBA /* Moonlight v1.0.xcdatamodel */,
+				DCAF051B205F3E6A00AD1DBA /* Limelight 0.3.0.xcdatamodel */,
 			);
-			currentVersion = DC535F4E20534B4C00B23E32 /* Moonlight v1.0-2.xcdatamodel */;
-			path = Moonlight_macOS.xcdatamodeld;
+			currentVersion = DCAF0518205F3E6A00AD1DBA /* Moonlight v1.0-2.xcdatamodel */;
+			name = Limelight.xcdatamodeld;
+			path = ../Limelight/Limelight.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
 		};

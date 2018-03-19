@@ -338,7 +338,7 @@ void ClLogMessage(const char* format, ...)
     _streamConfig.fps = config.frameRate;
     _streamConfig.bitrate = config.bitRate;
 
-    //This will activate the remote streaming optimization in moonlight-common if needed
+    // This will activate the remote streaming optimization in moonlight-common if needed
     _streamConfig.streamingRemotely = config.streamingRemotely;
 
 #if TARGET_OS_IPHONE
@@ -349,11 +349,12 @@ void ClLogMessage(const char* format, ...)
         // to freeze. Additionally, RFI is not supported so packet loss recovery
         // is worse with HEVC than H.264.
 
-        //Streaming with a limited bandwith will result in better quality with HEVC
+        // Streaming with a limited bandwith will result in better quality with HEVC
         //_streamConfig.supportsHevc = VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC);
     }
 #else
     if (@available(macOS 10.13, *)) {
+        if (VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC) || _streamConfig.streamingRemotely != 0)
         _streamConfig.supportsHevc = true;
     }
 #endif
@@ -362,9 +363,9 @@ void ClLogMessage(const char* format, ...)
     // reduce bandwidth usage while still gaining some image
     // quality improvement.
     if (config.streamingRemotely) {
-        //In the case of remotely streaming, we want the best possible qualtity for a limited bandwidth, so we set the multiplier to 0
+        // In the case of remotely streaming, we want the best possible qualtity for a limited bandwidth, so we set the multiplier to 0
         _streamConfig.hevcBitratePercentageMultiplier = 0;
-        //When streaming remotely we want to use a packet size of 1024
+        // When streaming remotely we want to use a packet size of 1024
         _streamConfig.packetSize = 1024;
     }
     else {
@@ -381,14 +382,9 @@ void ClLogMessage(const char* format, ...)
     _drCallbacks.setup = DrDecoderSetup;
     _drCallbacks.submitDecodeUnit = DrSubmitDecodeUnit;
 
-
-#if TARGET_OS_IPHONE
     // RFI doesn't work properly with HEVC on iOS 11 with an iPhone SE (at least)
+    // It doesnt work on macOS either, tested with Network Link Conditioner.
     _drCallbacks.capabilities = CAPABILITY_REFERENCE_FRAME_INVALIDATION_AVC;
-#else
-    // It works on macOS (on my MBP atleast)
-    _drCallbacks.capabilities = CAPABILITY_REFERENCE_FRAME_INVALIDATION_HEVC;
-#endif
 
     LiInitializeAudioCallbacks(&_arCallbacks);
     _arCallbacks.init = ArInit;

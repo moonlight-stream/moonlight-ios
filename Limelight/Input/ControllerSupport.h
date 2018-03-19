@@ -17,8 +17,12 @@
 @interface ControllerSupport : NSObject
 
 -(id) init;
+
+#if TARGET_OS_IPHONE
 -(void) initAutoOnScreenControlMode:(OnScreenControls*)osc;
 -(void) cleanup;
+-(Controller*) getOscController;
+#endif
 
 -(void) updateLeftStick:(Controller*)controller x:(short)x y:(short)y;
 -(void) updateRightStick:(Controller*)controller x:(short)x y:(short)y;
@@ -32,7 +36,6 @@
 -(void) clearButtonFlag:(Controller*)controller flags:(int)flags;
 
 -(void) updateFinished:(Controller*)controller;
--(Controller*) getOscController;
 
 +(int) getConnectedGamepadMask;
 

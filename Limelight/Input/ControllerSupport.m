@@ -7,7 +7,11 @@
 //
 
 #import "ControllerSupport.h"
+
+#if TARGET_OS_IPHONE
 #import "OnScreenControls.h"
+#endif
+
 #import "DataManager.h"
 #include "Limelight.h"
 
@@ -21,6 +25,7 @@
     NSLock *_controllerStreamLock;
     NSMutableDictionary *_controllers;
     
+#if TARGET_OS_IPHONE
     OnScreenControls *_osc;
     bool _oscEnabled;
     
@@ -28,10 +33,12 @@
     // and player 0
     Controller *_player0osc;
     
-    char _controllerNumbers;
-    
 #define EMULATING_SELECT     0x1
 #define EMULATING_SPECIAL    0x2
+    
+#endif
+    
+    char _controllerNumbers;
 }
 
 // UPDATE_BUTTON_FLAG(controller, flag, pressed)
@@ -76,6 +83,7 @@
     }
 }
 
+#if TARGET_OS_IPHONE
 -(void) handleSpecialCombosReleased:(Controller*)controller releasedButtons:(int)releasedButtons
 {
     if ((controller.emulatingButtonFlags & EMULATING_SELECT) &&
@@ -110,21 +118,23 @@
     }
     
 }
+#endif
 
 -(void) updateButtonFlags:(Controller*)controller flags:(int)flags
 {
     @synchronized(controller) {
-        int releasedButtons = (controller.lastButtonFlags ^ flags) & ~flags;
-        int pressedButtons = (controller.lastButtonFlags ^ flags) & flags;
-        
         controller.lastButtonFlags = flags;
         
         // This must be called before handleSpecialCombosPressed
         // because we clear the original button flags there
+#if TARGET_OS_IPHONE
+        int releasedButtons = (controller.lastButtonFlags ^ flags) & ~flags;
+        int pressedButtons = (controller.lastButtonFlags ^ flags) & flags;
+        
         [self handleSpecialCombosReleased:controller releasedButtons:releasedButtons];
         
         [self handleSpecialCombosPressed:controller pressedButtons:pressedButtons];
-        
+#endif
     }
 }
 
@@ -132,7 +142,9 @@
 {
     @synchronized(controller) {
         controller.lastButtonFlags |= flags;
+#if TARGET_OS_IPHONE
         [self handleSpecialCombosPressed:controller pressedButtons:flags];
+#endif
     }
 }
 
@@ -140,7 +152,9 @@
 {
     @synchronized(controller) {
         controller.lastButtonFlags &= ~flags;
+#if TARGET_OS_IPHONE
         [self handleSpecialCombosReleased:controller releasedButtons:flags];
+#endif
     }
 }
 
@@ -148,6 +162,12 @@
 {
     [_controllerStreamLock lock];
     @synchronized(controller) {
+#if TARGET_OS_IPHONE
+#else
+        bool _oscEnabled = 0;
+        controller.playerIndex = 0;
+        _controllerNumbers = 1;
+#endif
         // Player 1 is always present for OSC
         LiSendMultiControllerEvent(controller.playerIndex, _controllerNumbers | (_oscEnabled ? 1 : 0), controller.lastButtonFlags, controller.lastLeftTrigger, controller.lastRightTrigger, controller.lastLeftStickX, controller.lastLeftStickY, controller.lastRightStickX, controller.lastRightStickY);
     }
@@ -242,6 +262,7 @@
     }
 }
 
+#if TARGET_OS_IPHONE
 -(void) updateAutoOnScreenControlMode
 {
     // Auto on-screen control support may not be enabled
@@ -277,6 +298,7 @@
     
     [self updateAutoOnScreenControlMode];
 }
+#endif
 
 -(void) assignController:(GCController*)controller {
     for (int i = 0; i < 4; i++) {
@@ -285,6 +307,7 @@
             controller.playerIndex = i;
             
             Controller* limeController;
+#if TARGET_OS_IPHONE
             if (i == 0) {
                 // Player 0 shares a controller object with the on-screen controls
                 limeController = _player0osc;
@@ -292,6 +315,10 @@
                 limeController = [[Controller alloc] init];
                 limeController.playerIndex = i;
             }
+#else
+            limeController = [[Controller alloc] init];
+            limeController.playerIndex = i;
+#endif
 
             [_controllers setObject:limeController forKey:[NSNumber numberWithInteger:controller.playerIndex]];
             
@@ -301,9 +328,11 @@
     }
 }
 
+#if TARGET_OS_IPHONE
 -(Controller*) getOscController {
     return _player0osc;
 }
+#endif
 
 +(int) getConnectedGamepadMask {
     int mask = 0;
@@ -312,6 +341,7 @@
         mask |= 1 << i;
     }
     
+#if TARGET_OS_IPHONE
     DataManager* dataMan = [[DataManager alloc] init];
     OnScreenControlsLevel level = (OnScreenControlsLevel)[[dataMan getSettings].onscreenControls integerValue];
     
@@ -320,7 +350,7 @@
     if (level != OnScreenControlsLevelOff) {
         mask |= 1;
     }
-    
+#endif
     return mask;
 }
 
@@ -331,17 +361,23 @@
     _controllerStreamLock = [[NSLock alloc] init];
     _controllers = [[NSMutableDictionary alloc] init];
     _controllerNumbers = 0;
+
+#if TARGET_OS_IPHONE
     _player0osc = [[Controller alloc] init];
     _player0osc.playerIndex = 0;
     
     DataManager* dataMan = [[DataManager alloc] init];
     _oscEnabled = (OnScreenControlsLevel)[[dataMan getSettings].onscreenControls integerValue] != OnScreenControlsLevelOff;
+#endif
     
     Log(LOG_I, @"Number of controllers connected: %ld", (long)[[GCController controllers] count]);
     for (GCController* controller in [GCController controllers]) {
         [self assignController:controller];
         [self registerControllerCallbacks:controller];
+
+#if TARGET_OS_IPHONE
         [self updateAutoOnScreenControlMode];
+#endif
     }
     
     self.connectObserver = [[NSNotificationCenter defaultCenter] addObserverForName:GCControllerDidConnectNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
@@ -353,8 +389,10 @@
         // Register callbacks on the new controller
         [self registerControllerCallbacks:controller];
         
+#if TARGET_OS_IPHONE
         // Re-evaluate the on-screen control mode
         [self updateAutoOnScreenControlMode];
+#endif
     }];
     self.disconnectObserver = [[NSNotificationCenter defaultCenter] addObserverForName:GCControllerDidDisconnectNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
         Log(LOG_I, @"Controller disconnected!");
@@ -367,9 +405,11 @@
         // Inform the server of the updated active gamepads before removing this controller
         [self updateFinished:[_controllers objectForKey:[NSNumber numberWithInteger:controller.playerIndex]]];
         [_controllers removeObjectForKey:[NSNumber numberWithInteger:controller.playerIndex]];
-        
+
+#if TARGET_OS_IPHONE
         // Re-evaluate the on-screen control mode
         [self updateAutoOnScreenControlMode];
+#endif
     }];
     
     return self;

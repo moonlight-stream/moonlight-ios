@@ -14,7 +14,7 @@
 @implementation keepAlive
 
 CFStringRef reasonForActivity= CFSTR("Moonlight keeps the system awake");
-IOPMAssertionID assertionID = 1984201141;
+IOPMAssertionID assertionID;
 
 +(void) keepSystemAlive
 {

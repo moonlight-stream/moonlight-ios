@@ -12,7 +12,7 @@
 #define keyboardTranslation_h
 
 CGKeyCode keyCharFromKeyCode(CGKeyCode keyCode);
-CGKeyCode modifierKeyFromEvent(int keyModifier);
-char keyModifierFromEvent(int keyModifier);
+CGKeyCode keyCodeFromModifierKey(NSEventModifierFlags keyModifier);
+char modifierFlagForKeyModifier(NSEventModifierFlags keyModifier);
 
 #endif /* keyboardTranslation_h */

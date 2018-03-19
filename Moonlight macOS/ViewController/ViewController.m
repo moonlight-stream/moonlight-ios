@@ -29,8 +29,6 @@
     NSString* _uniqueId;
     NSData* _cert;
     StreamConfiguration* _streamConfig;
-    //NSAlertController* _pairAlert;
-    int currentPosition;
     NSArray* _sortedAppList;
     NSSet* _appList;
     NSString* _host;
@@ -192,6 +190,7 @@
                                                deviceName:@"roth"
                                                      cert:_cert];
     AppListResponse* appListResp;
+    
     for (int i = 0; i < 5; i++) {
         appListResp = [[AppListResponse alloc] init];
         [hMan executeRequestSynchronously:[HttpRequest requestForResponse:appListResp withUrlRequest:[hMan newAppListRequest]]];
@@ -212,7 +211,6 @@
 }
 
 - (void)pairFailed:(NSString *)message {
-    
     [self showAlert:[NSString stringWithFormat: @"%@", message]];
 }
 
@@ -224,8 +222,7 @@
     });
 }
 
-- (void)showPIN:(NSString *)PIN
-{
+- (void)showPIN:(NSString *)PIN {
     [self showAlert:[NSString stringWithFormat: @"PIN: %@", PIN]];
 }
 

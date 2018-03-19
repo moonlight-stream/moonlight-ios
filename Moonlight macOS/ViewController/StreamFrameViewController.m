@@ -21,7 +21,6 @@
     StreamConfiguration *_streamConfig;
     NSTimer* _timer;
     ViewController* _origin;
-    struct Gamepad_device* device;
 }
 
 -(ViewController*) _origin {
@@ -32,14 +31,17 @@
     [super viewDidLoad];
     [keepAlive keepSystemAlive];
     self.streamConfig = _streamConfig;
-    Gamepad_detectDevices();
+    
     initGamepad();
+    
+    // The Gamepad currently gets refreshed at 60Hz, this could very well be set as 1/Framerate in the future.
+    _timer = [NSTimer scheduledTimerWithTimeInterval:1.0/60.0 target:self selector:@selector(timerTick) userInfo:nil repeats:true];
+    
     _streamMan = [[StreamManager alloc] initWithConfig:self.streamConfig
                                             renderView:self.view
                                    connectionCallbacks:self];
     NSOperationQueue* opQueue = [[NSOperationQueue alloc] init];
     [opQueue addOperation:_streamMan];
-    _timer = [NSTimer scheduledTimerWithTimeInterval:1.0/60.0 target:self selector:@selector(timerTick) userInfo:nil repeats:true];
     // Do view setup here.
 }
 
@@ -49,13 +51,15 @@
 
 - (void) viewDidAppear {
     [super viewDidAppear];
+    
+    // Hide the cursor and disconnect it from the mouse movement
     [NSCursor hide];
     CGAssociateMouseAndMouseCursorPosition(false);
-    //CGWarpMouseCursorPosition(CGPointMake(self.view.frame.origin.x + self.view.frame.size.width/2 , self.view.frame.origin.y + self.view.frame.size.height/2));
-
+    
+    //During the setup the window should not be resizable, but to use the fullscreen feature of macOS it has to be resizable.
     [self.view.window setStyleMask:[self.view.window styleMask] | NSWindowStyleMaskResizable];
-    if (self.view.bounds.size.height != NSScreen.mainScreen.frame.size.height || self.view.bounds.size.width != NSScreen.mainScreen.frame.size.width)
-    {
+    
+    if (self.view.bounds.size.height != NSScreen.mainScreen.frame.size.height || self.view.bounds.size.width != NSScreen.mainScreen.frame.size.width) {
         [self.view.window toggleFullScreen:self];
     }
     [_progressIndicator startAnimation:nil];
@@ -68,8 +72,7 @@
     [keepAlive allowSleep];
     [_streamMan stopStream];
     CGAssociateMouseAndMouseCursorPosition(true);
-    if (self.view.bounds.size.height == NSScreen.mainScreen.frame.size.height && self.view.bounds.size.width == NSScreen.mainScreen.frame.size.width)
-    {
+    if (self.view.bounds.size.height == NSScreen.mainScreen.frame.size.height && self.view.bounds.size.width == NSScreen.mainScreen.frame.size.width) {
         [self.view.window toggleFullScreen:self];
         [self.view.window setStyleMask:[self.view.window styleMask] & ~NSWindowStyleMaskResizable];
     }

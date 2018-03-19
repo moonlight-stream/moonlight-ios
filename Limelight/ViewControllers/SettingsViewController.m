@@ -70,9 +70,8 @@ static NSString* bitrateFormat = @"Bitrate: %.1f Mbps";
     [self.remoteSelector addTarget:self action:@selector(remoteStreamingChanged) forControlEvents:UIControlEventValueChanged];
 }
 
-- (void) remoteStreamingChanged
-{
-    //This function can be used to reconfigure the settings view to offer more remote streaming options (i.e. reduce the audio frequency to 24kHz, enable/disable the HEVC bitrate multiplier, ...)
+- (void) remoteStreamingChanged {
+    // This function can be used to reconfigure the settings view to offer more remote streaming options (i.e. reduce the audio frequency to 24kHz, enable/disable the HEVC bitrate multiplier, ...)
 }
 
 - (void) newResolutionFpsChosen {

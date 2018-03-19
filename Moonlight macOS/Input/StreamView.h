@@ -6,8 +6,6 @@
 //  Copyright (c) 2018 Felix Kratz. All rights reserved.
 //
 
-#import <AppKit/AppKit.h>
-
 @interface StreamView : NSView
 
 

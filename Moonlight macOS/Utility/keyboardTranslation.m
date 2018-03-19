@@ -10,47 +10,34 @@
 #import "keyboardTranslation.h"
 #import <Limelight.h>
 
-CGKeyCode modifierKeyFromEvent(int keyModifier) {
-    switch (keyModifier) {
-        case 131330:
-            return 0xA0; //LSHIFT
-            //case 131332:              TODO: This will lockup the modifiers
-        //    return 0xA1; //RSHIFT
-        case 524576:
-            return 0xA4; //LALT
-        //case 524608:                  TODO: This will lockup the modifiers
-        //    return 0xA5; //RALT
-        case 262401:
-            return 0xA2; //LCTRL
-
-        default:
-            return 0x00;
+CGKeyCode keyCodeFromModifierKey(NSEventModifierFlags keyModifier) {
+    if (keyModifier & kCGEventFlagMaskShift) {
+        return 0xA0;
     }
+    if (keyModifier & kCGEventFlagMaskAlternate) {
+        return 0xA4;
+    }
+    if (keyModifier & kCGEventFlagMaskControl) {
+        return 0xA2;
+    }
+    return 0x00;
 }
 
-char keyModifierFromEvent(int keyModifier)
-{
-    switch (keyModifier) {
-        case 131330:
-            return MODIFIER_SHIFT; //LSHIFT
-        case 131332:
-            return MODIFIER_SHIFT; //RSHIFT
-        case 524576:
-            return MODIFIER_ALT; //LALT
-        case 524608:
-            return MODIFIER_ALT; //RALT
-        case 262401:
-            return MODIFIER_CTRL; //LCTRL
-            
-        default:
-            return 0x00;
+char modifierFlagForKeyModifier(NSEventModifierFlags keyModifier) {
+    if (keyModifier & kCGEventFlagMaskShift) {
+        return MODIFIER_SHIFT;
     }
+    if (keyModifier & kCGEventFlagMaskAlternate) {
+        return MODIFIER_ALT;
+    }
+    if (keyModifier & kCGEventFlagMaskControl) {
+        return MODIFIER_CTRL;
+    }
+    return 0x00;
 }
-
 
 CGKeyCode keyCharFromKeyCode(CGKeyCode keyCode) {
-    switch (keyCode)
-    {
+    switch (keyCode) {
         case 0: return 'A';
         case 1: return 'S';
         case 2: return 'D';

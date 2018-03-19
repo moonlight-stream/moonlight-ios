@@ -9,17 +9,17 @@
 #import "StreamView.h"
 #include <Limelight.h>
 #import "DataManager.h"
-#import <AppKit/AppKit.h>
 #include <ApplicationServices/ApplicationServices.h>
 #include "keyboardTranslation.h"
 
 @implementation StreamView {
     BOOL isDragging;
-    
     NSTrackingArea *trackingArea;
 }
 
 - (void) updateTrackingAreas {
+    
+    // This will be the area used to track the mouse movement
     if (trackingArea != nil) {
         [self removeTrackingArea:trackingArea];
     }
@@ -43,8 +43,7 @@
     }
 }
 
--(void)rightMouseDragged:(NSEvent *)event
-{
+-(void)rightMouseDragged:(NSEvent *)event {
     if (isDragging) {
         [self mouseMoved:event];
     }
@@ -59,7 +58,6 @@
 }
 
 - (void)mouseDown:(NSEvent *)mouseEvent {
-    NSLog(@"LeftMouseDown");
     LiSendMouseButtonEvent(BUTTON_ACTION_PRESS, BUTTON_LEFT);
     [self setNeedsDisplay:YES];
 }
@@ -77,7 +75,6 @@
 }
 
 - (void)rightMouseDown:(NSEvent *)mouseEvent {
-    NSLog(@"RightMouseDown");
     LiSendMouseButtonEvent(BUTTON_ACTION_PRESS, BUTTON_RIGHT);
     [self setNeedsDisplay:YES];
 }
@@ -87,28 +84,26 @@
 }
 
 -(void)keyDown:(NSEvent *)event {
-    int keyChar = keyCharFromKeyCode(event.keyCode);
+    unsigned char keyChar = keyCharFromKeyCode(event.keyCode);
     printf("DOWN: KeyCode: %hu, keyChar: %d, keyModifier: %lu \n", event.keyCode, keyChar, event.modifierFlags);
     
-    LiSendKeyboardEvent(keyChar, KEY_ACTION_DOWN, keyModifierFromEvent(event.modifierFlags));
+    LiSendKeyboardEvent(keyChar, KEY_ACTION_DOWN, modifierFlagForKeyModifier(event.modifierFlags));
 }
 
 -(void)keyUp:(NSEvent *)event {
-    short keyChar = keyCharFromKeyCode(event.keyCode);
+    unsigned char keyChar = keyCharFromKeyCode(event.keyCode);
     printf("UP: KeyChar: %d \n‚", keyChar);
-    LiSendKeyboardEvent(keyChar, KEY_ACTION_UP, keyModifierFromEvent(event.modifierFlags));
+    LiSendKeyboardEvent(keyChar, KEY_ACTION_UP, modifierFlagForKeyModifier(event.modifierFlags));
 }
 
 - (void)flagsChanged:(NSEvent *)event
 {
-    short keyChar = modifierKeyFromEvent(event.modifierFlags);
-    if(keyChar)
-    {
-        printf("DOWN: FlagChanged: %hd \n", keyChar);
+    unsigned char keyChar = keyCodeFromModifierKey(event.modifierFlags);
+    if(keyChar) {
+        printf("DOWN: FlagChanged: %hhu \n", keyChar);
         LiSendKeyboardEvent(keyChar, KEY_ACTION_DOWN, 0x00);
     }
-    else
-    {
+    else {
         LiSendKeyboardEvent(58, KEY_ACTION_UP, 0x00);
     }
 }
