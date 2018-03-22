@@ -9,9 +9,9 @@
 #import "StreamFrameViewController.h"
 #import "VideoDecoderRenderer.h"
 #import "StreamManager.h"
-#import "Control.h"
 #import "Gamepad.h"
 #import "keepAlive.h"
+#import "ControllerSupport.h"
 
 @interface StreamFrameViewController ()
 @end
@@ -19,8 +19,10 @@
 @implementation StreamFrameViewController {
     StreamManager *_streamMan;
     StreamConfiguration *_streamConfig;
-    NSTimer* _timer;
+    NSTimer* _eventTimer;
+    NSTimer* _searchTimer;
     ViewController* _origin;
+    ControllerSupport* _controllerSupport;
 }
 
 -(ViewController*) _origin {
@@ -31,22 +33,34 @@
     [super viewDidLoad];
     [keepAlive keepSystemAlive];
     self.streamConfig = _streamConfig;
-    
-    initGamepad();
-    
-    // The Gamepad currently gets refreshed at 60Hz, this could very well be set as 1/Framerate in the future.
-    _timer = [NSTimer scheduledTimerWithTimeInterval:1.0/60.0 target:self selector:@selector(timerTick) userInfo:nil repeats:true];
-    
+
     _streamMan = [[StreamManager alloc] initWithConfig:self.streamConfig
                                             renderView:self.view
                                    connectionCallbacks:self];
     NSOperationQueue* opQueue = [[NSOperationQueue alloc] init];
     [opQueue addOperation:_streamMan];
-    // Do view setup here.
+    
+    // Initialize the controllers (GC and IOHID)
+    // I have not tested it, but i think there will be a bug, when mixing GC and IOHID Controllers, because all GCControllers also register as IOHID Controllers.
+    // To fix this, we need to get the IOHIDDeviceRef for the GCController and compare it with every IOHID Controller.
+    // This shouldn't be a problem as long as this will not be put on the mac app store, as the IOHIDDeviceRef is a private field.
+    // The other "fix" would be to disable explicit GC support for the mac version for now.
+    // Can someone test this?
+    _controllerSupport = [[ControllerSupport alloc] init];
+    
+    // The gamepad currently gets polled at 60Hz, this could very well be set as 1/Framerate in the future.
+    _eventTimer = [NSTimer scheduledTimerWithTimeInterval:1.0/60.0 target:self selector:@selector(eventTimerTick) userInfo:nil repeats:true];
+    
+    // We search for new devices every second.
+    _searchTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(searchTimerTick) userInfo:nil repeats:true];
 }
 
-- (void)timerTick {
+- (void)eventTimerTick {
     Gamepad_processEvents();
+}
+
+- (void)searchTimerTick {
+    Gamepad_detectDevices();
 }
 
 - (void) viewDidAppear {

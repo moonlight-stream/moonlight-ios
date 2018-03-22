@@ -10,7 +10,8 @@
 #define Control_h
 
 #include <stdio.h>
+#import "ControllerSupport.h"
 
-extern void initGamepad(void);
+extern void initGamepad(ControllerSupport* controllerSupport);
 
 #endif /* Control_h */

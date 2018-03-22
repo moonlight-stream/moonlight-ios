@@ -10,6 +10,9 @@
 
 #if TARGET_OS_IPHONE
 #import "OnScreenControls.h"
+#else
+#import "Gamepad.h"
+#import "Control.h"
 #endif
 
 #import "DataManager.h"
@@ -27,7 +30,6 @@
     
 #if TARGET_OS_IPHONE
     OnScreenControls *_osc;
-    bool _oscEnabled;
     
     // This controller object is shared between on-screen controls
     // and player 0
@@ -35,9 +37,9 @@
     
 #define EMULATING_SELECT     0x1
 #define EMULATING_SPECIAL    0x2
-    
 #endif
     
+    bool _oscEnabled;
     char _controllerNumbers;
 }
 
@@ -162,12 +164,6 @@
 {
     [_controllerStreamLock lock];
     @synchronized(controller) {
-#if TARGET_OS_IPHONE
-#else
-        bool _oscEnabled = 0;
-        controller.playerIndex = 0;
-        _controllerNumbers = 1;
-#endif
         // Player 1 is always present for OSC
         LiSendMultiControllerEvent(controller.playerIndex, _controllerNumbers | (_oscEnabled ? 1 : 0), controller.lastButtonFlags, controller.lastLeftTrigger, controller.lastRightTrigger, controller.lastLeftStickX, controller.lastLeftStickY, controller.lastRightStickX, controller.lastRightStickY);
     }
@@ -332,6 +328,35 @@
 -(Controller*) getOscController {
     return _player0osc;
 }
+#else
+-(NSMutableDictionary*) getControllers {
+    return _controllers;
+}
+
+-(void) assignGamepad:(struct Gamepad_device *)gamepad {
+    for (int i = 0; i < 4; i++) {
+        if (!(_controllerNumbers & (1 << i))) {
+            _controllerNumbers |= (1 << i);
+            gamepad->deviceID = i;
+            NSLog(@"Gamepad device id: %u assigned", gamepad->deviceID);
+            Controller* limeController;
+            limeController = [[Controller alloc] init];
+            limeController.playerIndex = i;
+            
+            [_controllers setObject:limeController forKey:[NSNumber numberWithInteger:i]];
+            break;
+        }
+    }
+}
+
+-(void) removeGamepad:(struct Gamepad_device *)gamepad {
+    _controllerNumbers &= ~(1 << gamepad->deviceID);
+    Log(LOG_I, @"Unassigning controller index: %ld", (long)gamepad->deviceID);
+    
+    // Inform the server of the updated active gamepads before removing this controller
+    [self updateFinished:[_controllers objectForKey:[NSNumber numberWithInteger:gamepad->deviceID]]];
+    [_controllers removeObjectForKey:[NSNumber numberWithInteger:gamepad->deviceID]];
+}
 #endif
 
 +(int) getConnectedGamepadMask {
@@ -368,6 +393,10 @@
     
     DataManager* dataMan = [[DataManager alloc] init];
     _oscEnabled = (OnScreenControlsLevel)[[dataMan getSettings].onscreenControls integerValue] != OnScreenControlsLevelOff;
+#else
+    _oscEnabled = false;
+    initGamepad(self);
+    Gamepad_detectDevices();
 #endif
     
     Log(LOG_I, @"Number of controllers connected: %ld", (long)[[GCController controllers] count]);
@@ -411,7 +440,6 @@
         [self updateAutoOnScreenControlMode];
 #endif
     }];
-    
     return self;
 }
 

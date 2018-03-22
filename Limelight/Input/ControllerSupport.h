@@ -10,6 +10,10 @@
 
 // Swift
 #import "Moonlight-Swift.h"
+#if TARGET_OS_IPHONE
+#else
+#import "Gamepad.h"
+#endif
 @class Controller;
 
 @class OnScreenControls;
@@ -22,6 +26,10 @@
 -(void) initAutoOnScreenControlMode:(OnScreenControls*)osc;
 -(void) cleanup;
 -(Controller*) getOscController;
+#else
+-(void) assignGamepad:(struct Gamepad_device *)gamepad;
+-(void) removeGamepad:(struct Gamepad_device *)gamepad;
+-(NSMutableDictionary*) getControllers;
 #endif
 
 -(void) updateLeftStick:(Controller*)controller x:(short)x y:(short)y;
