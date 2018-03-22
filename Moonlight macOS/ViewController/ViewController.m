@@ -22,6 +22,7 @@
 #import "TemporaryApp.h"
 #import "IdManager.h"
 #import "SettingsViewController.h"
+#import "ConnectionHelper.h"
 
 @implementation ViewController{
     NSOperationQueue* _opQueue;
@@ -82,7 +83,6 @@
 }
 
 -(void) showAlert:(NSString*) message {
-    
     dispatch_async(dispatch_get_main_queue(), ^{
         _alert = [NSAlert new];
         _alert.messageText = message;
@@ -173,35 +173,21 @@
 }
 
 - (void)alreadyPaired {
-    [_popupButtonSelection setEnabled:true];
-    [_popupButtonSelection setHidden:false];
-    [_buttonConnect setEnabled:false];
-    [_buttonConnect setHidden:true];
-    [_buttonLaunch setEnabled:true];
-    [_textFieldHost setEnabled:false];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [_popupButtonSelection setEnabled:true];
+        [_popupButtonSelection setHidden:false];
+        [_buttonConnect setEnabled:false];
+        [_buttonConnect setHidden:true];
+        [_buttonLaunch setEnabled:true];
+        [_textFieldHost setEnabled:false];
+    });
     [self searchForHost:_host];
     [self updateAppsForHost];
     [self populatePopupButton];
 }
 
 - (void)searchForHost:(NSString*) hostAddress {
-    HttpManager* hMan = [[HttpManager alloc] initWithHost:_textFieldHost.stringValue
-                                                 uniqueId:_uniqueId
-                                               deviceName:@"roth"
-                                                     cert:_cert];
-    AppListResponse* appListResp;
-    
-    for (int i = 0; i < 5; i++) {
-        appListResp = [[AppListResponse alloc] init];
-        [hMan executeRequestSynchronously:[HttpRequest requestForResponse:appListResp withUrlRequest:[hMan newAppListRequest]]];
-        if (appListResp == nil || ![appListResp isStatusOk] || [appListResp getAppList] == nil) {
-            [NSThread sleepForTimeInterval:1];
-        }
-        else {
-            _appList = appListResp.getAppList;
-            break;
-        }
-    }
+    _appList = [ConnectionHelper getAppListForHostWithHostIP:_textFieldHost.stringValue deviceName:deviceName cert:_cert uniqueID:_uniqueId].getAppList;
 }
 
 - (void)populatePopupButton {

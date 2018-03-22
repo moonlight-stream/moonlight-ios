@@ -62,7 +62,7 @@
     
     HttpManager* hMan = [[HttpManager alloc] initWithHost:_config.host
                                                  uniqueId:uniqueId
-                                               deviceName:@"roth"
+                                               deviceName:deviceName
                                                      cert:cert];
     
     ServerInfoResponse* serverInfoResp = [[ServerInfoResponse alloc] init];

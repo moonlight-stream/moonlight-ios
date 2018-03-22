@@ -104,15 +104,15 @@ CGKeyCode keyCharFromKeyCode(CGKeyCode keyCode) {
         case kVK_ANSI_U: return 'U';
         case kVK_ANSI_I: return 'I';
         case kVK_ANSI_P: return 'P';
-        case kVK_Return: return VK_ENTER;
         case kVK_ANSI_L: return 'L';
         case kVK_ANSI_J: return 'J';
         case kVK_ANSI_K: return 'K';
-        case kVK_ANSI_Comma: return VK_COMMA;
-        case kVK_ANSI_Minus: return VK_MINUS;
         case kVK_ANSI_N: return 'N';
         case kVK_ANSI_M: return 'M';
+        case kVK_Return: return VK_ENTER;
         case kVK_ANSI_Period: return VK_PERIOD;
+        case kVK_ANSI_Comma: return VK_COMMA;
+        case kVK_ANSI_Minus: return VK_MINUS;
         case kVK_Tab: return VK_TAB;
         case kVK_Space: return VK_SPACE;
         case kVK_Delete: return VK_BACKSPACE;

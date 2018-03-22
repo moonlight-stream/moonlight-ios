@@ -56,6 +56,7 @@
 		DC5FA8FF205DBEE3008B7054 /* VideoDecoderRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = DC5FA8FB205DBEE3008B7054 /* VideoDecoderRenderer.m */; };
 		DC5FA900205DC0AF008B7054 /* libmoonlight-common.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DCECF42F205DBBAC00831862 /* libmoonlight-common.a */; };
 		DC62AC29205D9D3800FE4681 /* libopus_mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DC62AC28205D9D3800FE4681 /* libopus_mac.a */; };
+		DC6A60862064299700A0673D /* ConnectionHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = DC6A60852064299700A0673D /* ConnectionHelper.m */; };
 		DC7029D5205B28340016D44B /* LICENSE.txt in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DC7029D4205B28340016D44B /* LICENSE.txt */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		DC9CD51F20601658001A5DCD /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DC9CD51E20601658001A5DCD /* AppDelegate.m */; };
 		DCAF051C205F3E6A00AD1DBA /* Limelight.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = DCAF0516205F3E6A00AD1DBA /* Limelight.xcdatamodeld */; };
@@ -288,6 +289,8 @@
 		DC5FA8FA205DBEE3008B7054 /* StreamConfiguration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StreamConfiguration.h; sourceTree = "<group>"; };
 		DC5FA8FB205DBEE3008B7054 /* VideoDecoderRenderer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoDecoderRenderer.m; sourceTree = "<group>"; };
 		DC62AC28205D9D3800FE4681 /* libopus_mac.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libopus_mac.a; sourceTree = "<group>"; };
+		DC6A60842064298700A0673D /* ConnectionHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ConnectionHelper.h; sourceTree = "<group>"; };
+		DC6A60852064299700A0673D /* ConnectionHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ConnectionHelper.m; sourceTree = "<group>"; };
 		DC7029D4205B28340016D44B /* LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		DC9CD51E20601658001A5DCD /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = Limelight/AppDelegate.m; sourceTree = SOURCE_ROOT; };
 		DCAF04FD205F38B100AD1DBA /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Limelight/AppDelegate.h; sourceTree = SOURCE_ROOT; };
@@ -419,6 +422,8 @@
 				DC2F1734205DA35700C3021E /* PairManager.m */,
 				DC2F1735205DA35700C3021E /* DiscoveryManager.h */,
 				DC2F1736205DA35700C3021E /* AppListResponse.h */,
+				DC6A60842064298700A0673D /* ConnectionHelper.h */,
+				DC6A60852064299700A0673D /* ConnectionHelper.m */,
 			);
 			name = Network;
 			path = Limelight/Network;
@@ -919,6 +924,7 @@
 				DC5FA8FC205DBEE3008B7054 /* StreamConfiguration.m in Sources */,
 				DC2F1742205DA35700C3021E /* AppListResponse.m in Sources */,
 				DC2F1741205DA35700C3021E /* AppAssetResponse.m in Sources */,
+				DC6A60862064299700A0673D /* ConnectionHelper.m in Sources */,
 				DCC23C26205DAC5C00BF3C25 /* Settings.m in Sources */,
 				DCD464E22053417800CC8950 /* StreamFrameViewController.m in Sources */,
 				DC5EF5582052FBDB00C9BF55 /* main.m in Sources */,
