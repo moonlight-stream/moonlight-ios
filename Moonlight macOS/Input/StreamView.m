@@ -9,7 +9,6 @@
 #import "StreamView.h"
 #include <Limelight.h>
 #import "DataManager.h"
-#import <AppKit/AppKit.h>
 #include <ApplicationServices/ApplicationServices.h>
 #include "keyboardTranslation.h"
 #import "NetworkTraffic.h"
