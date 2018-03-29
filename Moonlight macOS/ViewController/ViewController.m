@@ -58,6 +58,14 @@
     
     // Do any additional setup after loading the view.
 }
+
+- (void)viewWillAppear {
+    [super viewWillAppear];
+    if ([[[NSUserDefaults standardUserDefaults] stringForKey:@"AppleInterfaceStyle"]  isEqual: @"Dark"]) {
+        [self.view.window setAppearance:[NSAppearance appearanceNamed:NSAppearanceNameVibrantDark]];
+    }
+}
+
 - (void)viewDidAppear {
     [super viewDidAppear];
     
@@ -138,7 +146,7 @@
     _host = _textFieldHost.stringValue;
     HttpManager* hMan = [[HttpManager alloc] initWithHost:_textFieldHost.stringValue
                                                  uniqueId:_uniqueId
-                                               deviceName:@"roth"
+                                               deviceName:deviceName
                                                      cert:_cert];
     
     ServerInfoResponse* serverInfoResp = [[ServerInfoResponse alloc] init];

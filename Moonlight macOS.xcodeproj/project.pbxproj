@@ -31,6 +31,7 @@
 		DC2F1746205DA35700C3021E /* PairManager.m in Sources */ = {isa = PBXBuildFile; fileRef = DC2F1734205DA35700C3021E /* PairManager.m */; };
 		DC2F174E205DA39600C3021E /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = DC2F174A205DA39600C3021E /* Utils.m */; };
 		DC2F174F205DA39600C3021E /* Logger.m in Sources */ = {isa = PBXBuildFile; fileRef = DC2F174C205DA39600C3021E /* Logger.m */; };
+		DC381F8E206D74F600E0931A /* NetworkTraffic.m in Sources */ = {isa = PBXBuildFile; fileRef = DC381F8D206D74F600E0931A /* NetworkTraffic.m */; };
 		DC38D540205ACC360045FE93 /* Control.m in Sources */ = {isa = PBXBuildFile; fileRef = DC38D53F205ACC360045FE93 /* Control.m */; };
 		DC38D548205AD8D00045FE93 /* libstem_gamepad.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DC38D544205AD8D00045FE93 /* libstem_gamepad.a */; };
 		DC38D549205AD9860045FE93 /* libstem_gamepad.a in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DC38D544205AD8D00045FE93 /* libstem_gamepad.a */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -176,6 +177,8 @@
 		DC2F174C205DA39600C3021E /* Logger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Logger.m; path = Limelight/Utility/Logger.m; sourceTree = SOURCE_ROOT; };
 		DC2F174D205DA39600C3021E /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Utils.h; path = Limelight/Utility/Utils.h; sourceTree = SOURCE_ROOT; };
 		DC2F1751205DA48D00C3021E /* Limelight-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Limelight-Prefix.pch"; path = "Limelight/Limelight-Prefix.pch"; sourceTree = SOURCE_ROOT; };
+		DC381F8C206D74F600E0931A /* NetworkTraffic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NetworkTraffic.h; path = "Moonlight macOS/Network/NetworkTraffic.h"; sourceTree = SOURCE_ROOT; };
+		DC381F8D206D74F600E0931A /* NetworkTraffic.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NetworkTraffic.m; path = "Moonlight macOS/Network/NetworkTraffic.m"; sourceTree = SOURCE_ROOT; };
 		DC38D53E205ACC360045FE93 /* Control.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Control.h; sourceTree = "<group>"; };
 		DC38D53F205ACC360045FE93 /* Control.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Control.m; sourceTree = "<group>"; };
 		DC38D544205AD8D00045FE93 /* libstem_gamepad.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libstem_gamepad.a; sourceTree = "<group>"; };
@@ -391,6 +394,8 @@
 		DC2F171C205DA35700C3021E /* Network */ = {
 			isa = PBXGroup;
 			children = (
+				DC381F8C206D74F600E0931A /* NetworkTraffic.h */,
+				DC381F8D206D74F600E0931A /* NetworkTraffic.m */,
 				DC2F171D205DA35700C3021E /* WakeOnLanManager.m */,
 				DC2F171E205DA35700C3021E /* ServerInfoResponse.m */,
 				DC2F171F205DA35700C3021E /* HttpResponse.m */,
@@ -901,6 +906,7 @@
 				DC2F1742205DA35700C3021E /* AppListResponse.m in Sources */,
 				DC2F1741205DA35700C3021E /* AppAssetResponse.m in Sources */,
 				DC6A60862064299700A0673D /* ConnectionHelper.m in Sources */,
+				DC381F8E206D74F600E0931A /* NetworkTraffic.m in Sources */,
 				DCC23C26205DAC5C00BF3C25 /* Settings.m in Sources */,
 				DCD464E22053417800CC8950 /* StreamFrameViewController.m in Sources */,
 				DC5EF5582052FBDB00C9BF55 /* main.m in Sources */,
@@ -1076,6 +1082,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = "Moonlight macOS/Moonlight macOS.entitlements";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = DQ6R9YE8BF;
@@ -1105,6 +1112,7 @@
 				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.Moonlight-macOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Moonlight macOS/Input/Moonlight macOS-Bridging-Header.h";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "Moonlight-Swift.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -1121,6 +1129,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = "Moonlight macOS/Moonlight macOS.entitlements";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = DQ6R9YE8BF;
@@ -1154,6 +1163,7 @@
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.Moonlight-macOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Moonlight macOS/Input/Moonlight macOS-Bridging-Header.h";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "Moonlight-Swift.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
