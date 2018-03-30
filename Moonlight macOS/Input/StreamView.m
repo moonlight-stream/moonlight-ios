@@ -194,10 +194,10 @@
 
 - (void)drawMessage:(NSString*)message {
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (_stageLabel == nil) {
+        if (self->_stageLabel == nil) {
             [self initStageLabel];
         }
-        _stageLabel.stringValue = message;
+        self->_stageLabel.stringValue = message;
     });
 }
 
