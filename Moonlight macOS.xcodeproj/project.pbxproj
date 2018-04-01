@@ -58,6 +58,7 @@
 		DC6A60862064299700A0673D /* ConnectionHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = DC6A60852064299700A0673D /* ConnectionHelper.m */; };
 		DC7029D5205B28340016D44B /* LICENSE.txt in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DC7029D4205B28340016D44B /* LICENSE.txt */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		DC9CD51F20601658001A5DCD /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DC9CD51E20601658001A5DCD /* AppDelegate.m */; };
+		DCA3B3F22070EED0006565D9 /* OverlayView.m in Sources */ = {isa = PBXBuildFile; fileRef = DCA3B3F02070EED0006565D9 /* OverlayView.m */; };
 		DCAF051C205F3E6A00AD1DBA /* Limelight.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = DCAF0516205F3E6A00AD1DBA /* Limelight.xcdatamodeld */; };
 		DCAF0522205FCADB00AD1DBA /* Controller.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCAF051F205FCADA00AD1DBA /* Controller.swift */; };
 		DCAF0523205FCADB00AD1DBA /* ControllerSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = DCAF0521205FCADA00AD1DBA /* ControllerSupport.m */; };
@@ -291,6 +292,8 @@
 		DC6A60852064299700A0673D /* ConnectionHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ConnectionHelper.m; sourceTree = "<group>"; };
 		DC7029D4205B28340016D44B /* LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		DC9CD51E20601658001A5DCD /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = Limelight/AppDelegate.m; sourceTree = SOURCE_ROOT; };
+		DCA3B3F02070EED0006565D9 /* OverlayView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OverlayView.m; sourceTree = "<group>"; };
+		DCA3B3F12070EED0006565D9 /* OverlayView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OverlayView.h; sourceTree = "<group>"; };
 		DCAF04FD205F38B100AD1DBA /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Limelight/AppDelegate.h; sourceTree = SOURCE_ROOT; };
 		DCAF0517205F3E6A00AD1DBA /* Limelight.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Limelight.xcdatamodel; sourceTree = "<group>"; };
 		DCAF0518205F3E6A00AD1DBA /* Moonlight v1.0-2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Moonlight v1.0-2.xcdatamodel"; sourceTree = "<group>"; };
@@ -701,6 +704,8 @@
 		DCAF13DB20530BE100896C35 /* Input */ = {
 			isa = PBXGroup;
 			children = (
+				DCA3B3F12070EED0006565D9 /* OverlayView.h */,
+				DCA3B3F02070EED0006565D9 /* OverlayView.m */,
 				DCAF051F205FCADA00AD1DBA /* Controller.swift */,
 				DCAF0520205FCADA00AD1DBA /* ControllerSupport.h */,
 				DCAF0521205FCADA00AD1DBA /* ControllerSupport.m */,
@@ -911,6 +916,7 @@
 				DCD464E22053417800CC8950 /* StreamFrameViewController.m in Sources */,
 				DC5EF5582052FBDB00C9BF55 /* main.m in Sources */,
 				DC2F173A205DA35700C3021E /* WakeOnLanManager.m in Sources */,
+				DCA3B3F22070EED0006565D9 /* OverlayView.m in Sources */,
 				DCAF051C205F3E6A00AD1DBA /* Limelight.xcdatamodeld in Sources */,
 				DC0F7508205C04A90087B187 /* keepAlive.m in Sources */,
 				DC2634D4205438DC00D44F88 /* keyboardTranslation.m in Sources */,

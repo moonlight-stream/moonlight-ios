@@ -340,7 +340,7 @@
     
     [displayLayer enqueueSampleBuffer:sampleBuffer];
 #if !TARGET_OS_IPHONE
-    [_view newFrame];
+    _view.frameCount++;
 #endif
     // Dereference the buffers
     CFRelease(blockBuffer);
