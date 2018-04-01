@@ -9,26 +9,15 @@
 #import "StreamView.h"
 #include <Limelight.h>
 #import "DataManager.h"
-#import <AppKit/AppKit.h>
 #include <ApplicationServices/ApplicationServices.h>
 #include "keyboardTranslation.h"
 #import "OverlayView.h"
 
 @implementation StreamView {
     bool isDragging;
-    bool statsDisplayed;
-    unsigned long lastNetworkDown;
-    unsigned long lastNetworkUp;
     NSTrackingArea* _trackingArea;
-    NSTextField* _textFieldIncomingBitrate;
-    NSTextField* _textFieldOutgoingBitrate;
-    NSTextField* _textFieldCodec;
-    NSTextField* _textFieldFramerate;
-    NSTextField* _stageLabel;
-    
-    NSTimer* _statTimer;
-    
     OverlayView* _overlay;
+    NSTextField* _stageLabel;
 }
 
 - (void) updateTrackingAreas {
