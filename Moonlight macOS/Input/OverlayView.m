@@ -64,10 +64,10 @@
         _statTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(statTimerTick) userInfo:nil repeats:true];
         NSLog(@"display stats");
         if (codec == 1) {
-            _textFieldCodec.stringValue = @"Codec: H264";
+            _textFieldCodec.stringValue = @"Codec: H.264";
         }
         else if (codec == 256) {
-            _textFieldCodec.stringValue = @"Codec: HEVC/H265";
+            _textFieldCodec.stringValue = @"Codec: HEVC/H.265";
         }
         else {
             _textFieldCodec.stringValue = @"Codec: Unknown";

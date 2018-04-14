@@ -17,11 +17,10 @@ unsigned long getBytesDown() {
     da = 0;
     getifaddrs (&ifap);
     ifa = ifap;
-    while (ifa != NULL){
-        if (ifa->ifa_addr->sa_family==AF_LINK) {
+    while (ifa != NULL) {
+        if (ifa->ifa_addr->sa_family == AF_LINK) {
             const struct if_data *ifa_data = (struct if_data *)ifa->ifa_data;
-            if (ifa_data != NULL)
-            {
+            if (ifa_data != NULL) {
                 da += ifa_data->ifi_ibytes;
             }
         }
@@ -36,11 +35,10 @@ unsigned long getBytesUp() {
     da = 0;
     getifaddrs (&ifap);
     ifa = ifap;
-    while (ifa != NULL){
-        if (ifa->ifa_addr->sa_family==AF_LINK) {
+    while (ifa != NULL) {
+        if (ifa->ifa_addr->sa_family == AF_LINK) {
             const struct if_data *ifa_data = (struct if_data *)ifa->ifa_data;
-            if (ifa_data != NULL)
-            {
+            if (ifa_data != NULL) {
                 da += ifa_data->ifi_obytes;
             }
         }
