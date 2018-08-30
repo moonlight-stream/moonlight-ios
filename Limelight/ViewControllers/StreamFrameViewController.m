@@ -26,7 +26,9 @@
 {
     [super viewDidAppear:animated];
     
+#if !TARGET_OS_TV
     [[self revealViewController] setPrimaryViewController:self];
+#endif
 }
 
 - (void)viewDidLoad
@@ -66,7 +68,10 @@
                                                object: nil];
 }
 
-- (void)viewDidDisappear:(BOOL)animated {
+- (void)willMoveToParentViewController:(UIViewController *)parent {
+    [_controllerSupport cleanup];
+    [UIApplication sharedApplication].idleTimerDisabled = NO;
+    [_streamMan stopStream];
     if (_inactivityTimer != nil) {
         [_inactivityTimer invalidate];
         _inactivityTimer = nil;
@@ -75,8 +80,6 @@
 }
 
 - (void) returnToMainFrame {
-    [_controllerSupport cleanup];
-    [UIApplication sharedApplication].idleTimerDisabled = NO;
     [self.navigationController popToRootViewControllerAnimated:YES];
 }
 
@@ -98,7 +101,6 @@
 - (void)inactiveTimerExpired:(NSTimer*)timer {
     Log(LOG_I, @"Terminating stream after inactivity");
 
-    [_streamMan stopStream];
     [self returnToMainFrame];
     
     _inactivityTimer = nil;
@@ -122,14 +124,12 @@
         _inactivityTimer = nil;
     }
     
-    [_streamMan stopStream];
     [self returnToMainFrame];
 }
 
 - (void)edgeSwiped {
     Log(LOG_I, @"User swiped to end stream");
     
-    [_streamMan stopStream];
     [self returnToMainFrame];
 }
 
@@ -139,7 +139,9 @@
         // Leave the spinner spinning until it's obscured by
         // the first frame of video.
         self.stageLabel.hidden = YES;
+#if !TARGET_OS_TV
         [(StreamView*)self.view setupOnScreenControls: self->_controllerSupport swipeDelegate:self];
+#endif
     });
 }
 
@@ -185,9 +187,7 @@
                                                                        message:[NSString stringWithFormat:@"%s failed with error %ld",
                                                                                 stageName, errorCode]
                                                                 preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:@"Help" style:UIAlertActionStyleDefault handler:^(UIAlertAction* action){
-            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://github.com/moonlight-stream/moonlight-docs/wiki/Troubleshooting"]];
-        }]];
+        [Utils addHelpOptionToDialog:alert];
         [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction* action){
             [self returnToMainFrame];
         }]];
@@ -207,9 +207,7 @@
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Connection Failed"
                                                                        message:message
                                                                 preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:@"Help" style:UIAlertActionStyleDefault handler:^(UIAlertAction* action){
-            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://github.com/moonlight-stream/moonlight-docs/wiki/Troubleshooting"]];
-        }]];
+        [Utils addHelpOptionToDialog:alert];
         [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction* action){
             [self returnToMainFrame];
         }]];
@@ -231,6 +229,7 @@
     // Dispose of any resources that can be recreated.
 }
 
+#if !TARGET_OS_TV
 // Require a confirmation when streaming to activate a system gesture
 - (UIRectEdge)preferredScreenEdgesDeferringSystemGestures {
     return UIRectEdgeAll;
@@ -239,4 +238,6 @@
 - (BOOL)shouldAutorotate {
     return YES;
 }
+#endif
+
 @end

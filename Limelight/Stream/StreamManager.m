@@ -36,7 +36,7 @@
 }
 
 - (void)main {
-    [CryptoManager generateKeyPairUsingSSl];
+    [CryptoManager generateKeyPairUsingSSL];
     NSString* uniqueId = [IdManager getUniqueId];
     NSData* cert = [CryptoManager readCertFromFile];
     
@@ -84,6 +84,7 @@
     [((StreamView*)_renderView) setMouseDeltaFactors:_config.width / screenSize.width
                                                    y:_config.height / screenSize.height];
 #endif
+    
     // Populate the config's version fields from serverinfo
     _config.appVersion = appversion;
     _config.gfeVersion = gfeVersion;

@@ -18,7 +18,12 @@
     CGSize _labelSize;
 }
 static const float REFRESH_CYCLE = 2.0f;
+
+#if TARGET_OS_TV
+static const int LABEL_DY = 40;
+#else
 static const int LABEL_DY = 20;
+#endif
 
 - (id) init {
     self = [super init];
@@ -34,9 +39,7 @@ static const int LABEL_DY = 20;
     _hostLabel = [[UILabel alloc] init];
     _hostStatus = [[UILabel alloc] init];
     _hostPairState = [[UILabel alloc] init];
-    [_hostLabel setFont:[UIFont fontWithName:@"Roboto-Regular" size:[UIFont systemFontSize]]];
-    [_hostStatus setFont:[UIFont fontWithName:@"Roboto-Regular" size:[UIFont systemFontSize]]];
-	[_hostPairState setFont:[UIFont fontWithName:@"Roboto-Regular" size:[UIFont systemFontSize]]];
+
     return self;
 }
 
@@ -46,7 +49,7 @@ static const int LABEL_DY = 20;
     
     [_hostButton setBackgroundImage:[UIImage imageNamed:@"Computer"] forState:UIControlStateNormal];
     [_hostButton setContentEdgeInsets:UIEdgeInsetsMake(0, 4, 0, 4)];
-    [_hostButton addTarget:self action:@selector(addClicked) forControlEvents:UIControlEventTouchUpInside];
+    [_hostButton addTarget:self action:@selector(addClicked) forControlEvents:UIControlEventPrimaryActionTriggered];
     [_hostButton sizeToFit];
     
     [_hostLabel setText:@"Add Host"];
@@ -79,7 +82,7 @@ static const int LABEL_DY = 20;
     
     UILongPressGestureRecognizer* longPressRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(hostLongClicked)];
     [_hostButton addGestureRecognizer:longPressRecognizer];
-    [_hostButton addTarget:self action:@selector(hostClicked) forControlEvents:UIControlEventTouchUpInside];
+    [_hostButton addTarget:self action:@selector(hostClicked) forControlEvents:UIControlEventPrimaryActionTriggered];
     
     [self updateContentsForHost:host];
     [self updateBounds];
