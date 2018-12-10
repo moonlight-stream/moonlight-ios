@@ -477,7 +477,11 @@ static NSMutableSet* hostList;
     
     // multiController must be set before calling getConnectedGamepadMask
     _streamConfig.multiController = streamSettings.multiController;
-    _streamConfig.gamepadMask = [ControllerSupport getConnectedGamepadMask:_streamConfig];
+    if (!streamSettings.disableTvOSController) {
+        _streamConfig.gamepadMask = [ControllerSupport getConnectedGamepadMask:_streamConfig];
+    } else {
+        _streamConfig.gamepadMask = 0;
+    }
     
     // TODO: Detect attached surround sound system then address 5.1 TODOs
     // in Connection.m
