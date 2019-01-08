@@ -138,16 +138,6 @@
 				<string>100000</string>
 			</array>
 		</dict>
-		<dict>
-			<key>Type</key>
-			<string>PSToggleSwitchSpecifier</string>
-			<key>Title</key>
-			<string>Disable tvOS Controller</string>
-			<key>Key</key>
-			<string>disableTvOSController</string>
-			<key>DefaultValue</key>
-			<false/>
-		</dict>
 	</array>
 </dict>
 </plist>

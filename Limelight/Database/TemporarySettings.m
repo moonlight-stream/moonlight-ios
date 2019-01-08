@@ -7,6 +7,7 @@
 //
 
 #import "TemporarySettings.h"
+#import "OnScreenControls.h"
 
 @implementation TemporarySettings
 
@@ -53,7 +54,7 @@
             self.width = [NSNumber numberWithInteger:1920];
             break;
     }
-    self.disableTvOSController = [[NSUserDefaults standardUserDefaults] boolForKey:@"disableTvOSController"];
+    self.onscreenControls = (NSInteger)OnScreenControlsLevelOff;
 #else
     self.bitrate = settings.bitrate;
     self.framerate = settings.framerate;
@@ -64,8 +65,8 @@
     self.enableHdr = settings.enableHdr;
     self.optimizeGames = settings.optimizeGames;
     self.multiController = settings.multiController;
-#endif
     self.onscreenControls = settings.onscreenControls;
+#endif
     self.uniqueId = settings.uniqueId;
     self.streamingRemotely = settings.streamingRemotely;
     
