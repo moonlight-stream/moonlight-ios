@@ -36,7 +36,7 @@
     self.playAudioOnPC = [[NSUserDefaults standardUserDefaults] boolForKey:@"audioOnPC"] || NO;
     self.enableHdr = [[NSUserDefaults standardUserDefaults] boolForKey:@"enableHdr"] || NO;
     self.optimizeGames = [[NSUserDefaults standardUserDefaults] boolForKey:@"optimizeGames"] || YES;
-    self.multiController = [[NSUserDefaults standardUserDefaults] boolForKey:@"multipleControllers"] || NO;
+    self.multiController = [[NSUserDefaults standardUserDefaults] boolForKey:@"multipleControllers"] || YES;
     
     NSInteger _screenSize = [[NSUserDefaults standardUserDefaults] integerForKey:@"streamResolution"];
     switch (_screenSize) {

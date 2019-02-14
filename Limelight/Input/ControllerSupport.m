@@ -394,11 +394,9 @@
         }
     }
     else {
-#if !TARGET_OS_TV
         // Some games don't deal with having controller reconnected
         // properly so always report controller 1 if not in MC mode
         mask = 0x1;
-#endif
     }
     
 #if TARGET_OS_IPHONE
