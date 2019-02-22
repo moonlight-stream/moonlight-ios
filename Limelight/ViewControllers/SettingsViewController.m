@@ -42,6 +42,8 @@ static const int bitrateTable[] = {
     100000
 };
 
+// add keyboard profile to settings
+
 -(int)getSliderValueForBitrate:(NSInteger)bitrate {
     int i;
     

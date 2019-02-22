@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3DC876C5221E85B30092845E /* KeyboardMovementProfile.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DC876C4221E85B30092845E /* KeyboardMovementProfile.m */; };
 		693B3A9B218638CD00982F7B /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 693B3A9A218638CD00982F7B /* Settings.bundle */; };
 		9832D1361BBCD5C50036EF48 /* TemporaryApp.m in Sources */ = {isa = PBXBuildFile; fileRef = 9832D1351BBCD5C50036EF48 /* TemporaryApp.m */; };
 		9865DC30213260B40005B9B9 /* libmoonlight-common-tv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FB1A68152132509400507771 /* libmoonlight-common-tv.a */; };
@@ -161,6 +162,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3DC876C3221E85B30092845E /* KeyboardMovementProfile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KeyboardMovementProfile.h; sourceTree = "<group>"; };
+		3DC876C4221E85B30092845E /* KeyboardMovementProfile.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KeyboardMovementProfile.m; sourceTree = "<group>"; };
 		693B3A9A218638CD00982F7B /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		98132E8C20BC9A62007A053F /* Moonlight v1.1.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Moonlight v1.1.xcdatamodel"; sourceTree = "<group>"; };
 		9832D1341BBCD5C50036EF48 /* TemporaryApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TemporaryApp.h; path = Database/TemporaryApp.h; sourceTree = "<group>"; };
@@ -558,6 +561,8 @@
 				FB1A674C2131E65900507771 /* KeyboardSupport.m */,
 				9897B6A0221260EF00966419 /* Controller.m */,
 				9897B6A32212610800966419 /* Controller.h */,
+				3DC876C3221E85B30092845E /* KeyboardMovementProfile.h */,
+				3DC876C4221E85B30092845E /* KeyboardMovementProfile.m */,
 			);
 			path = Input;
 			sourceTree = "<group>";
@@ -1061,6 +1066,7 @@
 				FB290D0719B2C406004C83CF /* Limelight.xcdatamodeld in Sources */,
 				FB1A674D2131E65900507771 /* KeyboardSupport.m in Sources */,
 				FB89463219F646E200339C8A /* VideoDecoderRenderer.m in Sources */,
+				3DC876C5221E85B30092845E /* KeyboardMovementProfile.m in Sources */,
 				FB290D0419B2C406004C83CF /* AppDelegate.m in Sources */,
 				FB9AFD401A7E127D00872C98 /* AppListResponse.m in Sources */,
 				FB89463419F646E200339C8A /* Utils.m in Sources */,

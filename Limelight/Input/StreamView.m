@@ -8,6 +8,7 @@
 
 #import "StreamView.h"
 #include <Limelight.h>
+#import "KeyboardMovementProfile.h"
 #import "OnScreenControls.h"
 #import "DataManager.h"
 #import "ControllerSupport.h"
@@ -17,6 +18,7 @@
     CGPoint touchLocation, originalLocation;
     BOOL touchMoved;
     OnScreenControls* onScreenControls;
+    KeyboardMovementProfile* keyboardMovementProfile;
     
     BOOL isInputingText;
     BOOL isDragging;
@@ -63,11 +65,18 @@
         originalLocation = touchLocation = [touch locationInView:self];
         touchMoved = false;
         if ([[event allTouches] count] == 1 && !isDragging) {
-            dragTimer = [NSTimer scheduledTimerWithTimeInterval:0.650
+            dragTimer = [NSTimer scheduledTimerWithTimeInterval:0.150
                                                      target:self
                                                    selector:@selector(onDragStart:)
                                                    userInfo:nil
                                                     repeats:NO];
+        // right click drag
+        } else if ([[event allTouches] count] == 2 && !isDragging) {
+            dragTimer = [NSTimer scheduledTimerWithTimeInterval:0.150
+                                                         target:self
+                                                       selector:@selector(onRightClickDragStart:)
+                                                       userInfo:nil
+                                                        repeats:NO];
         }
     }
 }
@@ -79,9 +88,16 @@
     }
 }
 
+- (void)onRightClickDragStart:(NSTimer*)timer {
+    if (!touchMoved && !isDragging){
+        isDragging = true;
+        LiSendMouseButtonEvent(BUTTON_ACTION_PRESS, BUTTON_RIGHT);
+    }
+}
+
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
     if (![onScreenControls handleTouchMovedEvent:touches]) {
-        if ([[event allTouches] count] == 1) {
+        if ([[event allTouches] count] == 1 || [[event allTouches] count] == 2) {
             UITouch *touch = [[event allTouches] anyObject];
             CGPoint currentLocation = [touch locationInView:self];
             
@@ -105,7 +121,8 @@
                     }
                 }
             }
-        } else if ([[event allTouches] count] == 2) {
+        }
+        /*else if ([[event allTouches] count] == 2) {
             CGPoint firstLocation = [[[[event allTouches] allObjects] objectAtIndex:0] locationInView:self];
             CGPoint secondLocation = [[[[event allTouches] allObjects] objectAtIndex:1] locationInView:self];
             
@@ -121,7 +138,7 @@
             }
             
             touchLocation = avgLocation;
-        }
+        }*/
     }
     
 }
@@ -155,13 +172,15 @@
                 }
             } else if ([[event allTouches] count]  == 2) {
                 dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-                    Log(LOG_D, @"Sending right mouse button press");
-                    
-                    LiSendMouseButtonEvent(BUTTON_ACTION_PRESS, BUTTON_RIGHT);
-                    
-                    // Wait 100 ms to simulate a real button press
-                    usleep(100 * 1000);
-                    
+                    if (!self->isDragging){
+                        Log(LOG_D, @"Sending right mouse button press");
+                        
+                        LiSendMouseButtonEvent(BUTTON_ACTION_PRESS, BUTTON_RIGHT);
+                        
+                        // Wait 100 ms to simulate a real button press
+                        usleep(100 * 1000);
+                    }
+                    self->isDragging = false;
                     LiSendMouseButtonEvent(BUTTON_ACTION_RELEASE, BUTTON_RIGHT);
                 });
             } else if ([[event allTouches] count]  == 1) {
@@ -245,10 +264,18 @@
 
 - (void)keyPressed:(UIKeyCommand *)cmd {
     struct KeyEvent event = [KeyboardSupport translateKeyEvent:[[cmd input] characterAtIndex:0] withModifierFlags:[cmd modifierFlags]];
-    [self sendLowLevelEvent:event];
+    if (!keyboardMovementProfile) keyboardMovementProfile = [[KeyboardMovementProfile alloc] initWithProfile:MovementProfileWasd];
+    if ([keyboardMovementProfile isToggable:event.keycode])
+        [self sendToggableLowLevelEvent:event delay:[keyboardMovementProfile delayForKeyCode:event.keycode] isDown:[keyboardMovementProfile keyPressState:event.keycode]];
+    else
+        [self sendLowLevelEvent:event delay:[keyboardMovementProfile delayForKeyCode:event.keycode]];
 }
 
 - (void)sendLowLevelEvent:(struct KeyEvent)event {
+    [self sendLowLevelEvent:event delay:50];
+}
+
+- (void)sendLowLevelEvent:(struct KeyEvent)event delay:(int)delay {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
         // When we want to send a modified key (like uppercase letters) we need to send the
         // modifier ("shift") seperately from the key itself.
@@ -256,11 +283,33 @@
             LiSendKeyboardEvent(event.modifierKeycode, KEY_ACTION_DOWN, event.modifier);
         }
         LiSendKeyboardEvent(event.keycode, KEY_ACTION_DOWN, event.modifier);
-        usleep(50 * 1000);
+        // figure out low level events optimization
+        usleep(delay * 1000);
         LiSendKeyboardEvent(event.keycode, KEY_ACTION_UP, event.modifier);
         if (event.modifier != 0) {
             LiSendKeyboardEvent(event.modifierKeycode, KEY_ACTION_UP, event.modifier);
         }
+    });
+}
+
+- (void)sendToggableLowLevelEvent:(struct KeyEvent)event delay:(int)delay isDown:(BOOL)isDown {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+        // When we want to send a modified key (like uppercase letters) we need to send the
+        // modifier ("shift") seperately from the key itself.
+        if (isDown) {
+            if (event.modifier != 0) {
+                LiSendKeyboardEvent(event.modifierKeycode, KEY_ACTION_DOWN, event.modifier);
+            }
+            LiSendKeyboardEvent(event.keycode, KEY_ACTION_DOWN, event.modifier);
+        } else {
+            LiSendKeyboardEvent(event.keycode, KEY_ACTION_UP, event.modifier);
+            if (event.modifier != 0) {
+                LiSendKeyboardEvent(event.modifierKeycode, KEY_ACTION_UP, event.modifier);
+            }
+        }
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self->keyboardMovementProfile toggleDownState:event.keycode];
+        });
     });
 }
 

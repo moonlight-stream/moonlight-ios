@@ -15,6 +15,7 @@
     self = [self init];
     
     self.parent = settings;
+    // add movement profile to settings
     
 #if TARGET_OS_TV
     NSInteger _bitrate = [[NSUserDefaults standardUserDefaults] integerForKey:@"bitrate"];
