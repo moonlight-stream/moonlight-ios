@@ -111,6 +111,7 @@
                                     <segment title="360p"/>
                                     <segment title="720p"/>
                                     <segment title="1080p"/>
+                                    <segment title="4K"/>
                                 </segments>
                                 <color key="tintColor" red="0.6716768741607666" green="0.61711704730987549" blue="0.99902987480163574" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </segmentedControl>

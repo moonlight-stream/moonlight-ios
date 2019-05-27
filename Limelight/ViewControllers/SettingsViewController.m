@@ -134,6 +134,9 @@ static const int bitrateTable[] = {
         case 1080:
             resolution = 2;
             break;
+        case 2160:
+            resolution = 3;
+            break;
     }
     
     // Only show the 120 FPS option if we have a > 60-ish Hz display
@@ -228,7 +231,7 @@ static const int bitrateTable[] = {
 }
 
 - (NSInteger) getChosenStreamHeight {
-    const int resolutionTable[] = { 360, 720, 1080 };
+    const int resolutionTable[] = { 360, 720, 1080, 2160 };
     return resolutionTable[[self.resolutionSelector selectedSegmentIndex]];
 }
 
