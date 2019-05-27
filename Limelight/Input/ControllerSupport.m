@@ -46,6 +46,7 @@
 
 -(void) rumbleController: (Controller*)controller
 {
+#if 0
     // Only vibrate if the amplitude is large enough
     if (controller.lowFreqMotor > 0x5000 || controller.highFreqMotor > 0x5000) {
         // If the gamepad is nil (on-screen controls) or it's attached to the device,
@@ -54,6 +55,7 @@
             AudioServicesPlayAlertSound(kSystemSoundID_Vibrate);
         }
     }
+#endif
 }
 
 -(void) rumble:(unsigned short)controllerNumber lowFreqMotor:(unsigned short)lowFreqMotor highFreqMotor:(unsigned short)highFreqMotor
