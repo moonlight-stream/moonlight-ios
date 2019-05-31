@@ -199,7 +199,7 @@ static const int bitrateTable[] = {
     }
     
     // We should always be exactly on a slider position with default bitrates
-    _bitrate = defaultBitrate;
+    _bitrate = MIN(defaultBitrate, 100000);
     assert(bitrateTable[[self getSliderValueForBitrate:_bitrate]] == _bitrate);
     [self.bitrateSlider setValue:[self getSliderValueForBitrate:_bitrate] animated:YES];
     
