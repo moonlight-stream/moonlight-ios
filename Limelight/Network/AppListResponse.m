@@ -102,6 +102,38 @@ static const char* TAG_HDR_SUPPORTED = "IsHdrSupported";
     }
     
     xmlFreeDoc(docPtr);
+    
+    // APP STORE REVIEW COMPLIANCE
+    //
+    // Remove default Steam entry from the app list to comply with Apple App Store Guideline 4.2.7d:
+    //
+    // The UI appearing on the client does not resemble an iOS or App Store view, does not provide a store-like interface,
+    // or include the ability to browse, select, or purchase software not already owned or licensed by the user.
+    //
+    // However, if the user manually adds Steam themselves, then we will display it.
+    TemporaryApp* officialSteamApp = nil;
+    TemporaryApp* manuallyAddedSteamApp = nil;
+    for (TemporaryApp* app in _appList) {
+        // The official Steam app is marked as HDR supported, while manually added ones are not.
+        if ([app.name isEqualToString:@"Steam"] && app.hdrSupported) {
+            officialSteamApp = app;
+        }
+        else if ([app.name containsString:@"steam"] || [app.name containsString:@"Steam"]) {
+            manuallyAddedSteamApp = app;
+        }
+    }
+    
+    // To be safe, don't do anything if we didn't find an HDR-enabled Steam app.
+    if (officialSteamApp != nil) {
+        // If we didn't find a manually added Steam app, remove the official one to
+        // comply with the App Store guidelines.
+        if (manuallyAddedSteamApp == nil) {
+            [_appList removeObject:officialSteamApp];
+        }
+        else {
+            [_appList removeObject:manuallyAddedSteamApp];
+        }
+    }
 }
 
 - (NSSet*) getAppList {
