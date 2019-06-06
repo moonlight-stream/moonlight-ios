@@ -143,7 +143,7 @@ static const int bitrateTable[] = {
     
     // Only show the 120 FPS option if we have a > 60-ish Hz display
     bool enable120Fps = false;
-    if (@available(iOS 10.3, *)) {
+    if (@available(iOS 10.3, tvOS 10.3, *)) {
         if ([UIScreen mainScreen].maximumFramesPerSecond > 62) {
             enable120Fps = true;
         }
@@ -152,8 +152,20 @@ static const int bitrateTable[] = {
         [self.framerateSelector removeSegmentAtIndex:2 animated:NO];
     }
     
+    // Only show the 4K option for "recent" devices. We'll judge that by whether
+    // they support HEVC decoding (A9 or later).
+    if (@available(iOS 11.0, tvOS 11.0, *)) {
+        if (!VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC)) {
+            [self.resolutionSelector removeSegmentAtIndex:3 animated:NO];
+        }
+    }
+    else {
+        [self.resolutionSelector removeSegmentAtIndex:3 animated:NO];
+    }
+    
     // Disable the HEVC selector if HEVC is not supported by the hardware
-    // or the version of iOS.
+    // or the version of iOS. See comment in Connection.m for reasoning behind
+    // the iOS 11.3 check.
     if (@available(iOS 11.3, tvOS 11.3, *)) {
         if (VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC)) {
             [self.hevcSelector setSelectedSegmentIndex:currentSettings.useHevc ? 1 : 0];
