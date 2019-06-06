@@ -10,6 +10,8 @@
 #import "TemporarySettings.h"
 #import "DataManager.h"
 
+#import <VideoToolbox/VideoToolbox.h>
+
 @implementation SettingsViewController {
     NSInteger _bitrate;
     Boolean _adjustedForSafeArea;
@@ -150,10 +152,27 @@ static const int bitrateTable[] = {
         [self.framerateSelector removeSegmentAtIndex:2 animated:NO];
     }
     
+    // Disable the HEVC selector if HEVC is not supported by the hardware
+    // or the version of iOS.
+    if (@available(iOS 11.3, tvOS 11.3, *)) {
+        if (VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC)) {
+            [self.hevcSelector setSelectedSegmentIndex:currentSettings.useHevc ? 1 : 0];
+        }
+        else {
+            [self.hevcSelector removeAllSegments];
+            [self.hevcSelector insertSegmentWithTitle:@"Unsupported on this device" atIndex:0 animated:NO];
+            [self.hevcSelector setEnabled:NO];
+        }
+    }
+    else {
+        [self.hevcSelector removeAllSegments];
+        [self.hevcSelector insertSegmentWithTitle:@"Requires iOS 11.3 or later" atIndex:0 animated:NO];
+        [self.hevcSelector setEnabled:NO];
+    }
+    
     [self.optimizeSettingsSelector setSelectedSegmentIndex:currentSettings.optimizeGames ? 1 : 0];
     [self.multiControllerSelector setSelectedSegmentIndex:currentSettings.multiController ? 1 : 0];
     [self.audioOnPCSelector setSelectedSegmentIndex:currentSettings.playAudioOnPC ? 1 : 0];
-    [self.hevcSelector setSelectedSegmentIndex:currentSettings.useHevc ? 1 : 0];
     NSInteger onscreenControls = [currentSettings.onscreenControls integerValue];
     [self.resolutionSelector setSelectedSegmentIndex:resolution];
     [self.resolutionSelector addTarget:self action:@selector(newResolutionFpsChosen) forControlEvents:UIControlEventValueChanged];

@@ -327,7 +327,7 @@ void ClRumble(unsigned short controllerNumber, unsigned short lowFreqMotor, unsi
     // Additionally, iPhone X had a bug which would cause video
     // to freeze after a few minutes with HEVC prior to iOS 11.3.
     // As a result, we will only use HEVC on iOS 11.3 or later.
-    if (@available(iOS 11.3, *)) {
+    if (@available(iOS 11.3, tvOS 11.3, *)) {
         _streamConfig.supportsHevc = config.allowHevc && VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC);
     }
 #else
