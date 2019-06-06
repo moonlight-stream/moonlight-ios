@@ -211,21 +211,25 @@
 -(void) registerControllerCallbacks:(GCController*) controller
 {
     if (controller != NULL) {
-        controller.controllerPausedHandler = ^(GCController *controller) {
-            Controller* limeController = [self->_controllers objectForKey:[NSNumber numberWithInteger:controller.playerIndex]];
-            
-            // Get off the main thread
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-                [self setButtonFlag:limeController flags:PLAY_FLAG];
-                [self updateFinished:limeController];
+        // On iOS 13, we want to use the new buttonMenu property which lets users hold down Start.
+        // On prior versions, we must use the controllerPausedHandler.
+        if (![controller.extendedGamepad respondsToSelector:@selector(buttonMenu)]) {
+            controller.controllerPausedHandler = ^(GCController *controller) {
+                Controller* limeController = [self->_controllers objectForKey:[NSNumber numberWithInteger:controller.playerIndex]];
                 
-                // Pause for 100 ms
-                usleep(100 * 1000);
-                
-                [self clearButtonFlag:limeController flags:PLAY_FLAG];
-                [self updateFinished:limeController];
-            });
-        };
+                // Get off the main thread
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+                    [self setButtonFlag:limeController flags:PLAY_FLAG];
+                    [self updateFinished:limeController];
+                    
+                    // Pause for 100 ms
+                    usleep(100 * 1000);
+                    
+                    [self clearButtonFlag:limeController flags:PLAY_FLAG];
+                    [self updateFinished:limeController];
+                });
+            };
+        }
         
         if (controller.extendedGamepad != NULL) {
             controller.extendedGamepad.valueChangedHandler = ^(GCExtendedGamepad *gamepad, GCControllerElement *element) {
@@ -254,6 +258,25 @@
                     }
                     if (gamepad.rightThumbstickButton != nil) {
                         UPDATE_BUTTON_FLAG(limeController, RS_CLK_FLAG, gamepad.rightThumbstickButton.pressed);
+                    }
+                }
+                
+                // Until the iOS 13 SDK is released, we must use performSelector: and respondsToSelector:
+                // to exercise the new buttonMenu and buttonOptions properties.
+                if (@available(iOS 13.0, tvOS 13.0, *)) {
+                    if ([gamepad respondsToSelector:@selector(buttonMenu)]) {
+                        GCControllerButtonInput* menuButton = [gamepad performSelector:@selector(buttonMenu)];
+                        
+                        // Menu button is mandatory, so no need to check for nil
+                        UPDATE_BUTTON_FLAG(limeController, PLAY_FLAG, menuButton.pressed);
+                    }
+                    if ([gamepad respondsToSelector:@selector(buttonOptions)]) {
+                        GCControllerButtonInput* optionsButton = [gamepad performSelector:@selector(buttonOptions)];
+                        
+                        // Options button is optional (only present on Xbox One S and PS4 gamepads)
+                        if (optionsButton != nil) {
+                            UPDATE_BUTTON_FLAG(limeController, BACK_FLAG, optionsButton.pressed);
+                        }
                     }
                 }
                 
@@ -316,7 +339,23 @@
                 if (@available(iOS 12.1, tvOS 12.1, *)) {
                     if (controller.extendedGamepad.leftThumbstickButton != nil &&
                         controller.extendedGamepad.rightThumbstickButton != nil) {
-                        level = OnScreenControlsLevelAutoGCExtendedGamepadWithStickButtons;
+                        GCControllerButtonInput* optionsButton = nil;
+                        
+                        if (@available(iOS 13.0, tvOS 13.0, *)) {
+                            // TODO: Update when iOS 13 SDK is officially released
+                            if ([controller.extendedGamepad respondsToSelector:@selector(buttonOptions)]) {
+                                optionsButton = [controller.extendedGamepad performSelector:@selector(buttonOptions)];
+                            }
+                        }
+                        
+                        if (optionsButton != nil) {
+                            // Has L3/R3 and Select, so we can show nothing :)
+                            level = OnScreenControlsLevelOff;
+                        }
+                        else {
+                            // Has L3/R3 but no Select button
+                            level = OnScreenControlsLevelAutoGCExtendedGamepadWithStickButtons;
+                        }
                     }
                 }
                 break;
