@@ -70,7 +70,12 @@ static NSString* NV_SERVICE_TYPE = @"_nvstream._tcp";
         inet_ntop(addr->sa_family, &((struct sockaddr_in*)addr)->sin_addr, addrStr, sizeof(addrStr));
     }
     else {
-        inet_ntop(addr->sa_family, &((struct sockaddr_in6*)addr)->sin6_addr, addrStr, sizeof(addrStr));
+        struct sockaddr_in6* sin6 = (struct sockaddr_in6*)addr;
+        inet_ntop(addr->sa_family, &sin6->sin6_addr, addrStr, sizeof(addrStr));
+        if (sin6->sin6_scope_id != 0) {
+            // Link-local addresses with scope IDs are special
+            return [NSString stringWithFormat: @"%s%%%u", addrStr, sin6->sin6_scope_id];
+        }
     }
     return [NSString stringWithFormat: @"%s", addrStr];
 }
