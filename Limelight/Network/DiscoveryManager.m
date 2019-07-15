@@ -130,6 +130,9 @@
         if (host.localAddress != nil) {
             existingHost.localAddress = host.localAddress;
         }
+        if (host.ipv6Address != nil) {
+            existingHost.ipv6Address = host.ipv6Address;
+        }
         if (host.externalAddress != nil) {
             existingHost.externalAddress = host.externalAddress;
         }

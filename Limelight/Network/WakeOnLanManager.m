@@ -33,7 +33,7 @@ static const int ports[numPorts] = {7, 9, 47998, 47999, 48000};
 + (void) wakeHost:(TemporaryHost*)host {
     NSData* wolPayload = [WakeOnLanManager createPayload:host];
     
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 5; i++) {
         const char* address;
         struct addrinfo hints, *res, *curr;
         
@@ -44,7 +44,9 @@ static const int ports[numPorts] = {7, 9, 47998, 47999, 48000};
             address = [host.externalAddress UTF8String];
         } else if (i == 2 && host.address != nil) {
             address = [host.address UTF8String];
-        } else if (i == 3) {
+        } else if (i == 3 && host.ipv6Address != nil) {
+            address = [host.ipv6Address UTF8String];
+        } else if (i == 4) {
             address = "255.255.255.255";
         } else {
             // Requested address wasn't present

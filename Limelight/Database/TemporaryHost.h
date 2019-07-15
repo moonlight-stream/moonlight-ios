@@ -20,6 +20,7 @@
 @property (nonatomic, nullable, retain) NSString *address;
 @property (nonatomic, nullable, retain) NSString *externalAddress;
 @property (nonatomic, nullable, retain) NSString *localAddress;
+@property (nonatomic, nullable, retain) NSString *ipv6Address;
 @property (nonatomic, nullable, retain) NSString *mac;
 @property (nonatomic)         int serverCodecModeSupport;
 

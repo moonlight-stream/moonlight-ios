@@ -26,6 +26,7 @@
     self.address = host.address;
     self.externalAddress = host.externalAddress;
     self.localAddress = host.localAddress;
+    self.ipv6Address = host.ipv6Address;
     self.mac = host.mac;
     self.name = host.name;
     self.uuid = host.uuid;
@@ -59,6 +60,9 @@
     }
     if (self.localAddress != nil) {
         parentHost.localAddress = self.localAddress;
+    }
+    if (self.ipv6Address != nil) {
+        parentHost.ipv6Address = self.ipv6Address;
     }
     if (self.mac != nil) {
         parentHost.mac = self.mac;

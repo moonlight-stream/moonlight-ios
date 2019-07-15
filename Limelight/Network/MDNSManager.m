@@ -63,10 +63,136 @@ static NSString* NV_SERVICE_TYPE = @"_nvstream._tcp";
     [mDNSBrowser stop];
 }
 
++ (NSString*)sockAddrToString:(NSData*)addrData {
+    char addrStr[INET6_ADDRSTRLEN];
+    struct sockaddr* addr = (struct sockaddr*)[addrData bytes];
+    if (addr->sa_family == AF_INET) {
+        inet_ntop(addr->sa_family, &((struct sockaddr_in*)addr)->sin_addr, addrStr, sizeof(addrStr));
+    }
+    else {
+        inet_ntop(addr->sa_family, &((struct sockaddr_in6*)addr)->sin6_addr, addrStr, sizeof(addrStr));
+    }
+    return [NSString stringWithFormat: @"%s", addrStr];
+}
+
++ (BOOL)isAddress:(uint8_t*)address inSubnet:(uint8_t*)subnet netmask:(int)bits {
+    for (int i = 0; i < bits; i++) {
+        uint8_t mask = 1 << (i % 8);
+        if ((address[i / 8] & mask) != (subnet[i / 8] & mask)) {
+            return NO;
+        }
+    }
+    return YES;
+}
+
++ (BOOL)isLocalIpv6Address:(NSData*)addrData {
+    struct sockaddr_in6* sin6 = (struct sockaddr_in6*)[addrData bytes];
+    if (sin6->sin6_family != AF_INET6) {
+        return NO;
+    }
+    
+    uint8_t* addrBytes = sin6->sin6_addr.s6_addr;
+    uint8_t prefix[2];
+    
+    // fe80::/10
+    prefix[0] = 0xfe;
+    prefix[1] = 0x80;
+    if ([MDNSManager isAddress:addrBytes inSubnet:prefix netmask:10]) {
+        // Link-local
+        return YES;
+    }
+    
+    // fec0::/10
+    prefix[0] = 0xfe;
+    prefix[1] = 0xc0;
+    if ([MDNSManager isAddress:addrBytes inSubnet:prefix netmask:10]) {
+        // Site local
+        return YES;
+    }
+    
+    // fc00::/7
+    prefix[0] = 0xfc;
+    prefix[1] = 0x00;
+    if ([MDNSManager isAddress:addrBytes inSubnet:prefix netmask:7]) {
+        // ULA
+        return YES;
+    }
+    
+    return NO;
+}
+
++ (NSString*)getBestIpv6Address:(NSArray<NSData*>*)addresses {
+    for (NSData* addrData in addresses) {
+        struct sockaddr_in6* sin6 = (struct sockaddr_in6*)[addrData bytes];
+        if (sin6->sin6_family != AF_INET6) {
+            continue;
+        }
+        
+        if ([MDNSManager isLocalIpv6Address:addrData]) {
+            // Skip non-global addresses
+            continue;
+        }
+        
+        uint8_t* addrBytes = sin6->sin6_addr.s6_addr;
+        uint8_t prefix[2];
+        
+        // 2002::/16
+        prefix[0] = 0x20;
+        prefix[1] = 0x02;
+        if ([MDNSManager isAddress:addrBytes inSubnet:prefix netmask:16]) {
+            Log(LOG_I, @"Ignoring 6to4 address: %@", [MDNSManager sockAddrToString:addrData]);
+            continue;
+        }
+        
+        // 2001::/32
+        prefix[0] = 0x20;
+        prefix[1] = 0x01;
+        if ([MDNSManager isAddress:addrBytes inSubnet:prefix netmask:32]) {
+            Log(LOG_I, @"Ignoring Teredo address: %@", [MDNSManager sockAddrToString:addrData]);
+            continue;
+        }
+        
+        return [MDNSManager sockAddrToString:addrData];
+    }
+    
+    return nil;
+}
+
 - (void)netServiceDidResolveAddress:(NSNetService *)service {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        Log(LOG_D, @"Resolved address: %@ -> %@", service, service.hostName);
+        NSArray<NSData*>* addresses = [service addresses];
+        
+        for (NSData* addrData in addresses) {
+            Log(LOG_I, @"Resolved address: %@ -> %@", [service hostName], [MDNSManager sockAddrToString: addrData]);
+        }
+        
         TemporaryHost* host = [[TemporaryHost alloc] init];
+        
+        // First, look for an IPv4 record for the local address
+        for (NSData* addrData in addresses) {
+            struct sockaddr_in* sin = (struct sockaddr_in*)[addrData bytes];
+            if (sin->sin_family != AF_INET) {
+                continue;
+            }
+            
+            host.localAddress = [MDNSManager sockAddrToString:addrData];
+            Log(LOG_I, @"Local address chosen: %@ -> %@", [service hostName], host.localAddress);
+            break;
+        }
+        
+        if (host.localAddress == nil) {
+            // If we didn't find an IPv4 record, look for a local IPv6 record
+            for (NSData* addrData in addresses) {
+                if ([MDNSManager isLocalIpv6Address:addrData]) {
+                    host.localAddress = [MDNSManager sockAddrToString:addrData];
+                    Log(LOG_I, @"Local address chosen: %@ -> %@", [service hostName], host.localAddress);
+                    break;
+                }
+            }
+        }
+        
+        host.ipv6Address = [MDNSManager getBestIpv6Address:addresses];
+        Log(LOG_I, @"IPv6 address chosen: %@ -> %@", [service hostName], host.ipv6Address);
         
         // Since we discovered this host over mDNS, we know we're on the same network
         // as the PC and we can use our current WAN address as a likely candidate
@@ -82,7 +208,7 @@ static NSString* NV_SERVICE_TYPE = @"_nvstream._tcp";
             Log(LOG_E, @"STUN failed to get WAN address: %d", err);
         }
         
-        host.activeAddress = host.localAddress = service.hostName;
+        host.activeAddress = host.localAddress;
         host.name = service.hostName;
         [self.callback updateHost:host];
     });

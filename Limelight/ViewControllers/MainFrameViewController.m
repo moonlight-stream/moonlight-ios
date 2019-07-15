@@ -861,6 +861,9 @@ static NSMutableSet* hostList;
             if (host.activeAddress == nil) {
                 host.activeAddress = host.address;
             }
+            if (host.activeAddress == nil) {
+                host.activeAddress = host.ipv6Address;
+            }
         }
     }
 }
@@ -869,7 +872,7 @@ static NSMutableSet* hostList;
     dispatch_async(dispatch_get_main_queue(), ^{
         Log(LOG_D, @"New host list:");
         for (TemporaryHost* host in hosts) {
-            Log(LOG_D, @"Host: \n{\n\t name:%@ \n\t address:%@ \n\t localAddress:%@ \n\t externalAddress:%@ \n\t uuid:%@ \n\t mac:%@ \n\t pairState:%d \n\t online:%d \n\t activeAddress:%@ \n}", host.name, host.address, host.localAddress, host.externalAddress, host.uuid, host.mac, host.pairState, host.online, host.activeAddress);
+            Log(LOG_D, @"Host: \n{\n\t name:%@ \n\t address:%@ \n\t localAddress:%@ \n\t externalAddress:%@ \n\t ipv6Address:%@ \n\t uuid:%@ \n\t mac:%@ \n\t pairState:%d \n\t online:%d \n\t activeAddress:%@ \n}", host.name, host.address, host.localAddress, host.externalAddress, host.ipv6Address, host.uuid, host.mac, host.pairState, host.online, host.activeAddress);
         }
         @synchronized(hostList) {
             [hostList removeAllObjects];
