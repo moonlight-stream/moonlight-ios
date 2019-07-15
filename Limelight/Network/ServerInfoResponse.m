@@ -19,10 +19,15 @@
 
 - (void) populateHost:(TemporaryHost*)host {
     host.name = [[self getStringTag:TAG_HOSTNAME] trim];
-    host.localAddress = [[self getStringTag:TAG_LOCAL_IP] trim];
     host.uuid = [[self getStringTag:TAG_UNIQUE_ID] trim];
     host.mac = [[self getStringTag:TAG_MAC_ADDRESS] trim];
     host.currentGame = [[self getStringTag:TAG_CURRENT_GAME] trim];
+    
+    // We might get an IPv4 loopback address if we're using GS IPv6 Forwarder
+    NSString *lanAddr = [[self getStringTag:TAG_LOCAL_IP] trim];
+    if (![lanAddr hasPrefix:@"127."]) {
+        host.localAddress = lanAddr;
+    }
     
     // Modern GFE versions don't actually give us a WAN address anymore
     // so we leave the one that we populated from mDNS discovery via STUN.

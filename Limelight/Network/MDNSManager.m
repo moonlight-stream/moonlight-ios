@@ -175,6 +175,21 @@ static NSString* NV_SERVICE_TYPE = @"_nvstream._tcp";
                 continue;
             }
             
+            // Since we discovered this host over IPv4 mDNS, we know we're on the same network
+            // as the PC and we can use our current WAN address as a likely candidate
+            // for our PC's external address.
+            struct in_addr wanAddr;
+            int err = LiFindExternalAddressIP4("stun.moonlight-stream.org", 3478, &wanAddr.s_addr);
+            if (err == 0) {
+                char addrStr[INET_ADDRSTRLEN];
+                inet_ntop(AF_INET, &wanAddr, addrStr, sizeof(addrStr));
+                host.externalAddress = [NSString stringWithFormat: @"%s", addrStr];
+                Log(LOG_I, @"External IPv4 address (STUN): %@ -> %@", [service hostName], host.externalAddress);
+            }
+            else {
+                Log(LOG_E, @"STUN failed to get WAN address: %d", err);
+            }
+            
             host.localAddress = [MDNSManager sockAddrToString:addrData];
             Log(LOG_I, @"Local address chosen: %@ -> %@", [service hostName], host.localAddress);
             break;
@@ -193,20 +208,6 @@ static NSString* NV_SERVICE_TYPE = @"_nvstream._tcp";
         
         host.ipv6Address = [MDNSManager getBestIpv6Address:addresses];
         Log(LOG_I, @"IPv6 address chosen: %@ -> %@", [service hostName], host.ipv6Address);
-        
-        // Since we discovered this host over mDNS, we know we're on the same network
-        // as the PC and we can use our current WAN address as a likely candidate
-        // for our PC's external address.
-        struct in_addr wanAddr;
-        int err = LiFindExternalAddressIP4("stun.moonlight-stream.org", 3478, &wanAddr.s_addr);
-        if (err == 0) {
-            char addrStr[INET_ADDRSTRLEN];
-            inet_ntop(AF_INET, &wanAddr, addrStr, sizeof(addrStr));
-            host.externalAddress = [NSString stringWithFormat: @"%s", addrStr];
-        }
-        else {
-            Log(LOG_E, @"STUN failed to get WAN address: %d", err);
-        }
         
         host.activeAddress = host.localAddress;
         host.name = service.hostName;
