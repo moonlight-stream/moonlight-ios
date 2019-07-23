@@ -238,6 +238,11 @@ void ClRumble(unsigned short controllerNumber, unsigned short lowFreqMotor, unsi
     [_callbacks rumble:controllerNumber lowFreqMotor:lowFreqMotor highFreqMotor:highFreqMotor];
 }
 
+void ClConnectionStatusUpdate(int status)
+{
+    [_callbacks connectionStatusUpdate:status];
+}
+
 -(void) terminate
 {
     // Interrupt any action blocking LiStartConnection(). This is
@@ -369,6 +374,7 @@ void ClRumble(unsigned short controllerNumber, unsigned short lowFreqMotor, unsi
     _clCallbacks.connectionTerminated = ClConnectionTerminated;
     _clCallbacks.logMessage = ClLogMessage;
     _clCallbacks.rumble = ClRumble;
+    _clCallbacks.connectionStatusUpdate = ClConnectionStatusUpdate;
 
     return self;
 }

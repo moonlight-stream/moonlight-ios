@@ -15,6 +15,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <Limelight.h>
 
 @implementation StreamFrameViewController {
     ControllerSupport *_controllerSupport;
@@ -22,6 +23,7 @@
     NSTimer *_inactivityTimer;
     UITapGestureRecognizer *_menuGestureRecognizer;
     UITapGestureRecognizer *_menuDoubleTapGestureRecognizer;
+    UITextView *_overlayView;
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -115,6 +117,31 @@
             _inactivityTimer = nil;
         }
         [[NSNotificationCenter defaultCenter] removeObserver:self];
+    }
+}
+
+- (void)updateOverlayText:(NSString*)text {
+    if (_overlayView == nil) {
+        _overlayView = [[UITextView alloc] init];
+        [_overlayView setEditable:NO];
+        [_overlayView setSelectable:NO];
+        [_overlayView setScrollEnabled:NO];
+        [_overlayView setTextAlignment:NSTextAlignmentCenter];
+        [_overlayView setTextColor:[OSColor lightGrayColor]];
+        [_overlayView setBackgroundColor:[OSColor blackColor]];
+        [_overlayView setFont:[UIFont systemFontOfSize:12]];
+        [_overlayView setAlpha:0.5];
+        [self.view addSubview:_overlayView];
+    }
+    
+    if (text != nil) {
+        [_overlayView setText:text];
+        [_overlayView sizeToFit];
+        [_overlayView setCenter:CGPointMake(self.view.frame.size.width / 2, _overlayView.frame.size.height / 2)];
+        [_overlayView setHidden:NO];
+    }
+    else {
+        [_overlayView setHidden:YES];
     }
 }
 
@@ -262,6 +289,27 @@
     Log(LOG_I, @"Rumble on gamepad %d: %04x %04x", controllerNumber, lowFreqMotor, highFreqMotor);
     
     [_controllerSupport rumble:controllerNumber lowFreqMotor:lowFreqMotor highFreqMotor:highFreqMotor];
+}
+
+- (void)connectionStatusUpdate:(int)status {
+    Log(LOG_W, @"Connection status update: %d", status);
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        switch (status) {
+            case CONN_STATUS_OKAY:
+                [self updateOverlayText:nil];
+                break;
+                
+            case CONN_STATUS_POOR:
+                if (self->_streamConfig.bitRate > 5000) {
+                    [self updateOverlayText:@"Slow connection to PC\nReduce your bitrate"];
+                }
+                else {
+                    [self updateOverlayText:@"Poor connection to PC"];
+                }
+                break;
+        }
+    });
 }
 
 - (void)didReceiveMemoryWarning

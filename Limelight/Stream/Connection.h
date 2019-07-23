@@ -18,6 +18,7 @@
 - (void) stageFailed:(const char*)stageName withError:(long)errorCode;
 - (void) launchFailed:(NSString*)message;
 - (void) rumble:(unsigned short)controllerNumber lowFreqMotor:(unsigned short)lowFreqMotor highFreqMotor:(unsigned short)highFreqMotor;
+- (void) connectionStatusUpdate:(int)status;
 
 @end
 
