@@ -22,7 +22,6 @@
 		98CFB82F1CAD481B0048EF74 /* libmoonlight-common.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98AB2E841CAD46840089BB98 /* libmoonlight-common.a */; };
 		98D5856D1C0EA79600F6CC00 /* TemporaryHost.m in Sources */ = {isa = PBXBuildFile; fileRef = 98D5856C1C0EA79600F6CC00 /* TemporaryHost.m */; };
 		98D585701C0ED0E800F6CC00 /* TemporarySettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 98D5856F1C0ED0E800F6CC00 /* TemporarySettings.m */; };
-		D46A73AD1CBC7D090039F1EE /* ControllerUnitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46A73AC1CBC7D090039F1EE /* ControllerUnitTests.swift */; };
 		DC1F5A07206436B20037755F /* ConnectionHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = DC1F5A06206436B20037755F /* ConnectionHelper.m */; };
 		FB1A674D2131E65900507771 /* KeyboardSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = FB1A674C2131E65900507771 /* KeyboardSupport.m */; };
 		FB1A67602132419700507771 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FB1A675E2132419700507771 /* Main.storyboard */; };
@@ -137,13 +136,6 @@
 			remoteGlobalIDString = FB290E2D19B37A4E004C83CF;
 			remoteInfo = "moonlight-common";
 		};
-		D46A73A51CBC7CB60039F1EE /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = FB290CE619B2C406004C83CF /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = FB290CED19B2C406004C83CF;
-			remoteInfo = Moonlight;
-		};
 		FB1A68142132509400507771 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 98AB2E7F1CAD46830089BB98 /* moonlight-common.xcodeproj */;
@@ -178,10 +170,6 @@
 		98D5856C1C0EA79600F6CC00 /* TemporaryHost.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TemporaryHost.m; path = Database/TemporaryHost.m; sourceTree = "<group>"; };
 		98D5856E1C0ED0E800F6CC00 /* TemporarySettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TemporarySettings.h; path = Database/TemporarySettings.h; sourceTree = "<group>"; };
 		98D5856F1C0ED0E800F6CC00 /* TemporarySettings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TemporarySettings.m; path = Database/TemporarySettings.m; sourceTree = "<group>"; };
-		D46A73A01CBC7CB60039F1EE /* MoonlightUnitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MoonlightUnitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		D46A73A41CBC7CB60039F1EE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		D46A73AB1CBC7D080039F1EE /* MoonlightUnitTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MoonlightUnitTests-Bridging-Header.h"; sourceTree = "<group>"; };
-		D46A73AC1CBC7D090039F1EE /* ControllerUnitTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ControllerUnitTests.swift; path = Input/ControllerUnitTests.swift; sourceTree = "<group>"; };
 		D4746EEA1CBC740C006FB401 /* Moonlight-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "Moonlight-Bridging-Header.h"; path = "Input/Moonlight-Bridging-Header.h"; sourceTree = "<group>"; };
 		DC1F5A05206436B10037755F /* ConnectionHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionHelper.h; sourceTree = "<group>"; };
 		DC1F5A06206436B20037755F /* ConnectionHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionHelper.m; sourceTree = "<group>"; };
@@ -370,13 +358,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		D46A739D1CBC7CB60039F1EE /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		FB1A67502132419700507771 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -420,24 +401,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		D46A73A11CBC7CB60039F1EE /* MoonlightUnitTests */ = {
-			isa = PBXGroup;
-			children = (
-				D46A73AB1CBC7D080039F1EE /* MoonlightUnitTests-Bridging-Header.h */,
-				D46A73AA1CBC7CEF0039F1EE /* Input */,
-				D46A73A41CBC7CB60039F1EE /* Info.plist */,
-			);
-			path = MoonlightUnitTests;
-			sourceTree = "<group>";
-		};
-		D46A73AA1CBC7CEF0039F1EE /* Input */ = {
-			isa = PBXGroup;
-			children = (
-				D46A73AC1CBC7D090039F1EE /* ControllerUnitTests.swift */,
-			);
-			name = Input;
-			sourceTree = "<group>";
-		};
 		FB1A67542132419700507771 /* Moonlight TV */ = {
 			isa = PBXGroup;
 			children = (
@@ -455,7 +418,6 @@
 			children = (
 				98AB2E7F1CAD46830089BB98 /* moonlight-common.xcodeproj */,
 				FB290CF919B2C406004C83CF /* Moonlight */,
-				D46A73A11CBC7CB60039F1EE /* MoonlightUnitTests */,
 				FB1A67542132419700507771 /* Moonlight TV */,
 				FB290CF019B2C406004C83CF /* Frameworks */,
 				FB290CEF19B2C406004C83CF /* Products */,
@@ -466,7 +428,6 @@
 			isa = PBXGroup;
 			children = (
 				FB290CEE19B2C406004C83CF /* Moonlight.app */,
-				D46A73A01CBC7CB60039F1EE /* MoonlightUnitTests.xctest */,
 				FB1A67532132419700507771 /* Moonlight TV.app */,
 			);
 			name = Products;
@@ -836,24 +797,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		D46A739F1CBC7CB60039F1EE /* MoonlightUnitTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = D46A73A91CBC7CB60039F1EE /* Build configuration list for PBXNativeTarget "MoonlightUnitTests" */;
-			buildPhases = (
-				D46A739C1CBC7CB60039F1EE /* Sources */,
-				D46A739D1CBC7CB60039F1EE /* Frameworks */,
-				D46A739E1CBC7CB60039F1EE /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				D46A73A61CBC7CB60039F1EE /* PBXTargetDependency */,
-			);
-			name = MoonlightUnitTests;
-			productName = MoonlightUnitTests;
-			productReference = D46A73A01CBC7CB60039F1EE /* MoonlightUnitTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 		FB1A67522132419700507771 /* Moonlight TV */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = FB1A67682132419A00507771 /* Build configuration list for PBXNativeTarget "Moonlight TV" */;
@@ -900,11 +843,6 @@
 				LastUpgradeCheck = 1010;
 				ORGANIZATIONNAME = "Moonlight Game Streaming Project";
 				TargetAttributes = {
-					D46A739F1CBC7CB60039F1EE = {
-						CreatedOnToolsVersion = 7.3;
-						LastSwiftMigration = 0920;
-						TestTargetID = FB290CED19B2C406004C83CF;
-					};
 					FB1A67522132419700507771 = {
 						CreatedOnToolsVersion = 9.4.1;
 						LastSwiftMigration = 1010;
@@ -942,7 +880,6 @@
 			projectRoot = "";
 			targets = (
 				FB290CED19B2C406004C83CF /* Moonlight */,
-				D46A739F1CBC7CB60039F1EE /* MoonlightUnitTests */,
 				FB1A67522132419700507771 /* Moonlight TV */,
 			);
 		};
@@ -966,13 +903,6 @@
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
-		D46A739E1CBC7CB60039F1EE /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		FB1A67512132419700507771 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -999,14 +929,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		D46A739C1CBC7CB60039F1EE /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				D46A73AD1CBC7D090039F1EE /* ControllerUnitTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		FB1A674F2132419700507771 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1115,11 +1037,6 @@
 			name = "moonlight-common";
 			targetProxy = 98AB2E851CAD468B0089BB98 /* PBXContainerItemProxy */;
 		};
-		D46A73A61CBC7CB60039F1EE /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = FB290CED19B2C406004C83CF /* Moonlight */;
-			targetProxy = D46A73A51CBC7CB60039F1EE /* PBXContainerItemProxy */;
-		};
 		FB1A68172132509800507771 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = "moonlight-common-tv";
@@ -1147,56 +1064,6 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		D46A73A71CBC7CB60039F1EE /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = MoonlightUnitTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MTL_ENABLE_DEBUG_INFO = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.MoonlightUnitTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "MoonlightUnitTests/MoonlightUnitTests-Bridging-Header.h";
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
-				SWIFT_VERSION = 4.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Moonlight.app/Moonlight";
-			};
-			name = Debug;
-		};
-		D46A73A81CBC7CB60039F1EE /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = MoonlightUnitTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MTL_ENABLE_DEBUG_INFO = NO;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.MoonlightUnitTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "MoonlightUnitTests/MoonlightUnitTests-Bridging-Header.h";
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
-				SWIFT_VERSION = 4.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Moonlight.app/Moonlight";
-			};
-			name = Release;
-		};
 		FB1A67662132419A00507771 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1468,15 +1335,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		D46A73A91CBC7CB60039F1EE /* Build configuration list for PBXNativeTarget "MoonlightUnitTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				D46A73A71CBC7CB60039F1EE /* Debug */,
-				D46A73A81CBC7CB60039F1EE /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		FB1A67682132419A00507771 /* Build configuration list for PBXNativeTarget "Moonlight TV" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
