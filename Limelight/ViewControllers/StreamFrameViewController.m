@@ -123,7 +123,10 @@
 - (void)updateOverlayText:(NSString*)text {
     if (_overlayView == nil) {
         _overlayView = [[UITextView alloc] init];
+#ifndef TARGET_OS_TV
         [_overlayView setEditable:NO];
+#endif
+        [_overlayView setUserInteractionEnabled:NO];
         [_overlayView setSelectable:NO];
         [_overlayView setScrollEnabled:NO];
         [_overlayView setTextAlignment:NSTextAlignmentCenter];
