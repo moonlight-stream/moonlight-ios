@@ -32,15 +32,13 @@ static id<ConnectionCallbacks> _callbacks;
 
 #define OUTPUT_BUS 0
 
-#define MAX_CHANNEL_COUNT 2
-#define FRAME_SIZE 240
-
 #define CIRCULAR_BUFFER_SIZE 32
 
 static int audioBufferWriteIndex;
 static int audioBufferReadIndex;
-static int activeChannelCount;
-static short audioCircularBuffer[CIRCULAR_BUFFER_SIZE][FRAME_SIZE * MAX_CHANNEL_COUNT];
+static int audioBufferStride;
+static int audioSamplesPerFrame;
+static short* audioCircularBuffer;
 
 #define AUDIO_QUEUE_BUFFERS 4
 
@@ -90,15 +88,16 @@ int ArInit(int audioConfiguration, POPUS_MULTISTREAM_CONFIGURATION opusConfig, v
 {
     int err;
     
-    // Clear the circular buffer
+    // Initialize the circular buffer
     audioBufferWriteIndex = audioBufferReadIndex = 0;
+    audioSamplesPerFrame = opusConfig->samplesPerFrame;
+    audioBufferStride = opusConfig->channelCount * opusConfig->samplesPerFrame;
+    audioCircularBuffer = malloc(CIRCULAR_BUFFER_SIZE * audioBufferStride * sizeof(short));
+    if (audioCircularBuffer == NULL) {
+        Log(LOG_E, @"Error allocating output queue\n");
+        return -1;
+    }
 
-    // We only support stereo for now.
-    // TODO: Ensure AudioToolbox's channel mapping matches Opus's
-    // and correct if neccessary.
-    assert(audioConfiguration == AUDIO_CONFIGURATION_STEREO);
-
-    activeChannelCount = opusConfig->channelCount;
     opusDecoder = opus_multistream_decoder_create(opusConfig->sampleRate,
                                                   opusConfig->channelCount,
                                                   opusConfig->streams,
@@ -137,8 +136,29 @@ int ArInit(int audioConfiguration, POPUS_MULTISTREAM_CONFIGURATION opusConfig, v
         return status;
     }
     
+    // We need to specify a channel layout for surround sound configurations
+    if (opusConfig->channelCount > 2) {
+        AudioChannelLayout channelLayout = {};
+        
+        switch (opusConfig->channelCount) {
+            case 6:
+                channelLayout.mChannelLayoutTag = kAudioChannelLayoutTag_MPEG_5_1_A;
+                break;
+            default:
+                // Unsupported channel layout
+                Log(LOG_E, @"Unsupported channel layout: %d\n", opusConfig->channelCount);
+                abort();
+        }
+        
+        status = AudioQueueSetProperty(audioQueue, kAudioQueueProperty_ChannelLayout, &channelLayout, sizeof(channelLayout));
+        if (status != noErr) {
+            Log(LOG_E, @"Error configuring surround channel layout: %d\n", status);
+            return status;
+        }
+    }
+    
     for (int i = 0; i < AUDIO_QUEUE_BUFFERS; i++) {
-        status = AudioQueueAllocateBuffer(audioQueue, audioFormat.mBytesPerFrame * FRAME_SIZE, &audioBuffers[i]);
+        status = AudioQueueAllocateBuffer(audioQueue, audioFormat.mBytesPerFrame * opusConfig->samplesPerFrame, &audioBuffers[i]);
         if (status != noErr) {
             Log(LOG_E, @"Error allocating output buffer: %d\n", status);
             return status;
@@ -170,10 +190,15 @@ void ArCleanup(void)
     // Also frees buffers
     AudioQueueDispose(audioQueue, true);
     
+    // Must be freed after the queue is stopped
+    if (audioCircularBuffer != NULL) {
+        free(audioCircularBuffer);
+        audioCircularBuffer = NULL;
+    }
+    
 #if TARGET_OS_IPHONE
     // Audio session is now inactive
-    AVAudioSession* audioSession = [AVAudioSession sharedInstance];
-    [audioSession setActive: YES error: nil];
+    [[AVAudioSession sharedInstance] setActive: NO error: nil];
 #endif
 }
 
@@ -188,7 +213,7 @@ void ArDecodeAndPlaySample(char* sampleData, int sampleLength)
     }
     
     decodeLen = opus_multistream_decode(opusDecoder, (unsigned char *)sampleData, sampleLength,
-                                        audioCircularBuffer[audioBufferWriteIndex], FRAME_SIZE, 0);
+                                        (short*)&audioCircularBuffer[audioBufferWriteIndex * audioBufferStride], audioSamplesPerFrame, 0);
     if (decodeLen > 0) {
         // Use a full memory barrier to ensure the circular buffer is written before incrementing the index
         __sync_synchronize();
@@ -382,7 +407,7 @@ void ClConnectionStatusUpdate(int status)
 static void FillOutputBuffer(void *aqData,
                              AudioQueueRef inAQ,
                              AudioQueueBufferRef inBuffer) {
-    inBuffer->mAudioDataByteSize = activeChannelCount * FRAME_SIZE * sizeof(short);
+    inBuffer->mAudioDataByteSize = audioBufferStride * sizeof(short);
     
     assert(inBuffer->mAudioDataByteSize == inBuffer->mAudioDataBytesCapacity);
     
@@ -390,7 +415,7 @@ static void FillOutputBuffer(void *aqData,
     if (audioBufferWriteIndex != audioBufferReadIndex) {
         // Copy data to the audio buffer
         memcpy(inBuffer->mAudioData,
-               audioCircularBuffer[audioBufferReadIndex],
+               &audioCircularBuffer[audioBufferReadIndex * audioBufferStride],
                inBuffer->mAudioDataByteSize);
         
         // Use a full memory barrier to ensure the circular buffer is read before incrementing the index

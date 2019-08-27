@@ -479,10 +479,17 @@ static NSMutableSet* hostList;
     _streamConfig.multiController = streamSettings.multiController;
     _streamConfig.gamepadMask = [ControllerSupport getConnectedGamepadMask:_streamConfig];
     
-    // TODO: Detect attached surround sound system then address 5.1 TODOs
-    // in Connection.m
-    _streamConfig.audioChannelCount = 2;
-    _streamConfig.audioChannelMask = 0x3;
+
+    // Probe for supported channel configurations
+    Log(LOG_I, @"Audio devices supports %d channels", [AVAudioSession sharedInstance].maximumOutputNumberOfChannels);
+    if ([AVAudioSession sharedInstance].maximumOutputNumberOfChannels >= 6) {
+        _streamConfig.audioChannelCount = 6;
+        _streamConfig.audioChannelMask = 0xFC;
+    }
+    else {
+        _streamConfig.audioChannelCount = 2;
+        _streamConfig.audioChannelMask = 0x3;
+    }
     
     // HDR requires HDR10 game, HDR10 display, and HEVC Main10 decoder on the client.
     // It additionally requires an HEVC Main10 encoder on the server (GTX 1000+).
