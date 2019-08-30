@@ -66,33 +66,51 @@ static UIImage* noImage;
     [_callback appClicked:_app];
 }
 
+#if TARGET_OS_TV
+- (UIImageView*) renderToImageView:(UIImage*)appImage {
+    //custom image to do TvOS hover popup effect
+    UIImageView *imageView = [[UIImageView alloc] initWithImage:appImage];
+    imageView.userInteractionEnabled = YES;
+    imageView.adjustsImageWhenAncestorFocused = YES;
+    imageView.frame = self.frame;
+    UIGraphicsBeginImageContextWithOptions(self.frame.size, false, 0);
+    [imageView.layer renderInContext:(UIGraphicsGetCurrentContext())];
+    [_appLabel.layer renderInContext:(UIGraphicsGetCurrentContext())];
+    [_appOverlay.layer renderInContext:(UIGraphicsGetCurrentContext())];
+    UIImage *imageWithText = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    [imageView setImage:imageWithText];
+    [_appButton addSubview:imageView];
+    return imageView;
+}
+#endif
+
 - (void) updateAppImage {
     if (_appOverlay != nil) {
         [_appOverlay removeFromSuperview];
         _appOverlay = nil;
     }
     
-    _appButton.frame = CGRectMake(0, 0, noImage.size.width, noImage.size.height);
-    self.frame = CGRectMake(0, 0, noImage.size.width, noImage.size.height);
+#if TARGET_OS_TV
+    _appButton.frame = CGRectMake(0, 0, 200, 265);
+#else
+    _appButton.frame = CGRectMake(0, 0, 150, 200);
+#endif
+    
+    self.frame = _appButton.frame;
     
     if ([_app.id isEqualToString:_app.host.currentGame]) {
-#if TARGET_OS_TV
-        _appButton.layer.masksToBounds = NO;
-
-        _appButton.layer.shadowColor = [UIColor greenColor].CGColor;
-        _appButton.layer.shadowOffset = CGSizeMake(5,8);
-        _appButton.layer.shadowOpacity = 0.7;
-#else
         // Only create the app overlay if needed
         _appOverlay = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Play"]];
         _appOverlay.layer.shadowColor = [UIColor blackColor].CGColor;
         _appOverlay.layer.shadowOffset = CGSizeMake(0, 0);
         _appOverlay.layer.shadowOpacity = 1;
-        _appOverlay.layer.shadowRadius = 2.0;
-        [self addSubview:_appOverlay];
-        
-        _appOverlay.frame = CGRectMake(0, 0, noImage.size.width / 2.f, noImage.size.height / 4.f);
-        [_appOverlay setCenter:CGPointMake(self.frame.size.width/2, self.frame.size.height/6)];
+        _appOverlay.layer.shadowRadius = 4.0;
+#if TARGET_OS_TV
+        _appOverlay.contentMode = UIViewContentModeScaleAspectFit;
+        _appOverlay.frame = CGRectMake(0, 0, self.frame.size.width, self.frame.size.height / 3.f);
+#else
+        _appOverlay.frame = CGRectMake(self.frame.size.width / 4, 10, self.frame.size.width / 2, self.frame.size.height / 4.f);
 #endif
     }
     
@@ -112,24 +130,13 @@ static UIImage* noImage;
         // TODO: Improve no-app image detection
         if (!(appImage.size.width == 130.f && appImage.size.height == 180.f) && // GFE 2.0
             !(appImage.size.width == 628.f && appImage.size.height == 888.f)) { // GFE 3.0
-#if TARGET_OS_TV
-            //custom image to do TvOS hover popup effect
-            UIImageView *imageView = [[UIImageView alloc] initWithImage:appImage];
-            imageView.userInteractionEnabled = YES;
-            imageView.adjustsImageWhenAncestorFocused = YES;
-            imageView.frame = CGRectMake(0, 0, 200, 265);
-            [_appButton addSubview:imageView];
             
-            _appButton.frame = CGRectMake(0, 0, 200, 265);
-            self.frame = CGRectMake(0, 0, 200, 265);
+#if TARGET_OS_TV
+            [_appButton addSubview:[self renderToImageView:appImage]];
 #else
-            _appButton.frame = CGRectMake(0, 0, appImage.size.width / 2, appImage.size.height / 2);
-            self.frame = CGRectMake(0, 0, appImage.size.width / 2, appImage.size.height / 2);
-
-            _appOverlay.frame = CGRectMake(0, 0, self.frame.size.width / 2.f, self.frame.size.height / 4.f);
-            _appOverlay.layer.shadowRadius = 4.0;
-            [_appOverlay setCenter:CGPointMake(self.frame.size.width/2, self.frame.size.height/6)];
+            [self addSubview:_appOverlay];
 #endif
+            
             [_appButton setBackgroundImage:appImage forState:UIControlStateNormal];
             [self setNeedsDisplay];
         } else {
@@ -147,28 +154,17 @@ static UIImage* noImage;
         [_appLabel setLineBreakMode:NSLineBreakByWordWrapping];
         [_appLabel setNumberOfLines:0];
         [_appLabel setText:_app.name];
-#if TARGET_OS_TV
-        [_appLabel setFont:[UIFont systemFontOfSize:24]];
-        [_appLabel setAdjustsFontSizeToFitWidth:YES];
-        [_appLabel setFrame: CGRectMake(0, 0, 200, 265)];
-        //custom image to do TvOS hover popup effect
-        UIImageView *imageView = [[UIImageView alloc] initWithImage:appImage];
-        imageView.userInteractionEnabled = YES;
-        imageView.adjustsImageWhenAncestorFocused = YES;
-        imageView.frame = CGRectMake(0, 0, 200, 265);
-        UIGraphicsBeginImageContextWithOptions(_appLabel.frame.size, false, 0);
-        [imageView.layer renderInContext:(UIGraphicsGetCurrentContext())];
-        [_appLabel.layer renderInContext:(UIGraphicsGetCurrentContext())];
-        UIImage *imageWithText = UIGraphicsGetImageFromCurrentImageContext();
-        UIGraphicsEndImageContext();
-        [imageView setImage:imageWithText];
-        [_appButton addSubview:imageView];
-        _appButton.frame = CGRectMake(0, 0, 200, 265);
-        self.frame = CGRectMake(0, 0, 200, 265);
-#else
+        
         CGFloat padding = 4.f;
         [_appLabel setFrame: CGRectMake(padding, padding, _appButton.frame.size.width - 2 * padding, _appButton.frame.size.height - 2 * padding)];
+        
+#if TARGET_OS_TV
+        [_appLabel setFont:[UIFont systemFontOfSize:24]];
+        
+        [_appButton addSubview:[self renderToImageView:noImage]];
+#else
         [_appButton addSubview:_appLabel];
+        [self addSubview:_appOverlay];
 #endif
     }
     
