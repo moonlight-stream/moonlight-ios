@@ -67,10 +67,12 @@ static const int bitrateTable[] = {
         // highest view Y value to set our scroll view's content
         // size.
         for (UIView* view in self.scrollView.subviews) {
-            // UIScrollViews have 2 default UIImageView children
+            // UIScrollViews have 2 default child views
             // which represent the horizontal and vertical scrolling
-            // indicators. Ignore these when computing content size.
-            if ([view isKindOfClass:[UIImageView class]]) {
+            // indicators. Ignore any views we don't recognize.
+            if (![view isKindOfClass:[UILabel class]] &&
+                ![view isKindOfClass:[UISegmentedControl class]] &&
+                ![view isKindOfClass:[UISlider class]]) {
                 continue;
             }
             
