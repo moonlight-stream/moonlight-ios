@@ -148,7 +148,7 @@ static UIImage* noImage;
         [_appLabel setNumberOfLines:0];
         [_appLabel setText:_app.name];
 #if TARGET_OS_TV
-        [_appLabel setFont:[UIFont systemFontOfSize:16]];
+        [_appLabel setFont:[UIFont systemFontOfSize:24]];
         [_appLabel setAdjustsFontSizeToFitWidth:YES];
         [_appLabel setFrame: CGRectMake(0, 0, 200, 265)];
         //custom image to do TvOS hover popup effect
