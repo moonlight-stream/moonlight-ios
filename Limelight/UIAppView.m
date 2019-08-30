@@ -155,14 +155,16 @@ static UIImage* noImage;
         [_appLabel setNumberOfLines:0];
         [_appLabel setText:_app.name];
         
-        CGFloat padding = 4.f;
-        [_appLabel setFrame: CGRectMake(padding, padding, _appButton.frame.size.width - 2 * padding, _appButton.frame.size.height - 2 * padding)];
-        
 #if TARGET_OS_TV
         [_appLabel setFont:[UIFont systemFontOfSize:24]];
+        [_appLabel setFrame: self.frame];
         
         [_appButton addSubview:[self renderToImageView:noImage]];
 #else
+        // This padding doesn't work on Apple TV due to how we render into an ImageView
+        CGFloat padding = 4.f;
+        [_appLabel setFrame: CGRectMake(padding, padding, _appButton.frame.size.width - 2 * padding, _appButton.frame.size.height - 2 * padding)];
+        
         [_appButton addSubview:_appLabel];
         [self addSubview:_appOverlay];
 #endif
