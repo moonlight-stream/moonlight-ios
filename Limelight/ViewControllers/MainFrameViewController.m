@@ -481,7 +481,7 @@ static NSMutableSet* hostList;
     
 
     // Probe for supported channel configurations
-    Log(LOG_I, @"Audio devices supports %d channels", [AVAudioSession sharedInstance].maximumOutputNumberOfChannels);
+    Log(LOG_I, @"Audio device supports %d channels", [AVAudioSession sharedInstance].maximumOutputNumberOfChannels);
     if ([AVAudioSession sharedInstance].maximumOutputNumberOfChannels >= 6) {
         _streamConfig.audioChannelCount = 6;
         _streamConfig.audioChannelMask = 0xFC;
