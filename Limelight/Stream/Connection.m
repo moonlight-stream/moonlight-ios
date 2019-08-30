@@ -32,7 +32,7 @@ static id<ConnectionCallbacks> _callbacks;
 
 #define OUTPUT_BUS 0
 
-#define CIRCULAR_BUFFER_SIZE 32
+#define CIRCULAR_BUFFER_SIZE 8
 
 static int audioBufferWriteIndex;
 static int audioBufferReadIndex;
