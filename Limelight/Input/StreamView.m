@@ -26,6 +26,11 @@
     float yDeltaFactor;
     float screenFactor;
     
+#if TARGET_OS_TV
+    UIGestureRecognizer* remotePressRecognizer;
+    UIGestureRecognizer* remoteLongPressRecognizer;
+#endif
+    
     NSDictionary<NSString *, NSNumber *> *dictCodes;
 }
 
@@ -34,6 +39,19 @@
     yDeltaFactor = y;
     
     screenFactor = [[UIScreen mainScreen] scale];
+}
+
+- (void) setupStreamView {
+#if TARGET_OS_TV
+    remotePressRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(remoteButtonPressed:)];
+    remotePressRecognizer.allowedPressTypes = @[@(UIPressTypeSelect)];
+    
+    remoteLongPressRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(remoteButtonLongPressed:)];
+    remoteLongPressRecognizer.allowedPressTypes = @[@(UIPressTypeSelect)];
+    
+    [self addGestureRecognizer:remotePressRecognizer];
+    [self addGestureRecognizer:remoteLongPressRecognizer];
+#endif
 }
 
 - (void) setupOnScreenControls:(ControllerSupport*)controllerSupport swipeDelegate:(id<EdgeDetectionDelegate>)swipeDelegate {
@@ -198,6 +216,30 @@
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
 }
+
+#if TARGET_OS_TV
+- (void)remoteButtonPressed:(id)sender {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+        Log(LOG_D, @"Sending left mouse button press");
+        
+        // Mark this as touchMoved to avoid a duplicate press on touch up
+        self->touchMoved = true;
+        
+        LiSendMouseButtonEvent(BUTTON_ACTION_PRESS, BUTTON_LEFT);
+        
+        // Wait 100 ms to simulate a real button press
+        usleep(100 * 1000);
+            
+        LiSendMouseButtonEvent(BUTTON_ACTION_RELEASE, BUTTON_LEFT);
+    });
+}
+- (void)remoteButtonLongPressed:(id)sender {
+    Log(LOG_D, @"Holding left mouse button");
+    
+    isDragging = true;
+    LiSendMouseButtonEvent(BUTTON_ACTION_PRESS, BUTTON_LEFT);
+}
+#endif
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
     // Disable all gesture recognizers to prevent them from eating our touches.

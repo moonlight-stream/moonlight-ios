@@ -50,6 +50,8 @@
     
     [self.navigationController setNavigationBarHidden:YES animated:YES];
     
+    [(StreamView*)self.view setupStreamView];
+    
     [self.stageLabel setText:[NSString stringWithFormat:@"Starting %@...", self.streamConfig.appName]];
     [self.stageLabel sizeToFit];
     self.stageLabel.textAlignment = NSTextAlignmentCenter;
