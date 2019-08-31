@@ -16,6 +16,9 @@
     NSInteger _bitrate;
     Boolean _adjustedForSafeArea;
 }
+
+@dynamic overrideUserInterfaceStyle;
+
 static NSString* bitrateFormat = @"Bitrate: %.1f Mbps";
 static const int bitrateTable[] = {
     500,
@@ -108,7 +111,7 @@ static const int bitrateTable[] = {
     [super viewDidLoad];
 
     // Always run settings in dark mode because we want the light fonts
-    if (@available(iOS 12.0, tvOS 12.0, *)) {
+    if (@available(iOS 13.0, tvOS 13.0, *)) {
         self.overrideUserInterfaceStyle = UIUserInterfaceStyleDark;
     }
     
