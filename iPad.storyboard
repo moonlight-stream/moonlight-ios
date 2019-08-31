@@ -45,24 +45,16 @@
                         </connections>
                     </collectionView>
                     <navigationItem key="navigationItem" id="pSu-bl-gL9">
-                        <barButtonItem key="leftBarButtonItem" style="done" id="mSL-ru-nRm">
-                            <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="Tiq-VS-Ua5">
-                                <rect key="frame" x="20" y="0.0" width="109" height="44"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="16"/>
-                                <state key="normal" title="Moonlight" image="Logo">
-                                    <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                </state>
-                            </button>
+                        <barButtonItem key="leftBarButtonItem" image="SettingsButton" id="mSL-ru-nRm">
                             <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" title="No Host Selected" id="KDy-JC-2sU">
+                        <barButtonItem key="rightBarButtonItem" id="KDy-JC-2sU">
                             <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <outlet property="computerNameButton" destination="KDy-JC-2sU" id="Lkg-yz-GE6"/>
-                        <outlet property="limelightLogoButton" destination="Tiq-VS-Ua5" id="cue-NW-Hty"/>
+                        <outlet property="settingsButton" destination="mSL-ru-nRm" id="NRf-lv-vlh"/>
+                        <outlet property="upButton" destination="KDy-JC-2sU" id="tXB-Rc-IvJ"/>
                         <segue destination="OIm-0n-i9v" kind="push" identifier="createStreamFrame" id="7gN-E7-Ips"/>
                     </connections>
                 </viewController>

@@ -50,8 +50,6 @@
     bool _background;
 #if TARGET_OS_TV
     UITapGestureRecognizer* _menuRecognizer;
-#else
-    UIButton* _pullArrow;
 #endif
 }
 static NSMutableSet* hostList;
@@ -126,10 +124,10 @@ static NSMutableSet* hostList;
                 return;
             }
             
-#if TARGET_OS_TV
             self.title = host.name;
-#else
-            self->_computerNameButton.title = host.name;
+            
+#if !TARGET_OS_TV
+            [self->_upButton setImage:[UIImage imageNamed:@"UpIcon"]];
 #endif
             [self.navigationController.navigationBar setNeedsLayout];
             
@@ -174,10 +172,10 @@ static NSMutableSet* hostList;
                     return;
                 }
                 
-#if TARGET_OS_TV
                 self.title = host.name;
-#else
-                self->_computerNameButton.title = host.name;
+                
+#if !TARGET_OS_TV
+                [self->_upButton setImage:[UIImage imageNamed:@"UpIcon"]];
 #endif
                 [self.navigationController.navigationBar setNeedsLayout];
                 
@@ -251,11 +249,13 @@ static NSMutableSet* hostList;
     
     [_appManager stopRetrieving];
     _selectedHost = nil;
-#if TARGET_OS_TV
+    
     self.title = @"Select Host";
-#else
-    _computerNameButton.title = @"No Host Selected";
+    
+#if !TARGET_OS_TV
+    [_upButton setImage:nil];
 #endif
+    
     [self.collectionView reloadData];
     [self.view addSubview:hostScrollView];
 }
@@ -651,30 +651,6 @@ static NSMutableSet* hostList;
         [(SettingsViewController*)[revealController rearViewController] saveSettings];
     }
     
-    // Fade out the pull arrow
-    [UIView animateWithDuration:0.1
-                     animations:^{
-                         self->_pullArrow.alpha = 0.0;
-                     }
-                     completion:^(BOOL finished) {
-                         // Flip the direction of the arrow
-                         if (position == FrontViewPositionLeft) {
-                             // Change the pull arrow back to the default rotation
-                             self->_pullArrow.imageView.transform = CGAffineTransformMakeRotation(0);
-                         }
-                         else {
-                             // Flip the pull arrow when the reveal is toggled
-                             self->_pullArrow.imageView.transform = CGAffineTransformMakeRotation(M_PI);
-                         }
-                         
-                         // Fade it back in
-                         [UIView animateWithDuration:0.2
-                                          animations:^{
-                                              self->_pullArrow.alpha = 1.0;
-                                          }
-                                          completion:nil];
-                     }];
-    
     currentPosition = position;
 }
 #endif
@@ -705,13 +681,17 @@ static NSMutableSet* hostList;
 {
     [super viewDidLoad];
     
+    self.title = @"Select Host";
+    
 #if !TARGET_OS_TV
     // Set the side bar button action. When it's tapped, it'll show the sidebar.
-    [_limelightLogoButton addTarget:self.revealViewController action:@selector(revealToggle:) forControlEvents:UIControlEventTouchDown];
+    [_settingsButton setTarget:self.revealViewController];
+    [_settingsButton setAction:@selector(revealToggle:)];
     
     // Set the host name button action. When it's tapped, it'll show the host selection view.
-    [_computerNameButton setTarget:self];
-    [_computerNameButton setAction:@selector(showHostSelectionView)];
+    [_upButton setTarget:self];
+    [_upButton setAction:@selector(showHostSelectionView)];
+    [_upButton setImage:nil];
     
     // Set the gesture
     [self.view addGestureRecognizer:self.revealViewController.panGestureRecognizer];
@@ -724,8 +704,6 @@ static NSMutableSet* hostList;
     _menuRecognizer.allowedPressTypes = [[NSArray alloc] initWithObjects:[NSNumber numberWithLong:UIPressTypeMenu], nil];
     
     self.navigationController.navigationBar.titleTextAttributes = [NSDictionary dictionaryWithObject:[UIColor whiteColor] forKey:NSForegroundColorAttributeName];
-    
-    self.title = @"Select Host";
 #endif
     
     _loadingFrame = [self.storyboard instantiateViewControllerWithIdentifier:@"loadingFrame"];
@@ -755,17 +733,6 @@ static NSMutableSet* hostList;
     [hostScrollView setShowsHorizontalScrollIndicator:NO];
     hostScrollView.delaysContentTouches = NO;
     
-#if !TARGET_OS_TV
-    _pullArrow = [[UIButton alloc] init];
-    [_pullArrow addTarget:self.revealViewController action:@selector(revealToggle:) forControlEvents:UIControlEventTouchDown];
-    [_pullArrow setImage:[UIImage imageNamed:@"PullArrow"] forState:UIControlStateNormal];
-    [_pullArrow sizeToFit];
-    _pullArrow.frame = CGRectMake(0,
-                                  self.collectionView.frame.size.height / 6 - _pullArrow.frame.size.height / 2 - self.navigationController.navigationBar.frame.size.height,
-                                  _pullArrow.frame.size.width,
-                                  _pullArrow.frame.size.height);
-#endif
-    
     self.collectionView.delaysContentTouches = NO;
     self.collectionView.allowsMultipleSelection = NO;
 #if !TARGET_OS_TV
@@ -776,9 +743,6 @@ static NSMutableSet* hostList;
     _discMan = [[DiscoveryManager alloc] initWithHosts:[hostList allObjects] andCallback:self];
     
     [self.view addSubview:hostScrollView];
-#if !TARGET_OS_TV
-    [self.view addSubview:_pullArrow];
-#endif
 }
 
 -(void)beginForegroundRefresh:(bool)refreshAppList

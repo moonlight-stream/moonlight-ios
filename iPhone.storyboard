@@ -45,26 +45,18 @@
                         </connections>
                     </collectionView>
                     <toolbarItems/>
-                    <navigationItem key="navigationItem" id="1jn-Sf-Xky">
-                        <barButtonItem key="leftBarButtonItem" style="done" id="zAn-CM-7Yz">
-                            <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="pZ9-ft-T24">
-                                <rect key="frame" x="20" y="0.0" width="109" height="32"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" name="Roboto-Regular" family="Roboto" pointSize="16"/>
-                                <state key="normal" title="Moonlight" image="Logo">
-                                    <color key="titleColor" red="0.9513210654258728" green="0.97490358352661133" blue="0.99987185001373291" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                    <color key="titleShadowColor" red="0.5" green="0.5" blue="0.5" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                </state>
-                            </button>
+                    <navigationItem key="navigationItem" id="pSu-bl-gL9">
+                        <barButtonItem key="leftBarButtonItem" image="SettingsButton" id="mSL-ru-nRm">
+                            <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" title="No Host Selected" id="L1H-n4-HB7">
-                            <color key="tintColor" red="0.9513210654258728" green="0.97490358352661133" blue="0.99987185001373291" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <barButtonItem key="rightBarButtonItem" id="KDy-JC-2sU">
+                            <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <outlet property="computerNameButton" destination="L1H-n4-HB7" id="bng-Ky-oQs"/>
-                        <outlet property="limelightLogoButton" destination="pZ9-ft-T24" id="yRw-rK-9lQ"/>
-                        <segue destination="mI3-9F-XwU" kind="push" identifier="createStreamFrame" id="Vgc-B6-lvM"/>
+                        <outlet property="settingsButton" destination="mSL-ru-nRm" id="NRf-lv-vlh"/>
+                        <outlet property="upButton" destination="KDy-JC-2sU" id="tXB-Rc-IvJ"/>
+                        <segue destination="OIm-0n-i9v" kind="push" identifier="createStreamFrame" id="7gN-E7-Ips"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="HNf-lX-GEO" userLabel="First Responder" sceneMemberID="firstResponder"/>
