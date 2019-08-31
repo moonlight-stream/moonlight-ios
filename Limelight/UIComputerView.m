@@ -42,9 +42,7 @@ static const int LABEL_DY = 20;
     _hostButton.layer.shadowOpacity = 0.3;
     
     _hostLabel = [[UILabel alloc] init];
-#if !TARGET_OS_TV
     _hostLabel.textColor = [UIColor whiteColor];
-#endif
     
     _hostOverlay = [[UIImageView alloc] initWithFrame:CGRectMake(_hostButton.frame.size.width / 3, _hostButton.frame.size.height / 4, _hostButton.frame.size.width / 3, _hostButton.frame.size.height / 3)];
 
