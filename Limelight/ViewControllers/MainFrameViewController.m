@@ -909,10 +909,18 @@ static NSMutableSet* hostList;
 }
 
 - (float) getCompViewX:(UIComputerView*)comp addComp:(UIComputerView*)addComp prevEdge:(float)prevEdge {
+    float padding;
+    
+#if TARGET_OS_TV
+    padding = 100;
+#else
+    padding = addComp.frame.size.width / 2;
+#endif
+    
     if (prevEdge == -1) {
-        return hostScrollView.frame.origin.x + comp.frame.size.width / 2 + addComp.frame.size.width / 2;
+        return hostScrollView.frame.origin.x + comp.frame.size.width / 2 + padding;
     } else {
-        return prevEdge + addComp.frame.size.width / 2  + comp.frame.size.width / 2;
+        return prevEdge + comp.frame.size.width / 2 + padding;
     }
 }
 

@@ -19,8 +19,10 @@
 static const float REFRESH_CYCLE = 2.0f;
 
 #if TARGET_OS_TV
+static const int ITEM_PADDING = 50;
 static const int LABEL_DY = 40;
 #else
+static const int ITEM_PADDING = 0;
 static const int LABEL_DY = 20;
 #endif
 
@@ -122,8 +124,7 @@ static const int LABEL_DY = 20;
         _hostLabel.frame.size.height +
         LABEL_DY / 2;
     
-    self.bounds = CGRectMake(x, y, width, height);
-    self.frame = CGRectMake(x, y, width, height);
+    self.bounds = CGRectMake(x - ITEM_PADDING, y - ITEM_PADDING, width + 2 * ITEM_PADDING, height + 2 * ITEM_PADDING);
 }
 
 - (void) updateContentsForHost:(TemporaryHost*)host {
@@ -181,8 +182,8 @@ static const int LABEL_DY = 20;
     UIButton *previousButton = (UIButton *)context.previouslyFocusedItem;
     UIButton *nextButton = (UIButton *) context.nextFocusedItem;
     
-    previousButton.layer.shadowColor = [[UIColor blackColor] CGColor];
-    nextButton.layer.shadowColor = [[UIColor greenColor] CGColor];
+    previousButton.superview.backgroundColor = nil;
+    nextButton.superview.backgroundColor = [UIColor darkGrayColor];
 }
 #endif
 
