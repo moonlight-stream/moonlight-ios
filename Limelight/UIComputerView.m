@@ -13,6 +13,7 @@
     UIButton* _hostButton;
     UILabel* _hostLabel;
     UIImageView* _hostOverlay;
+    UIActivityIndicatorView* _hostSpinner;
     id<HostCallback> _callback;
     CGSize _labelSize;
 }
@@ -51,10 +52,14 @@ static const int LABEL_DY = 20;
     _hostLabel.textColor = [UIColor whiteColor];
     
     _hostOverlay = [[UIImageView alloc] initWithFrame:CGRectMake(_hostButton.frame.size.width / 3, _hostButton.frame.size.height / 4, _hostButton.frame.size.width / 3, _hostButton.frame.size.height / 3)];
+    _hostSpinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+    [_hostSpinner setFrame:_hostOverlay.frame];
+    _hostSpinner.hidesWhenStopped = YES;
 
     [self addSubview:_hostButton];
     [self addSubview:_hostLabel];
     [self addSubview:_hostOverlay];
+    [self addSubview:_hostSpinner];
     
     return self;
 }
@@ -132,6 +137,8 @@ static const int LABEL_DY = 20;
     [_hostLabel sizeToFit];
     
     if (host.state == StateOnline) {
+        [_hostSpinner stopAnimating];
+
         if (host.pairState == PairStateUnpaired) {
             [_hostOverlay setImage:[UIImage imageNamed:@"LockedOverlayIcon"]];
         }
@@ -140,10 +147,11 @@ static const int LABEL_DY = 20;
         }
     }
     else if (host.state == StateOffline) {
+        [_hostSpinner stopAnimating];
         [_hostOverlay setImage:[UIImage imageNamed:@"ErrorOverlayIcon"]];
     }
     else {
-        [_hostOverlay setImage:[UIImage imageNamed:@"UpdatingOverlayIcon"]];
+        [_hostSpinner startAnimating];
     }
     
     float x = _hostButton.frame.origin.x + _hostButton.frame.size.width / 2;
