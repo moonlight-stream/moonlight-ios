@@ -31,6 +31,12 @@ static const int LABEL_DY = 20;
     [_hostButton setBackgroundImage:[UIImage imageNamed:@"Computer"] forState:UIControlStateNormal];
     [_hostButton sizeToFit];
     
+#if TARGET_OS_TV
+    _hostButton.frame = CGRectMake(0, 0, 400, 400);
+#else
+    _hostButton.frame = CGRectMake(0, 0, 100, 100);
+#endif
+    
     _hostButton.layer.shadowColor = [[UIColor blackColor] CGColor];
     _hostButton.layer.shadowOffset = CGSizeMake(5,8);
     _hostButton.layer.shadowOpacity = 0.3;

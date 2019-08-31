@@ -2,11 +2,11 @@
   "images" : [
     {
       "idiom" : "universal",
+      "filename" : "lock.pdf",
       "scale" : "1x"
     },
     {
       "idiom" : "universal",
-      "filename" : "lock.pdf",
       "scale" : "2x"
     },
     {
