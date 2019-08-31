@@ -12,8 +12,7 @@
     TemporaryHost* _host;
     UIButton* _hostButton;
     UILabel* _hostLabel;
-    UILabel* _hostStatus;
-    UILabel* _hostPairState;
+    UIImageView* _hostOverlay;
     id<HostCallback> _callback;
     CGSize _labelSize;
 }
@@ -32,14 +31,21 @@ static const int LABEL_DY = 20;
     [_hostButton setBackgroundImage:[UIImage imageNamed:@"Computer"] forState:UIControlStateNormal];
     [_hostButton sizeToFit];
     
-     _hostButton.layer.shadowColor = [[UIColor blackColor] CGColor];
+    _hostButton.layer.shadowColor = [[UIColor blackColor] CGColor];
     _hostButton.layer.shadowOffset = CGSizeMake(5,8);
     _hostButton.layer.shadowOpacity = 0.7;
     
     _hostLabel = [[UILabel alloc] init];
-    _hostStatus = [[UILabel alloc] init];
-    _hostPairState = [[UILabel alloc] init];
+#if !TARGET_OS_TV
+    _hostLabel.textColor = [UIColor whiteColor];
+#endif
+    
+    _hostOverlay = [[UIImageView alloc] initWithFrame:CGRectMake(_hostButton.frame.size.width / 4, _hostButton.frame.size.height / 6, _hostButton.frame.size.width / 2, _hostButton.frame.size.height / 2)];
 
+    [self addSubview:_hostButton];
+    [self addSubview:_hostLabel];
+    [self addSubview:_hostOverlay];
+    
     return self;
 }
 
@@ -47,38 +53,23 @@ static const int LABEL_DY = 20;
     self = [self init];
     _callback = callback;
     
-    [_hostButton setBackgroundImage:[UIImage imageNamed:@"Computer"] forState:UIControlStateNormal];
-    [_hostButton setContentEdgeInsets:UIEdgeInsetsMake(0, 4, 0, 4)];
     if (@available(iOS 9.0, tvOS 9.0, *)) {
         [_hostButton addTarget:self action:@selector(addClicked) forControlEvents:UIControlEventPrimaryActionTriggered];
     }
     else {
         [_hostButton addTarget:self action:@selector(addClicked) forControlEvents:UIControlEventTouchUpInside];
     }
-    [_hostButton sizeToFit];
     
     [_hostLabel setText:@"Add Host"];
     [_hostLabel sizeToFit];
-#if !TARGET_OS_TV
-    _hostLabel.textColor = [UIColor whiteColor];
-#endif
-    _hostLabel.center = CGPointMake(_hostButton.frame.origin.x + (_hostButton.frame.size.width / 2), _hostButton.frame.origin.y + _hostButton.frame.size.height + LABEL_DY);
     
-    UIImageView* addIcon = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"AddComputerIcon"]];
-    [addIcon sizeToFit];
-    addIcon.center = CGPointMake(_hostButton.frame.origin.x + _hostButton.frame.size.width, _hostButton.frame.origin.y);
+    float x = _hostButton.frame.origin.x + _hostButton.frame.size.width / 2;
+    _hostLabel.center = CGPointMake(x, _hostButton.frame.origin.y + _hostButton.frame.size.height + LABEL_DY);
     
-    // This is required to ensure this button is the same size as the others
-    _hostPairState.text = @"None";
-    _hostStatus.text = @"None";
-    [_hostPairState sizeToFit];
-    [_hostStatus sizeToFit];
+    [_hostOverlay setImage:[UIImage imageNamed:@"AddOverlayIcon"]];
     
     [self updateBounds];
-    [self addSubview:_hostButton];
-    [self addSubview:_hostLabel];
-    [self addSubview:addIcon];
-    
+        
     return self;
 }
 
@@ -99,10 +90,6 @@ static const int LABEL_DY = 20;
     
     [self updateContentsForHost:host];
     [self updateBounds];
-    [self addSubview:_hostButton];
-    [self addSubview:_hostLabel];
-    [self addSubview:_hostStatus];
-    [self addSubview:_hostPairState];
     [self startUpdateLoop];
 
     return self;
@@ -116,23 +103,15 @@ static const int LABEL_DY = 20;
     
     x = MIN(x, _hostButton.frame.origin.x);
     x = MIN(x, _hostLabel.frame.origin.x);
-    x = MIN(x, _hostStatus.frame.origin.x);
-    x = MIN(x, _hostPairState.frame.origin.x);
     
     y = MIN(y, _hostButton.frame.origin.y);
     y = MIN(y, _hostLabel.frame.origin.y);
-    y = MIN(y, _hostStatus.frame.origin.y);
-    y = MIN(y, _hostPairState.frame.origin.y);
 
     width = MAX(width, _hostButton.frame.size.width);
     width = MAX(width, _hostLabel.frame.size.width);
-    width = MAX(width, _hostStatus.frame.size.width);
-    width = MAX(width, _hostPairState.frame.size.width);
     
     height = _hostButton.frame.size.height +
         _hostLabel.frame.size.height +
-        _hostStatus.frame.size.height +
-        _hostPairState.frame.size.height +
         LABEL_DY / 2;
     
     self.bounds = CGRectMake(x, y, width, height);
@@ -141,40 +120,23 @@ static const int LABEL_DY = 20;
 
 - (void) updateContentsForHost:(TemporaryHost*)host {
     _hostLabel.text = _host.name;
-#if !TARGET_OS_TV
-    _hostLabel.textColor = [UIColor whiteColor];
-#endif
     [_hostLabel sizeToFit];
     
-    switch (host.pairState) {
-        case PairStateUnknown:
-            _hostPairState.text = @"Pair State Unknown";
-            break;
-        case PairStateUnpaired:
-            _hostPairState.text = @"Not Paired";
-            break;
-        case PairStatePaired:
-            _hostPairState.text = @"Paired";
-            break;
-    }
-#if !TARGET_OS_TV
-    _hostPairState.textColor = [UIColor whiteColor];
-#endif
-    [_hostPairState sizeToFit];
-    
     if (host.online) {
-        _hostStatus.text = @"Online";
-        _hostStatus.textColor = [UIColor greenColor];
-    } else {
-        _hostStatus.text = @"Offline";
-        _hostStatus.textColor = [UIColor grayColor];
+        if (host.pairState == PairStateUnpaired) {
+            [_hostOverlay setImage:[UIImage imageNamed:@"LockedOverlayIcon"]];
+        }
+        else {
+            [_hostOverlay setImage:nil];
+        }
     }
-    [_hostStatus sizeToFit];
+    else {
+        // TODO: Use updating icon if we've not determined online state yet
+        [_hostOverlay setImage:[UIImage imageNamed:@"ErrorOverlayIcon"]];
+    }
     
     float x = _hostButton.frame.origin.x + _hostButton.frame.size.width / 2;
     _hostLabel.center = CGPointMake(x, _hostButton.frame.origin.y + _hostButton.frame.size.height + LABEL_DY);
-    _hostPairState.center = CGPointMake(x, _hostLabel.center.y + LABEL_DY);
-    _hostStatus.center = CGPointMake(x, _hostPairState.center.y + LABEL_DY);
 }
 
 - (void) startUpdateLoop {
