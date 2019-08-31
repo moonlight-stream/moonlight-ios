@@ -162,7 +162,7 @@ static NSMutableSet* hostList;
                 [self hideLoadingFrame: ^{
                     [[self activeViewController] presentViewController:applistAlert animated:YES completion:nil];
                 }];
-                host.online = NO;
+                host.state = StateOffline;
                 [self showHostSelectionView];
             });
         } else {
@@ -284,7 +284,7 @@ static NSMutableSet* hostList;
     // This shows the context menu with wake, delete, etc. rather
     // than just hanging for a while and failing as we would in this
     // code path.
-    if (!host.online && view != nil) {
+    if (host.state != StateOnline && view != nil) {
         [self hostLongClicked:host view:view];
         return;
     }
@@ -303,7 +303,7 @@ static NSMutableSet* hostList;
     // should hit most. Check for a valid view because we don't want to hit the fast
     // path after coming back from streaming, since we need to fetch serverinfo too
     // so that our active game data is correct.
-    if (host.online && host.pairState == PairStatePaired && host.appList.count > 0 && view != nil) {
+    if (host.state == StateOnline && host.pairState == PairStatePaired && host.appList.count > 0 && view != nil) {
         [self alreadyPaired];
         return;
     }
@@ -341,7 +341,7 @@ static NSMutableSet* hostList;
                         }
                     }];
                     
-                    host.online = NO;
+                    host.state = StateOffline;
                     [self showHostSelectionView];
                 });
             } else {
@@ -384,8 +384,32 @@ static NSMutableSet* hostList;
 
 - (void)hostLongClicked:(TemporaryHost *)host view:(UIView *)view {
     Log(LOG_D, @"Long clicked host: %@", host.name);
-    UIAlertController* longClickAlert = [UIAlertController alertControllerWithTitle:host.name message:@"" preferredStyle:UIAlertControllerStyleActionSheet];
-    if (!host.online) {
+    NSString* message;
+    
+    switch (host.state) {
+        case StateOffline:
+            message = @"Offline";
+            break;
+            
+        case StateOnline:
+            if (host.pairState == PairStatePaired) {
+                message = @"Online - Paired";
+            }
+            else {
+                message = @"Online - Not Paired";
+            }
+            break;
+        
+        case StateUnknown:
+            message = @"Connecting";
+            break;
+            
+        default:
+            break;
+    }
+    
+    UIAlertController* longClickAlert = [UIAlertController alertControllerWithTitle:host.name message:message preferredStyle:UIAlertControllerStyleActionSheet];
+    if (host.state != StateOnline) {
         [longClickAlert addAction:[UIAlertAction actionWithTitle:@"Wake" style:UIAlertActionStyleDefault handler:^(UIAlertAction* action){
             UIAlertController* wolAlert = [UIAlertController alertControllerWithTitle:@"Wake On LAN" message:@"" preferredStyle:UIAlertControllerStyleAlert];
             [wolAlert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
@@ -879,7 +903,7 @@ static NSMutableSet* hostList;
     dispatch_async(dispatch_get_main_queue(), ^{
         Log(LOG_D, @"New host list:");
         for (TemporaryHost* host in hosts) {
-            Log(LOG_D, @"Host: \n{\n\t name:%@ \n\t address:%@ \n\t localAddress:%@ \n\t externalAddress:%@ \n\t ipv6Address:%@ \n\t uuid:%@ \n\t mac:%@ \n\t pairState:%d \n\t online:%d \n\t activeAddress:%@ \n}", host.name, host.address, host.localAddress, host.externalAddress, host.ipv6Address, host.uuid, host.mac, host.pairState, host.online, host.activeAddress);
+            Log(LOG_D, @"Host: \n{\n\t name:%@ \n\t address:%@ \n\t localAddress:%@ \n\t externalAddress:%@ \n\t ipv6Address:%@ \n\t uuid:%@ \n\t mac:%@ \n\t pairState:%d \n\t online:%d \n\t activeAddress:%@ \n}", host.name, host.address, host.localAddress, host.externalAddress, host.ipv6Address, host.uuid, host.mac, host.pairState, host.state, host.activeAddress);
         }
         @synchronized(hostList) {
             [hostList removeAllObjects];

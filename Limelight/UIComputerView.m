@@ -33,14 +33,14 @@ static const int LABEL_DY = 20;
     
     _hostButton.layer.shadowColor = [[UIColor blackColor] CGColor];
     _hostButton.layer.shadowOffset = CGSizeMake(5,8);
-    _hostButton.layer.shadowOpacity = 0.7;
+    _hostButton.layer.shadowOpacity = 0.3;
     
     _hostLabel = [[UILabel alloc] init];
 #if !TARGET_OS_TV
     _hostLabel.textColor = [UIColor whiteColor];
 #endif
     
-    _hostOverlay = [[UIImageView alloc] initWithFrame:CGRectMake(_hostButton.frame.size.width / 4, _hostButton.frame.size.height / 6, _hostButton.frame.size.width / 2, _hostButton.frame.size.height / 2)];
+    _hostOverlay = [[UIImageView alloc] initWithFrame:CGRectMake(_hostButton.frame.size.width / 3, _hostButton.frame.size.height / 4, _hostButton.frame.size.width / 3, _hostButton.frame.size.height / 3)];
 
     [self addSubview:_hostButton];
     [self addSubview:_hostLabel];
@@ -122,7 +122,7 @@ static const int LABEL_DY = 20;
     _hostLabel.text = _host.name;
     [_hostLabel sizeToFit];
     
-    if (host.online) {
+    if (host.state == StateOnline) {
         if (host.pairState == PairStateUnpaired) {
             [_hostOverlay setImage:[UIImage imageNamed:@"LockedOverlayIcon"]];
         }
@@ -130,9 +130,11 @@ static const int LABEL_DY = 20;
             [_hostOverlay setImage:nil];
         }
     }
-    else {
-        // TODO: Use updating icon if we've not determined online state yet
+    else if (host.state == StateOffline) {
         [_hostOverlay setImage:[UIImage imageNamed:@"ErrorOverlayIcon"]];
+    }
+    else {
+        [_hostOverlay setImage:[UIImage imageNamed:@"UpdatingOverlayIcon"]];
     }
     
     float x = _hostButton.frame.origin.x + _hostButton.frame.size.width / 2;

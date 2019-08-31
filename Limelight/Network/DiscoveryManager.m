@@ -56,7 +56,7 @@
     if ([serverInfoResponse isStatusOk]) {
         host = [[TemporaryHost alloc] init];
         host.activeAddress = host.address = hostAddress;
-        host.online = YES;
+        host.state = StateOnline;
         [serverInfoResponse populateHost:host];
         if (![self addHostToDiscovery:host]) {
             callback(nil, @"Host information updated");
@@ -137,7 +137,7 @@
             existingHost.externalAddress = host.externalAddress;
         }
         existingHost.activeAddress = host.activeAddress;
-        existingHost.online = host.online;
+        existingHost.state = host.state;
         return NO;
     }
     else {

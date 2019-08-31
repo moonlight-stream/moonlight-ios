@@ -11,7 +11,7 @@
 
 @interface TemporaryHost : NSObject
 
-@property (nonatomic) BOOL online;
+@property (nonatomic) State state;
 @property (nonatomic) PairState pairState;
 @property (nonatomic, nullable) NSString * activeAddress;
 @property (nonatomic, nullable) NSString * currentGame;

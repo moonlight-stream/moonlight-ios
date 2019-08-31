@@ -14,6 +14,12 @@ typedef NS_ENUM(int, PairState) {
     PairStatePaired
 };
 
+typedef NS_ENUM(int, State) {
+    StateUnknown,
+    StateOffline,
+    StateOnline
+};
+
 FOUNDATION_EXPORT NSString *const deviceName;
 
 + (NSData*) randomBytes:(NSInteger)length;
