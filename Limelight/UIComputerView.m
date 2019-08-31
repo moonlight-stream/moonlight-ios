@@ -34,7 +34,11 @@ static const int LABEL_DY = 20;
 #if TARGET_OS_TV
     _hostButton.frame = CGRectMake(0, 0, 400, 400);
 #else
-    _hostButton.frame = CGRectMake(0, 0, 100, 100);
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+        _hostButton.frame = CGRectMake(0, 0, 200, 200);
+    } else {
+        _hostButton.frame = CGRectMake(0, 0, 100, 100);
+    }
 #endif
     
     _hostButton.layer.shadowColor = [[UIColor blackColor] CGColor];
