@@ -10,62 +10,6 @@
 			<key>Type</key>
 			<string>PSGroupSpecifier</string>
 			<key>Title</key>
-			<string>Host Configuration</string>
-		</dict>
-		<dict>
-			<key>Type</key>
-			<string>PSToggleSwitchSpecifier</string>
-			<key>DefaultValue</key>
-			<false/>
-			<key>Title</key>
-			<string>Play Audio on Host PC</string>
-			<key>Key</key>
-			<string>audioOnPC</string>
-		</dict>
-		<dict>
-			<key>Type</key>
-			<string>PSToggleSwitchSpecifier</string>
-			<key>Title</key>
-			<string>Optimize Game Settings</string>
-			<key>Key</key>
-			<string>optimizeGames</string>
-			<key>DefaultValue</key>
-			<true/>
-		</dict>
-		<dict>
-			<key>Type</key>
-			<string>PSToggleSwitchSpecifier</string>
-			<key>Title</key>
-			<string>Use HEVC Codec</string>
-			<key>Key</key>
-			<string>useHevc</string>
-			<key>DefaultValue</key>
-			<false/>
-		</dict>
-		<dict>
-			<key>Type</key>
-			<string>PSToggleSwitchSpecifier</string>
-			<key>Title</key>
-			<string>Request HDR Video</string>
-			<key>Key</key>
-			<string>enableHdr</string>
-			<key>DefaultValue</key>
-			<false/>
-		</dict>
-		<dict>
-			<key>Type</key>
-			<string>PSToggleSwitchSpecifier</string>
-			<key>Title</key>
-			<string>Automatic Game Controller Detection</string>
-			<key>Key</key>
-			<string>multipleControllers</string>
-			<key>DefaultValue</key>
-			<true/>
-		</dict>
-		<dict>
-			<key>Type</key>
-			<string>PSGroupSpecifier</string>
-			<key>Title</key>
 			<string>Stream Configuration</string>
 		</dict>
 		<dict>
@@ -118,7 +62,7 @@
 			<key>Key</key>
 			<string>bitrate</string>
 			<key>DefaultValue</key>
-			<string>10000</string>
+			<string>20000</string>
 			<key>Titles</key>
 			<array>
 				<string>0.5 Mbps</string>
@@ -143,6 +87,62 @@
 				<string>50000</string>
 				<string>100000</string>
 			</array>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSGroupSpecifier</string>
+			<key>Title</key>
+			<string>Host Configuration</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>DefaultValue</key>
+			<false/>
+			<key>Title</key>
+			<string>Play Audio on Host PC</string>
+			<key>Key</key>
+			<string>audioOnPC</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>Title</key>
+			<string>Optimize Game Settings</string>
+			<key>Key</key>
+			<string>optimizeGames</string>
+			<key>DefaultValue</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>Title</key>
+			<string>Use HEVC Codec</string>
+			<key>Key</key>
+			<string>useHevc</string>
+			<key>DefaultValue</key>
+			<false/>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>Title</key>
+			<string>Request HDR Video</string>
+			<key>Key</key>
+			<string>enableHdr</string>
+			<key>DefaultValue</key>
+			<false/>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>Title</key>
+			<string>Automatic Game Controller Detection</string>
+			<key>Key</key>
+			<string>multipleControllers</string>
+			<key>DefaultValue</key>
+			<true/>
 		</dict>
 	</array>
 </dict>
