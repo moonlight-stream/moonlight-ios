@@ -21,6 +21,8 @@
 @property (strong, nonatomic) IBOutlet UISegmentedControl *hevcSelector;
 @property (strong, nonatomic) IBOutlet UIScrollView *scrollView;
 
+@property(nonatomic) UIUserInterfaceStyle overrideUserInterfaceStyle;
+
 - (void) saveSettings;
 
 @end

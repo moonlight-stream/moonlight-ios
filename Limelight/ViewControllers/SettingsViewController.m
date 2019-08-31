@@ -106,6 +106,11 @@ static const int bitrateTable[] = {
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+
+    // Always run settings in dark mode because we want the light fonts
+    if (@available(iOS 12.0, tvOS 12.0, *)) {
+        self.overrideUserInterfaceStyle = UIUserInterfaceStyleDark;
+    }
     
     DataManager* dataMan = [[DataManager alloc] init];
     TemporarySettings* currentSettings = [dataMan getSettings];
