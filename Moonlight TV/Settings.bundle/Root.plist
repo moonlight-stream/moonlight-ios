@@ -23,24 +23,20 @@
 			<string>audioOnPC</string>
 		</dict>
 		<dict>
-			<key>TrueValue</key>
-			<string>Optimize Games</string>
-			<key>FalseValue</key>
-			<string>Off</string>
 			<key>Type</key>
 			<string>PSToggleSwitchSpecifier</string>
 			<key>Title</key>
-			<string>Optimize Games</string>
+			<string>Optimize Game Settings</string>
 			<key>Key</key>
 			<string>optimizeGames</string>
 			<key>DefaultValue</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>Type</key>
 			<string>PSToggleSwitchSpecifier</string>
 			<key>Title</key>
-			<string>HEVC Video</string>
+			<string>Use HEVC Codec</string>
 			<key>Key</key>
 			<string>useHevc</string>
 			<key>DefaultValue</key>
@@ -50,7 +46,7 @@
 			<key>Type</key>
 			<string>PSToggleSwitchSpecifier</string>
 			<key>Title</key>
-			<string>Enable HDR</string>
+			<string>Request HDR Video</string>
 			<key>Key</key>
 			<string>enableHdr</string>
 			<key>DefaultValue</key>
@@ -60,7 +56,7 @@
 			<key>Type</key>
 			<string>PSToggleSwitchSpecifier</string>
 			<key>Title</key>
-			<string>Enable multi-controller support</string>
+			<string>Automatic Game Controller Detection</string>
 			<key>Key</key>
 			<string>multipleControllers</string>
 			<key>DefaultValue</key>
