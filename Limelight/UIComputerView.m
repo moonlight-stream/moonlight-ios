@@ -47,6 +47,9 @@ static const int LABEL_DY = 20;
     _hostButton.layer.shadowColor = [[UIColor blackColor] CGColor];
     _hostButton.layer.shadowOffset = CGSizeMake(5,8);
     _hostButton.layer.shadowOpacity = 0.3;
+
+    [_hostButton addTarget:self action:@selector(hostButtonSelected:) forControlEvents:UIControlEventTouchDown];
+    [_hostButton addTarget:self action:@selector(hostButtonDeselected:) forControlEvents:UIControlEventTouchUpInside | UIControlEventTouchCancel | UIControlEventTouchDragExit];
     
     _hostLabel = [[UILabel alloc] init];
     _hostLabel.textColor = [UIColor whiteColor];
@@ -54,6 +57,7 @@ static const int LABEL_DY = 20;
     _hostOverlay = [[UIImageView alloc] initWithFrame:CGRectMake(_hostButton.frame.size.width / 3, _hostButton.frame.size.height / 4, _hostButton.frame.size.width / 3, _hostButton.frame.size.height / 3)];
     _hostSpinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
     [_hostSpinner setFrame:_hostOverlay.frame];
+    _hostSpinner.userInteractionEnabled = NO;
     _hostSpinner.hidesWhenStopped = YES;
 
     [self addSubview:_hostButton];
@@ -62,6 +66,15 @@ static const int LABEL_DY = 20;
     [self addSubview:_hostSpinner];
     
     return self;
+}
+
+- (void) hostButtonSelected:(id)sender {
+    _hostSpinner.layer.opacity = 0.5f;
+    _hostOverlay.layer.opacity = 0.5f;
+}
+- (void) hostButtonDeselected:(id)sender {
+    _hostSpinner.layer.opacity = 1.0f;
+    _hostOverlay.layer.opacity = 1.0f;
 }
 
 - (id) initForAddWithCallback:(id<HostCallback>)callback {
