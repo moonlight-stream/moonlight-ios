@@ -180,9 +180,7 @@ static UIImage* noImage;
     // Update the app image if neccessary
     if ((_appOverlay != nil && ![_app.id isEqualToString:_app.host.currentGame]) ||
         (_appOverlay == nil && [_app.id isEqualToString:_app.host.currentGame])) {
-#if !TARGET_OS_TV
         [self updateAppImage];
-#endif
     }
     
     // Stop updating when we detach from our parent view
