@@ -190,8 +190,12 @@ static const int LABEL_DY = 20;
     UIButton *previousButton = (UIButton *)context.previouslyFocusedItem;
     UIButton *nextButton = (UIButton *) context.nextFocusedItem;
     
-    previousButton.superview.backgroundColor = nil;
-    nextButton.superview.backgroundColor = [UIColor darkGrayColor];
+    if (previousButton.superview == self) {
+        self.backgroundColor = nil;
+    }
+    if (nextButton.superview == self) {
+        nextButton.superview.backgroundColor = [UIColor darkGrayColor];
+    }
 }
 #endif
 
