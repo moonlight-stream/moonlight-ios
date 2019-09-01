@@ -14,7 +14,6 @@
 
 @implementation SettingsViewController {
     NSInteger _bitrate;
-    Boolean _adjustedForSafeArea;
 }
 
 @dynamic overrideUserInterfaceStyle;
@@ -89,21 +88,21 @@ static const int bitrateTable[] = {
         self.scrollView.contentSize = CGSizeMake(self.scrollView.contentSize.width,
                                                  highestViewY + 20);
     }
+}
+
+// Adjust the subviews for the safe area on the iPhone X.
+- (void)viewSafeAreaInsetsDidChange {
+    [super viewSafeAreaInsetsDidChange];
     
-    // Adjust the subviews for the safe area on the iPhone X.
-    if (!_adjustedForSafeArea) {
-        if (@available(iOS 11.0, *)) {
-            for (UIView* view in self.view.subviews) {
-                // HACK: The official safe area is much too large for our purposes
-                // so we'll just use the presence of any safe area to indicate we should
-                // pad by 20.
-                if (self.view.safeAreaInsets.left >= 20 || self.view.safeAreaInsets.right >= 20) {
-                    view.frame = CGRectMake(view.frame.origin.x + 20, view.frame.origin.y, view.frame.size.width, view.frame.size.height);
-                }
+    if (@available(iOS 11.0, *)) {
+        for (UIView* view in self.view.subviews) {
+            // HACK: The official safe area is much too large for our purposes
+            // so we'll just use the presence of any safe area to indicate we should
+            // pad by 20.
+            if (self.view.safeAreaInsets.left >= 20 || self.view.safeAreaInsets.right >= 20) {
+                view.frame = CGRectMake(view.frame.origin.x + 20, view.frame.origin.y, view.frame.size.width, view.frame.size.height);
             }
         }
-
-        _adjustedForSafeArea = true;
     }
 }
 
