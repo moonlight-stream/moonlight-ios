@@ -8,11 +8,6 @@
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
-    <customFonts key="customFonts">
-        <array key="Roboto-Regular.ttf">
-            <string>Roboto-Regular</string>
-        </array>
-    </customFonts>
     <scenes>
         <!--Main Frame View Controller-->
         <scene sceneID="Me4-Nr-liz">
@@ -344,6 +339,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="Logo" width="32" height="32"/>
+        <image name="SettingsButton" width="75" height="75"/>
     </resources>
 </document>
