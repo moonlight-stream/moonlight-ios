@@ -20,6 +20,7 @@ static const char* TAG_APP = "App";
 static const char* TAG_APP_TITLE = "AppTitle";
 static const char* TAG_APP_ID = "ID";
 static const char* TAG_HDR_SUPPORTED = "IsHdrSupported";
+static const char* TAG_APP_INSTALL_PATH = "AppInstallPath";
 
 - (void)populateWithData:(NSData *)xml {
     self.data = xml;
@@ -68,6 +69,7 @@ static const char* TAG_HDR_SUPPORTED = "IsHdrSupported";
             NSString* appName = @"";
             NSString* appId = nil;
             NSString* hdrSupported = @"0";
+            NSString* appInstallPath = nil;
             while (appInfoNode != NULL) {
                 if (!xmlStrcmp(appInfoNode->name, (xmlChar*)TAG_APP_TITLE)) {
                     xmlChar* nodeVal = xmlNodeListGetString(docPtr, appInfoNode->xmlChildrenNode, 1);
@@ -87,7 +89,14 @@ static const char* TAG_HDR_SUPPORTED = "IsHdrSupported";
                         hdrSupported = [[NSString alloc] initWithCString:(const char*)nodeVal encoding:NSUTF8StringEncoding];
                         xmlFree(nodeVal);
                     }
+                } else if (!xmlStrcmp(appInfoNode->name, (xmlChar*)TAG_APP_INSTALL_PATH)) {
+                    xmlChar* nodeVal = xmlNodeListGetString(docPtr, appInfoNode->xmlChildrenNode, 1);
+                    if (nodeVal != NULL) {
+                        appInstallPath = [[NSString alloc] initWithCString:(const char*)nodeVal encoding:NSUTF8StringEncoding];
+                        xmlFree(nodeVal);
+                    }
                 }
+
                 appInfoNode = appInfoNode->next;
             }
             if (appId != nil) {
@@ -95,6 +104,7 @@ static const char* TAG_HDR_SUPPORTED = "IsHdrSupported";
                 app.name = appName;
                 app.id = appId;
                 app.hdrSupported = [hdrSupported intValue] != 0;
+                app.installPath = appInstallPath;
                 [_appList addObject:app];
             }
         }
@@ -114,12 +124,14 @@ static const char* TAG_HDR_SUPPORTED = "IsHdrSupported";
     TemporaryApp* officialSteamApp = nil;
     TemporaryApp* manuallyAddedSteamApp = nil;
     for (TemporaryApp* app in _appList) {
-        // The official Steam app is marked as HDR supported, while manually added ones are not.
-        if ([app.name isEqualToString:@"Steam"] && app.hdrSupported) {
-            officialSteamApp = app;
-        }
-        else if ([app.name containsString:@"steam"] || [app.name containsString:@"Steam"]) {
-            manuallyAddedSteamApp = app;
+        if (app.installPath != nil && [app.installPath hasSuffix:@"\\Steam\\"]) {
+            // The official Steam app is marked as HDR supported, while manually added ones are not.
+            if ([app.name isEqualToString:@"Steam"] && app.hdrSupported) {
+                officialSteamApp = app;
+            }
+            else {
+                manuallyAddedSteamApp = app;
+            }
         }
     }
     
