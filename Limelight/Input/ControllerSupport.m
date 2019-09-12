@@ -194,6 +194,9 @@
     [_controllerStreamLock unlock];
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 -(void) unregisterControllerCallbacks:(GCController*) controller
 {
     if (controller != NULL) {
@@ -427,6 +430,8 @@
 +(bool) isSupportedGamepad:(GCController*) controller {
     return controller.extendedGamepad != nil || controller.gamepad != nil;
 }
+
+#pragma clang diagnostic pop
 
 +(int) getGamepadCount {
     int count = 0;

@@ -44,7 +44,7 @@
     UIAlertController* _pairAlert;
     LoadingFrameViewController* _loadingFrame;
     UIScrollView* hostScrollView;
-    int currentPosition;
+    FrontViewPosition currentPosition;
     NSArray* _sortedAppList;
     NSCache* _boxArtCache;
     bool _background;

@@ -365,10 +365,11 @@
 			};
 			buildConfigurationList = FB290E2919B37A4E004C83CF /* Build configuration list for PBXProject "moonlight-common" */;
 			compatibilityVersion = "Xcode 8.0";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = FB290E2519B37A4E004C83CF;
 			productRefGroup = FB290E2F19B37A4E004C83CF /* Products */;
