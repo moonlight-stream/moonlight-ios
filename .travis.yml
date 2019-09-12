@@ -6,17 +6,17 @@ git:
 matrix:
   include:
     - os: osx
-      osx_image: xcode10.2
+      osx_image: xcode11
       env:
         - SCHEME="Moonlight"
         - TARGET="platform=iOS Simulator,OS=12.1,name=iPhone SE"
     - os: osx
-      osx_image: xcode10.2
+      osx_image: xcode11
       env:
         - SCHEME="Moonlight"
         - TARGET="platform=iOS Simulator,OS=12.1,name=iPad Pro (9.7-inch)"
     - os: osx
-      osx_image: xcode10.2
+      osx_image: xcode11
       env:
         - SCHEME="Moonlight TV"
         - TARGET="platform=tvOS Simulator,OS=12.1,name=Apple TV 4K"
