@@ -109,6 +109,18 @@ static NSMutableSet* hostList;
     });
 }
 
+- (void)disableUpButton {
+#if !TARGET_OS_TV
+    [self->_upButton setTitle:nil];
+#endif
+}
+
+- (void)enableUpButton {
+#if !TARGET_OS_TV
+    [self->_upButton setTitle:@"Select New Host"];
+#endif
+}
+
 - (void)alreadyPaired {
     BOOL usingCachedAppList = false;
     
@@ -126,11 +138,7 @@ static NSMutableSet* hostList;
             
             self.title = host.name;
             
-#if !TARGET_OS_TV
-            [self->_upButton setImage:[UIImage imageNamed:@"UpIcon"]];
-#endif
-            [self.navigationController.navigationBar setNeedsLayout];
-            
+            [self enableUpButton];
             [self updateAppsForHost:host];
             [self hideLoadingFrame: nil];
         });
@@ -173,11 +181,7 @@ static NSMutableSet* hostList;
                 }
                 
                 self.title = host.name;
-                
-#if !TARGET_OS_TV
-                [self->_upButton setImage:[UIImage imageNamed:@"UpIcon"]];
-#endif
-                [self.navigationController.navigationBar setNeedsLayout];
+                [self enableUpButton];
                 
                 [self updateAppsForHost:host];
                 [self->_appManager stopRetrieving];
@@ -251,10 +255,7 @@ static NSMutableSet* hostList;
     _selectedHost = nil;
     
     self.title = @"Select Host";
-    
-#if !TARGET_OS_TV
-    [_upButton setImage:nil];
-#endif
+    [self disableUpButton];
     
     [self.collectionView reloadData];
     [self.view addSubview:hostScrollView];
@@ -707,7 +708,7 @@ static NSMutableSet* hostList;
     // Set the host name button action. When it's tapped, it'll show the host selection view.
     [_upButton setTarget:self];
     [_upButton setAction:@selector(showHostSelectionView)];
-    [_upButton setImage:nil];
+    [self disableUpButton];
     
     // Set the gesture
     [self.view addGestureRecognizer:self.revealViewController.panGestureRecognizer];

@@ -37,12 +37,8 @@
                         </connections>
                     </collectionView>
                     <navigationItem key="navigationItem" id="pSu-bl-gL9">
-                        <barButtonItem key="leftBarButtonItem" image="SettingsButton" id="mSL-ru-nRm">
-                            <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                        </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" id="KDy-JC-2sU">
-                            <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                        </barButtonItem>
+                        <barButtonItem key="leftBarButtonItem" title="Settings" id="mSL-ru-nRm"/>
+                        <barButtonItem key="rightBarButtonItem" id="KDy-JC-2sU"/>
                     </navigationItem>
                     <connections>
                         <outlet property="settingsButton" destination="mSL-ru-nRm" id="NRf-lv-vlh"/>
@@ -351,7 +347,4 @@
             <point key="canvasLocation" x="1530.46875" y="834.9609375"/>
         </scene>
     </scenes>
-    <resources>
-        <image name="SettingsButton" width="75" height="75"/>
-    </resources>
 </document>
