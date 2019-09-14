@@ -584,46 +584,40 @@ static NSMutableSet* hostList;
                                                     }
                                                 }
                                                 [self->_discMan addHostToDiscovery:app.host];
-                                                
-                                                UIAlertController* alert;
-                                                
+
                                                 // If it fails, display an error and stop the current operation
                                                 if (quitResponse.statusCode != 200) {
-                                                    alert = [UIAlertController alertControllerWithTitle:@"Quitting App Failed"
+                                                    UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Quitting App Failed"
                                                                                                 message:@"Failed to quit app. If this app was started by "
                                                              "another device, you'll need to quit from that device."
                                                                                          preferredStyle:UIAlertControllerStyleAlert];
-                                                }
-                                                // If it succeeds and we're to start streaming, segue to the stream and return
-                                                else if (![app.id isEqualToString:currentApp.id]) {
-                                                    app.host.currentGame = @"0";
-                                                    
+                                                    [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
                                                     dispatch_async(dispatch_get_main_queue(), ^{
                                                         [self updateAppsForHost:app.host];
-                                                        [self prepareToStreamApp:app];
                                                         [self hideLoadingFrame: ^{
-                                                            [self performSegueWithIdentifier:@"createStreamFrame" sender:nil];
+                                                            [[self activeViewController] presentViewController:alert animated:YES completion:nil];
                                                         }];
                                                     });
-                                                    
-                                                    return;
                                                 }
-                                                // Otherwise, display a dialog to notify the user that the app was quit
                                                 else {
                                                     app.host.currentGame = @"0";
-                                                    
-                                                    alert = [UIAlertController alertControllerWithTitle:@"Quitting App"
-                                                                                                message:@"The app was quit successfully."
-                                                                                         preferredStyle:UIAlertControllerStyleAlert];
+                                                    dispatch_async(dispatch_get_main_queue(), ^{
+                                                        // Refresh the UI
+                                                        [self updateAppsForHost:app.host];
+                                                        
+                                                        // If it succeeds and we're to start streaming, segue to the stream
+                                                        if (![app.id isEqualToString:currentApp.id]) {
+                                                            [self prepareToStreamApp:app];
+                                                            [self hideLoadingFrame: ^{
+                                                                [self performSegueWithIdentifier:@"createStreamFrame" sender:nil];
+                                                            }];
+                                                        }
+                                                        else {
+                                                            // Otherwise, just hide the loading icon
+                                                            [self hideLoadingFrame:nil];
+                                                        }
+                                                    });
                                                 }
-                                                
-                                                [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
-                                                dispatch_async(dispatch_get_main_queue(), ^{
-                                                    [self updateAppsForHost:app.host];
-                                                    [self hideLoadingFrame: ^{
-                                                        [[self activeViewController] presentViewController:alert animated:YES completion:nil];
-                                                    }];
-                                                });
                                             });
                                         }];
                                         
