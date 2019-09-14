@@ -147,25 +147,26 @@ static UIImage* noImage;
     }
     
     if (noAppImage) {
+#if TARGET_OS_TV
         _appLabel = [[UILabel alloc] init];
         [_appLabel setTextColor:[UIColor whiteColor]];
+        [_appLabel setText:_app.name];
+        [_appLabel setFrame:self.frame];
+#else
+        _appLabel = _appButton.titleLabel;
+        [_appButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [_appButton setTitle:_app.name forState:UIControlStateNormal];
+        [_appButton setTitleEdgeInsets:UIEdgeInsetsMake(_appOverlay != nil ? _appOverlay.frame.size.height : 5, 5, 5, 5)];
+#endif
+        [_appLabel setFont:[UIFont systemFontOfSize:24]];
         [_appLabel setBaselineAdjustment:UIBaselineAdjustmentAlignCenters];
         [_appLabel setTextAlignment:NSTextAlignmentCenter];
         [_appLabel setLineBreakMode:NSLineBreakByWordWrapping];
         [_appLabel setNumberOfLines:0];
-        [_appLabel setText:_app.name];
         
 #if TARGET_OS_TV
-        [_appLabel setFont:[UIFont systemFontOfSize:24]];
-        [_appLabel setFrame: self.frame];
-        
         [_appButton addSubview:[self renderToImageView:noImage]];
 #else
-        // This padding doesn't work on Apple TV due to how we render into an ImageView
-        CGFloat padding = 4.f;
-        [_appLabel setFrame: CGRectMake(padding, padding, _appButton.frame.size.width - 2 * padding, _appButton.frame.size.height - 2 * padding)];
-        
-        [_appButton addSubview:_appLabel];
         [self addSubview:_appOverlay];
 #endif
     }
