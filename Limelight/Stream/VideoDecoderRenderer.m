@@ -20,6 +20,8 @@
     
     NSData *spsData, *ppsData, *vpsData;
     CMVideoFormatDescriptionRef formatDesc;
+    
+    CADisplayLink* _displayLink;
 }
 
 - (void)reinitializeDisplayLayer
@@ -70,12 +72,33 @@
     return self;
 }
 
-- (void)setupWithVideoFormat:(int)videoFormat
+- (void)setupWithVideoFormat:(int)videoFormat refreshRate:(int)refreshRate
 {
     self->videoFormat = videoFormat;
 #if !TARGET_OS_IPHONE
     _view.codec = videoFormat;
 #endif
+    
+    if (refreshRate > 60) {
+        // HACK: We seem to just get 60 Hz screen updates even with a 120 FPS stream if
+        // we don't set preferredFramesPerSecond somewhere. Since we're a UIKit view, we
+        // have to use CADisplayLink for that. See https://github.com/moonlight-stream/moonlight-ios/issues/372
+        _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkCallback:)];
+        if (@available(iOS 10.0, tvOS 10.0, *)) {
+            _displayLink.preferredFramesPerSecond = refreshRate;
+        }
+        [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+    }
+}
+                     
+- (void)displayLinkCallback:(CADisplayLink *)sender
+{
+    // No-op - rendering done in submitDecodeBuffer
+}
+
+- (void)cleanup
+{
+    [_displayLink invalidate];
 }
 
 #define FRAME_START_PREFIX_SIZE 4
@@ -356,8 +379,10 @@
         // Enqueue the next frame
         [self->displayLayer enqueueSampleBuffer:sampleBuffer];
         
-        // Ensure the layer is visible now
-        self->displayLayer.hidden = NO;
+        if ([self isNalReferencePicture:nalType]) {
+            // Ensure the layer is visible now
+            self->displayLayer.hidden = NO;
+        }
         
         // Dereference the buffers
         CFRelease(blockBuffer);

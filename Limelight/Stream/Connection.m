@@ -48,8 +48,13 @@ static VideoDecoderRenderer* renderer;
 
 int DrDecoderSetup(int videoFormat, int width, int height, int redrawRate, void* context, int drFlags)
 {
-    [renderer setupWithVideoFormat:videoFormat];
+    [renderer setupWithVideoFormat:videoFormat refreshRate:redrawRate];
     return 0;
+}
+
+void DrCleanup(void)
+{
+    [renderer cleanup];
 }
 
 int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit)
@@ -380,6 +385,7 @@ void ClConnectionStatusUpdate(int status)
 
     LiInitializeVideoCallbacks(&_drCallbacks);
     _drCallbacks.setup = DrDecoderSetup;
+    _drCallbacks.cleanup = DrCleanup;
     _drCallbacks.submitDecodeUnit = DrSubmitDecodeUnit;
 
     // RFI doesn't work properly with HEVC on iOS 11 with an iPhone SE (at least)

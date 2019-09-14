@@ -12,7 +12,9 @@
 
 - (id)initWithView:(OSView*)view;
 
-- (void)setupWithVideoFormat:(int)videoFormat;
+- (void)setupWithVideoFormat:(int)videoFormat refreshRate:(int)refreshRate;
+
+- (void)cleanup;
 
 - (void)updateBufferForRange:(CMBlockBufferRef)existingBuffer data:(unsigned char *)data offset:(int)offset length:(int)nalLength;
 
