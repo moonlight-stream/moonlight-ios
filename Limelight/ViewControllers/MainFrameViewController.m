@@ -677,6 +677,22 @@ static NSMutableSet* hostList;
     [_loadingFrame dismissLoadingFrame:completion];
 }
 
+- (void)adjustScrollViewForSafeArea:(UIScrollView*)view {
+    if (@available(iOS 11.0, *)) {
+        if (self.view.safeAreaInsets.left >= 20 || self.view.safeAreaInsets.right >= 20) {
+            view.contentInset = UIEdgeInsetsMake(0, 20, 0, 20);
+        }
+    }
+}
+
+// Adjust the subviews for the safe area on the iPhone X.
+- (void)viewSafeAreaInsetsDidChange {
+    [super viewSafeAreaInsetsDidChange];
+    
+    [self adjustScrollViewForSafeArea:self.collectionView];
+    [self adjustScrollViewForSafeArea:self->hostScrollView];
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
