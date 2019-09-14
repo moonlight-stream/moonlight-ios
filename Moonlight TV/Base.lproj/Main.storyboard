@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.AppleTV.Storyboard" version="3.0" toolsVersion="14313.18" targetRuntime="AppleTV" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="pui-7y-JNH">
-    <device id="appleTV" orientation="landscape">
-        <adaptation id="light"/>
-    </device>
+<document type="com.apple.InterfaceBuilder.AppleTV.Storyboard" version="3.0" toolsVersion="14868" targetRuntime="AppleTV" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="pui-7y-JNH">
+    <device id="appleTV" appearance="dark"/>
     <dependencies>
         <deployment identifier="tvOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14283.14"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14824"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -15,7 +13,7 @@
             <objects>
                 <navigationController id="pui-7y-JNH" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" translucent="NO" id="Lgd-OS-TqA">
-                        <rect key="frame" x="0.0" y="0.0" width="1920" height="145"/>
+                        <rect key="frame" x="0.0" y="60" width="1920" height="145"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <color key="barTintColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -37,7 +35,7 @@
             <objects>
                 <collectionViewController id="vKn-MI-uG7" customClass="MainFrameViewController" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" prefetchingEnabled="YES" id="8P0-wP-bDe">
-                        <rect key="frame" x="0.0" y="0.0" width="1920" height="1080"/>
+                        <rect key="frame" x="0.0" y="0.0" width="1920" height="875"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="50" minimumInteritemSpacing="50" id="m6l-TM-5FZ">
                             <size key="itemSize" width="300" height="400"/>
@@ -105,7 +103,7 @@
                         <viewControllerLayoutGuide type="bottom" id="6Xc-C7-Or1"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="CAm-nS-IFz" userLabel="RenderView" customClass="StreamView">
-                        <rect key="frame" x="0.0" y="0.0" width="1920" height="1080"/>
+                        <rect key="frame" x="0.0" y="0.0" width="1920" height="875"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="0eJ-kd-ugl" userLabel="Spinner">
