@@ -54,7 +54,7 @@
             self.width = [NSNumber numberWithInteger:1920];
             break;
     }
-    self.onscreenControls = (NSInteger)OnScreenControlsLevelOff;
+    self.onscreenControls = [NSNumber numberWithInteger:OnScreenControlsLevelOff];
 #else
     self.bitrate = settings.bitrate;
     self.framerate = settings.framerate;
