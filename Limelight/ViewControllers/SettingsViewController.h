@@ -21,7 +21,13 @@
 @property (strong, nonatomic) IBOutlet UISegmentedControl *hevcSelector;
 @property (strong, nonatomic) IBOutlet UIScrollView *scrollView;
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunguarded-availability"
+
+// This is okay because it's just an enum and access uses @available checks
 @property(nonatomic) UIUserInterfaceStyle overrideUserInterfaceStyle;
+
+#pragma clang diagnostic pop
 
 - (void) saveSettings;
 
