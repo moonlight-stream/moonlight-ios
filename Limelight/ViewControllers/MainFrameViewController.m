@@ -736,9 +736,7 @@ static NSMutableSet* hostList;
     }
     
     _boxArtCache = [[NSCache alloc] init];
-    
-    [self setAutomaticallyAdjustsScrollViewInsets:NO];
-    
+        
     hostScrollView = [[ComputerScrollView alloc] init];
     hostScrollView.frame = CGRectMake(0, self.navigationController.navigationBar.frame.origin.y + self.navigationController.navigationBar.frame.size.height, self.view.frame.size.width, self.view.frame.size.height / 2);
     [hostScrollView setShowsHorizontalScrollIndicator:NO];

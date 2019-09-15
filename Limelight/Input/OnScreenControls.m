@@ -120,7 +120,7 @@ static float L3_Y;
     _edgeDelegate = swipeDelegate;
     _deadTouches = [[NSMutableArray alloc] init];
     
-    _iPad = (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad);
+    _iPad = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad);
     _controlArea = CGRectMake(0, 0, _view.frame.size.width, _view.frame.size.height);
     if (_iPad)
     {
