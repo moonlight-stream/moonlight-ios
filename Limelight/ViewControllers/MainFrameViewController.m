@@ -709,6 +709,10 @@ static NSMutableSet* hostList;
     
     // Get callbacks associated with the viewController
     [self.revealViewController setDelegate:self];
+    
+    // Disable bounce-back on reveal VC otherwise the settings will snap closed
+    // if the user drags all the way off the screen opposite the settings pane.
+    self.revealViewController.bounceBackOnOverdraw = NO;
 #else
     _menuRecognizer = [[UITapGestureRecognizer alloc] init];
     [_menuRecognizer addTarget:self action: @selector(showHostSelectionView)];
