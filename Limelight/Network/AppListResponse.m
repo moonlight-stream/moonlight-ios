@@ -124,7 +124,7 @@ static const char* TAG_APP_INSTALL_PATH = "AppInstallPath";
     TemporaryApp* officialSteamApp = nil;
     TemporaryApp* manuallyAddedSteamApp = nil;
     for (TemporaryApp* app in _appList) {
-        if (app.installPath != nil && [app.installPath hasSuffix:@"\\Steam\\"]) {
+        if (app.installPath != nil && [[app.installPath lowercaseString] hasSuffix:@"\\steam\\"]) {
             // The official Steam app is marked as HDR supported, while manually added ones are not.
             if ([app.name isEqualToString:@"Steam"] && app.hdrSupported) {
                 officialSteamApp = app;
