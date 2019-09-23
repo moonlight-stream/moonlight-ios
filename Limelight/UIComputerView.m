@@ -10,7 +10,7 @@
 
 @implementation UIComputerView {
     TemporaryHost* _host;
-    UIButton* _hostButton;
+    UIImageView* _hostIcon;
     UILabel* _hostLabel;
     UIImageView* _hostOverlay;
     UIActivityIndicatorView* _hostSpinner;
@@ -29,50 +29,66 @@ static const int LABEL_DY = 20;
 
 - (id) init {
     self = [super init];
-    _hostButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [_hostButton setContentEdgeInsets:UIEdgeInsetsMake(0, 4, 0, 4)];
-    [_hostButton setBackgroundImage:[UIImage imageNamed:@"Computer"] forState:UIControlStateNormal];
-    [_hostButton sizeToFit];
-    
+        
 #if TARGET_OS_TV
-    _hostButton.frame = CGRectMake(0, 0, 400, 400);
+    self.frame = CGRectMake(0, 0, 400, 400);
 #else
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-        _hostButton.frame = CGRectMake(0, 0, 200, 200);
+        self.frame = CGRectMake(0, 0, 200, 200);
     } else {
-        _hostButton.frame = CGRectMake(0, 0, 100, 100);
+        self.frame = CGRectMake(0, 0, 100, 100);
     }
 #endif
     
-    _hostButton.layer.shadowColor = [[UIColor blackColor] CGColor];
-    _hostButton.layer.shadowOffset = CGSizeMake(5,8);
-    _hostButton.layer.shadowOpacity = 0.3;
+    _hostIcon = [[UIImageView alloc] initWithFrame:self.frame];
+    [_hostIcon setImage:[UIImage imageNamed:@"Computer"]];
+    
+    self.layer.shadowColor = [[UIColor blackColor] CGColor];
+    self.layer.shadowOffset = CGSizeMake(5,8);
+    self.layer.shadowOpacity = 0.3;
 
-    [_hostButton addTarget:self action:@selector(hostButtonSelected:) forControlEvents:UIControlEventTouchDown];
-    [_hostButton addTarget:self action:@selector(hostButtonDeselected:) forControlEvents:UIControlEventTouchUpInside | UIControlEventTouchCancel | UIControlEventTouchDragExit];
+    [self addTarget:self action:@selector(hostButtonSelected:) forControlEvents:UIControlEventTouchDown];
+    [self addTarget:self action:@selector(hostButtonDeselected:) forControlEvents:UIControlEventTouchUpInside | UIControlEventTouchCancel | UIControlEventTouchDragExit];
     
     _hostLabel = [[UILabel alloc] init];
     _hostLabel.textColor = [UIColor whiteColor];
     
-    _hostOverlay = [[UIImageView alloc] initWithFrame:CGRectMake(_hostButton.frame.size.width / 3, _hostButton.frame.size.height / 4, _hostButton.frame.size.width / 3, _hostButton.frame.size.height / 3)];
+    _hostOverlay = [[UIImageView alloc] initWithFrame:CGRectMake(self.frame.size.width / 3, _hostIcon.frame.size.height / 4, _hostIcon.frame.size.width / 3, self.frame.size.height / 3)];
     _hostSpinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
     [_hostSpinner setFrame:_hostOverlay.frame];
     _hostSpinner.userInteractionEnabled = NO;
     _hostSpinner.hidesWhenStopped = YES;
 
-    [self addSubview:_hostButton];
     [self addSubview:_hostLabel];
+    [self addSubview:_hostIcon];
+    
+#if TARGET_OS_TV
+    _hostIcon.clipsToBounds = NO;
+    _hostIcon.adjustsImageWhenAncestorFocused = YES;
+    _hostIcon.masksFocusEffectToContents = YES;
+    
+    self.adjustsImageWhenHighlighted = NO;
+    
+    _hostOverlay.masksFocusEffectToContents = YES;
+    _hostOverlay.adjustsImageWhenAncestorFocused = NO;
+    
+    [_hostIcon.overlayContentView addSubview:_hostOverlay];
+    [_hostIcon.overlayContentView addSubview:_hostSpinner];
+#else
     [self addSubview:_hostOverlay];
     [self addSubview:_hostSpinner];
+#endif
     
     return self;
 }
 
 - (void) hostButtonSelected:(id)sender {
+    _hostIcon.layer.opacity = 0.5f;
     _hostSpinner.layer.opacity = 0.5f;
     _hostOverlay.layer.opacity = 0.5f;
 }
 - (void) hostButtonDeselected:(id)sender {
+    _hostIcon.layer.opacity = 1.0f;
     _hostSpinner.layer.opacity = 1.0f;
     _hostOverlay.layer.opacity = 1.0f;
 }
@@ -82,17 +98,14 @@ static const int LABEL_DY = 20;
     _callback = callback;
     
     if (@available(iOS 9.0, tvOS 9.0, *)) {
-        [_hostButton addTarget:self action:@selector(addClicked) forControlEvents:UIControlEventPrimaryActionTriggered];
+        [self addTarget:self action:@selector(addClicked) forControlEvents:UIControlEventPrimaryActionTriggered];
     }
     else {
-        [_hostButton addTarget:self action:@selector(addClicked) forControlEvents:UIControlEventTouchUpInside];
+        [self addTarget:self action:@selector(addClicked) forControlEvents:UIControlEventTouchUpInside];
     }
     
     [_hostLabel setText:@"Add Host"];
     [_hostLabel sizeToFit];
-    
-    float x = _hostButton.frame.origin.x + _hostButton.frame.size.width / 2;
-    _hostLabel.center = CGPointMake(x, _hostButton.frame.origin.y + _hostButton.frame.size.height + LABEL_DY);
     
     [_hostOverlay setImage:[UIImage imageNamed:@"AddOverlayIcon"]];
     
@@ -107,17 +120,16 @@ static const int LABEL_DY = 20;
     _callback = callback;
     
     UILongPressGestureRecognizer* longPressRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(hostLongClicked:)];
-    [_hostButton addGestureRecognizer:longPressRecognizer];
+    [self addGestureRecognizer:longPressRecognizer];
     
     if (@available(iOS 9.0, tvOS 9.0, *)) {
-        [_hostButton addTarget:self action:@selector(hostClicked) forControlEvents:UIControlEventPrimaryActionTriggered];
+        [self addTarget:self action:@selector(hostClicked) forControlEvents:UIControlEventPrimaryActionTriggered];
     }
     else {
-        [_hostButton addTarget:self action:@selector(hostClicked) forControlEvents:UIControlEventTouchUpInside];
+        [self addTarget:self action:@selector(hostClicked) forControlEvents:UIControlEventTouchUpInside];
     }
     
     [self updateContentsForHost:host];
-    [self updateBounds];
     [self startUpdateLoop];
 
     return self;
@@ -129,16 +141,19 @@ static const int LABEL_DY = 20;
     float width = 0;
     float height;
     
-    x = MIN(x, _hostButton.frame.origin.x);
+    float iconX = _hostIcon.frame.origin.x + _hostIcon.frame.size.width / 2;
+    _hostLabel.center = CGPointMake(iconX, _hostIcon.frame.origin.y + _hostIcon.frame.size.height + LABEL_DY);
+    
+    x = MIN(x, _hostIcon.frame.origin.x);
     x = MIN(x, _hostLabel.frame.origin.x);
     
-    y = MIN(y, _hostButton.frame.origin.y);
+    y = MIN(y, _hostIcon.frame.origin.y);
     y = MIN(y, _hostLabel.frame.origin.y);
 
-    width = MAX(width, _hostButton.frame.size.width);
+    width = MAX(width, _hostIcon.frame.size.width);
     width = MAX(width, _hostLabel.frame.size.width);
     
-    height = _hostButton.frame.size.height +
+    height = _hostIcon.frame.size.height +
         _hostLabel.frame.size.height +
         LABEL_DY / 2;
     
@@ -167,8 +182,7 @@ static const int LABEL_DY = 20;
         [_hostSpinner startAnimating];
     }
     
-    float x = _hostButton.frame.origin.x + _hostButton.frame.size.width / 2;
-    _hostLabel.center = CGPointMake(x, _hostButton.frame.origin.y + _hostButton.frame.size.height + LABEL_DY);
+    [self updateBounds];
 }
 
 - (void) startUpdateLoop {
@@ -197,19 +211,5 @@ static const int LABEL_DY = 20;
 - (void) addClicked {
     [_callback addHostClicked];
 }
-
-#if TARGET_OS_TV
-- (void) didUpdateFocusInContext:(UIFocusUpdateContext *)context withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator {
-    UIButton *previousButton = (UIButton *)context.previouslyFocusedItem;
-    UIButton *nextButton = (UIButton *) context.nextFocusedItem;
-    
-    if (previousButton.superview == self) {
-        self.backgroundColor = nil;
-    }
-    if (nextButton.superview == self) {
-        nextButton.superview.backgroundColor = [UIColor darkGrayColor];
-    }
-}
-#endif
 
 @end

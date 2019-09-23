@@ -17,7 +17,7 @@
 
 @end
 
-@interface UIComputerView : UIView
+@interface UIComputerView : UIButton
 
 - (id) initWithComputer:(TemporaryHost*)host andCallback:(id<HostCallback>)callback;
 - (id) initForAddWithCallback:(id<HostCallback>)callback;
