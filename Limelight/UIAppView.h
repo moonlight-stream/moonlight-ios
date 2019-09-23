@@ -15,7 +15,7 @@
 
 @end
 
-@interface UIAppView : UIView
+@interface UIAppView : UIButton
 
 - (id) initWithApp:(TemporaryApp*)app cache:(NSCache*)cache andCallback:(id<AppCallback>)callback;
 - (void) updateAppImage;

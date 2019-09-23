@@ -13,9 +13,9 @@ static const float REFRESH_CYCLE = 2.0f;
 
 @implementation UIAppView {
     TemporaryApp* _app;
-    UIButton* _appButton;
     UILabel* _appLabel;
     UIImageView* _appOverlay;
+    UIImageView* _appImage;
     NSCache* _artCache;
     id<AppCallback> _callback;
 }
@@ -33,28 +33,35 @@ static UIImage* noImage;
     if (noImage == nil) {
         noImage = [UIImage imageNamed:@"NoAppImage"];
     }
-    
+        
 #if TARGET_OS_TV
-    _appButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    self.frame = CGRectMake(0, 0, 200, 265);
 #else
-    _appButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    self.frame = CGRectMake(0, 0, 150, 200);
 #endif
-    [_appButton setBackgroundImage:noImage forState:UIControlStateNormal];
-    [_appButton setContentEdgeInsets:UIEdgeInsetsMake(0, 4, 0, 4)];
-    [_appButton sizeToFit];
+    
+    _appImage = [[UIImageView alloc] initWithFrame:self.frame];
+    [_appImage setImage:noImage];
+    [self addSubview:_appImage];
+    
     if (@available(iOS 9.0, tvOS 9.0, *)) {
-        [_appButton addTarget:self action:@selector(appClicked) forControlEvents:UIControlEventPrimaryActionTriggered];
+        [self addTarget:self action:@selector(appClicked) forControlEvents:UIControlEventPrimaryActionTriggered];
     }
     else {
-        [_appButton addTarget:self action:@selector(appClicked) forControlEvents:UIControlEventTouchUpInside];
+        [self addTarget:self action:@selector(appClicked) forControlEvents:UIControlEventTouchUpInside];
     }
     
-    [self addSubview:_appButton];
-    [self sizeToFit];
+    [self addTarget:self action:@selector(buttonSelected:) forControlEvents:UIControlEventTouchDown];
+    [self addTarget:self action:@selector(buttonDeselected:) forControlEvents:UIControlEventTouchUpInside | UIControlEventTouchCancel | UIControlEventTouchDragExit];
     
+#if TARGET_OS_TV
+    _appImage.adjustsImageWhenAncestorFocused = YES;
+#else
     // Rasterizing the cell layer increases rendering performance by quite a bit
+    // but we want it unrasterized for tvOS where it must be scaled.
     self.layer.shouldRasterize = YES;
     self.layer.rasterizationScale = [UIScreen mainScreen].scale;
+#endif
     
     [self updateAppImage];
     [self startUpdateLoop];
@@ -66,52 +73,14 @@ static UIImage* noImage;
     [_callback appClicked:_app];
 }
 
-#if TARGET_OS_TV
-- (UIImageView*) renderToImageView:(UIImage*)appImage {
-    //custom image to do TvOS hover popup effect
-    UIImageView *imageView = [[UIImageView alloc] initWithImage:appImage];
-    imageView.userInteractionEnabled = YES;
-    imageView.adjustsImageWhenAncestorFocused = YES;
-    imageView.frame = self.frame;
-    UIGraphicsBeginImageContextWithOptions(self.frame.size, false, 0);
-    [imageView.layer renderInContext:(UIGraphicsGetCurrentContext())];
-    [_appLabel.layer renderInContext:(UIGraphicsGetCurrentContext())];
-    [_appOverlay.layer renderInContext:(UIGraphicsGetCurrentContext())];
-    UIImage *imageWithText = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    [imageView setImage:imageWithText];
-    [_appButton addSubview:imageView];
-    return imageView;
-}
-#endif
-
 - (void) updateAppImage {
     if (_appOverlay != nil) {
         [_appOverlay removeFromSuperview];
         _appOverlay = nil;
     }
-    
-#if TARGET_OS_TV
-    _appButton.frame = CGRectMake(0, 0, 200, 265);
-#else
-    _appButton.frame = CGRectMake(0, 0, 150, 200);
-#endif
-    
-    self.frame = _appButton.frame;
-    
-    if ([_app.id isEqualToString:_app.host.currentGame]) {
-        // Only create the app overlay if needed
-        _appOverlay = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Play"]];
-        _appOverlay.layer.shadowColor = [UIColor blackColor].CGColor;
-        _appOverlay.layer.shadowOffset = CGSizeMake(0, 0);
-        _appOverlay.layer.shadowOpacity = 1;
-        _appOverlay.layer.shadowRadius = 4.0;
-#if TARGET_OS_TV
-        _appOverlay.contentMode = UIViewContentModeScaleAspectFit;
-        _appOverlay.frame = CGRectMake(0, 0, self.frame.size.width, self.frame.size.height / 3.f);
-#else
-        _appOverlay.frame = CGRectMake(self.frame.size.width / 4, 10, self.frame.size.width / 2, self.frame.size.height / 4.f);
-#endif
+    if (_appLabel != nil) {
+        [_appLabel removeFromSuperview];
+        _appLabel = nil;
     }
     
     BOOL noAppImage = false;
@@ -125,20 +94,13 @@ static UIImage* noImage;
             [_artCache setObject:appImage forKey:_app];
         }
     }
+    
     if (appImage != nil) {
         // This size of image might be blank image received from GameStream.
         // TODO: Improve no-app image detection
         if (!(appImage.size.width == 130.f && appImage.size.height == 180.f) && // GFE 2.0
             !(appImage.size.width == 628.f && appImage.size.height == 888.f)) { // GFE 3.0
-            
-#if TARGET_OS_TV
-            [_appButton addSubview:[self renderToImageView:appImage]];
-#else
-            [self addSubview:_appOverlay];
-#endif
-            
-            [_appButton setBackgroundImage:appImage forState:UIControlStateNormal];
-            [self setNeedsDisplay];
+            [_appImage setImage:appImage];
         } else {
             noAppImage = true;
         }
@@ -146,31 +108,65 @@ static UIImage* noImage;
         noAppImage = true;
     }
     
+    if ([_app.id isEqualToString:_app.host.currentGame]) {
+        // Only create the app overlay if needed
+        _appOverlay = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Play"]];
+        _appOverlay.layer.shadowColor = [UIColor blackColor].CGColor;
+        _appOverlay.layer.shadowOffset = CGSizeMake(0, 0);
+        _appOverlay.layer.shadowOpacity = 1;
+        _appOverlay.layer.shadowRadius = 4.0;
+        _appOverlay.contentMode = UIViewContentModeScaleAspectFit;
+    }
+    
     if (noAppImage) {
-#if TARGET_OS_TV
         _appLabel = [[UILabel alloc] init];
         [_appLabel setTextColor:[UIColor whiteColor]];
         [_appLabel setText:_app.name];
-        [_appLabel setFrame:self.frame];
-#else
-        _appLabel = _appButton.titleLabel;
-        [_appButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        [_appButton setTitle:_app.name forState:UIControlStateNormal];
-        [_appButton setTitleEdgeInsets:UIEdgeInsetsMake(_appOverlay != nil ? _appOverlay.frame.size.height : 5, 5, 5, 5)];
-#endif
         [_appLabel setFont:[UIFont systemFontOfSize:24]];
         [_appLabel setBaselineAdjustment:UIBaselineAdjustmentAlignCenters];
         [_appLabel setTextAlignment:NSTextAlignmentCenter];
         [_appLabel setLineBreakMode:NSLineBreakByWordWrapping];
         [_appLabel setNumberOfLines:0];
-        
-#if TARGET_OS_TV
-        [_appButton addSubview:[self renderToImageView:noImage]];
-#else
-        [self addSubview:_appOverlay];
-#endif
     }
     
+    [self positionSubviews];
+    
+#if TARGET_OS_TV
+    [_appImage.overlayContentView addSubview:_appLabel];
+    [_appImage.overlayContentView addSubview:_appOverlay];
+#else
+    [self addSubview:_appLabel];
+    [self addSubview:_appOverlay];
+#endif
+}
+
+- (void) buttonSelected:(id)sender {
+    _appImage.layer.opacity = 0.5f;
+}
+- (void) buttonDeselected:(id)sender {
+    _appImage.layer.opacity = 1.0f;
+}
+
+- (void) positionSubviews {
+    CGFloat padding = 5.f;
+    CGSize frameSize = _appImage.frame.size;
+    CGPoint center = _appImage.center;
+    
+    if (_appLabel != nil) {
+        if (_appOverlay != nil) {
+            _appOverlay.frame = CGRectMake(0, 0, frameSize.width / 3, frameSize.width / 3);
+            _appOverlay.center = CGPointMake(frameSize.width / 2, padding + _appOverlay.frame.size.height / 2);
+            
+            [_appLabel setFrame:CGRectMake(padding, _appOverlay.frame.size.height + padding, frameSize.width - 2 * padding, frameSize.height - _appOverlay.frame.size.height - 2 * padding)];
+        }
+        else {
+            [_appLabel setFrame:CGRectMake(padding, padding, frameSize.width - 2 * padding, frameSize.height - 2 * padding)];
+        }
+    }
+    else if (_appOverlay != nil) {
+        _appOverlay.frame = CGRectMake(0, 0, frameSize.width / 2, frameSize.width / 2);
+        _appOverlay.center = center;
+    }
 }
 
 - (void) startUpdateLoop {
