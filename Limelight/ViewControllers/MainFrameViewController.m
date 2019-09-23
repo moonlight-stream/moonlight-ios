@@ -714,6 +714,10 @@ static NSMutableSet* hostList;
     // if the user drags all the way off the screen opposite the settings pane.
     self.revealViewController.bounceBackOnOverdraw = NO;
 #else
+    // Restore focus on the selected app on view controller pop navigation
+    self.restoresFocusAfterTransition = NO;
+    self.collectionView.remembersLastFocusedIndexPath = YES;
+    
     _menuRecognizer = [[UITapGestureRecognizer alloc] init];
     [_menuRecognizer addTarget:self action: @selector(showHostSelectionView)];
     _menuRecognizer.allowedPressTypes = [[NSArray alloc] initWithObjects:[NSNumber numberWithLong:UIPressTypeMenu], nil];
