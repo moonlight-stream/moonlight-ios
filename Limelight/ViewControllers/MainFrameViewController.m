@@ -714,6 +714,10 @@ static NSMutableSet* hostList;
     // if the user drags all the way off the screen opposite the settings pane.
     self.revealViewController.bounceBackOnOverdraw = NO;
 #else
+    // The settings button will direct the user into the Settings app on tvOS
+    [_settingsButton setTarget:self];
+    [_settingsButton setAction:@selector(openTvSettings:)];
+    
     // Restore focus on the selected app on view controller pop navigation
     self.restoresFocusAfterTransition = NO;
     self.collectionView.remembersLastFocusedIndexPath = YES;
@@ -761,6 +765,13 @@ static NSMutableSet* hostList;
     
     [self.view addSubview:hostScrollView];
 }
+
+#if TARGET_OS_TV
+- (void)openTvSettings:(id)sender
+{
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString] options:@{} completionHandler:nil];
+}
+#endif
 
 -(void)beginForegroundRefresh:(bool)refreshAppList
 {

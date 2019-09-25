@@ -58,8 +58,11 @@
                             <outlet property="delegate" destination="vKn-MI-uG7" id="U6n-Uv-2Do"/>
                         </connections>
                     </collectionView>
-                    <navigationItem key="navigationItem" id="4ja-Go-cNV"/>
+                    <navigationItem key="navigationItem" id="4ja-Go-cNV">
+                        <barButtonItem key="leftBarButtonItem" title="Settings" id="Iii-CS-fMJ" userLabel="Settings"/>
+                    </navigationItem>
                     <connections>
+                        <outlet property="settingsButton" destination="Iii-CS-fMJ" id="32S-2R-fU5"/>
                         <segue destination="YUB-6u-B7f" kind="show" identifier="createStreamFrame" id="7lZ-Tj-a6a"/>
                     </connections>
                 </collectionViewController>
