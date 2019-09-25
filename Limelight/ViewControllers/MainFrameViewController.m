@@ -248,7 +248,7 @@ static NSMutableSet* hostList;
 #if TARGET_OS_TV
     // Remove the menu button intercept to allow the app to exit
     // when at the host selection view.
-    [self.view removeGestureRecognizer:_menuRecognizer];
+    [self.navigationController.view removeGestureRecognizer:_menuRecognizer];
 #endif
     
     [_appManager stopRetrieving];
@@ -296,7 +296,7 @@ static NSMutableSet* hostList;
     
 #if TARGET_OS_TV
     // Intercept the menu key to go back to the host page
-    [self.view addGestureRecognizer:_menuRecognizer];
+    [self.navigationController.view addGestureRecognizer:_menuRecognizer];
 #endif
     
     // If we are online, paired, and have a cached app list, skip straight
