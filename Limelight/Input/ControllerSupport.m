@@ -214,12 +214,21 @@
 -(void) registerControllerCallbacks:(GCController*) controller
 {
     if (controller != NULL) {
-        // On iOS 13, we want to use the new buttonMenu property which lets users hold down Start.
-        // On prior versions, we must use the controllerPausedHandler.
+        // iOS 13 allows the Start button to behave like a normal button, however
+        // older MFi controllers can send an instant down+up event for the start button
+        // which means the button will not be down long enough to register on the PC.
+        // To work around this issue, use the old controllerPausedHandler if the controller
+        // doesn't have a Select button (which indicates it probably doesn't have a proper
+        // Start button either).
+        BOOL useLegacyPausedHandler = YES;
         if (@available(iOS 13.0, tvOS 13.0, *)) {
-            // Nothing - buttonMenu is already handled in valueChangedHandler
+            if (controller.extendedGamepad != nil &&
+                controller.extendedGamepad.buttonOptions != nil) {
+                useLegacyPausedHandler = NO;
+            }
         }
-        else {
+        
+        if (useLegacyPausedHandler) {
             controller.controllerPausedHandler = ^(GCController *controller) {
                 Controller* limeController = [self->_controllers objectForKey:[NSNumber numberWithInteger:controller.playerIndex]];
                 
@@ -268,12 +277,13 @@
                 }
                 
                 if (@available(iOS 13.0, tvOS 13.0, *)) {
-                    // Menu button is mandatory, so no need to check for nil
-                    UPDATE_BUTTON_FLAG(limeController, PLAY_FLAG, gamepad.buttonMenu.pressed);
-                    
                     // Options button is optional (only present on Xbox One S and PS4 gamepads)
                     if (gamepad.buttonOptions != nil) {
                         UPDATE_BUTTON_FLAG(limeController, BACK_FLAG, gamepad.buttonOptions.pressed);
+
+                        // For older MFi gamepads, the menu button will already be handled by
+                        // the controllerPausedHandler.
+                        UPDATE_BUTTON_FLAG(limeController, PLAY_FLAG, gamepad.buttonMenu.pressed);
                     }
                 }
                 
