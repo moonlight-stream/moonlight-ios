@@ -50,7 +50,11 @@
     NSString* appversion = [serverInfoResp getStringTag:@"appversion"];
     NSString* gfeVersion = [serverInfoResp getStringTag:@"GfeVersion"];
     NSString* serverState = [serverInfoResp getStringTag:@"state"];
-    if (![serverInfoResp isStatusOk] || pairStatus == NULL || appversion == NULL || serverState == NULL) {
+    if (![serverInfoResp isStatusOk]) {
+        [_callbacks launchFailed:serverInfoResp.statusMessage];
+        return;
+    }
+    else if (pairStatus == NULL || appversion == NULL || serverState == NULL) {
         [_callbacks launchFailed:@"Failed to connect to PC"];
         return;
     }

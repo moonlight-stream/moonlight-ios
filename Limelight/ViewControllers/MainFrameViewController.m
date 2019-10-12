@@ -152,7 +152,7 @@ static NSMutableSet* hostList;
         
         [self->_discMan addHostToDiscovery:host];
 
-        if (appListResp == nil || ![appListResp isStatusOk] || [appListResp getAppList] == nil) {
+        if (![appListResp isStatusOk] || [appListResp getAppList] == nil) {
             Log(LOG_W, @"Failed to get applist: %@", appListResp.statusMessage);
             dispatch_async(dispatch_get_main_queue(), ^{
                 if (host != self->_selectedHost) {
@@ -160,8 +160,8 @@ static NSMutableSet* hostList;
                     return;
                 }
                 
-                UIAlertController* applistAlert = [UIAlertController alertControllerWithTitle:@"Fetching App List Failed"
-                                                                                      message:@"The connection to the PC was interrupted."
+                UIAlertController* applistAlert = [UIAlertController alertControllerWithTitle:@"Connection Interrupted"
+                                                                                      message:appListResp.statusMessage
                                                                                preferredStyle:UIAlertControllerStyleAlert];
                 [Utils addHelpOptionToDialog:applistAlert];
                 [applistAlert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
@@ -320,7 +320,7 @@ static NSMutableSet* hostList;
                                                                 fallbackError:401 fallbackRequest:[hMan newHttpServerInfoRequest]]];
             [self->_discMan addHostToDiscovery:host];
             
-            if (serverInfoResp == nil || ![serverInfoResp isStatusOk]) {
+            if (![serverInfoResp isStatusOk]) {
                 Log(LOG_W, @"Failed to get server info: %@", serverInfoResp.statusMessage);
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (host != self->_selectedHost) {
@@ -328,8 +328,8 @@ static NSMutableSet* hostList;
                         return;
                     }
                     
-                    UIAlertController* applistAlert = [UIAlertController alertControllerWithTitle:@"Fetching Server Info Failed"
-                                                                                          message:@"The connection to the PC was interrupted."
+                    UIAlertController* applistAlert = [UIAlertController alertControllerWithTitle:@"Connection Failed"
+                                                                            message:serverInfoResp.statusMessage
                                                                                    preferredStyle:UIAlertControllerStyleAlert];
                     [Utils addHelpOptionToDialog:applistAlert];
                     [applistAlert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
