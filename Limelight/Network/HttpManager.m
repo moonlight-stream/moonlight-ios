@@ -129,6 +129,10 @@ static const NSString* HTTPS_PORT = @"47984";
             [self executeRequestSynchronously:request];
         }
     }
+    else if (_error && request.response) {
+        request.response.statusCode = [_error code];
+        request.response.statusMessage = [_error localizedDescription];
+    }
 }
 
 - (NSURLRequest*) createRequestFromString:(NSString*) urlString timeout:(int)timeout {
