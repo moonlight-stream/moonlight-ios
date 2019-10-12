@@ -412,7 +412,7 @@ static NSMutableSet* hostList;
     UIAlertController* longClickAlert = [UIAlertController alertControllerWithTitle:host.name message:message preferredStyle:UIAlertControllerStyleActionSheet];
     if (host.state != StateOnline) {
         [longClickAlert addAction:[UIAlertAction actionWithTitle:@"Wake" style:UIAlertActionStyleDefault handler:^(UIAlertAction* action){
-            UIAlertController* wolAlert = [UIAlertController alertControllerWithTitle:@"Wake On LAN" message:@"" preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertController* wolAlert = [UIAlertController alertControllerWithTitle:@"Wake-On-LAN" message:@"" preferredStyle:UIAlertControllerStyleAlert];
             [wolAlert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
             if (host.mac == nil || [host.mac isEqualToString:@"00:00:00:00:00:00"]) {
                 wolAlert.message = @"Host MAC unknown, unable to send WOL Packet";
@@ -420,7 +420,7 @@ static NSMutableSet* hostList;
                 dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                     [WakeOnLanManager wakeHost:host];
                 });
-                wolAlert.message = @"Sent WOL Packet";
+                wolAlert.message = @"Successfully sent wake-up request. It may take a few moments for the PC to wake. If it never wakes up, ensure it's properly configured for Wake-on-LAN.";
             }
             [[self activeViewController] presentViewController:wolAlert animated:YES completion:nil];
         }]];
