@@ -289,7 +289,7 @@
         // Allow the display to go to sleep now
         [UIApplication sharedApplication].idleTimerDisabled = NO;
         
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Connection Failed"
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Connection Error"
                                                                        message:message
                                                                 preferredStyle:UIAlertControllerStyleAlert];
         [Utils addHelpOptionToDialog:alert];
