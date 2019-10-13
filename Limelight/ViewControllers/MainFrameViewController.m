@@ -29,6 +29,8 @@
 
 #if !TARGET_OS_TV
 #import "SettingsViewController.h"
+#else
+#import <sys/utsname.h>
 #endif
 
 #import <VideoToolbox/VideoToolbox.h>
@@ -492,9 +494,28 @@ static NSMutableSet* hostList;
     TemporarySettings* streamSettings = [dataMan getSettings];
     
     _streamConfig.frameRate = [streamSettings.framerate intValue];
-    _streamConfig.bitRate = [streamSettings.bitrate intValue];
+    if (@available(iOS 10.3, *)) {
+        // Don't stream more FPS than the display can show
+        if (_streamConfig.frameRate > [UIScreen mainScreen].maximumFramesPerSecond) {
+            _streamConfig.frameRate = (int)[UIScreen mainScreen].maximumFramesPerSecond;
+            Log(LOG_W, @"Clamping FPS to maximum refresh rate: %d", _streamConfig.frameRate);
+        }
+    }
+    
     _streamConfig.height = [streamSettings.height intValue];
     _streamConfig.width = [streamSettings.width intValue];
+#ifdef TARGET_OS_TV
+    // Don't allow streaming 4K on the Apple TV HD
+    struct utsname systemInfo;
+    uname(&systemInfo);
+    if (strcmp(systemInfo.machine, "AppleTV5,3") == 0 && _streamConfig.height >= 2160) {
+        Log(LOG_W, @"4K streaming not supported on Apple TV HD");
+        _streamConfig.width = 1920;
+        _streamConfig.height = 1080;
+    }
+#endif
+    
+    _streamConfig.bitRate = [streamSettings.bitrate intValue];
     _streamConfig.streamingRemotely = streamSettings.streamingRemotely;
     _streamConfig.optimizeGameSettings = streamSettings.optimizeGames;
     _streamConfig.playAudioOnPC = streamSettings.playAudioOnPC;
