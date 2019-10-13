@@ -35,7 +35,7 @@
 #endif
 }
 
-#ifdef TARGET_OS_TV
+#if TARGET_OS_TV
 - (void)controllerPauseButtonPressed:(id)sender { }
 - (void)controllerPauseButtonDoublePressed:(id)sender {
     Log(LOG_I, @"Menu double-pressed -- backing out of stream");
@@ -125,7 +125,7 @@
 - (void)updateOverlayText:(NSString*)text {
     if (_overlayView == nil) {
         _overlayView = [[UITextView alloc] init];
-#ifndef TARGET_OS_TV
+#if !TARGET_OS_TV
         [_overlayView setEditable:NO];
 #endif
         [_overlayView setUserInteractionEnabled:NO];

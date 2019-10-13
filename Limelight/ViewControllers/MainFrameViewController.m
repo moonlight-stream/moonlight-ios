@@ -504,7 +504,7 @@ static NSMutableSet* hostList;
     
     _streamConfig.height = [streamSettings.height intValue];
     _streamConfig.width = [streamSettings.width intValue];
-#ifdef TARGET_OS_TV
+#if TARGET_OS_TV
     // Don't allow streaming 4K on the Apple TV HD
     struct utsname systemInfo;
     uname(&systemInfo);
