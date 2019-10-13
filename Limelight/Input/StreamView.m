@@ -38,7 +38,13 @@
     xDeltaFactor = x;
     yDeltaFactor = y;
     
+#if TARGET_OS_TV
+    // The Apple TV uses indirect touch devices, so they should
+    // not be scaled by the screen scaling factor.
+    screenFactor = 1.0f;
+#else
     screenFactor = [[UIScreen mainScreen] scale];
+#endif
 }
 
 - (void) setupStreamView {
