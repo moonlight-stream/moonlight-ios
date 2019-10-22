@@ -31,9 +31,9 @@
     [[NSUserDefaults standardUserDefaults] registerDefaults:defaultsToRegister];
     
     self.bitrate = [NSNumber numberWithInteger:[[NSUserDefaults standardUserDefaults] integerForKey:@"bitrate"]];
-    assert(self.bitrate);
+    assert([self.bitrate intValue] != 0);
     self.framerate = [NSNumber numberWithInteger:[[NSUserDefaults standardUserDefaults] integerForKey:@"framerate"]];
-    assert(self.framerate);
+    assert([self.framerate intValue] != 0);
     self.useHevc = [[NSUserDefaults standardUserDefaults] boolForKey:@"useHevc"];
     self.playAudioOnPC = [[NSUserDefaults standardUserDefaults] boolForKey:@"audioOnPC"];
     self.enableHdr = [[NSUserDefaults standardUserDefaults] boolForKey:@"enableHdr"];
