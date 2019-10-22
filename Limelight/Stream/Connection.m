@@ -110,7 +110,6 @@ int ArInit(int audioConfiguration, POPUS_MULTISTREAM_CONFIGURATION opusConfig, v
                                                   opusConfig->mapping,
                                                   &err);
 
-#if TARGET_OS_IPHONE
     // Configure the audio session for our app
     NSError *audioSessionError = nil;
     AVAudioSession* audioSession = [AVAudioSession sharedInstance];
@@ -122,7 +121,6 @@ int ArInit(int audioConfiguration, POPUS_MULTISTREAM_CONFIGURATION opusConfig, v
     
     // FIXME: Calling this breaks surround audio for some reason
     //[audioSession setPreferredOutputNumberOfChannels:opusConfig->channelCount error:&audioSessionError];
-#endif
     
     OSStatus status;
     
@@ -203,10 +201,8 @@ void ArCleanup(void)
         audioCircularBuffer = NULL;
     }
     
-#if TARGET_OS_IPHONE
     // Audio session is now inactive
     [[AVAudioSession sharedInstance] setActive: NO error: nil];
-#endif
 }
 
 void ArDecodeAndPlaySample(char* sampleData, int sampleLength)
@@ -358,7 +354,6 @@ void ClConnectionStatusUpdate(int status)
         config.allowHevc = YES;
     }
 
-#if TARGET_OS_IPHONE
     // On iOS 11, we can use HEVC if the server supports encoding it
     // and this device has hardware decode for it (A9 and later).
     // Additionally, iPhone X had a bug which would cause video
@@ -367,13 +362,6 @@ void ClConnectionStatusUpdate(int status)
     if (@available(iOS 11.3, tvOS 11.3, *)) {
         _streamConfig.supportsHevc = config.allowHevc && VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC);
     }
-#else
-    if (@available(macOS 10.13, *)) {
-        // Streaming with limited bandwidth will result in better quality with HEVC
-        if (VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC) || _streamConfig.streamingRemotely != 0)
-            _streamConfig.supportsHevc = config.allowHevc;
-    }
-#endif
     
     // HEVC must be supported when HDR is enabled
     assert(!_streamConfig.enableHdr || _streamConfig.supportsHevc);

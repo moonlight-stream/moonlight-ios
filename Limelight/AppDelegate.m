@@ -18,13 +18,10 @@ static NSOperationQueue* mainQueue;
 
 #if TARGET_OS_TV
 static NSString* DB_NAME = @"Moonlight_tvOS.bin";
-#elif TARGET_OS_IPHONE
-static NSString* DB_NAME = @"Limelight_iOS.sqlite";
 #else
-static NSString* DB_NAME = @"moonlight_mac.sqlite";
+static NSString* DB_NAME = @"Limelight_iOS.sqlite";
 #endif
 
-#if TARGET_OS_IPHONE
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     
@@ -58,17 +55,6 @@ static NSString* DB_NAME = @"moonlight_mac.sqlite";
     // Saves changes in the application's managed object context before the application terminates.
     [self saveContext];
 }
-#else
-- (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
-    // Insert code here to initialize your application
-}
-
-- (void)applicationWillTerminate:(NSNotification *)aNotification {
-    // Insert code here to tear down your application
-    [self saveContext];
-}
-
-#endif
 
 - (void)saveContext
 {

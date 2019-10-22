@@ -24,16 +24,12 @@ static const int MAX_ATTEMPTS = 5;
         AppAssetResponse* appAssetResp = [[AppAssetResponse alloc] init];
         [hMan executeRequestSynchronously:[HttpRequest requestForResponse:appAssetResp withUrlRequest:[hMan newAppAssetRequestWithAppId:self.app.id]]];
 
-#if TARGET_OS_IPHONE
         if (appAssetResp.data != nil) {
             NSString* boxArtPath = [AppAssetManager boxArtPathForApp:self.app];
             [[NSFileManager defaultManager] createDirectoryAtPath:[boxArtPath stringByDeletingLastPathComponent] withIntermediateDirectories:YES attributes:nil error:nil];
             [appAssetResp.data writeToFile:boxArtPath atomically:NO];
             break;
         }
-#else
-        
-#endif
         
         if (![self isCancelled]) {
             [NSThread sleepForTimeInterval:RETRY_DELAY];

@@ -10,10 +10,6 @@
 #import "Controller.h"
 
 #import "OnScreenControls.h"
-#if !TARGET_OS_IPHONE
-#import "Gamepad.h"
-#import "Control.h"
-#endif
 
 #import "DataManager.h"
 #include "Limelight.h"
@@ -364,9 +360,7 @@
         }
     }
     
-#if TARGET_OS_IPHONE
     [_osc setLevel:level];
-#endif
 }
 
 -(void) initAutoOnScreenControlMode:(OnScreenControls*)osc
@@ -402,40 +396,9 @@
     }
 }
 
-#if TARGET_OS_IPHONE
 -(Controller*) getOscController {
     return _player0osc;
 }
-#else
--(NSMutableDictionary*) getControllers {
-    return _controllers;
-}
-
--(void) assignGamepad:(struct Gamepad_device *)gamepad {
-    for (int i = 0; i < 4; i++) {
-        if (!(_controllerNumbers & (1 << i))) {
-            _controllerNumbers |= (1 << i);
-            gamepad->deviceID = i;
-            NSLog(@"Gamepad device id: %u assigned", gamepad->deviceID);
-            Controller* limeController;
-            limeController = [[Controller alloc] init];
-            limeController.playerIndex = i;
-            
-            [_controllers setObject:limeController forKey:[NSNumber numberWithInteger:i]];
-            break;
-        }
-    }
-}
-
--(void) removeGamepad:(struct Gamepad_device *)gamepad {
-    _controllerNumbers &= ~(1 << gamepad->deviceID);
-    Log(LOG_I, @"Unassigning controller index: %ld", (long)gamepad->deviceID);
-    
-    // Inform the server of the updated active gamepads before removing this controller
-    [self updateFinished:[_controllers objectForKey:[NSNumber numberWithInteger:gamepad->deviceID]]];
-    [_controllers removeObjectForKey:[NSNumber numberWithInteger:gamepad->deviceID]];
-}
-#endif
 
 +(bool) isSupportedGamepad:(GCController*) controller {
     return controller.extendedGamepad != nil || controller.gamepad != nil;
@@ -472,7 +435,6 @@
         mask = 0x1;
     }
     
-#if TARGET_OS_IPHONE
     DataManager* dataMan = [[DataManager alloc] init];
     OnScreenControlsLevel level = (OnScreenControlsLevel)[[dataMan getSettings].onscreenControls integerValue];
     
@@ -481,7 +443,6 @@
     if (level != OnScreenControlsLevelOff) {
         mask |= 0x1;
     }
-#endif
     
     return mask;
 }
@@ -515,14 +476,8 @@
     _player0osc = [[Controller alloc] init];
     _player0osc.playerIndex = 0;
 
-#if TARGET_OS_IPHONE
     DataManager* dataMan = [[DataManager alloc] init];
     _oscEnabled = (OnScreenControlsLevel)[[dataMan getSettings].onscreenControls integerValue] != OnScreenControlsLevelOff;
-#else
-    _oscEnabled = false;
-    initGamepad(self);
-    Gamepad_detectDevices();
-#endif
     
     _rumbleTimer = [NSTimer scheduledTimerWithTimeInterval:0.20
                                                     target:self

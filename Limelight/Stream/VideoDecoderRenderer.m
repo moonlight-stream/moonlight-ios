@@ -75,9 +75,6 @@
 - (void)setupWithVideoFormat:(int)videoFormat refreshRate:(int)refreshRate
 {
     self->videoFormat = videoFormat;
-#if !TARGET_OS_IPHONE
-    _view.codec = videoFormat;
-#endif
     
     if (refreshRate > 60) {
         // HACK: We seem to just get 60 Hz screen updates even with a 120 FPS stream if
@@ -255,11 +252,7 @@
                 
                 Log(LOG_I, @"Constructing new HEVC format description");
 
-#if TARGET_OS_IPHONE
                 if (@available(iOS 11.0, *)) {
-#else
-                if (@available(macOS 10.13, *)) {
-#endif
                     status = CMVideoFormatDescriptionCreateFromHEVCParameterSets(kCFAllocatorDefault,
                                                                                  3, /* count of parameter sets */
                                                                                  parameterSetPointers,
@@ -369,10 +362,6 @@
         CFDictionarySetValue(dict, kCMSampleAttachmentKey_NotSync, kCFBooleanFalse);
         CFDictionarySetValue(dict, kCMSampleAttachmentKey_DependsOnOthers, kCFBooleanFalse);
     }
-
-#if !TARGET_OS_IPHONE
-    _view.frameCount++;
-#endif
 
     // Enqueue video samples on the main thread
     dispatch_async(dispatch_get_main_queue(), ^{

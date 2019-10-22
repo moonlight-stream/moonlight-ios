@@ -17,12 +17,7 @@
     self.statusCode = -1;
 }
 - (OSImage*) getImage {
-#if TARGET_OS_IPHONE
-    OSImage* appImage = [[OSImage alloc] initWithData:self.data];
-#else
-    OSImage* appImage = nil;
-#endif
-    return appImage;
+    return [[OSImage alloc] initWithData:self.data];
 }
 
 @end
