@@ -58,7 +58,7 @@
     self.spinner.center = CGPointMake(self.view.frame.size.width / 2, self.view.frame.size.height / 2 - self.stageLabel.frame.size.height - self.spinner.frame.size.height);
     [UIApplication sharedApplication].idleTimerDisabled = YES;
     
-    _controllerSupport = [[ControllerSupport alloc] initWithConfig:self.streamConfig];
+    _controllerSupport = [[ControllerSupport alloc] initWithConfig:self.streamConfig presenceDelegate:self];
     _inactivityTimer = nil;
     
     _streamView = (StreamView*)self.view;
@@ -335,10 +335,34 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (void)gamepadPresenceChanged {
+#if !TARGET_OS_TV
+    if (@available(iOS 11.0, *)) {
+        [self setNeedsUpdateOfHomeIndicatorAutoHidden];
+    }
+#endif
+}
+
 #if !TARGET_OS_TV
 // Require a confirmation when streaming to activate a system gesture
 - (UIRectEdge)preferredScreenEdgesDeferringSystemGestures {
     return UIRectEdgeAll;
+}
+
+- (BOOL)prefersHomeIndicatorAutoHidden {
+    if ([_controllerSupport getConnectedGamepadCount] > 0 &&
+        [_streamView getCurrentOscState] == OnScreenControlsLevelOff) {
+        // Autohide the home bar when a gamepad is connected
+        // and the on-screen controls are disabled. We can't
+        // do this all the time because any touch on the display
+        // will cause the home indicator to reappear, and our
+        // preferredScreenEdgesDeferringSystemGestures will also
+        // be suppressed (leading to possible errant exits of the
+        // stream).
+        return YES;
+    }
+    
+    return NO;
 }
 
 - (BOOL)shouldAutorotate {

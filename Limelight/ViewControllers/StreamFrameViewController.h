@@ -15,9 +15,9 @@
 #if TARGET_OS_TV
 @import GameController;
 
-@interface StreamFrameViewController : GCEventViewController <ConnectionCallbacks, EdgeDetectionDelegate>
+@interface StreamFrameViewController : GCEventViewController <ConnectionCallbacks, EdgeDetectionDelegate, GamepadPresenceDelegate>
 #else
-@interface StreamFrameViewController : UIViewController <ConnectionCallbacks, EdgeDetectionDelegate>
+@interface StreamFrameViewController : UIViewController <ConnectionCallbacks, EdgeDetectionDelegate, GamepadPresenceDelegate>
 #endif
 @property (strong, nonatomic) IBOutlet UILabel *stageLabel;
 @property (strong, nonatomic) IBOutlet UILabel *tipLabel;

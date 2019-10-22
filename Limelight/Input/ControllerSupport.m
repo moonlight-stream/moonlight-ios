@@ -21,6 +21,7 @@
     NSLock *_controllerStreamLock;
     NSMutableDictionary *_controllers;
     NSTimer *_rumbleTimer;
+    id<GamepadPresenceDelegate> _presenceDelegate;
     
     OnScreenControls *_osc;
     
@@ -464,7 +465,12 @@
     }
 }
 
--(id) initWithConfig:(StreamConfiguration*)streamConfig
+-(NSUInteger) getConnectedGamepadCount
+{
+    return _controllers.count;
+}
+
+-(id) initWithConfig:(StreamConfiguration*)streamConfig presenceDelegate:(id<GamepadPresenceDelegate>)delegate
 {
     self = [super init];
     
@@ -472,6 +478,7 @@
     _controllers = [[NSMutableDictionary alloc] init];
     _controllerNumbers = 0;
     _multiController = streamConfig.multiController;
+    _presenceDelegate = delegate;
 
     _player0osc = [[Controller alloc] init];
     _player0osc.playerIndex = 0;
@@ -513,6 +520,9 @@
         
         // Re-evaluate the on-screen control mode
         [self updateAutoOnScreenControlMode];
+        
+        // Notify the delegate
+        [self->_presenceDelegate gamepadPresenceChanged];
     }];
     self.disconnectObserver = [[NSNotificationCenter defaultCenter] addObserverForName:GCControllerDidDisconnectNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
         Log(LOG_I, @"Controller disconnected!");
@@ -538,6 +548,9 @@
 
         // Re-evaluate the on-screen control mode
         [self updateAutoOnScreenControlMode];
+        
+        // Notify the delegate
+        [self->_presenceDelegate gamepadPresenceChanged];
     }];
     return self;
 }

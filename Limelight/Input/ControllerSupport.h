@@ -11,9 +11,15 @@
 
 @class OnScreenControls;
 
+@protocol GamepadPresenceDelegate <NSObject>
+
+- (void) gamepadPresenceChanged;
+
+@end
+
 @interface ControllerSupport : NSObject
 
--(id) initWithConfig:(StreamConfiguration*)streamConfig;
+-(id) initWithConfig:(StreamConfiguration*)streamConfig presenceDelegate:(id<GamepadPresenceDelegate>)delegate;
 
 -(void) initAutoOnScreenControlMode:(OnScreenControls*)osc;
 -(void) cleanup;
@@ -35,6 +41,8 @@
 -(void) rumble:(unsigned short)controllerNumber lowFreqMotor:(unsigned short)lowFreqMotor highFreqMotor:(unsigned short)highFreqMotor;
 
 +(int) getConnectedGamepadMask:(StreamConfiguration*)streamConfig;
+
+-(NSUInteger) getConnectedGamepadCount;
 
 @property (nonatomic, strong) id connectObserver;
 @property (nonatomic, strong) id disconnectObserver;
