@@ -202,7 +202,7 @@
     if (![resp isStatusOk]) {
         return false;
     } else {
-        long pairedStatus;
+        NSInteger pairedStatus;
         
         if (![resp getIntTag:@"paired" value:&pairedStatus]) {
             return false;
