@@ -7,6 +7,7 @@
 //
 
 #import "OnScreenControls.h"
+#import "StreamView.h"
 #import "ControllerSupport.h"
 #import "Controller.h"
 #include "Limelight.h"
@@ -64,6 +65,7 @@
     CGRect _controlArea;
     UIView* _view;
     OnScreenControlsLevel _level;
+    BOOL _visible;
     
     ControllerSupport *_controllerSupport;
     Controller *_controller;
@@ -156,14 +158,29 @@ static float L3_Y;
     _rightStick = [CALayer layer];
     _edge = [CALayer layer];
     
+    return self;
+}
+
+- (void) show {
+    _visible = YES;
+    
     [self setupEdgeDetection];
     
-    return self;
+    [self updateControls];
 }
 
 - (void) setLevel:(OnScreenControlsLevel)level {
     _level = level;
-    [self updateControls];
+    
+    // Only update controls if we're showing, otherwise
+    // show will do it for us.
+    if (_visible) {
+        [self updateControls];
+    }
+}
+
+- (OnScreenControlsLevel) getLevel {
+    return _level;
 }
 
 - (void) updateControls {

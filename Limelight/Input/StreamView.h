@@ -7,6 +7,7 @@
 //
 
 #import "ControllerSupport.h"
+#import "OnScreenControls.h"
 
 @protocol EdgeDetectionDelegate <NSObject>
 
@@ -18,8 +19,9 @@
 
 @property (nonatomic, retain) IBOutlet UITextField* keyInputField;
 
-- (void) setupStreamView;
-- (void) setupOnScreenControls:(ControllerSupport*)controllerSupport swipeDelegate:(id<EdgeDetectionDelegate>)swipeDelegate;
+- (void) setupStreamView:(ControllerSupport*)controllerSupport swipeDelegate:(id<EdgeDetectionDelegate>)swipeDelegate;
+- (void) showOnScreenControls;
 - (void) setMouseDeltaFactors:(float)x y:(float)y;
+- (OnScreenControlsLevel) getCurrentOscState;
 
 @end

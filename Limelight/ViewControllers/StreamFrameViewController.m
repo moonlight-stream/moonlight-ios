@@ -24,6 +24,7 @@
     UITapGestureRecognizer *_menuGestureRecognizer;
     UITapGestureRecognizer *_menuDoubleTapGestureRecognizer;
     UITextView *_overlayView;
+    StreamView *_streamView;
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -50,8 +51,6 @@
     
     [self.navigationController setNavigationBarHidden:YES animated:YES];
     
-    [(StreamView*)self.view setupStreamView];
-    
     [self.stageLabel setText:[NSString stringWithFormat:@"Starting %@...", self.streamConfig.appName]];
     [self.stageLabel sizeToFit];
     self.stageLabel.textAlignment = NSTextAlignmentCenter;
@@ -61,6 +60,10 @@
     
     _controllerSupport = [[ControllerSupport alloc] initWithConfig:self.streamConfig];
     _inactivityTimer = nil;
+    
+    _streamView = (StreamView*)self.view;
+    [_streamView setupStreamView:_controllerSupport swipeDelegate:self];
+    
 #if TARGET_OS_TV
     if (!_menuGestureRecognizer || !_menuDoubleTapGestureRecognizer) {
         _menuGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(controllerPauseButtonPressed:)];
@@ -221,9 +224,8 @@
         // the first frame of video.
         self.stageLabel.hidden = YES;
         self.tipLabel.hidden = YES;
-#if !TARGET_OS_TV
-        [(StreamView*)self.view setupOnScreenControls: self->_controllerSupport swipeDelegate:self];
-#endif
+        
+        [self->_streamView showOnScreenControls];
     });
 }
 

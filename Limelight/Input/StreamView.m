@@ -8,7 +8,6 @@
 
 #import "StreamView.h"
 #include <Limelight.h>
-#import "OnScreenControls.h"
 #import "DataManager.h"
 #import "ControllerSupport.h"
 #import "KeyboardSupport.h"
@@ -47,7 +46,7 @@
 #endif
 }
 
-- (void) setupStreamView {
+- (void) setupStreamView:(ControllerSupport*)controllerSupport swipeDelegate:(id<EdgeDetectionDelegate>)swipeDelegate {
 #if TARGET_OS_TV
     remotePressRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(remoteButtonPressed:)];
     remotePressRecognizer.allowedPressTypes = @[@(UIPressTypeSelect)];
@@ -57,14 +56,10 @@
     
     [self addGestureRecognizer:remotePressRecognizer];
     [self addGestureRecognizer:remoteLongPressRecognizer];
-#endif
-}
-
-- (void) setupOnScreenControls:(ControllerSupport*)controllerSupport swipeDelegate:(id<EdgeDetectionDelegate>)swipeDelegate {
+#else
     onScreenControls = [[OnScreenControls alloc] initWithView:self controllerSup:controllerSupport swipeDelegate:swipeDelegate];
     DataManager* dataMan = [[DataManager alloc] init];
     OnScreenControlsLevel level = (OnScreenControlsLevel)[[dataMan getSettings].onscreenControls integerValue];
-    
     if (level == OnScreenControlsLevelAuto) {
         [controllerSupport initAutoOnScreenControlMode:onScreenControls];
     }
@@ -72,7 +67,23 @@
         Log(LOG_I, @"Setting manual on-screen controls level: %d", (int)level);
         [onScreenControls setLevel:level];
     }
+#endif
+}
+
+- (void) showOnScreenControls {
+#if !TARGET_OS_TV
+    [onScreenControls show];
     [self becomeFirstResponder];
+#endif
+}
+
+- (OnScreenControlsLevel) getCurrentOscState {
+    if (onScreenControls == nil) {
+        return OnScreenControlsLevelOff;
+    }
+    else {
+        return [onScreenControls getLevel];
+    }
 }
 
 - (Boolean)isConfirmedMove:(CGPoint)currentPoint from:(CGPoint)originalPoint {
