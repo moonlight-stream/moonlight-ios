@@ -30,6 +30,10 @@
     UIGestureRecognizer* remoteLongPressRecognizer;
 #endif
     
+    id<UserInteractionDelegate> interactionDelegate;
+    NSTimer* interactionTimer;
+    BOOL hasUserInteracted;
+    
     NSDictionary<NSString *, NSNumber *> *dictCodes;
 }
 
@@ -46,7 +50,8 @@
 #endif
 }
 
-- (void) setupStreamView:(ControllerSupport*)controllerSupport swipeDelegate:(id<EdgeDetectionDelegate>)swipeDelegate {
+- (void) setupStreamView:(ControllerSupport*)controllerSupport swipeDelegate:(id<EdgeDetectionDelegate>)swipeDelegate interactionDelegate:(id<UserInteractionDelegate>)interactionDelegate {
+    self->interactionDelegate = interactionDelegate;
 #if TARGET_OS_TV
     remotePressRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(remoteButtonPressed:)];
     remotePressRecognizer.allowedPressTypes = @[@(UIPressTypeSelect)];
@@ -68,6 +73,38 @@
         [onScreenControls setLevel:level];
     }
 #endif
+}
+
+- (void)startInteractionTimer {
+    // Restart user interaction tracking
+    hasUserInteracted = NO;
+    
+    BOOL timerAlreadyRunning = interactionTimer != nil;
+    
+    // Start/restart the timer
+    [interactionTimer invalidate];
+    interactionTimer = [NSTimer scheduledTimerWithTimeInterval:2.0
+                        target:self
+                        selector:@selector(interactionTimerExpired:)
+                        userInfo:nil
+                        repeats:NO];
+    
+    // Notify the delegate if this was a new user interaction
+    if (!timerAlreadyRunning) {
+        [interactionDelegate userInteractionBegan];
+    }
+}
+
+- (void)interactionTimerExpired:(NSTimer *)timer {
+    if (!hasUserInteracted) {
+        // User has finished touching the screen
+        interactionTimer = nil;
+        [interactionDelegate userInteractionEnded];
+    }
+    else {
+        // User is still touching the screen. Restart the timer.
+        [self startInteractionTimer];
+    }
 }
 
 - (void) showOnScreenControls {
@@ -93,6 +130,10 @@
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     Log(LOG_D, @"Touch down");
+    
+    // Notify of user interaction and start expiration timer
+    [self startInteractionTimer];
+    
     if (![onScreenControls handleTouchDownEvent:touches]) {
         UITouch *touch = [[event allTouches] anyObject];
         originalLocation = touchLocation = [touch locationInView:self];
@@ -115,6 +156,8 @@
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+    hasUserInteracted = YES;
+    
     if (![onScreenControls handleTouchMovedEvent:touches]) {
         if ([[event allTouches] count] == 1) {
             UITouch *touch = [[event allTouches] anyObject];
@@ -163,6 +206,9 @@
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
     Log(LOG_D, @"Touch up");
+    
+    hasUserInteracted = YES;
+    
     if (![onScreenControls handleTouchUpEvent:touches]) {
         [dragTimer invalidate];
         dragTimer = nil;

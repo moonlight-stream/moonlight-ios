@@ -25,6 +25,7 @@
     UITapGestureRecognizer *_menuDoubleTapGestureRecognizer;
     UITextView *_overlayView;
     StreamView *_streamView;
+    BOOL _userIsInteracting;
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -62,7 +63,7 @@
     _inactivityTimer = nil;
     
     _streamView = (StreamView*)self.view;
-    [_streamView setupStreamView:_controllerSupport swipeDelegate:self];
+    [_streamView setupStreamView:_controllerSupport swipeDelegate:self interactionDelegate:self];
     
 #if TARGET_OS_TV
     if (!_menuGestureRecognizer || !_menuDoubleTapGestureRecognizer) {
@@ -343,6 +344,29 @@
 #endif
 }
 
+- (void)userInteractionBegan {
+    // Disable hiding home bar when user is interacting.
+    // iOS will force it to be shown anyway, but it will
+    // also discard our edges deferring system gestures unless
+    // we willingly give up home bar hiding preference.
+    _userIsInteracting = YES;
+#if !TARGET_OS_TV
+    if (@available(iOS 11.0, *)) {
+        [self setNeedsUpdateOfHomeIndicatorAutoHidden];
+    }
+#endif
+}
+
+- (void)userInteractionEnded {
+    // Enable home bar hiding again if conditions allow
+    _userIsInteracting = NO;
+#if !TARGET_OS_TV
+    if (@available(iOS 11.0, *)) {
+        [self setNeedsUpdateOfHomeIndicatorAutoHidden];
+    }
+#endif
+}
+
 #if !TARGET_OS_TV
 // Require a confirmation when streaming to activate a system gesture
 - (UIRectEdge)preferredScreenEdgesDeferringSystemGestures {
@@ -351,7 +375,8 @@
 
 - (BOOL)prefersHomeIndicatorAutoHidden {
     if ([_controllerSupport getConnectedGamepadCount] > 0 &&
-        [_streamView getCurrentOscState] == OnScreenControlsLevelOff) {
+        [_streamView getCurrentOscState] == OnScreenControlsLevelOff &&
+        _userIsInteracting == NO) {
         // Autohide the home bar when a gamepad is connected
         // and the on-screen controls are disabled. We can't
         // do this all the time because any touch on the display

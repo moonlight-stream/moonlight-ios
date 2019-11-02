@@ -15,11 +15,18 @@
 
 @end
 
+@protocol UserInteractionDelegate <NSObject>
+
+- (void) userInteractionBegan;
+- (void) userInteractionEnded;
+
+@end
+
 @interface StreamView : OSView <UITextFieldDelegate>
 
 @property (nonatomic, retain) IBOutlet UITextField* keyInputField;
 
-- (void) setupStreamView:(ControllerSupport*)controllerSupport swipeDelegate:(id<EdgeDetectionDelegate>)swipeDelegate;
+- (void) setupStreamView:(ControllerSupport*)controllerSupport swipeDelegate:(id<EdgeDetectionDelegate>)swipeDelegate interactionDelegate:(id<UserInteractionDelegate>)interactionDelegate;
 - (void) showOnScreenControls;
 - (void) setMouseDeltaFactors:(float)x y:(float)y;
 - (OnScreenControlsLevel) getCurrentOscState;
