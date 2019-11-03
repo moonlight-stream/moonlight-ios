@@ -138,9 +138,6 @@ static NSMutableSet* hostList;
                 return;
             }
             
-            self.title = host.name;
-            
-            [self enableUpButton];
             [self updateAppsForHost:host];
             [self hideLoadingFrame: nil];
         });
@@ -181,9 +178,6 @@ static NSMutableSet* hostList;
                     [self hideLoadingFrame: nil];
                     return;
                 }
-                
-                self.title = host.name;
-                [self enableUpButton];
                 
                 [self updateAppsForHost:host];
                 [self->_appManager stopRetrieving];
@@ -299,6 +293,8 @@ static NSMutableSet* hostList;
     
     Log(LOG_D, @"Clicked host: %@", host.name);
     _selectedHost = host;
+    self.title = host.name;
+    [self enableUpButton];
     [self disableNavigation];
     
 #if TARGET_OS_TV
