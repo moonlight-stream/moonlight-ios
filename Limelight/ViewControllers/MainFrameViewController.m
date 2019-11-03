@@ -64,39 +64,37 @@ static NSMutableSet* hostList;
         [self->_pairAlert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDestructive handler:^(UIAlertAction* action) {
             self->_pairAlert = nil;
             [self->_discMan startDiscovery];
-            [self hideLoadingFrame: nil];
+            [self hideLoadingFrame: ^{
+                [self showHostSelectionView];
+            }];
         }]];
         [[self activeViewController] presentViewController:self->_pairAlert animated:YES completion:nil];
     });
 }
 
-- (void)displayFailureDialog:(NSString *)message {
+- (void)displayPairingFailureDialog:(NSString *)message {
     UIAlertController* failedDialog = [UIAlertController alertControllerWithTitle:@"Pairing Failed"
                                                                           message:message
                                                                    preferredStyle:UIAlertControllerStyleAlert];
     [Utils addHelpOptionToDialog:failedDialog];
     [failedDialog addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
     
+    [_discMan startDiscovery];
+    
     [self hideLoadingFrame: ^{
+        [self showHostSelectionView];
         [[self activeViewController] presentViewController:failedDialog animated:YES completion:nil];
     }];
-    
-    [_discMan startDiscovery];
 }
 
 - (void)pairFailed:(NSString *)message {
     dispatch_async(dispatch_get_main_queue(), ^{
         if (self->_pairAlert != nil) {
             [self->_pairAlert dismissViewControllerAnimated:YES completion:^{
-                [self displayFailureDialog:message];
+                [self displayPairingFailureDialog:message];
             }];
             self->_pairAlert = nil;
         }
-        else {
-            [self displayFailureDialog:message];
-        }
-        
-        [self->_discMan startDiscovery];
     });
 }
 
@@ -170,10 +168,10 @@ static NSMutableSet* hostList;
                 [Utils addHelpOptionToDialog:applistAlert];
                 [applistAlert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
                 [self hideLoadingFrame: ^{
+                    [self showHostSelectionView];
                     [[self activeViewController] presentViewController:applistAlert animated:YES completion:nil];
                 }];
                 host.state = StateOffline;
-                [self showHostSelectionView];
             });
         } else {
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -346,13 +344,13 @@ static NSMutableSet* hostList;
                     // Only display an alert if this was the result of a real
                     // user action, not just passively entering the foreground again
                     [self hideLoadingFrame: ^{
+                        [self showHostSelectionView];
                         if (view != nil) {
                             [[self activeViewController] presentViewController:applistAlert animated:YES completion:nil];
                         }
                     }];
                     
                     host.state = StateOffline;
-                    [self showHostSelectionView];
                 });
             } else {
                 // Update the host object with this data
