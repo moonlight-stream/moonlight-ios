@@ -89,8 +89,9 @@ static const float POLL_RATE = 2.0f; // Poll every 2 seconds
     
     Log(LOG_D, @"%@ has %d unique addresses", _host.name, [addresses count]);
     
-    // Give the PC 2 tries to respond before declaring it offline
-    for (int i = 0; i < 2; i++) {
+    // Give the PC 2 tries to respond before declaring it offline if we've seen it before.
+    // If this is an unknown PC, update the status after 1 attempt to get the UI refreshed quickly.
+    for (int i = 0; i < (_host.state == StateUnknown ? 1 : 2); i++) {
         for (NSString *address in addresses) {
             if (self.cancelled) {
                 // Get out without updating the status because
