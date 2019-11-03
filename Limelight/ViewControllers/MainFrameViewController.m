@@ -1167,10 +1167,12 @@ static NSMutableSet* hostList;
 
 - (void) disableNavigation {
     self.navigationController.navigationBar.topItem.rightBarButtonItem.enabled = NO;
+    self.navigationController.navigationBar.topItem.leftBarButtonItem.enabled = NO;
 }
 
 - (void) enableNavigation {
     self.navigationController.navigationBar.topItem.rightBarButtonItem.enabled = YES;
+    self.navigationController.navigationBar.topItem.leftBarButtonItem.enabled = YES;
 }
 
 #if TARGET_OS_TV
