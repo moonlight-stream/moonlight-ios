@@ -22,10 +22,17 @@ static NSString* DB_NAME = @"Moonlight_tvOS.bin";
 static NSString* DB_NAME = @"Limelight_iOS.sqlite";
 #endif
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
-{
-    
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    UIApplicationShortcutItem* shortcut = [launchOptions valueForKey:UIApplicationLaunchOptionsShortcutItemKey];
+    if (shortcut != nil) {
+        _pcUuidToLoad = (NSString*)[shortcut.userInfo objectForKey:@"UUID"];
+    }
     return YES;
+}
+
+- (void)application:(UIApplication *)application performActionForShortcutItem:(UIApplicationShortcutItem *)shortcutItem completionHandler:(void (^)(BOOL succeeded))completionHandler {
+    _pcUuidToLoad = (NSString*)[shortcutItem.userInfo objectForKey:@"UUID"];
+    _shortcutCompletionHandler = completionHandler;
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application

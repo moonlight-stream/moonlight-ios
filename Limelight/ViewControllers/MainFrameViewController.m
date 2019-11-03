@@ -244,6 +244,10 @@ static NSMutableSet* hostList;
     } while (appWasRemoved);
 
     [database updateAppsForExistingHost:host];
+    
+    // This host may be eligible for a shortcut now that the app list
+    // has been populated
+    [self updateHostShortcuts];
 }
 
 - (void)showHostSelectionView {
@@ -809,11 +813,44 @@ static NSMutableSet* hostList;
     }
 }
 
+-(void)handlePendingShortcutAction
+{
+    // Check if we have a pending shortcut action
+    AppDelegate* delegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
+    if (delegate.pcUuidToLoad != nil) {
+        // Find the host it corresponds to
+        TemporaryHost* matchingHost = nil;
+        for (TemporaryHost* host in hostList) {
+            if ([host.uuid isEqualToString:delegate.pcUuidToLoad]) {
+                matchingHost = host;
+                break;
+            }
+        }
+        
+        // Clear the pending shortcut action
+        delegate.pcUuidToLoad = nil;
+        
+        // Complete the request
+        if (delegate.shortcutCompletionHandler != nil) {
+            delegate.shortcutCompletionHandler(matchingHost != nil);
+            delegate.shortcutCompletionHandler = nil;
+        }
+        
+        if (matchingHost != nil && _selectedHost != matchingHost) {
+            // Navigate to the host page
+            [self hostClicked:matchingHost view:nil];
+        }
+    }
+}
+
 -(void)handleReturnToForeground
 {
     _background = NO;
     
     [self beginForegroundRefresh: YES];
+    
+    // Check for a pending shortcut action when returning to foreground
+    [self handlePendingShortcutAction];
 }
 
 -(void)handleEnterBackground
@@ -837,6 +874,9 @@ static NSMutableSet* hostList;
     UIImage* fakeImage = [[UIImage alloc] init];
     [self.navigationController.navigationBar setShadowImage:fakeImage];
     [self.navigationController.navigationBar setBackgroundImage:fakeImage forBarPosition:UIBarPositionAny barMetrics:UIBarMetricsDefault];
+    
+    // Check for a pending shortcut action when appearing
+    [self handlePendingShortcutAction];
     
     [[NSNotificationCenter defaultCenter] addObserver: self
                                              selector: @selector(handleReturnToForeground)
@@ -926,6 +966,30 @@ static NSMutableSet* hostList;
     });
 }
 
+- (void)updateHostShortcuts {
+    if (@available(iOS 9.0, *)) {
+        NSMutableArray* quickActions = [[NSMutableArray alloc] init];
+        
+        @synchronized (hostList) {
+            for (TemporaryHost* host in hostList) {
+                // Pair state may be unknown if we haven't polled it yet, but the app list
+                // count will persist from paired PCs
+                if ([host.appList count] > 0) {
+                    UIApplicationShortcutItem* shortcut = [[UIApplicationShortcutItem alloc]
+                                                           initWithType:@"PC"
+                                                           localizedTitle:host.name
+                                                           localizedSubtitle:nil
+                                                           icon:[UIApplicationShortcutIcon iconWithType:UIApplicationShortcutIconTypePlay]
+                                                           userInfo:[NSDictionary dictionaryWithObject:host.uuid forKey:@"UUID"]];
+                    [quickActions addObject: shortcut];
+                }
+            }
+        }
+        
+        [UIApplication sharedApplication].shortcutItems = quickActions;
+    }
+}
+
 - (void)updateHosts {
     Log(LOG_I, @"Updating hosts...");
     [[hostScrollView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
@@ -949,6 +1013,9 @@ static NSMutableSet* hostList;
             }
         }
     }
+    
+    // Create or delete host shortcuts as needed
+    [self updateHostShortcuts];
     
     prevEdge = [self getCompViewX:addComp addComp:addComp prevEdge:prevEdge];
     addComp.center = CGPointMake(prevEdge, hostScrollView.frame.size.height / 2);
