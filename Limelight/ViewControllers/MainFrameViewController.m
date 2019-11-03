@@ -983,6 +983,7 @@ static NSMutableSet* hostList;
 }
 
 - (void)updateHostShortcuts {
+#if !TARGET_OS_TV
     if (@available(iOS 9.0, *)) {
         NSMutableArray* quickActions = [[NSMutableArray alloc] init];
         
@@ -1004,6 +1005,7 @@ static NSMutableSet* hostList;
         
         [UIApplication sharedApplication].shortcutItems = quickActions;
     }
+#endif
 }
 
 - (void)updateHosts {
