@@ -95,6 +95,8 @@ static NSMutableSet* hostList;
         else {
             [self displayFailureDialog:message];
         }
+        
+        [self->_discMan startDiscovery];
     });
 }
 
