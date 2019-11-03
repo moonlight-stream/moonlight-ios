@@ -833,7 +833,7 @@ static NSMutableSet* hostList;
             delegate.shortcutCompletionHandler = nil;
         }
         
-        if (matchingHost != nil && _selectedHost != matchingHost) {
+        if (matchingHost != nil && _selectedHost != matchingHost && matchingHost.state != StateOffline) {
             // Navigate to the host page
             [self hostClicked:matchingHost view:nil];
         }
