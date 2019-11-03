@@ -259,6 +259,7 @@ static NSMutableSet* hostList;
     
     [_appManager stopRetrieving];
     _selectedHost = nil;
+    _sortedAppList = nil;
     
     self.title = @"Select Host";
     [self disableUpButton];
@@ -1137,8 +1138,8 @@ static NSMutableSet* hostList;
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    if (_selectedHost != nil) {
-        return _selectedHost.appList.count;
+    if (_selectedHost != nil && _sortedAppList != nil) {
+        return _sortedAppList.count;
     }
     else {
         return 0;
