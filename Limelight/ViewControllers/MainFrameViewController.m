@@ -314,6 +314,21 @@ static NSMutableSet* hostList;
     
     [self showLoadingFrame: ^{
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            // Wait for the PC's status to be known
+            while (host.state == StateUnknown) {
+                sleep(1);
+            }
+            
+            // Don't bother polling if the server is already offline
+            if (host.state == StateOffline) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self hideLoadingFrame:^{
+                        [self showHostSelectionView];
+                    }];
+                });
+                return;
+            }
+            
             HttpManager* hMan = [[HttpManager alloc] initWithHost:host.activeAddress uniqueId:self->_uniqueId serverCert:host.serverCert];
             ServerInfoResponse* serverInfoResp = [[ServerInfoResponse alloc] init];
             
@@ -713,9 +728,7 @@ static NSMutableSet* hostList;
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
-    self.title = @"Select Host";
-    
+        
 #if !TARGET_OS_TV
     // Set the side bar button action. When it's tapped, it'll show the sidebar.
     [_settingsButton setTarget:self.revealViewController];
@@ -784,8 +797,14 @@ static NSMutableSet* hostList;
     
     [self retrieveSavedHosts];
     _discMan = [[DiscoveryManager alloc] initWithHosts:[hostList allObjects] andCallback:self];
-    
-    [self.view addSubview:hostScrollView];
+        
+    if ([hostList count] == 1) {
+        [self hostClicked:[hostList anyObject] view:nil];
+    }
+    else {
+        self.title = @"Select Host";
+        [self.view addSubview:hostScrollView];
+    }
 }
 
 #if TARGET_OS_TV
