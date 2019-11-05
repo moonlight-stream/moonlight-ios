@@ -30,6 +30,10 @@
 }
 
 - (void) main {
+    // We have to call startPairing before calling any other _callback functions
+    NSString* PIN = [self generatePIN];
+    [_callback startPairing:PIN];
+    
     ServerInfoResponse* serverInfoResp = [[ServerInfoResponse alloc] init];
     [_httpManager executeRequestSynchronously:[HttpRequest requestForResponse:serverInfoResp withUrlRequest:[_httpManager newServerInfoRequest:false]
                                                fallbackError:401 fallbackRequest:[_httpManager newHttpServerInfoRequest]]];
@@ -42,7 +46,7 @@
                 [_callback pairFailed:@"Missing XML element"];
                 return;
             }            
-            [self initiatePair: [[appversion substringToIndex:1] intValue]];
+            [self initiatePairWithPin:PIN forServerMajorVersion:[[appversion substringToIndex:1] intValue]];
         } else {
             [_callback alreadyPaired];
         }
@@ -78,7 +82,7 @@
 }
 
 // All codepaths must call finishPairing exactly once before returning!
-- (void) initiatePair:(int)serverMajorVersion {
+- (void) initiatePairWithPin:(NSString*)PIN forServerMajorVersion:(int)serverMajorVersion {
     Log(LOG_I, @"Pairing with generation %d server", serverMajorVersion);
     
     // Start a background task to help prevent the app from being killed
@@ -87,10 +91,8 @@
         Log(LOG_W, @"Background pairing time has expired!");
     }];
     
-    NSString* PIN = [self generatePIN];
     NSData* salt = [self saltPIN:PIN];
     Log(LOG_I, @"PIN: %@, saltedPIN: %@", PIN, salt);
-    [_callback showPIN:PIN];
     
     HttpResponse* pairResp = [[HttpResponse alloc] init];
     [_httpManager executeRequestSynchronously:[HttpRequest requestForResponse:pairResp withUrlRequest:[_httpManager newPairRequest:salt clientCert:_clientCert]]];

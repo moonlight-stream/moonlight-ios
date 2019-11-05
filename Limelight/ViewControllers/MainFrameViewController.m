@@ -56,8 +56,10 @@
 }
 static NSMutableSet* hostList;
 
-- (void)showPIN:(NSString *)PIN {
-    dispatch_async(dispatch_get_main_queue(), ^{
+- (void)startPairing:(NSString *)PIN {
+    // Needs to be synchronous to ensure the alert is shown before any potential
+    // failure callback could be invoked.
+    dispatch_sync(dispatch_get_main_queue(), ^{
         self->_pairAlert = [UIAlertController alertControllerWithTitle:@"Pairing"
                                                                message:[NSString stringWithFormat:@"Enter the following PIN on the host machine: %@", PIN]
                                                         preferredStyle:UIAlertControllerStyleAlert];
