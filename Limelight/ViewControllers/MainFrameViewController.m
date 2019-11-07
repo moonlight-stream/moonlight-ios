@@ -192,10 +192,11 @@ static NSMutableSet* hostList;
 
 - (void) updateApplist:(NSSet*) newList forHost:(TemporaryHost*)host {
     DataManager* database = [[DataManager alloc] init];
+    NSMutableSet* newHostAppList = [NSMutableSet setWithSet:host.appList];
     
     for (TemporaryApp* app in newList) {
         BOOL appAlreadyInList = NO;
-        for (TemporaryApp* savedApp in host.appList) {
+        for (TemporaryApp* savedApp in newHostAppList) {
             if ([app.id isEqualToString:savedApp.id]) {
                 savedApp.name = app.name;
                 savedApp.hdrSupported = app.hdrSupported;
@@ -205,7 +206,7 @@ static NSMutableSet* hostList;
         }
         if (!appAlreadyInList) {
             app.host = host;
-            [host.appList addObject:app];
+            [newHostAppList addObject:app];
         }
     }
     
@@ -213,7 +214,7 @@ static NSMutableSet* hostList;
     do {
         appWasRemoved = NO;
         
-        for (TemporaryApp* app in host.appList) {
+        for (TemporaryApp* app in newHostAppList) {
             appWasRemoved = YES;
             for (TemporaryApp* mergedApp in newList) {
                 if ([mergedApp.id isEqualToString:app.id]) {
@@ -225,7 +226,7 @@ static NSMutableSet* hostList;
                 // Removing the app mutates the list we're iterating (which isn't legal).
                 // We need to jump out of this loop and restart enumeration.
                 
-                [host.appList removeObject:app];
+                [newHostAppList removeObject:app];
                 
                 // It's important to remove the app record from the database
                 // since we'll have a constraint violation now that appList
@@ -238,6 +239,8 @@ static NSMutableSet* hostList;
         
         // Keep looping until the list is no longer being mutated
     } while (appWasRemoved);
+    
+    host.appList = newHostAppList;
 
     [database updateAppsForExistingHost:host];
     
