@@ -91,21 +91,21 @@
     }
 }
 
--(void) updateLeftTrigger:(Controller*)controller left:(char)left
+-(void) updateLeftTrigger:(Controller*)controller left:(unsigned char)left
 {
     @synchronized(controller) {
         controller.lastLeftTrigger = left;
     }
 }
 
--(void) updateRightTrigger:(Controller*)controller right:(char)right
+-(void) updateRightTrigger:(Controller*)controller right:(unsigned char)right
 {
     @synchronized(controller) {
         controller.lastRightTrigger = right;
     }
 }
 
--(void) updateTriggers:(Controller*) controller left:(char)left right:(char)right
+-(void) updateTriggers:(Controller*) controller left:(unsigned char)left right:(unsigned char)right
 {
     @synchronized(controller) {
         controller.lastLeftTrigger = left;
@@ -248,7 +248,7 @@
                 Controller* limeController = [self->_controllers objectForKey:[NSNumber numberWithInteger:gamepad.controller.playerIndex]];
                 short leftStickX, leftStickY;
                 short rightStickX, rightStickY;
-                char leftTrigger, rightTrigger;
+                unsigned char leftTrigger, rightTrigger;
                 
                 UPDATE_BUTTON_FLAG(limeController, A_FLAG, gamepad.buttonA.pressed);
                 UPDATE_BUTTON_FLAG(limeController, B_FLAG, gamepad.buttonB.pressed);

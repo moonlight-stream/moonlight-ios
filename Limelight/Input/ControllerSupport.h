@@ -28,9 +28,9 @@
 -(void) updateLeftStick:(Controller*)controller x:(short)x y:(short)y;
 -(void) updateRightStick:(Controller*)controller x:(short)x y:(short)y;
 
--(void) updateLeftTrigger:(Controller*)controller left:(char)left;
--(void) updateRightTrigger:(Controller*)controller right:(char)right;
--(void) updateTriggers:(Controller*)controller left:(char)left right:(char)right;
+-(void) updateLeftTrigger:(Controller*)controller left:(unsigned char)left;
+-(void) updateRightTrigger:(Controller*)controller right:(unsigned char)right;
+-(void) updateTriggers:(Controller*)controller left:(unsigned char)left right:(unsigned char)right;
 
 -(void) updateButtonFlags:(Controller*)controller flags:(int)flags;
 -(void) setButtonFlag:(Controller*)controller flags:(int)flags;
