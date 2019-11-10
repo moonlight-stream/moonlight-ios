@@ -14,6 +14,7 @@
 @property (nonatomic)                   int playerIndex;
 @property (nonatomic)                   int lastButtonFlags;
 @property (nonatomic)                   int emulatingButtonFlags;
+@property (nonatomic)                   int supportedEmulationFlags;
 @property (nonatomic)                   unsigned char lastLeftTrigger;
 @property (nonatomic)                   unsigned char lastRightTrigger;
 @property (nonatomic)                   short lastLeftStickX;

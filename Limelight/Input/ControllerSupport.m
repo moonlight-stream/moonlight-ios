@@ -134,15 +134,19 @@
     if (controller.lastButtonFlags & PLAY_FLAG) {
         // If LB and start are down, trigger select
         if (controller.lastButtonFlags & LB_FLAG) {
-            controller.lastButtonFlags |= BACK_FLAG;
-            controller.lastButtonFlags &= ~(pressedButtons & (PLAY_FLAG | LB_FLAG));
-            controller.emulatingButtonFlags |= EMULATING_SELECT;
+            if (controller.supportedEmulationFlags & EMULATING_SELECT) {
+                controller.lastButtonFlags |= BACK_FLAG;
+                controller.lastButtonFlags &= ~(pressedButtons & (PLAY_FLAG | LB_FLAG));
+                controller.emulatingButtonFlags |= EMULATING_SELECT;
+            }
         }
         // If (RB or select) and start are down, trigger special
         else if ((controller.lastButtonFlags & RB_FLAG) || (controller.lastButtonFlags & BACK_FLAG)) {
-            controller.lastButtonFlags |= SPECIAL_FLAG;
-            controller.lastButtonFlags &= ~(pressedButtons & (PLAY_FLAG | RB_FLAG | BACK_FLAG));
-            controller.emulatingButtonFlags |= EMULATING_SPECIAL;
+            if (controller.supportedEmulationFlags & EMULATING_SPECIAL) {
+                controller.lastButtonFlags |= SPECIAL_FLAG;
+                controller.lastButtonFlags &= ~(pressedButtons & (PLAY_FLAG | RB_FLAG | BACK_FLAG));
+                controller.emulatingButtonFlags |= EMULATING_SPECIAL;
+            }
         }
     }
     
@@ -387,7 +391,16 @@
                 limeController.playerIndex = i;
             }
             
+            limeController.supportedEmulationFlags = EMULATING_SPECIAL | EMULATING_SELECT;
             limeController.gamepad = controller;
+            
+            if (@available(iOS 13.0, tvOS 13.0, *)) {
+                if (controller.extendedGamepad != nil &&
+                    controller.extendedGamepad.buttonOptions != nil) {
+                    // Disable select button emulation since we have a physical select button
+                    limeController.supportedEmulationFlags &= ~EMULATING_SELECT;
+                }
+            }
 
             [_controllers setObject:limeController forKey:[NSNumber numberWithInteger:controller.playerIndex]];
             
