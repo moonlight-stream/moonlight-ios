@@ -18,6 +18,6 @@
 
 - (void)updateBufferForRange:(CMBlockBufferRef)existingBuffer data:(unsigned char *)data offset:(int)offset length:(int)nalLength;
 
-- (int)submitDecodeBuffer:(unsigned char *)data length:(int)length bufferType:(int)bufferType;
+- (int)submitDecodeBuffer:(unsigned char *)data length:(int)length bufferType:(int)bufferType pts:(unsigned int)pts;
 
 @end

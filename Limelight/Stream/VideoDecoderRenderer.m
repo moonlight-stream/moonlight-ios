@@ -201,7 +201,7 @@
 }
 
 // This function must free data for bufferType == BUFFER_TYPE_PICDATA
-- (int)submitDecodeBuffer:(unsigned char *)data length:(int)length bufferType:(int)bufferType
+- (int)submitDecodeBuffer:(unsigned char *)data length:(int)length bufferType:(int)bufferType pts:(unsigned int)pts
 {
     unsigned char nalType = data[FRAME_START_PREFIX_SIZE];
     OSStatus status;

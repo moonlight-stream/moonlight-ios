@@ -71,7 +71,10 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit)
     while (entry != NULL) {
         // Submit parameter set NALUs directly since no copy is required by the decoder
         if (entry->bufferType != BUFFER_TYPE_PICDATA) {
-            ret = [renderer submitDecodeBuffer:(unsigned char*)entry->data length:entry->length bufferType:entry->bufferType];
+            ret = [renderer submitDecodeBuffer:(unsigned char*)entry->data
+                                        length:entry->length
+                                    bufferType:entry->bufferType
+                                           pts:decodeUnit->presentationTimeMs];
             if (ret != DR_OK) {
                 free(data);
                 return ret;
@@ -86,7 +89,10 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit)
     }
 
     // This function will take our picture data buffer
-    return [renderer submitDecodeBuffer:data length:offset bufferType:BUFFER_TYPE_PICDATA];
+    return [renderer submitDecodeBuffer:data
+                                 length:offset
+                             bufferType:BUFFER_TYPE_PICDATA
+                                    pts:decodeUnit->presentationTimeMs];
 }
 
 int ArInit(int audioConfiguration, POPUS_MULTISTREAM_CONFIGURATION opusConfig, void* context, int flags)
