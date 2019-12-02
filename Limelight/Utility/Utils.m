@@ -50,27 +50,18 @@ NSString *const deviceName = @"roth";
     return hex;
 }
 
-+ (int) resolveHost:(NSString*)host {
-    struct hostent *hostent;
-    
-    if (inet_addr([host UTF8String]) != INADDR_NONE) {
-        // Already an IP address
-        int addr = inet_addr([host UTF8String]);
-        Log(LOG_I, @"host address: %d", addr);
-        return addr;
-    } else {
-        hostent = gethostbyname([host UTF8String]);
-        if (hostent != NULL) {
-            char* ipstr = inet_ntoa(*(struct in_addr*)hostent->h_addr_list[0]);
-            Log(LOG_I, @"Resolved %@ -> %s", host, ipstr);
-            int addr = inet_addr(ipstr);
-            Log(LOG_I, @"host address: %d", addr);
-            return addr;
-        } else {
-            Log(LOG_W, @"Failed to resolve host: %d", h_errno);
-            return 0;
++ (BOOL)isActiveNetworkVPN {
+    NSDictionary *dict = CFBridgingRelease(CFNetworkCopySystemProxySettings());
+    NSArray *keys = [dict[@"__SCOPED__"] allKeys];
+    for (NSString *key in keys) {
+        if ([key containsString:@"tap"] ||
+            [key containsString:@"tun"] ||
+            [key containsString:@"ppp"] ||
+            [key containsString:@"ipsec"]) {
+            return YES;
         }
     }
+    return NO;
 }
 
 + (void) addHelpOptionToDialog:(UIAlertController*)dialog {

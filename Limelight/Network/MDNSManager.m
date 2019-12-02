@@ -163,20 +163,6 @@ static NSString* NV_SERVICE_TYPE = @"_nvstream._tcp";
     return nil;
 }
 
-- (BOOL)isActiveNetworkVPN {
-    NSDictionary *dict = CFBridgingRelease(CFNetworkCopySystemProxySettings());
-    NSArray *keys = [dict[@"__SCOPED__"] allKeys];
-    for (NSString *key in keys) {
-        if ([key containsString:@"tap"] ||
-            [key containsString:@"tun"] ||
-            [key containsString:@"ppp"] ||
-            [key containsString:@"ipsec"]) {
-            return YES;
-        }
-    }
-    return NO;
-}
-
 - (void)netServiceDidResolveAddress:(NSNetService *)service {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSArray<NSData*>* addresses = [service addresses];
@@ -196,7 +182,7 @@ static NSString* NV_SERVICE_TYPE = @"_nvstream._tcp";
             
             // Don't send a STUN request if we're connected to a VPN. We'll likely get the VPN
             // gateway's external address rather than the external address of the LAN.
-            if (![self isActiveNetworkVPN]) {
+            if (![Utils isActiveNetworkVPN]) {
                 // Since we discovered this host over IPv4 mDNS, we know we're on the same network
                 // as the PC and we can use our current WAN address as a likely candidate
                 // for our PC's external address.

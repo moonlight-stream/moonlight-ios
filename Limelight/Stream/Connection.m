@@ -7,6 +7,7 @@
 //
 
 #import "Connection.h"
+#import "Utils.h"
 
 #import <AudioUnit/AudioUnit.h>
 #import <AVFoundation/AVFoundation.h>
@@ -340,9 +341,16 @@ void ClConnectionStatusUpdate(int status)
     // quality improvement.
     _streamConfig.hevcBitratePercentageMultiplier = 75;
     
-    // Detect remote streaming automatically based on the IP address of the target
-    _streamConfig.streamingRemotely = STREAM_CFG_AUTO;
-    _streamConfig.packetSize = 1392;
+    if ([Utils isActiveNetworkVPN]) {
+        // Force remote streaming mode when a VPN is connected
+        _streamConfig.streamingRemotely = STREAM_CFG_REMOTE;
+        _streamConfig.packetSize = 1024;
+    }
+    else {
+        // Detect remote streaming automatically based on the IP address of the target
+        _streamConfig.streamingRemotely = STREAM_CFG_AUTO;
+        _streamConfig.packetSize = 1392;
+    }
     
     switch (config.audioChannelCount) {
         case 2:
