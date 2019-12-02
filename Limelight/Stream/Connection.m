@@ -122,7 +122,8 @@ int ArInit(int audioConfiguration, POPUS_MULTISTREAM_CONFIGURATION opusConfig, v
 
     [audioSession setPreferredSampleRate:opusConfig->sampleRate error:&audioSessionError];
     [audioSession setCategory: AVAudioSessionCategoryPlayback error: &audioSessionError];
-    [audioSession setPreferredIOBufferDuration:0.005 error:&audioSessionError];
+    [audioSession setPreferredIOBufferDuration:(opusConfig->samplesPerFrame / (opusConfig->sampleRate / 1000)) / 1000.0
+                                         error:&audioSessionError];
     [audioSession setActive: YES error: &audioSessionError];
     
     // FIXME: Calling this breaks surround audio for some reason
@@ -391,7 +392,8 @@ void ClConnectionStatusUpdate(int status)
     _arCallbacks.init = ArInit;
     _arCallbacks.cleanup = ArCleanup;
     _arCallbacks.decodeAndPlaySample = ArDecodeAndPlaySample;
-    _arCallbacks.capabilities = CAPABILITY_DIRECT_SUBMIT;
+    _arCallbacks.capabilities = CAPABILITY_DIRECT_SUBMIT |
+                                CAPABILITY_SUPPORTS_ARBITRARY_AUDIO_DURATION;
 
     LiInitializeConnectionCallbacks(&_clCallbacks);
     _clCallbacks.stageStarting = ClStageStarting;
