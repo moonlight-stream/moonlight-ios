@@ -77,8 +77,11 @@
     Log(LOG_I, @"Starting discovery");
     shouldDiscover = YES;
     [_mdnsMan searchForHosts];
-    for (TemporaryHost* host in _hostQueue) {
-        [_opQueue addOperation:[self createWorkerForHost:host]];
+    
+    @synchronized (_hostQueue) {
+        for (TemporaryHost* host in _hostQueue) {
+            [_opQueue addOperation:[self createWorkerForHost:host]];
+        }
     }
 }
 
@@ -141,21 +144,26 @@
         return NO;
     }
     else {
-        [_hostQueue addObject:host];
-        if (shouldDiscover) {
-            [_opQueue addOperation:[self createWorkerForHost:host]];
+        @synchronized (_hostQueue) {
+            [_hostQueue addObject:host];
+            if (shouldDiscover) {
+                [_opQueue addOperation:[self createWorkerForHost:host]];
+            }
         }
         return YES;
     }
 }
 
 - (void) removeHostFromDiscovery:(TemporaryHost *)host {
-    for (DiscoveryWorker* worker in [_opQueue operations]) {
-        if ([worker getHost] == host) {
-            [worker cancel];
+    @synchronized (_hostQueue) {
+        for (DiscoveryWorker* worker in [_opQueue operations]) {
+            if ([worker getHost] == host) {
+                [worker cancel];
+            }
         }
+        
+        [_hostQueue removeObject:host];
     }
-    [_hostQueue removeObject:host];
 }
 
 // Override from MDNSCallback - called in a worker thread
@@ -167,16 +175,20 @@
     [worker discoverHost];
     if ([self addHostToDiscovery:host]) {
         Log(LOG_I, @"Found new host through MDNS: %@:", host.name);
-        [self->_callback updateAllHosts:self->_hostQueue];
+        @synchronized (_hostQueue) {
+            [_callback updateAllHosts:_hostQueue];
+        }
     } else {
         Log(LOG_D, @"Found existing host through MDNS: %@", host.name);
     }
 }
 
 - (TemporaryHost*) getHostInDiscovery:(NSString*)uuidString {
-    for (TemporaryHost* discoveredHost in _hostQueue) {
-        if (discoveredHost.uuid.length > 0 && [discoveredHost.uuid isEqualToString:uuidString]) {
-            return discoveredHost;
+    @synchronized (_hostQueue) {
+        for (TemporaryHost* discoveredHost in _hostQueue) {
+            if (discoveredHost.uuid.length > 0 && [discoveredHost.uuid isEqualToString:uuidString]) {
+                return discoveredHost;
+            }
         }
     }
     return nil;
