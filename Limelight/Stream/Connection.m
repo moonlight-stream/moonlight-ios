@@ -33,15 +33,16 @@ static id<ConnectionCallbacks> _callbacks;
 
 #define OUTPUT_BUS 0
 
-#define CIRCULAR_BUFFER_SIZE 16
+#define CIRCULAR_BUFFER_DURATION 60
 
+static int audioBufferEntries;
 static int audioBufferWriteIndex;
 static int audioBufferReadIndex;
 static int audioBufferStride;
 static int audioSamplesPerFrame;
 static short* audioCircularBuffer;
 
-#define AUDIO_QUEUE_BUFFERS 4
+#define AUDIO_QUEUE_BUFFERS 3
 
 static AudioQueueRef audioQueue;
 static AudioQueueBufferRef audioBuffers[AUDIO_QUEUE_BUFFERS];
@@ -104,7 +105,8 @@ int ArInit(int audioConfiguration, POPUS_MULTISTREAM_CONFIGURATION opusConfig, v
     audioBufferWriteIndex = audioBufferReadIndex = 0;
     audioSamplesPerFrame = opusConfig->samplesPerFrame;
     audioBufferStride = opusConfig->channelCount * opusConfig->samplesPerFrame;
-    audioCircularBuffer = malloc(CIRCULAR_BUFFER_SIZE * audioBufferStride * sizeof(short));
+    audioBufferEntries = CIRCULAR_BUFFER_DURATION / (opusConfig->samplesPerFrame / (opusConfig->sampleRate / 1000));
+    audioCircularBuffer = malloc(audioBufferEntries * audioBufferStride * sizeof(short));
     if (audioCircularBuffer == NULL) {
         Log(LOG_E, @"Error allocating output queue\n");
         return -1;
@@ -219,7 +221,7 @@ void ArDecodeAndPlaySample(char* sampleData, int sampleLength)
     
     // Check if there is space for this sample in the buffer. Again, this can race
     // but in the worst case, we'll not see the sample callback having consumed a sample.
-    if (((audioBufferWriteIndex + 1) % CIRCULAR_BUFFER_SIZE) == audioBufferReadIndex) {
+    if (((audioBufferWriteIndex + 1) % audioBufferEntries) == audioBufferReadIndex) {
         return;
     }
     
@@ -232,7 +234,7 @@ void ArDecodeAndPlaySample(char* sampleData, int sampleLength)
         // This can race with the reader in the sample callback, however this is a benign
         // race since we'll either read the original value of s_WriteIndex (which is safe,
         // we just won't consider this sample) or the new value of s_WriteIndex
-        audioBufferWriteIndex = (audioBufferWriteIndex + 1) % CIRCULAR_BUFFER_SIZE;
+        audioBufferWriteIndex = (audioBufferWriteIndex + 1) % audioBufferEntries;
     }
 }
 
@@ -435,7 +437,7 @@ static void FillOutputBuffer(void *aqData,
         
         // This can race with the reader in the AudDecDecodeAndPlaySample function. This is
         // not a problem because at worst, it just won't see that we've consumed this sample yet.
-        audioBufferReadIndex = (audioBufferReadIndex + 1) % CIRCULAR_BUFFER_SIZE;
+        audioBufferReadIndex = (audioBufferReadIndex + 1) % audioBufferEntries;
     }
     else {
         // No data, so play silence
