@@ -33,7 +33,10 @@ static id<ConnectionCallbacks> _callbacks;
 
 #define OUTPUT_BUS 0
 
-#define CIRCULAR_BUFFER_DURATION 60
+// My iPod touch 5th Generation seems to really require 80 ms
+// of buffering to deliver glitch-free playback :(
+// FIXME: Maybe we can use a smaller buffer on more modern iOS versions?
+#define CIRCULAR_BUFFER_DURATION 80
 
 static int audioBufferEntries;
 static int audioBufferWriteIndex;
