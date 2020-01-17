@@ -16,6 +16,7 @@
     CGPoint touchLocation, originalLocation;
     BOOL touchMoved;
     OnScreenControls* onScreenControls;
+    X1Mouse* x1mouse;
     
     BOOL isInputingText;
     BOOL isDragging;
@@ -73,6 +74,10 @@
         [onScreenControls setLevel:level];
     }
 #endif
+    
+    x1mouse = [[X1Mouse alloc] init];
+    x1mouse.delegate = self;
+    [x1mouse start];
 }
 
 - (void)startInteractionTimer {
@@ -421,6 +426,40 @@
     }
     
     return commands;
+}
+
+- (void)connectedStateDidChangeWithIdentifier:(NSUUID * _Nonnull)identifier isConnected:(BOOL)isConnected {
+    NSLog(@"Citrix X1 mouse state change: %@ -> %s",
+          identifier, isConnected ? "connected" : "disconnected");
+}
+
+- (void)mouseDidMoveWithIdentifier:(NSUUID * _Nonnull)identifier deltaX:(int16_t)deltaX deltaY:(int16_t)deltaY {
+    LiSendMouseMoveEvent(deltaX, deltaY);
+}
+
+- (int) buttonFromX1ButtonCode:(enum X1MouseButton)button {
+    switch (button) {
+        case X1MouseButtonLeft:
+            return BUTTON_LEFT;
+        case X1MouseButtonRight:
+            return BUTTON_RIGHT;
+        case X1MouseButtonMiddle:
+            return BUTTON_MIDDLE;
+        default:
+            return -1;
+    }
+}
+
+- (void)mouseDownWithIdentifier:(NSUUID * _Nonnull)identifier button:(enum X1MouseButton)button {
+    LiSendMouseButtonEvent(BUTTON_ACTION_PRESS, [self buttonFromX1ButtonCode:button]);
+}
+
+- (void)mouseUpWithIdentifier:(NSUUID * _Nonnull)identifier button:(enum X1MouseButton)button {
+    LiSendMouseButtonEvent(BUTTON_ACTION_RELEASE, [self buttonFromX1ButtonCode:button]);
+}
+
+- (void)wheelDidScrollWithIdentifier:(NSUUID * _Nonnull)identifier deltaZ:(int8_t)deltaZ {
+    LiSendScrollEvent(deltaZ);
 }
 
 @end

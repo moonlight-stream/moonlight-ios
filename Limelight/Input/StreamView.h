@@ -8,6 +8,7 @@
 
 #import "ControllerSupport.h"
 #import "OnScreenControls.h"
+#import "Moonlight-Swift.h"
 
 @protocol EdgeDetectionDelegate <NSObject>
 
@@ -22,7 +23,7 @@
 
 @end
 
-@interface StreamView : OSView <UITextFieldDelegate>
+@interface StreamView : OSView <UITextFieldDelegate, X1KitMouseDelegate>
 
 @property (nonatomic, retain) IBOutlet UITextField* keyInputField;
 
