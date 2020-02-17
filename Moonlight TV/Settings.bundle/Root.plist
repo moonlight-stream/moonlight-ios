@@ -47,11 +47,13 @@
 			<array>
 				<string>30</string>
 				<string>60</string>
+				<string>120</string>
 			</array>
 			<key>Titles</key>
 			<array>
 				<string>30 FPS</string>
 				<string>60 FPS</string>
+				<string>120 FPS</string>
 			</array>
 		</dict>
 		<dict>
