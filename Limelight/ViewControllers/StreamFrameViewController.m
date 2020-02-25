@@ -230,8 +230,8 @@
     });
 }
 
-- (void)connectionTerminated:(long)errorCode {
-    Log(LOG_I, @"Connection terminated: %ld", errorCode);
+- (void)connectionTerminated:(int)errorCode {
+    Log(LOG_I, @"Connection terminated: %d", errorCode);
     
     dispatch_async(dispatch_get_main_queue(), ^{
         // Allow the display to go to sleep now
@@ -264,15 +264,15 @@
 - (void) stageComplete:(const char*)stageName {
 }
 
-- (void) stageFailed:(const char*)stageName withError:(long)errorCode {
-    Log(LOG_I, @"Stage %s failed: %ld", stageName, errorCode);
+- (void) stageFailed:(const char*)stageName withError:(int)errorCode {
+    Log(LOG_I, @"Stage %s failed: %d", stageName, errorCode);
 
     dispatch_async(dispatch_get_main_queue(), ^{
         // Allow the display to go to sleep now
         [UIApplication sharedApplication].idleTimerDisabled = NO;
         
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Connection Failed"
-                                                                       message:[NSString stringWithFormat:@"%s failed with error %ld",
+                                                                       message:[NSString stringWithFormat:@"%s failed with error %d",
                                                                                 stageName, errorCode]
                                                                 preferredStyle:UIAlertControllerStyleAlert];
         [Utils addHelpOptionToDialog:alert];

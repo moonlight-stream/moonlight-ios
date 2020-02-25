@@ -251,7 +251,7 @@ void ClStageComplete(int stage)
     [_callbacks stageComplete:LiGetStageName(stage)];
 }
 
-void ClStageFailed(int stage, long errorCode)
+void ClStageFailed(int stage, int errorCode)
 {
     [_callbacks stageFailed:LiGetStageName(stage) withError:errorCode];
 }
@@ -261,7 +261,7 @@ void ClConnectionStarted(void)
     [_callbacks connectionStarted];
 }
 
-void ClConnectionTerminated(long errorCode)
+void ClConnectionTerminated(int errorCode)
 {
     [_callbacks connectionTerminated: errorCode];
 }

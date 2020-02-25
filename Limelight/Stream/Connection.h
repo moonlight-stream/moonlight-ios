@@ -12,10 +12,10 @@
 @protocol ConnectionCallbacks <NSObject>
 
 - (void) connectionStarted;
-- (void) connectionTerminated:(long)errorCode;
+- (void) connectionTerminated:(int)errorCode;
 - (void) stageStarting:(const char*)stageName;
 - (void) stageComplete:(const char*)stageName;
-- (void) stageFailed:(const char*)stageName withError:(long)errorCode;
+- (void) stageFailed:(const char*)stageName withError:(int)errorCode;
 - (void) launchFailed:(NSString*)message;
 - (void) rumble:(unsigned short)controllerNumber lowFreqMotor:(unsigned short)lowFreqMotor highFreqMotor:(unsigned short)highFreqMotor;
 - (void) connectionStatusUpdate:(int)status;
