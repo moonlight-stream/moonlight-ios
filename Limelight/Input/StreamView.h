@@ -23,7 +23,7 @@
 
 @end
 
-@interface StreamView : OSView <UITextFieldDelegate, X1KitMouseDelegate>
+@interface StreamView : OSView <X1KitMouseDelegate>
 
 @property (nonatomic, retain) IBOutlet UITextField* keyInputField;
 
