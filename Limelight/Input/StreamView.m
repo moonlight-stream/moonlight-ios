@@ -10,6 +10,7 @@
 #include <Limelight.h>
 #import "DataManager.h"
 #import "ControllerSupport.h"
+#import "KeyboardSupport.h"
 #import "TextFieldKeyboardDelegate.h"
 
 @implementation StreamView {
@@ -209,6 +210,44 @@
         }
     }
     
+}
+
+- (void)pressesBegan:(NSSet<UIPress *> *)presses withEvent:(UIPressesEvent *)event {
+    BOOL handled = NO;
+    
+    if (@available(iOS 13.4, tvOS 13.4, *)) {
+        for (UIPress* press in presses) {
+            // For now, we'll treated it as handled if we handle at least one of the
+            // UIPress events inside the set.
+            if (press.key != nil && [KeyboardSupport sendKeyEvent:press.key down:YES]) {
+                // This will prevent the legacy UITextField from receiving the event
+                handled = YES;
+            }
+        }
+    }
+    
+    if (!handled) {
+        [super pressesBegan:presses withEvent:event];
+    }
+}
+
+- (void)pressesEnded:(NSSet<UIPress *> *)presses withEvent:(UIPressesEvent *)event {
+    BOOL handled = NO;
+    
+    if (@available(iOS 13.4, tvOS 13.4, *)) {
+        for (UIPress* press in presses) {
+            // For now, we'll treated it as handled if we handle at least one of the
+            // UIPress events inside the set.
+            if (press.key != nil && [KeyboardSupport sendKeyEvent:press.key down:NO]) {
+                // This will prevent the legacy UITextField from receiving the event
+                handled = YES;
+            }
+        }
+    }
+    
+    if (!handled) {
+        [super pressesEnded:presses withEvent:event];
+    }
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
