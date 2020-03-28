@@ -227,13 +227,28 @@ static NSData* p12 = nil;
         Log(LOG_E, @"Unable to parse certificate in memory!");
         return NULL;
     }
-    return [NSData dataWithBytes:x509->signature->data length:x509->signature->length];
+    
+#if (OPENSSL_VERSION_NUMBER < 0x10002000L)
+    ASN1_BIT_STRING *asnSignature = x509->signature;
+#elif (OPENSSL_VERSION_NUMBER < 0x10100000L)
+    ASN1_BIT_STRING *asnSignature;
+    X509_get0_signature(&asnSignature, NULL, x509);
+#else
+    const ASN1_BIT_STRING *asnSignature;
+    X509_get0_signature(&asnSignature, NULL, x509);
+#endif
+    
+    NSData* sig = [NSData dataWithBytes:asnSignature->data length:asnSignature->length];
+    
+    X509_free(x509);
+    
+    return sig;
 }
 
 + (NSData*)getKeyFromCertKeyPair:(CertKeyPair*)certKeyPair {
     BIO* bio = BIO_new(BIO_s_mem());
     
-    PEM_write_bio_PrivateKey(bio, certKeyPair->pkey, NULL, NULL, 0, NULL, NULL);
+    PEM_write_bio_PrivateKey_traditional(bio, certKeyPair->pkey, NULL, NULL, 0, NULL, NULL);
     
     BUF_MEM* mem;
     BIO_get_mem_ptr(bio, &mem);

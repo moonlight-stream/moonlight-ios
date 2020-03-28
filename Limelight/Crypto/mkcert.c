@@ -5,19 +5,60 @@
 #include <stdlib.h>
 
 #include <openssl/pem.h>
-#include <openssl/conf.h>
-#include <openssl/pkcs12.h>
-
-#ifndef OPENSSL_NO_ENGINE
-#include <openssl/engine.h>
-#endif
+#include <openssl/rsa.h>
+#include <openssl/bn.h>
+#include <openssl/x509.h>
+#include <openssl/rand.h>
 
 static const int NUM_BITS = 2048;
 static const int SERIAL = 0;
-static const int NUM_YEARS = 10;
+static const int NUM_YEARS = 20;
 
-int mkcert(X509 **x509p, EVP_PKEY **pkeyp, int bits, int serial, int years);
-int add_ext(X509 *cert, int nid, char *value);
+void mkcert(X509 **x509p, EVP_PKEY **pkeyp, int bits, int serial, int years) {
+    X509* cert = X509_new();
+    EVP_PKEY* pk = EVP_PKEY_new();
+    BIGNUM* bne = BN_new();
+    RSA* rsa = RSA_new();
+
+    BN_set_word(bne, RSA_F4);
+    RSA_generate_key_ex(rsa, bits, bne, NULL);
+
+    EVP_PKEY_assign_RSA(pk, rsa);
+
+    X509_set_version(cert, 2);
+    ASN1_INTEGER_set(X509_get_serialNumber(cert), serial);
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+    X509_gmtime_adj(X509_get_notBefore(cert), 0);
+    X509_gmtime_adj(X509_get_notAfter(cert), 60 * 60 * 24 * 365 * years);
+#else
+    ASN1_TIME* before = ASN1_STRING_dup(X509_get0_notBefore(cert));
+    ASN1_TIME* after = ASN1_STRING_dup(X509_get0_notAfter(cert));
+
+    X509_gmtime_adj(before, 0);
+    X509_gmtime_adj(after, 60 * 60 * 24 * 365 * years);
+
+    X509_set1_notBefore(cert, before);
+    X509_set1_notAfter(cert, after);
+
+    ASN1_STRING_free(before);
+    ASN1_STRING_free(after);
+#endif
+
+    X509_set_pubkey(cert, pk);
+
+    X509_NAME* name = X509_get_subject_name(cert);
+    X509_NAME_add_entry_by_txt(name, "CN", MBSTRING_ASC,
+                               (const unsigned char*)"NVIDIA GameStream Client",
+                               -1, -1, 0);
+    X509_set_issuer_name(cert, name);
+
+    X509_sign(cert, pk, EVP_sha256());
+
+    BN_free(bne);
+    
+    *x509p = cert;
+    *pkeyp = pk;
+}
 
 struct CertKeyPair generateCertKeyPair(void) {
     BIO *bio_err;
@@ -28,29 +69,13 @@ struct CertKeyPair generateCertKeyPair(void) {
     CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON);
     bio_err = BIO_new_fp(stderr, BIO_NOCLOSE);
     
-    SSLeay_add_all_algorithms();
-    ERR_load_crypto_strings();
-    
     mkcert(&x509, &pkey, NUM_BITS, SERIAL, NUM_YEARS);
 
     p12 = PKCS12_create("limelight", "GameStream", pkey, x509, NULL, 0, 0, 0, 0, 0);
     if (p12 == NULL) {
         printf("Error generating a valid PKCS12 certificate.\n");
     }
-
-    // Debug Print statements
-    //RSA_print_fp(stdout, pkey->pkey.rsa, 0);
-    //X509_print_fp(stdout, x509);
-    //PEM_write_PUBKEY(stdout, pkey);
-    //PEM_write_PrivateKey(stdout, pkey, NULL, NULL, 0, NULL, NULL);
-    //PEM_write_X509(stdout, x509);
     
-#ifndef OPENSSL_NO_ENGINE
-    ENGINE_cleanup();
-#endif
-    CRYPTO_cleanup_all_ex_data();
-    
-    CRYPTO_mem_leaks(bio_err);
     BIO_free(bio_err);
     
     return (CertKeyPair){x509, pkey, p12};
@@ -60,61 +85,4 @@ void freeCertKeyPair(struct CertKeyPair certKeyPair) {
     X509_free(certKeyPair.x509);
     EVP_PKEY_free(certKeyPair.pkey);
     PKCS12_free(certKeyPair.p12);
-}
-
-int mkcert(X509 **x509p, EVP_PKEY **pkeyp, int bits, int serial, int years) {
-    X509 *x;
-    EVP_PKEY *pk;
-    RSA *rsa;
-    X509_NAME *name = NULL;
-    
-    if (*pkeyp == NULL) {
-        if ((pk=EVP_PKEY_new()) == NULL) {
-            return(0);
-        }
-    } else {
-        pk = *pkeyp;
-    }
-    
-    if (*x509p == NULL) {
-        if ((x = X509_new()) == NULL) {
-            goto err;
-        }
-    } else {
-        x = *x509p;
-    }
-    
-    rsa = RSA_generate_key(bits, RSA_F4, NULL, NULL);
-    if (!EVP_PKEY_assign_RSA(pk, rsa)) {
-        goto err;
-    }
-    
-    X509_set_version(x, 2);
-    ASN1_INTEGER_set(X509_get_serialNumber(x), serial);
-    X509_gmtime_adj(X509_get_notBefore(x), 0);
-    X509_gmtime_adj(X509_get_notAfter(x), (long)60*60*24*365*years);
-    X509_set_pubkey(x, pk);
-    
-    name = X509_get_subject_name(x);
-    
-    /* This function creates and adds the entry, working out the
-     * correct string type and performing checks on its length.
-     */
-    X509_NAME_add_entry_by_txt(name,"CN", MBSTRING_ASC, (unsigned char*)"NVIDIA GameStream Client", -1, -1, 0);
-    
-    /* Its self signed so set the issuer name to be the same as the
-     * subject.
-     */
-    X509_set_issuer_name(x, name);
-    
-    if (!X509_sign(x, pk, EVP_sha256())) {
-        goto err;
-    }
-    
-    *x509p = x;
-    *pkeyp = pk;
-    
-    return(1);
-err:
-    return(0);
 }
