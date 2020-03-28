@@ -13,6 +13,8 @@
 #import "KeyboardSupport.h"
 #import "TextFieldKeyboardDelegate.h"
 
+static const double X1_MOUSE_SPEED_DIVISOR = 2.0;
+
 @implementation StreamView {
     CGPoint touchLocation, originalLocation;
     BOOL touchMoved;
@@ -26,6 +28,9 @@
     float xDeltaFactor;
     float yDeltaFactor;
     float screenFactor;
+    
+    double mouseX;
+    double mouseY;
     
 #if TARGET_OS_TV
     UIGestureRecognizer* remotePressRecognizer;
@@ -374,7 +379,20 @@
 }
 
 - (void)mouseDidMoveWithIdentifier:(NSUUID * _Nonnull)identifier deltaX:(int16_t)deltaX deltaY:(int16_t)deltaY {
-    LiSendMouseMoveEvent(deltaX, deltaY);
+    mouseX += deltaX / X1_MOUSE_SPEED_DIVISOR;
+    mouseY += deltaY / X1_MOUSE_SPEED_DIVISOR;
+    
+    short shortX = (short)mouseX;
+    short shortY = (short)mouseY;
+    
+    if (shortX == 0 && shortY == 0) {
+        return;
+    }
+    
+    LiSendMouseMoveEvent(shortX, shortY);
+    
+    mouseX -= shortX;
+    mouseY -= shortY;
 }
 
 - (int) buttonFromX1ButtonCode:(enum X1MouseButton)button {
