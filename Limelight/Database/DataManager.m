@@ -63,7 +63,8 @@
                  multiController:(BOOL)multiController
                        audioOnPC:(BOOL)audioOnPC
                          useHevc:(BOOL)useHevc
-                       enableHdr:(BOOL)enableHdr {
+                       enableHdr:(BOOL)enableHdr
+                  btMouseSupport:(BOOL)btMouseSupport {
     
     [_managedObjectContext performBlockAndWait:^{
         Settings* settingsToSave = [self retrieveSettings];
@@ -78,6 +79,7 @@
         settingsToSave.playAudioOnPC = audioOnPC;
         settingsToSave.useHevc = useHevc;
         settingsToSave.enableHdr = enableHdr;
+        settingsToSave.btMouseSupport = btMouseSupport;
         
         [self saveData];
     }];

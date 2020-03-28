@@ -202,6 +202,23 @@
                                 <color key="tintColor" red="0.6716768741607666" green="0.61711704730987549" blue="0.99902987480163574" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <color key="selectedSegmentTintColor" red="0.6716768741607666" green="0.61711704730987549" blue="0.99902987480163574" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </segmentedControl>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Citrix X1 Mouse Support" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="t9f-V8-GCm">
+                                <rect key="frame" x="16" y="541" width="186" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" red="0.93902439019999995" green="0.9625305918" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <segmentedControl opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="KMg-3j-F9p" userLabel="Citrix X1 Selector">
+                                <rect key="frame" x="16" y="570" width="209" height="28"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <segments>
+                                    <segment title="No"/>
+                                    <segment title="Yes"/>
+                                </segments>
+                                <color key="tintColor" red="0.6716768742" green="0.61711704730000005" blue="0.99902987480000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <color key="selectedSegmentTintColor" red="0.6716768742" green="0.61711704730000005" blue="0.99902987480000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            </segmentedControl>
                         </subviews>
                         <color key="backgroundColor" cocoaTouchSystemColor="viewFlipsideBackgroundColor"/>
                     </view>
@@ -209,6 +226,7 @@
                         <outlet property="audioOnPCSelector" destination="WDY-9o-6Hb" id="ntW-H9-Ahp"/>
                         <outlet property="bitrateLabel" destination="lMt-4H-fkV" id="ItM-l3-1Jk"/>
                         <outlet property="bitrateSlider" destination="JAY-nj-UNz" id="fHd-v5-9Vo"/>
+                        <outlet property="btMouseSelector" destination="KMg-3j-F9p" id="W45-AB-sJf"/>
                         <outlet property="framerateSelector" destination="lGK-vl-pdw" id="Kc8-Zv-hdm"/>
                         <outlet property="hevcSelector" destination="aFy-0w-YPe" id="DlU-0l-gwz"/>
                         <outlet property="multiControllerSelector" destination="KlC-fG-wEi" id="giM-F7-So5"/>

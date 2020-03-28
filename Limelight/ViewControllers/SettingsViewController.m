@@ -191,6 +191,7 @@ static const int bitrateTable[] = {
         [self.hevcSelector setEnabled:NO];
     }
     
+    [self.btMouseSelector setSelectedSegmentIndex:currentSettings.btMouseSupport ? 1 : 0];
     [self.optimizeSettingsSelector setSelectedSegmentIndex:currentSettings.optimizeGames ? 1 : 0];
     [self.multiControllerSelector setSelectedSegmentIndex:currentSettings.multiController ? 1 : 0];
     [self.audioOnPCSelector setSelectedSegmentIndex:currentSettings.playAudioOnPC ? 1 : 0];
@@ -290,6 +291,7 @@ static const int bitrateTable[] = {
     BOOL multiController = [self.multiControllerSelector selectedSegmentIndex] == 1;
     BOOL audioOnPC = [self.audioOnPCSelector selectedSegmentIndex] == 1;
     BOOL useHevc = [self.hevcSelector selectedSegmentIndex] == 1;
+    BOOL btMouseSupport = [self.btMouseSelector selectedSegmentIndex] == 1;
     [dataMan saveSettingsWithBitrate:_bitrate
                            framerate:framerate
                               height:height
@@ -300,7 +302,8 @@ static const int bitrateTable[] = {
                      multiController:multiController
                            audioOnPC:audioOnPC
                              useHevc:useHevc
-                           enableHdr:NO];
+                           enableHdr:NO
+                      btMouseSupport:btMouseSupport];
 }
 
 - (void)didReceiveMemoryWarning {

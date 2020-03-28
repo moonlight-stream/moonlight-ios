@@ -54,6 +54,9 @@
 
 - (void) setupStreamView:(ControllerSupport*)controllerSupport swipeDelegate:(id<EdgeDetectionDelegate>)swipeDelegate interactionDelegate:(id<UserInteractionDelegate>)interactionDelegate {
     self->interactionDelegate = interactionDelegate;
+    
+    TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
+    
 #if TARGET_OS_TV
     remotePressRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(remoteButtonPressed:)];
     remotePressRecognizer.allowedPressTypes = @[@(UIPressTypeSelect)];
@@ -65,8 +68,7 @@
     [self addGestureRecognizer:remoteLongPressRecognizer];
 #else
     onScreenControls = [[OnScreenControls alloc] initWithView:self controllerSup:controllerSupport swipeDelegate:swipeDelegate];
-    DataManager* dataMan = [[DataManager alloc] init];
-    OnScreenControlsLevel level = (OnScreenControlsLevel)[[dataMan getSettings].onscreenControls integerValue];
+    OnScreenControlsLevel level = (OnScreenControlsLevel)[settings.onscreenControls integerValue];
     if (level == OnScreenControlsLevelAuto) {
         [controllerSupport initAutoOnScreenControlMode:onScreenControls];
     }
@@ -80,7 +82,10 @@
     
     x1mouse = [[X1Mouse alloc] init];
     x1mouse.delegate = self;
-    [x1mouse start];
+    
+    if (settings.btMouseSupport) {
+        [x1mouse start];
+    }
 }
 
 - (void)startInteractionTimer {
