@@ -14,6 +14,8 @@
 #include <libxml2/libxml/xmlreader.h>
 #include <string.h>
 
+#include <Limelight.h>
+
 #define SHORT_TIMEOUT_SEC 2
 #define NORMAL_TIMEOUT_SEC 5
 #define LONG_TIMEOUT_SEC 60
@@ -214,7 +216,7 @@ static const NSString* HTTPS_PORT = @"47984";
                            [Utils bytesToHex:config.riKey], config.riKeyId,
                            config.enableHdr ? @"&hdrMode=1&clientHdrCapVersion=0&clientHdrCapSupportedFlagsInUint32=0&clientHdrCapMetaDataId=NV_STATIC_METADATA_TYPE_1&clientHdrCapDisplayData=0x0x0x0x0x0x0x0x0x0x0": @"",
                            config.playAudioOnPC ? 1 : 0,
-                           (config.audioChannelMask << 16) | config.audioChannelCount,
+                           SURROUNDAUDIOINFO_FROM_AUDIO_CONFIGURATION(config.audioConfiguration),
                            config.gamepadMask, config.gamepadMask];
     Log(LOG_I, @"Requesting: %@", urlString);
     // This blocks while the app is launching
@@ -225,7 +227,7 @@ static const NSString* HTTPS_PORT = @"47984";
     NSString* urlString = [NSString stringWithFormat:@"%@/resume?uniqueid=%@&rikey=%@&rikeyid=%d&surroundAudioInfo=%d",
                            _baseHTTPSURL, _uniqueId,
                            [Utils bytesToHex:config.riKey], config.riKeyId,
-                           (config.audioChannelMask << 16) | config.audioChannelCount];
+                           SURROUNDAUDIOINFO_FROM_AUDIO_CONFIGURATION(config.audioConfiguration)];
     Log(LOG_I, @"Requesting: %@", urlString);
     // This blocks while the app is resuming
     return [self createRequestFromString:urlString timeout:LONG_TIMEOUT_SEC];

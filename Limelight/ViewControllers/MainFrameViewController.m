@@ -35,6 +35,8 @@
 
 #import <VideoToolbox/VideoToolbox.h>
 
+#include <Limelight.h>
+
 @implementation MainFrameViewController {
     NSOperationQueue* _opQueue;
     TemporaryHost* _selectedHost;
@@ -548,14 +550,16 @@ static NSMutableSet* hostList;
     
 
     // Probe for supported channel configurations
-    Log(LOG_I, @"Audio device supports %d channels", [AVAudioSession sharedInstance].maximumOutputNumberOfChannels);
-    if ([AVAudioSession sharedInstance].maximumOutputNumberOfChannels >= 6) {
-        _streamConfig.audioChannelCount = 6;
-        _streamConfig.audioChannelMask = 0xFC;
+    long outputChannels = [AVAudioSession sharedInstance].maximumOutputNumberOfChannels;
+    Log(LOG_I, @"Audio device supports %d channels", outputChannels);
+    if (outputChannels >= 8) {
+        _streamConfig.audioConfiguration = AUDIO_CONFIGURATION_71_SURROUND;
+    }
+    else if (outputChannels >= 6) {
+        _streamConfig.audioConfiguration = AUDIO_CONFIGURATION_51_SURROUND;
     }
     else {
-        _streamConfig.audioChannelCount = 2;
-        _streamConfig.audioChannelMask = 0x3;
+        _streamConfig.audioConfiguration = AUDIO_CONFIGURATION_STEREO;
     }
     
     // HDR requires HDR10 game, HDR10 display, and HEVC Main10 decoder on the client.

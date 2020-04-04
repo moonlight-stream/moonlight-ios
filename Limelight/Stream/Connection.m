@@ -100,37 +100,64 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit)
                                     pts:decodeUnit->presentationTimeMs];
 }
 
-int ArInit(int audioConfiguration, POPUS_MULTISTREAM_CONFIGURATION opusConfig, void* context, int flags)
+int ArInit(int audioConfiguration, POPUS_MULTISTREAM_CONFIGURATION originalOpusConfig, void* context, int flags)
 {
     int err;
+    AudioChannelLayout channelLayout = {};
+    OPUS_MULTISTREAM_CONFIGURATION opusConfig = *originalOpusConfig;
     
     // Initialize the circular buffer
     audioBufferWriteIndex = audioBufferReadIndex = 0;
-    audioSamplesPerFrame = opusConfig->samplesPerFrame;
-    audioBufferStride = opusConfig->channelCount * opusConfig->samplesPerFrame;
-    audioBufferEntries = CIRCULAR_BUFFER_DURATION / (opusConfig->samplesPerFrame / (opusConfig->sampleRate / 1000));
+    audioSamplesPerFrame = opusConfig.samplesPerFrame;
+    audioBufferStride = opusConfig.channelCount * opusConfig.samplesPerFrame;
+    audioBufferEntries = CIRCULAR_BUFFER_DURATION / (opusConfig.samplesPerFrame / (opusConfig.sampleRate / 1000));
     audioCircularBuffer = malloc(audioBufferEntries * audioBufferStride * sizeof(short));
     if (audioCircularBuffer == NULL) {
         Log(LOG_E, @"Error allocating output queue\n");
         return -1;
     }
-
-    opusDecoder = opus_multistream_decoder_create(opusConfig->sampleRate,
-                                                  opusConfig->channelCount,
-                                                  opusConfig->streams,
-                                                  opusConfig->coupledStreams,
-                                                  opusConfig->mapping,
+    
+    switch (opusConfig.channelCount) {
+        case 2:
+            channelLayout.mChannelLayoutTag = kAudioChannelLayoutTag_Stereo;
+            break;
+        case 4:
+            channelLayout.mChannelLayoutTag = kAudioChannelLayoutTag_Quadraphonic;
+            break;
+        case 6:
+            channelLayout.mChannelLayoutTag = kAudioChannelLayoutTag_AudioUnit_5_1;
+            break;
+        case 8:
+            channelLayout.mChannelLayoutTag = kAudioChannelLayoutTag_AudioUnit_7_1;
+            
+            // Swap SL/SR and RL/RR to match the selected channel layout
+            opusConfig.mapping[4] = originalOpusConfig->mapping[6];
+            opusConfig.mapping[5] = originalOpusConfig->mapping[7];
+            opusConfig.mapping[6] = originalOpusConfig->mapping[4];
+            opusConfig.mapping[7] = originalOpusConfig->mapping[5];
+            break;
+        default:
+            // Unsupported channel layout
+            Log(LOG_E, @"Unsupported channel layout: %d\n", opusConfig.channelCount);
+            abort();
+    }
+    
+    opusDecoder = opus_multistream_decoder_create(opusConfig.sampleRate,
+                                                  opusConfig.channelCount,
+                                                  opusConfig.streams,
+                                                  opusConfig.coupledStreams,
+                                                  opusConfig.mapping,
                                                   &err);
 
     // Configure the audio session for our app
     NSError *audioSessionError = nil;
     AVAudioSession* audioSession = [AVAudioSession sharedInstance];
 
-    [audioSession setPreferredSampleRate:opusConfig->sampleRate error:&audioSessionError];
+    [audioSession setPreferredSampleRate:opusConfig.sampleRate error:&audioSessionError];
     [audioSession setCategory:AVAudioSessionCategoryPlayback
                   withOptions:AVAudioSessionCategoryOptionMixWithOthers
                         error:&audioSessionError];
-    [audioSession setPreferredIOBufferDuration:(opusConfig->samplesPerFrame / (opusConfig->sampleRate / 1000)) / 1000.0
+    [audioSession setPreferredIOBufferDuration:(opusConfig.samplesPerFrame / (opusConfig.sampleRate / 1000)) / 1000.0
                                          error:&audioSessionError];
     [audioSession setActive: YES error: &audioSessionError];
     
@@ -140,11 +167,11 @@ int ArInit(int audioConfiguration, POPUS_MULTISTREAM_CONFIGURATION opusConfig, v
     OSStatus status;
     
     AudioStreamBasicDescription audioFormat = {0};
-    audioFormat.mSampleRate = opusConfig->sampleRate;
+    audioFormat.mSampleRate = opusConfig.sampleRate;
     audioFormat.mBitsPerChannel = 16;
     audioFormat.mFormatID = kAudioFormatLinearPCM;
     audioFormat.mFormatFlags = kAudioFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked;
-    audioFormat.mChannelsPerFrame = opusConfig->channelCount;
+    audioFormat.mChannelsPerFrame = opusConfig.channelCount;
     audioFormat.mBytesPerFrame = audioFormat.mChannelsPerFrame * (audioFormat.mBitsPerChannel / 8);
     audioFormat.mBytesPerPacket = audioFormat.mBytesPerFrame;
     audioFormat.mFramesPerPacket = audioFormat.mBytesPerPacket / audioFormat.mBytesPerFrame;
@@ -157,28 +184,14 @@ int ArInit(int audioConfiguration, POPUS_MULTISTREAM_CONFIGURATION opusConfig, v
     }
     
     // We need to specify a channel layout for surround sound configurations
-    if (opusConfig->channelCount > 2) {
-        AudioChannelLayout channelLayout = {};
-        
-        switch (opusConfig->channelCount) {
-            case 6:
-                channelLayout.mChannelLayoutTag = kAudioChannelLayoutTag_MPEG_5_1_A;
-                break;
-            default:
-                // Unsupported channel layout
-                Log(LOG_E, @"Unsupported channel layout: %d\n", opusConfig->channelCount);
-                abort();
-        }
-        
-        status = AudioQueueSetProperty(audioQueue, kAudioQueueProperty_ChannelLayout, &channelLayout, sizeof(channelLayout));
-        if (status != noErr) {
-            Log(LOG_E, @"Error configuring surround channel layout: %d\n", status);
-            return status;
-        }
+    status = AudioQueueSetProperty(audioQueue, kAudioQueueProperty_ChannelLayout, &channelLayout, sizeof(channelLayout));
+    if (status != noErr) {
+        Log(LOG_E, @"Error configuring surround channel layout: %d\n", status);
+        return status;
     }
     
     for (int i = 0; i < AUDIO_QUEUE_BUFFERS; i++) {
-        status = AudioQueueAllocateBuffer(audioQueue, audioFormat.mBytesPerFrame * opusConfig->samplesPerFrame, &audioBuffers[i]);
+        status = AudioQueueAllocateBuffer(audioQueue, audioFormat.mBytesPerFrame * opusConfig.samplesPerFrame, &audioBuffers[i]);
         if (status != noErr) {
             Log(LOG_E, @"Error allocating output buffer: %d\n", status);
             return status;
@@ -342,6 +355,7 @@ void ClConnectionStatusUpdate(int status)
     _streamConfig.fps = config.frameRate;
     _streamConfig.bitrate = config.bitRate;
     _streamConfig.enableHdr = config.enableHdr;
+    _streamConfig.audioConfiguration = config.audioConfiguration;
     
     // Use some of the HEVC encoding efficiency improvements to
     // reduce bandwidth usage while still gaining some image
@@ -357,18 +371,6 @@ void ClConnectionStatusUpdate(int status)
         // Detect remote streaming automatically based on the IP address of the target
         _streamConfig.streamingRemotely = STREAM_CFG_AUTO;
         _streamConfig.packetSize = 1392;
-    }
-    
-    switch (config.audioChannelCount) {
-        case 2:
-            _streamConfig.audioConfiguration = AUDIO_CONFIGURATION_STEREO;
-            break;
-        case 6:
-            _streamConfig.audioConfiguration = AUDIO_CONFIGURATION_51_SURROUND;
-            break;
-        default:
-            Log(LOG_E, @"Unknown audio channel count: %d", config.audioChannelCount);
-            abort();
     }
     
     // HDR implies HEVC allowed

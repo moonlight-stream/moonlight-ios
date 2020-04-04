@@ -9,5 +9,5 @@
 #import "StreamConfiguration.h"
 
 @implementation StreamConfiguration
-@synthesize host, appID, width, height, frameRate, bitRate, riKeyId, riKey, gamepadMask, streamingRemotely, appName, optimizeGameSettings, playAudioOnPC, audioChannelMask, audioChannelCount, enableHdr, multiController, allowHevc, serverCert;
+@synthesize host, appID, width, height, frameRate, bitRate, riKeyId, riKey, gamepadMask, streamingRemotely, appName, optimizeGameSettings, playAudioOnPC, audioConfiguration, enableHdr, multiController, allowHevc, serverCert;
 @end

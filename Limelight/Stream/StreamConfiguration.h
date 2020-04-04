@@ -23,8 +23,7 @@
 @property int gamepadMask;
 @property BOOL optimizeGameSettings;
 @property BOOL playAudioOnPC;
-@property int audioChannelCount;
-@property int audioChannelMask;
+@property int audioConfiguration;
 @property BOOL enableHdr;
 @property BOOL multiController;
 @property BOOL allowHevc;
