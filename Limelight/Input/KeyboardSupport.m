@@ -21,7 +21,7 @@
     if (key.modifierFlags & UIKeyModifierAlternate) {
         modifierFlags |= MODIFIER_ALT;
     }
-    if (key.modifierFlags & UIKeyModifierControl) {
+    if (key.modifierFlags & (UIKeyModifierControl | UIKeyModifierCommand)) {
         modifierFlags |= MODIFIER_CTRL;
     }
     
