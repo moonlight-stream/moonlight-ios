@@ -13,7 +13,7 @@
 #import "KeyboardSupport.h"
 #import "TextFieldKeyboardDelegate.h"
 
-static const double X1_MOUSE_SPEED_DIVISOR = 2.0;
+static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
 @implementation StreamView {
     CGPoint touchLocation, originalLocation;
