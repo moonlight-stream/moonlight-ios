@@ -91,8 +91,10 @@
         Log(LOG_W, @"Background pairing time has expired!");
     }];
     
-    NSData* salt = [self saltPIN:PIN];
-    Log(LOG_I, @"PIN: %@, saltedPIN: %@", PIN, salt);
+    NSData* salt = [Utils randomBytes:16];
+    NSData* saltedPIN = [self concatData:salt with:[PIN dataUsingEncoding:NSUTF8StringEncoding]];
+
+    Log(LOG_I, @"PIN: %@, salt %@", PIN, salt);
     
     HttpResponse* pairResp = [[HttpResponse alloc] init];
     [_httpManager executeRequestSynchronously:[HttpRequest requestForResponse:pairResp withUrlRequest:[_httpManager newPairRequest:salt clientCert:_clientCert]]];
@@ -117,11 +119,11 @@
     // Gen 7 servers use SHA256 to get the key
     int hashLength;
     if (serverMajorVersion >= 7) {
-        aesKey = [cryptoMan createAESKeyFromSaltSHA256:salt];
+        aesKey = [cryptoMan createAESKeyFromSaltSHA256:saltedPIN];
         hashLength = 32;
     }
     else {
-        aesKey = [cryptoMan createAESKeyFromSaltSHA1:salt];
+        aesKey = [cryptoMan createAESKeyFromSaltSHA1:saltedPIN];
         hashLength = 20;
     }
     
@@ -225,13 +227,6 @@
                      arc4random() % 10, arc4random() % 10,
                      arc4random() % 10, arc4random() % 10];
     return PIN;
-}
-
-- (NSData*) saltPIN:(NSString*)PIN {
-    NSMutableData* saltedPIN = [[NSMutableData alloc] initWithCapacity:20];
-    [saltedPIN appendData:[Utils randomBytes:16]];
-    [saltedPIN appendBytes:[PIN UTF8String] length:4];
-    return saltedPIN;
 }
 
 @end
