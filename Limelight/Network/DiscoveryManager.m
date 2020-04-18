@@ -69,6 +69,11 @@
     
 }
 
+- (void) resetDiscoveryState {
+    // Allow us to rediscover hosts that were already found before
+    [_mdnsMan forgetHosts];
+}
+
 - (void) startDiscovery {
     if (shouldDiscover) {
         return;

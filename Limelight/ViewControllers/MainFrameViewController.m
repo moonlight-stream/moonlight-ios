@@ -829,6 +829,8 @@ static NSMutableSet* hostList;
         // This will kick off box art caching
         [self updateHosts];
         
+        // Reset state first so we can rediscover hosts that were deleted before
+        [_discMan resetDiscoveryState];
         [_discMan startDiscovery];
         
         // This will refresh the applist when a paired host is selected

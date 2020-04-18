@@ -21,6 +21,7 @@
 - (id) initWithCallback:(id<MDNSCallback>) callback;
 - (void) searchForHosts;
 - (void) stopSearching;
+- (void) forgetHosts;
 
 @end
 

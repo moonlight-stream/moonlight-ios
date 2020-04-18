@@ -63,6 +63,10 @@ static NSString* NV_SERVICE_TYPE = @"_nvstream._tcp";
     [mDNSBrowser stop];
 }
 
+- (void) forgetHosts {
+    [services removeAllObjects];
+}
+
 + (NSString*)sockAddrToString:(NSData*)addrData {
     char addrStr[INET6_ADDRSTRLEN];
     struct sockaddr* addr = (struct sockaddr*)[addrData bytes];
