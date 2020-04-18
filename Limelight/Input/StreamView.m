@@ -25,6 +25,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     BOOL isDragging;
     NSTimer* dragTimer;
     
+    float streamAspectRatio;
     float xDeltaFactor;
     float yDeltaFactor;
     float screenFactor;
@@ -58,8 +59,12 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 #endif
 }
 
-- (void) setupStreamView:(ControllerSupport*)controllerSupport swipeDelegate:(id<EdgeDetectionDelegate>)swipeDelegate interactionDelegate:(id<UserInteractionDelegate>)interactionDelegate {
+- (void) setupStreamView:(ControllerSupport*)controllerSupport
+           swipeDelegate:(id<EdgeDetectionDelegate>)swipeDelegate
+     interactionDelegate:(id<UserInteractionDelegate>)interactionDelegate
+                  config:(StreamConfiguration*)streamConfig {
     self->interactionDelegate = interactionDelegate;
+    self->streamAspectRatio = (float)streamConfig.width / (float)streamConfig.height;
     
     TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
     
@@ -443,10 +448,49 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 - (UIPointerRegion *)pointerInteraction:(UIPointerInteraction *)interaction
                        regionForRequest:(UIPointerRegionRequest *)request
                           defaultRegion:(UIPointerRegion *)defaultRegion API_AVAILABLE(ios(13.4)) {
-    // Send coordinates normalized to our view
-    LiSendMousePositionEvent(request.location.x - self.bounds.origin.x,
-                             request.location.y - self.bounds.origin.y,
-                             self.bounds.size.width, self.bounds.size.height);
+    
+    // These are now relative to the StreamView, however we need to scale them
+    // further to make them relative to the actual video portion.
+    float x = request.location.x - self.bounds.origin.x;
+    float y = request.location.y - self.bounds.origin.y;
+    
+    // For some reason, we don't seem to always get to the bounds of the window
+    // so we'll subtract 1 pixel if we're to the left/below of the origin and
+    // and add 1 pixel if we're to the right/above. It should be imperceptible
+    // to the user but it will allow activation of gestures that require contact
+    // with the edge of the screen (like Aero Snap).
+    if (x < self.bounds.size.width / 2) {
+        x--;
+    }
+    else {
+        x++;
+    }
+    if (y < self.bounds.size.height / 2) {
+        y--;
+    }
+    else {
+        y++;
+    }
+    
+    // This logic mimics what iOS does with AVLayerVideoGravityResizeAspect
+    CGSize videoSize;
+    CGPoint videoOrigin;
+    if (self.bounds.size.width > self.bounds.size.height * streamAspectRatio) {
+        videoSize = CGSizeMake(self.bounds.size.height * streamAspectRatio, self.bounds.size.height);
+    } else {
+        videoSize = CGSizeMake(self.bounds.size.width, self.bounds.size.width / streamAspectRatio);
+    }
+    videoOrigin = CGPointMake(self.bounds.size.width / 2 - videoSize.width / 2,
+                              self.bounds.size.height / 2 - videoSize.height / 2);
+    
+    // Confine the cursor to the video region. We don't just discard events outside
+    // the region because we won't always get one exactly when the mouse leaves the region.
+    x = MIN(MAX(x, videoOrigin.x), videoOrigin.x + videoSize.width);
+    y = MIN(MAX(y, videoOrigin.y), videoOrigin.y + videoSize.height);
+    
+    // Send the mouse position relative to the video region
+    LiSendMousePositionEvent(x - videoOrigin.x, y - videoOrigin.y,
+                             videoSize.width, videoSize.height);
     
     // The pointer interaction should cover the entire view
     return [UIPointerRegion regionWithRect:self.bounds identifier:nil];

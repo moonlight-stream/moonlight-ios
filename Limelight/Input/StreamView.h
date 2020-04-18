@@ -9,6 +9,7 @@
 #import "ControllerSupport.h"
 #import "OnScreenControls.h"
 #import "Moonlight-Swift.h"
+#import "StreamConfiguration.h"
 
 @protocol EdgeDetectionDelegate <NSObject>
 
@@ -31,7 +32,10 @@
 
 @property (nonatomic, retain) IBOutlet UITextField* keyInputField;
 
-- (void) setupStreamView:(ControllerSupport*)controllerSupport swipeDelegate:(id<EdgeDetectionDelegate>)swipeDelegate interactionDelegate:(id<UserInteractionDelegate>)interactionDelegate;
+- (void) setupStreamView:(ControllerSupport*)controllerSupport
+           swipeDelegate:(id<EdgeDetectionDelegate>)swipeDelegate
+     interactionDelegate:(id<UserInteractionDelegate>)interactionDelegate
+                  config:(StreamConfiguration*)streamConfig;
 - (void) showOnScreenControls;
 - (void) setMouseDeltaFactors:(float)x y:(float)y;
 - (OnScreenControlsLevel) getCurrentOscState;

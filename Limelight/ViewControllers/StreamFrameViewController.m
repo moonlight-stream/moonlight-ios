@@ -63,7 +63,7 @@
     _inactivityTimer = nil;
     
     _streamView = (StreamView*)self.view;
-    [_streamView setupStreamView:_controllerSupport swipeDelegate:self interactionDelegate:self];
+    [_streamView setupStreamView:_controllerSupport swipeDelegate:self interactionDelegate:self config:self.streamConfig];
     
 #if TARGET_OS_TV
     if (!_menuGestureRecognizer || !_menuDoubleTapGestureRecognizer) {
