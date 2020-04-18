@@ -29,6 +29,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     float yDeltaFactor;
     float screenFactor;
     
+    NSInteger lastMouseButtonMask;
     double mouseX;
     double mouseY;
     
@@ -80,6 +81,15 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     else {
         Log(LOG_I, @"Setting manual on-screen controls level: %d", (int)level);
         [onScreenControls setLevel:level];
+    }
+    
+    if (@available(iOS 13.4, *)) {
+        [self addInteraction:[[UIPointerInteraction alloc] initWithDelegate:self]];
+        
+        UIPanGestureRecognizer *mouseWheelRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(mouseWheelMoved:)];
+        mouseWheelRecognizer.allowedScrollTypesMask = UIScrollTypeMaskDiscrete;
+        mouseWheelRecognizer.allowedTouchTypes = @[@(UITouchTypeIndirectPointer)];
+        [self addGestureRecognizer:mouseWheelRecognizer];
     }
 #endif
     
@@ -147,6 +157,13 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    if ([self handleMouseButtonEvent:BUTTON_ACTION_PRESS
+                          forTouches:touches
+                           withEvent:event]) {
+        // If it's a mouse event, we're done
+        return;
+    }
+    
     Log(LOG_D, @"Touch down");
     
     // Notify of user interaction and start expiration timer
@@ -173,7 +190,57 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     }
 }
 
+- (BOOL)handleMouseButtonEvent:(int)buttonAction forTouches:(NSSet *)touches withEvent:(UIEvent *)event {
+#if !TARGET_OS_TV
+    if (@available(iOS 13.4, *)) {
+        UITouch* touch = [touches anyObject];
+        if (touch.type == UITouchTypeIndirectPointer) {
+            UIEventButtonMask changedButtons = lastMouseButtonMask ^ event.buttonMask;
+                        
+            for (int i = BUTTON_LEFT; i <= BUTTON_X2; i++) {
+                UIEventButtonMask buttonFlag;
+                
+                switch (i) {
+                    // Right and Middle are reversed from what iOS uses
+                    case BUTTON_RIGHT:
+                        buttonFlag = UIEventButtonMaskForButtonNumber(2);
+                        break;
+                    case BUTTON_MIDDLE:
+                        buttonFlag = UIEventButtonMaskForButtonNumber(3);
+                        break;
+                        
+                    default:
+                        buttonFlag = UIEventButtonMaskForButtonNumber(i);
+                        break;
+                }
+                
+                if (changedButtons & buttonFlag) {
+                    LiSendMouseButtonEvent(buttonAction, i);
+                }
+            }
+            
+            lastMouseButtonMask = event.buttonMask;
+            return YES;
+        }
+    }
+#endif
+    
+    return NO;
+}
+
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+#if !TARGET_OS_TV
+    if (@available(iOS 13.4, *)) {
+        UITouch *touch = [touches anyObject];
+        if (touch.type == UITouchTypeIndirectPointer) {
+            // Ignore move events from mice. These only happen while the
+            // mouse button is pressed and conflict with our positional
+            // mouse input handling.
+            return;
+        }
+    }
+#endif
+    
     hasUserInteracted = YES;
     
     if (![onScreenControls handleTouchMovedEvent:touches]) {
@@ -261,6 +328,13 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+    if ([self handleMouseButtonEvent:BUTTON_ACTION_RELEASE
+                          forTouches:touches
+                           withEvent:event]) {
+        // If it's a mouse event, we're done
+        return;
+    }
+    
     Log(LOG_D, @"Touch up");
     
     hasUserInteracted = YES;
@@ -338,6 +412,9 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         isDragging = false;
         LiSendMouseButtonEvent(BUTTON_ACTION_RELEASE, BUTTON_LEFT);
     }
+    [self handleMouseButtonEvent:BUTTON_ACTION_RELEASE
+                      forTouches:touches
+                       withEvent:event];
 }
 
 #if TARGET_OS_TV
@@ -362,6 +439,42 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     isDragging = true;
     LiSendMouseButtonEvent(BUTTON_ACTION_PRESS, BUTTON_LEFT);
 }
+#else
+- (UIPointerRegion *)pointerInteraction:(UIPointerInteraction *)interaction
+                       regionForRequest:(UIPointerRegionRequest *)request
+                          defaultRegion:(UIPointerRegion *)defaultRegion API_AVAILABLE(ios(13.4)) {
+    // Send coordinates normalized to our view
+    LiSendMousePositionEvent(request.location.x - self.bounds.origin.x,
+                             request.location.y - self.bounds.origin.y,
+                             self.bounds.size.width, self.bounds.size.height);
+    
+    // The pointer interaction should cover the entire view
+    return [UIPointerRegion regionWithRect:self.bounds identifier:nil];
+}
+
+- (UIPointerStyle *)pointerInteraction:(UIPointerInteraction *)interaction styleForRegion:(UIPointerRegion *)region  API_AVAILABLE(ios(13.4)) {
+    // Always hide the mouse cursor over our stream view
+    return [UIPointerStyle hiddenPointerStyle];
+}
+
+- (void)mouseWheelMoved:(UIPanGestureRecognizer *)gesture {
+    switch (gesture.state) {
+        case UIGestureRecognizerStateBegan:
+        case UIGestureRecognizerStateChanged:
+        case UIGestureRecognizerStateEnded:
+            break;
+            
+        default:
+            // Ignore recognition failure and other states
+            return;
+    }
+
+    CGPoint velocity = [gesture velocityInView:self];
+    if ((short)velocity.y != 0) {
+        LiSendHighResScrollEvent((short)velocity.y);
+    }
+}
+
 #endif
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {

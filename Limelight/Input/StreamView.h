@@ -23,7 +23,11 @@
 
 @end
 
+#if TARGET_OS_TV
 @interface StreamView : OSView <X1KitMouseDelegate>
+#else
+@interface StreamView : OSView <X1KitMouseDelegate, UIPointerInteractionDelegate>
+#endif
 
 @property (nonatomic, retain) IBOutlet UITextField* keyInputField;
 
