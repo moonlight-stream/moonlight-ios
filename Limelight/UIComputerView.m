@@ -77,6 +77,11 @@ static const int LABEL_DY = 20;
 #else
     [self addSubview:_hostOverlay];
     [self addSubview:_hostSpinner];
+    
+    if (@available(iOS 13.4, *)) {
+        // Allow the button style to change when moused over
+        self.pointerInteractionEnabled = YES;
+    }
 #endif
     
     return self;

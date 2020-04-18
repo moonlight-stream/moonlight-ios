@@ -61,6 +61,11 @@ static UIImage* noImage;
     // but we want it unrasterized for tvOS where it must be scaled.
     self.layer.shouldRasterize = YES;
     self.layer.rasterizationScale = [UIScreen mainScreen].scale;
+    
+    if (@available(iOS 13.4, *)) {
+        // Allow the button style to change when moused over
+        self.pointerInteractionEnabled = YES;
+    }
 #endif
     
     [self updateAppImage];
