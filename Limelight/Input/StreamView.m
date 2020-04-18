@@ -332,6 +332,12 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
+    [dragTimer invalidate];
+    dragTimer = nil;
+    if (isDragging) {
+        isDragging = false;
+        LiSendMouseButtonEvent(BUTTON_ACTION_RELEASE, BUTTON_LEFT);
+    }
 }
 
 #if TARGET_OS_TV
