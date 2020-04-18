@@ -492,8 +492,8 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     LiSendMousePositionEvent(x - videoOrigin.x, y - videoOrigin.y,
                              videoSize.width, videoSize.height);
     
-    // The pointer interaction should cover the entire view
-    return [UIPointerRegion regionWithRect:self.bounds identifier:nil];
+    // The pointer interaction should cover the video region only
+    return [UIPointerRegion regionWithRect:CGRectMake(videoOrigin.x, videoOrigin.y, videoSize.width, videoSize.height) identifier:nil];
 }
 
 - (UIPointerStyle *)pointerInteraction:(UIPointerInteraction *)interaction styleForRegion:(UIPointerRegion *)region  API_AVAILABLE(ios(13.4)) {
