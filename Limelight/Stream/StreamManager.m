@@ -77,13 +77,6 @@
             return;
         }
     }
-
-    // Set mouse delta factors from the screen resolution and stream size
-    CGFloat screenScale = [[UIScreen mainScreen] scale];
-    CGRect screenBounds = [[UIScreen mainScreen] bounds];
-    CGSize screenSize = CGSizeMake(screenBounds.size.width * screenScale, screenBounds.size.height * screenScale);
-    [((StreamView*)_renderView) setMouseDeltaFactors:_config.width / screenSize.width
-                                                   y:_config.height / screenSize.height];
     
     // Populate the config's version fields from serverinfo
     _config.appVersion = appversion;

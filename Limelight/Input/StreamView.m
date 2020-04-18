@@ -15,6 +15,9 @@
 
 static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
+static const int REFERENCE_WIDTH = 1280;
+static const int REFERENCE_HEIGHT = 720;
+
 @implementation StreamView {
     CGPoint touchLocation, originalLocation;
     BOOL touchMoved;
@@ -26,9 +29,6 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     NSTimer* dragTimer;
     
     float streamAspectRatio;
-    float xDeltaFactor;
-    float yDeltaFactor;
-    float screenFactor;
     
     NSInteger lastMouseButtonMask;
     double mouseX;
@@ -44,19 +44,6 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     BOOL hasUserInteracted;
     
     TextFieldKeyboardDelegate* textFieldDelegate;
-}
-
-- (void) setMouseDeltaFactors:(float)x y:(float)y {
-    xDeltaFactor = x;
-    yDeltaFactor = y;
-    
-#if TARGET_OS_TV
-    // The Apple TV uses indirect touch devices, so they should
-    // not be scaled by the screen scaling factor.
-    screenFactor = 1.0f;
-#else
-    screenFactor = [[UIScreen mainScreen] scale];
-#endif
 }
 
 - (void) setupStreamView:(ControllerSupport*)controllerSupport
@@ -156,9 +143,9 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     }
 }
 
-- (Boolean)isConfirmedMove:(CGPoint)currentPoint from:(CGPoint)originalPoint {
-    // Movements of greater than 10 pixels are considered confirmed
-    return hypotf(originalPoint.x - currentPoint.x, originalPoint.y - currentPoint.y) >= 10;
+- (BOOL)isConfirmedMove:(CGPoint)currentPoint from:(CGPoint)originalPoint {
+    // Movements of greater than 5 pixels are considered confirmed
+    return hypotf(originalPoint.x - currentPoint.x, originalPoint.y - currentPoint.y) >= 5;
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -256,11 +243,8 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
             if (touchLocation.x != currentLocation.x ||
                 touchLocation.y != currentLocation.y)
             {
-                int deltaX = currentLocation.x - touchLocation.x;
-                int deltaY = currentLocation.y - touchLocation.y;
-                
-                deltaX *= xDeltaFactor * screenFactor;
-                deltaY *= yDeltaFactor * screenFactor;
+                int deltaX = (currentLocation.x - touchLocation.x) * (REFERENCE_WIDTH / self.bounds.size.width);
+                int deltaY = (currentLocation.y - touchLocation.y) * (REFERENCE_HEIGHT / self.bounds.size.height);
                 
                 if (deltaX != 0 || deltaY != 0) {
                     LiSendMouseMoveEvent(deltaX, deltaY);

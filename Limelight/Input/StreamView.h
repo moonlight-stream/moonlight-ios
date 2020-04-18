@@ -37,7 +37,6 @@
      interactionDelegate:(id<UserInteractionDelegate>)interactionDelegate
                   config:(StreamConfiguration*)streamConfig;
 - (void) showOnScreenControls;
-- (void) setMouseDeltaFactors:(float)x y:(float)y;
 - (OnScreenControlsLevel) getCurrentOscState;
 
 @end
