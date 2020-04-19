@@ -827,7 +827,7 @@ static NSMutableSet* hostList;
 }
 #endif
 
--(void)beginForegroundRefresh:(bool)refreshAppList
+-(void)beginForegroundRefresh
 {
     if (!_background) {
         // This will kick off box art caching
@@ -838,7 +838,7 @@ static NSMutableSet* hostList;
         [_discMan startDiscovery];
         
         // This will refresh the applist when a paired host is selected
-        if (refreshAppList && _selectedHost != nil && _selectedHost.pairState == PairStatePaired) {
+        if (_selectedHost != nil && _selectedHost.pairState == PairStatePaired) {
             [self hostClicked:_selectedHost view:nil];
         }
     }
@@ -878,7 +878,7 @@ static NSMutableSet* hostList;
 {
     _background = NO;
     
-    [self beginForegroundRefresh: YES];
+    [self beginForegroundRefresh];
     
     // Check for a pending shortcut action when returning to foreground
     [self handlePendingShortcutAction];
@@ -935,12 +935,7 @@ static NSMutableSet* hostList;
     // this view via an error dialog from the stream
     // view, so we won't get a return to active notification
     // for that which would normally fire beginForegroundRefresh.
-    //
-    // On tvOS, we'll get a viewWillAppear when returning from the
-    // loading frame which will cause an infinite loop by starting
-    // another loading frame. To avoid this, just don't refresh
-    // if we're coming back from a loading frame view.
-    [self beginForegroundRefresh: !([_loadingFrame isShown] || [_loadingFrame isBeingDismissed])];
+    [self beginForegroundRefresh];
 }
 
 - (void)viewDidDisappear:(BOOL)animated
