@@ -41,7 +41,7 @@
         return YES;
     }
     
-    if (![object isKindOfClass:[App class]]) {
+    if (![object isKindOfClass:[self class]]) {
         return NO;
     }
     

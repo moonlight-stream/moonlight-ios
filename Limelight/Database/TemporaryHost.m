@@ -90,7 +90,7 @@
         return YES;
     }
     
-    if (![object isKindOfClass:[Host class]]) {
+    if (![object isKindOfClass:[self class]]) {
         return NO;
     }
     
