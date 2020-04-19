@@ -133,6 +133,10 @@ static NSMutableSet* hostList;
     // Capture the host here because it can change once we
     // leave the main thread
     TemporaryHost* host = _selectedHost;
+    if (host == nil) {
+        [self hideLoadingFrame: nil];
+        return;
+    }
     
     if ([host.appList count] > 0) {
         usingCachedAppList = true;
@@ -149,11 +153,11 @@ static NSMutableSet* hostList;
     Log(LOG_I, @"Using cached app list: %d", usingCachedAppList);
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         // Exempt this host from discovery while handling the applist query
-        [self->_discMan removeHostFromDiscovery:host];
+        [self->_discMan pauseDiscoveryForHost:host];
         
         AppListResponse* appListResp = [ConnectionHelper getAppListForHostWithHostIP:host.activeAddress serverCert:host.serverCert uniqueID:self->_uniqueId];
         
-        [self->_discMan addHostToDiscovery:host];
+        [self->_discMan resumeDiscoveryForHost:host];
 
         if (![appListResp isStatusOk] || [appListResp getAppList] == nil) {
             Log(LOG_W, @"Failed to get applist: %@", appListResp.statusMessage);
@@ -340,10 +344,10 @@ static NSMutableSet* hostList;
             ServerInfoResponse* serverInfoResp = [[ServerInfoResponse alloc] init];
             
             // Exempt this host from discovery while handling the serverinfo request
-            [self->_discMan removeHostFromDiscovery:host];
+            [self->_discMan pauseDiscoveryForHost:host];
             [hMan executeRequestSynchronously:[HttpRequest requestForResponse:serverInfoResp withUrlRequest:[hMan newServerInfoRequest:false]
                                                                 fallbackError:401 fallbackRequest:[hMan newHttpServerInfoRequest]]];
-            [self->_discMan addHostToDiscovery:host];
+            [self->_discMan resumeDiscoveryForHost:host];
             
             if (![serverInfoResp isStatusOk]) {
                 Log(LOG_W, @"Failed to get server info: %@", serverInfoResp.statusMessage);
@@ -612,7 +616,7 @@ static NSMutableSet* hostList;
                                                 HttpRequest* quitRequest = [HttpRequest requestForResponse: quitResponse withUrlRequest:[hMan newQuitAppRequest]];
                                                 
                                                 // Exempt this host from discovery while handling the quit operation
-                                                [self->_discMan removeHostFromDiscovery:app.host];
+                                                [self->_discMan pauseDiscoveryForHost:app.host];
                                                 [hMan executeRequestSynchronously:quitRequest];
                                                 if (quitResponse.statusCode == 200) {
                                                     ServerInfoResponse* serverInfoResp = [[ServerInfoResponse alloc] init];
@@ -629,7 +633,7 @@ static NSMutableSet* hostList;
                                                         [serverInfoResp populateHost:app.host];
                                                     }
                                                 }
-                                                [self->_discMan addHostToDiscovery:app.host];
+                                                [self->_discMan resumeDiscoveryForHost:app.host];
 
                                                 // If it fails, display an error and stop the current operation
                                                 if (quitResponse.statusCode != 200) {

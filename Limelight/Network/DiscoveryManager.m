@@ -17,6 +17,7 @@
 
 @implementation DiscoveryManager {
     NSMutableArray* _hostQueue;
+    NSMutableSet* _pausedHosts;
     id<DiscoveryCallback> _callback;
     MDNSManager* _mdnsMan;
     NSOperationQueue* _opQueue;
@@ -33,6 +34,7 @@
     _callback = callback;
     shouldDiscover = NO;
     _hostQueue = [NSMutableArray array];
+    _pausedHosts = [NSMutableSet set];
     for (TemporaryHost* host in hosts)
     {
         [self addHostToDiscovery:host];
@@ -85,7 +87,9 @@
     
     @synchronized (_hostQueue) {
         for (TemporaryHost* host in _hostQueue) {
-            [_opQueue addOperation:[self createWorkerForHost:host]];
+            if (![_pausedHosts containsObject:host]) {
+                [_opQueue addOperation:[self createWorkerForHost:host]];
+            }
         }
     }
 }
@@ -168,6 +172,33 @@
         }
         
         [_hostQueue removeObject:host];
+        [_pausedHosts removeObject:host];
+    }
+}
+
+- (void) pauseDiscoveryForHost:(TemporaryHost *)host {
+    @synchronized (_hostQueue) {
+        // Stop any worker for the host
+        for (DiscoveryWorker* worker in [_opQueue operations]) {
+            if ([worker getHost] == host) {
+                [worker cancel];
+            }
+        }
+        
+        // Add it to the paused hosts list
+        [_pausedHosts addObject:host];
+    }
+}
+
+- (void) resumeDiscoveryForHost:(TemporaryHost *)host {
+    @synchronized (_hostQueue) {
+        // Remove it from the paused hosts list
+        [_pausedHosts removeObject:host];
+        
+        // Start discovery again
+        if (shouldDiscover) {
+            [_opQueue addOperation:[self createWorkerForHost:host]];
+        }
     }
 }
 
