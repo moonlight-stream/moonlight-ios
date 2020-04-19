@@ -1116,7 +1116,7 @@
 					"$(PROJECT_DIR)/libs/openssl/lib/tvOS",
 					"$(PROJECT_DIR)/libs/opus/lib/tvOS",
 				);
-				MARKETING_VERSION = 4.0.1;
+				MARKETING_VERSION = 4.0.2;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.Moonlight";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1161,7 +1161,7 @@
 					"$(PROJECT_DIR)/libs/openssl/lib/tvOS",
 					"$(PROJECT_DIR)/libs/opus/lib/tvOS",
 				);
-				MARKETING_VERSION = 4.0.1;
+				MARKETING_VERSION = 4.0.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.Moonlight";
 				PRODUCT_NAME = "$(TARGET_NAME)";
