@@ -24,8 +24,6 @@
 		98CFB82F1CAD481B0048EF74 /* libmoonlight-common.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98AB2E841CAD46840089BB98 /* libmoonlight-common.a */; };
 		98D5856D1C0EA79600F6CC00 /* TemporaryHost.m in Sources */ = {isa = PBXBuildFile; fileRef = 98D5856C1C0EA79600F6CC00 /* TemporaryHost.m */; };
 		98D585701C0ED0E800F6CC00 /* TemporarySettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 98D5856F1C0ED0E800F6CC00 /* TemporarySettings.m */; };
-		98EB5208242AC4DF007127D3 /* TextFieldKeyboardDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 98EB5207242AC4DF007127D3 /* TextFieldKeyboardDelegate.m */; };
-		98EB520A242AC86C007127D3 /* TextFieldKeyboardDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 98EB5207242AC4DF007127D3 /* TextFieldKeyboardDelegate.m */; };
 		DC1F5A07206436B20037755F /* ConnectionHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = DC1F5A06206436B20037755F /* ConnectionHelper.m */; };
 		FB1A674D2131E65900507771 /* KeyboardSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = FB1A674C2131E65900507771 /* KeyboardSupport.m */; };
 		FB1A67602132419700507771 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FB1A675E2132419700507771 /* Main.storyboard */; };
@@ -176,8 +174,6 @@
 		98D5856C1C0EA79600F6CC00 /* TemporaryHost.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TemporaryHost.m; path = Database/TemporaryHost.m; sourceTree = "<group>"; };
 		98D5856E1C0ED0E800F6CC00 /* TemporarySettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TemporarySettings.h; path = Database/TemporarySettings.h; sourceTree = "<group>"; };
 		98D5856F1C0ED0E800F6CC00 /* TemporarySettings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TemporarySettings.m; path = Database/TemporarySettings.m; sourceTree = "<group>"; };
-		98EB5207242AC4DF007127D3 /* TextFieldKeyboardDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextFieldKeyboardDelegate.m; sourceTree = "<group>"; };
-		98EB5209242AC4F3007127D3 /* TextFieldKeyboardDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextFieldKeyboardDelegate.h; sourceTree = "<group>"; };
 		D4746EEA1CBC740C006FB401 /* Moonlight-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "Moonlight-Bridging-Header.h"; path = "Input/Moonlight-Bridging-Header.h"; sourceTree = "<group>"; };
 		DC1F5A05206436B10037755F /* ConnectionHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionHelper.h; sourceTree = "<group>"; };
 		DC1F5A06206436B20037755F /* ConnectionHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionHelper.m; sourceTree = "<group>"; };
@@ -537,8 +533,6 @@
 				FB1A674C2131E65900507771 /* KeyboardSupport.m */,
 				9897B6A0221260EF00966419 /* Controller.m */,
 				9897B6A32212610800966419 /* Controller.h */,
-				98EB5207242AC4DF007127D3 /* TextFieldKeyboardDelegate.m */,
-				98EB5209242AC4F3007127D3 /* TextFieldKeyboardDelegate.h */,
 			);
 			path = Input;
 			sourceTree = "<group>";
@@ -974,7 +968,6 @@
 				FB1A67D1213245F800507771 /* TemporaryHost.m in Sources */,
 				FB1A67D3213245F800507771 /* TemporarySettings.m in Sources */,
 				FB1A67C3213245EA00507771 /* AppAssetManager.m in Sources */,
-				98EB520A242AC86C007127D3 /* TextFieldKeyboardDelegate.m in Sources */,
 				FB1A67C5213245EA00507771 /* AppAssetRetriever.m in Sources */,
 				FB1A67C7213245EA00507771 /* PairManager.m in Sources */,
 				FB1A67C9213245EA00507771 /* WakeOnLanManager.m in Sources */,
@@ -1013,7 +1006,6 @@
 				FB9AFD321A7D867C00872C98 /* AppAssetRetriever.m in Sources */,
 				FB4678FF1A565DAC00377732 /* WakeOnLanManager.m in Sources */,
 				FB53E1431BE5DC4400CD6ECE /* IdManager.m in Sources */,
-				98EB5208242AC4DF007127D3 /* TextFieldKeyboardDelegate.m in Sources */,
 				9897B6A1221260EF00966419 /* Controller.m in Sources */,
 				FB89462919F646E200339C8A /* mkcert.c in Sources */,
 				FB9AFD281A7C84ED00872C98 /* HttpResponse.m in Sources */,
