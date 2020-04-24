@@ -44,7 +44,7 @@ static const char* TAG_APP_INSTALL_PATH = "AppInstallPath";
     
     xmlChar* statusStr = xmlGetProp(node, (const xmlChar*)[TAG_STATUS_CODE UTF8String]);
     if (statusStr != NULL) {
-        int status = [[NSString stringWithUTF8String:(const char*)statusStr] intValue];
+        int status = (int)[[NSString stringWithUTF8String:(const char*)statusStr] longLongValue];
         xmlFree(statusStr);
         self.statusCode = status;
     }
