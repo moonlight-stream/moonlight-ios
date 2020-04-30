@@ -78,7 +78,7 @@ static const int REFERENCE_HEIGHT = 720;
         [self addInteraction:[[UIPointerInteraction alloc] initWithDelegate:self]];
         
         UIPanGestureRecognizer *mouseWheelRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(mouseWheelMoved:)];
-        mouseWheelRecognizer.allowedScrollTypesMask = UIScrollTypeMaskDiscrete;
+        mouseWheelRecognizer.allowedScrollTypesMask = UIScrollTypeMaskAll;
         mouseWheelRecognizer.allowedTouchTypes = @[@(UITouchTypeIndirectPointer)];
         [self addGestureRecognizer:mouseWheelRecognizer];
     }
