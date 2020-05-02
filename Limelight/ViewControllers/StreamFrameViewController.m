@@ -236,15 +236,34 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         // Allow the display to go to sleep now
         [UIApplication sharedApplication].idleTimerDisabled = NO;
-        if (errorCode == 0) {
-            [self returnToMainFrame];
-        } else {
-            UIAlertController* conTermAlert = [UIAlertController alertControllerWithTitle:@"Connection Terminated" message:@"The connection was terminated" preferredStyle:UIAlertControllerStyleAlert];
-            [conTermAlert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction* action){
+        
+        NSString* title;
+        NSString* message;
+        
+        switch (errorCode) {
+            case ML_ERROR_GRACEFUL_TERMINATION:
                 [self returnToMainFrame];
-            }]];
-            [self presentViewController:conTermAlert animated:YES completion:nil];
+                return;
+                
+            case ML_ERROR_NO_VIDEO_TRAFFIC:
+                title = @"Connection Error";
+                message = @"No video received from host. Check the host PC's firewall and port forwarding rules.";
+                break;
+                
+            default:
+                title = @"Connection Terminated";
+                message = @"The connection was terminated";
+                break;
         }
+        
+        UIAlertController* conTermAlert = [UIAlertController alertControllerWithTitle:title
+                                                                              message:message
+                                                                       preferredStyle:UIAlertControllerStyleAlert];
+        [Utils addHelpOptionToDialog:conTermAlert];
+        [conTermAlert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction* action){
+            [self returnToMainFrame];
+        }]];
+        [self presentViewController:conTermAlert animated:YES completion:nil];
     });
 
     [_streamMan stopStream];
