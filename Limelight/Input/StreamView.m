@@ -21,7 +21,6 @@ static const int REFERENCE_HEIGHT = 720;
     CGPoint touchLocation, originalLocation;
     BOOL touchMoved;
     OnScreenControls* onScreenControls;
-    X1Mouse* x1mouse;
     
     BOOL isInputingText;
     BOOL isDragging;
@@ -29,9 +28,15 @@ static const int REFERENCE_HEIGHT = 720;
     
     float streamAspectRatio;
     
+    // iOS 13.4 mouse support
     NSInteger lastMouseButtonMask;
-    double mouseX;
-    double mouseY;
+    float lastMouseX;
+    float lastMouseY;
+    
+    // Citrix X1 mouse support
+    X1Mouse* x1mouse;
+    double accumulatedMouseDeltaX;
+    double accumulatedMouseDeltaY;
     
 #if TARGET_OS_TV
     UIGestureRecognizer* remotePressRecognizer;
@@ -471,9 +476,21 @@ static const int REFERENCE_HEIGHT = 720;
     x = MIN(MAX(x, videoOrigin.x), videoOrigin.x + videoSize.width);
     y = MIN(MAX(y, videoOrigin.y), videoOrigin.y + videoSize.height);
     
-    // Send the mouse position relative to the video region
-    LiSendMousePositionEvent(x - videoOrigin.x, y - videoOrigin.y,
-                             videoSize.width, videoSize.height);
+    // Send the mouse position relative to the video region if it has changed
+    //
+    // NB: It is important for functionality (not just optimization) to only
+    // send it if the value has changed. We will receive one of these events
+    // any time the user presses a modifier key, which can result in errant
+    // mouse motion when using a Citrix X1 mouse.
+    if (x != lastMouseX || y != lastMouseY) {
+        if (lastMouseX != 0 || lastMouseY != 0) {
+            LiSendMousePositionEvent(x - videoOrigin.x, y - videoOrigin.y,
+                                     videoSize.width, videoSize.height);
+        }
+        
+        lastMouseX = x;
+        lastMouseY = y;
+    }
     
     // The pointer interaction should cover the video region only
     return [UIPointerRegion regionWithRect:CGRectMake(videoOrigin.x, videoOrigin.y, videoSize.width, videoSize.height) identifier:nil];
@@ -629,11 +646,11 @@ static const int REFERENCE_HEIGHT = 720;
 }
 
 - (void)mouseDidMoveWithIdentifier:(NSUUID * _Nonnull)identifier deltaX:(int16_t)deltaX deltaY:(int16_t)deltaY {
-    mouseX += deltaX / X1_MOUSE_SPEED_DIVISOR;
-    mouseY += deltaY / X1_MOUSE_SPEED_DIVISOR;
+    accumulatedMouseDeltaX += deltaX / X1_MOUSE_SPEED_DIVISOR;
+    accumulatedMouseDeltaY += deltaY / X1_MOUSE_SPEED_DIVISOR;
     
-    short shortX = (short)mouseX;
-    short shortY = (short)mouseY;
+    short shortX = (short)accumulatedMouseDeltaX;
+    short shortY = (short)accumulatedMouseDeltaY;
     
     if (shortX == 0 && shortY == 0) {
         return;
@@ -641,8 +658,8 @@ static const int REFERENCE_HEIGHT = 720;
     
     LiSendMouseMoveEvent(shortX, shortY);
     
-    mouseX -= shortX;
-    mouseY -= shortY;
+    accumulatedMouseDeltaX -= shortX;
+    accumulatedMouseDeltaY -= shortY;
 }
 
 - (int) buttonFromX1ButtonCode:(enum X1MouseButton)button {
