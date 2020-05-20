@@ -22,8 +22,7 @@
     CMVideoFormatDescriptionRef formatDesc;
     
     CADisplayLink* _displayLink;
-}
-
+}    
 - (void)reinitializeDisplayLayer
 {
     CALayer *oldLayer = displayLayer;
@@ -31,7 +30,6 @@
     displayLayer = [[AVSampleBufferDisplayLayer alloc] init];
     displayLayer.bounds = _view.bounds;
     displayLayer.backgroundColor = [OSColor blackColor].CGColor;
-    
     displayLayer.position = CGPointMake(CGRectGetMidX(_view.bounds), CGRectGetMidY(_view.bounds));
     displayLayer.videoGravity = AVLayerVideoGravityResizeAspect;
     
@@ -68,7 +66,14 @@
     _view = view;
     
     [self reinitializeDisplayLayer];
-    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+      selector:@selector(reinitializeDisplayLayer)
+        name:@"ScreenConnected"
+        object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+    selector:@selector(reinitializeDisplayLayer)
+        name:@"ScreenDisconnected"
+      object:nil];
     return self;
 }
 
