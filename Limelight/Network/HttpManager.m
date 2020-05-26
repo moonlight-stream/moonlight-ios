@@ -204,9 +204,10 @@ static const NSString* HTTPS_PORT = @"47984";
 
 - (NSURLRequest*) newLaunchRequest:(StreamConfiguration*)config {
     // Using an FPS value over 60 causes SOPS to default to 720p60,
-    // so force it to 60 when starting. This won't impact our ability
-    // to get > 60 FPS while actually streaming though.
-    int fps = config.frameRate > 60 ? 60 : config.frameRate;
+    // so force it to 0 to ensure the correct resolution is set. We
+    // used to use 60 here but that locked the frame rate to 60 FPS
+    // on GFE 3.20.3.
+    int fps = config.frameRate > 60 ? 0 : config.frameRate;
     
     NSString* urlString = [NSString stringWithFormat:@"%@/launch?uniqueid=%@&appid=%@&mode=%dx%dx%d&additionalStates=1&sops=%d&rikey=%@&rikeyid=%d%@&localAudioPlayMode=%d&surroundAudioInfo=%d&remoteControllersBitmap=%d&gcmap=%d",
                            _baseHTTPSURL, _uniqueId,
