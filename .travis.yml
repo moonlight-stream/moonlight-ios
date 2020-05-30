@@ -19,7 +19,7 @@ matrix:
       osx_image: xcode11.5
       env:
         - SCHEME="Moonlight TV"
-        - TARGET="platform=tvOS Simulator,OS=13.5,name=Apple TV 4K"
+        - TARGET="platform=tvOS Simulator,OS=13.4,name=Apple TV 4K"
 
 script:
   - set -o pipefail && xcodebuild -project Moonlight.xcodeproj -scheme "$SCHEME" -destination "$TARGET" build | xcpretty
