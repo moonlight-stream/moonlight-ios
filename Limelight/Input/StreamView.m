@@ -227,9 +227,13 @@ static const int REFERENCE_HEIGHT = 720;
     if (@available(iOS 13.4, *)) {
         UITouch *touch = [touches anyObject];
         if (touch.type == UITouchTypeIndirectPointer) {
-            // Ignore move events from mice. These only happen while the
-            // mouse button is pressed and conflict with our positional
-            // mouse input handling.
+            // We must handle this event to properly support
+            // drags while the middle, X1, or X2 mouse buttons are
+            // held down. For some reason, left and right buttons
+            // don't require this, but we do it anyway for them too.
+            // Cursor movement without a button held down is handled
+            // in pointerInteraction:regionForRequest:defaultRegion.
+            [self updateCursorLocation:[touch locationInView:self]];
             return;
         }
     }
@@ -433,14 +437,11 @@ static const int REFERENCE_HEIGHT = 720;
     LiSendMouseButtonEvent(BUTTON_ACTION_PRESS, BUTTON_LEFT);
 }
 #else
-- (UIPointerRegion *)pointerInteraction:(UIPointerInteraction *)interaction
-                       regionForRequest:(UIPointerRegionRequest *)request
-                          defaultRegion:(UIPointerRegion *)defaultRegion API_AVAILABLE(ios(13.4)) {
-    
+- (void) updateCursorLocation:(CGPoint)location {
     // These are now relative to the StreamView, however we need to scale them
     // further to make them relative to the actual video portion.
-    float x = request.location.x - self.bounds.origin.x;
-    float y = request.location.y - self.bounds.origin.y;
+    float x = location.x - self.bounds.origin.x;
+    float y = location.y - self.bounds.origin.y;
     
     // For some reason, we don't seem to always get to the bounds of the window
     // so we'll subtract 1 pixel if we're to the left/below of the origin and
@@ -490,6 +491,27 @@ static const int REFERENCE_HEIGHT = 720;
         
         lastMouseX = x;
         lastMouseY = y;
+    }
+}
+
+- (UIPointerRegion *)pointerInteraction:(UIPointerInteraction *)interaction
+                       regionForRequest:(UIPointerRegionRequest *)request
+                          defaultRegion:(UIPointerRegion *)defaultRegion API_AVAILABLE(ios(13.4)) {
+    // This logic mimics what iOS does with AVLayerVideoGravityResizeAspect
+    CGSize videoSize;
+    CGPoint videoOrigin;
+    if (self.bounds.size.width > self.bounds.size.height * streamAspectRatio) {
+        videoSize = CGSizeMake(self.bounds.size.height * streamAspectRatio, self.bounds.size.height);
+    } else {
+        videoSize = CGSizeMake(self.bounds.size.width, self.bounds.size.width / streamAspectRatio);
+    }
+    videoOrigin = CGPointMake(self.bounds.size.width / 2 - videoSize.width / 2,
+                              self.bounds.size.height / 2 - videoSize.height / 2);
+    
+    // Move the cursor on the host if no buttons are pressed.
+    // Motion with buttons pressed in handled in touchesMoved:
+    if (lastMouseButtonMask == 0) {
+        [self updateCursorLocation:request.location];
     }
     
     // The pointer interaction should cover the video region only
