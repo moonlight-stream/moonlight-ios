@@ -127,6 +127,18 @@ static NSMutableSet* hostList;
 #endif
 }
 
+- (void)updateTitle {
+    if (_selectedHost != nil) {
+        self.title = _selectedHost.name;
+    }
+    else if ([hostList count] == 0) {
+        self.title = @"Searching for PCs on your network...";
+    }
+    else {
+        self.title = @"Select Host";
+    }
+}
+
 - (void)alreadyPaired {
     BOOL usingCachedAppList = false;
     
@@ -266,7 +278,7 @@ static NSMutableSet* hostList;
     _selectedHost = nil;
     _sortedAppList = nil;
     
-    self.title = @"Select Host";
+    [self updateTitle];
     [self disableUpButton];
     
     [self.collectionView reloadData];
@@ -304,7 +316,7 @@ static NSMutableSet* hostList;
     
     Log(LOG_D, @"Clicked host: %@", host.name);
     _selectedHost = host;
-    self.title = host.name;
+    [self updateTitle];
     [self enableUpButton];
     [self disableNavigation];
     
@@ -483,7 +495,7 @@ static NSMutableSet* hostList;
 
 - (void) addHostClicked {
     Log(LOG_D, @"Clicked add host");
-    UIAlertController* alertController = [UIAlertController alertControllerWithTitle:@"Host Address" message:@"Please enter a hostname or IP address" preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertController* alertController = [UIAlertController alertControllerWithTitle:@"Add Host Manually" message:@"If Moonlight doesn't find your local gaming PC automatically,\nenter the IP address of your PC" preferredStyle:UIAlertControllerStyleAlert];
     [alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
     [alertController addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction* action){
         NSString* hostAddress = ((UITextField*)[[alertController textFields] objectAtIndex:0]).text;
@@ -497,7 +509,7 @@ static NSMutableSet* hostList;
                         [self updateHosts];
                     });
                 } else {
-                    UIAlertController* hostNotFoundAlert = [UIAlertController alertControllerWithTitle:@"Add Host" message:error preferredStyle:UIAlertControllerStyleAlert];
+                    UIAlertController* hostNotFoundAlert = [UIAlertController alertControllerWithTitle:@"Add Host Manually" message:error preferredStyle:UIAlertControllerStyleAlert];
                     [Utils addHelpOptionToDialog:hostNotFoundAlert];
                     [hostNotFoundAlert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
                     dispatch_async(dispatch_get_main_queue(), ^{
@@ -815,7 +827,7 @@ static NSMutableSet* hostList;
         [self hostClicked:[hostList anyObject] view:nil];
     }
     else {
-        self.title = @"Select Host";
+        [self updateTitle];
         [self.view addSubview:hostScrollView];
     }
 }
@@ -1044,6 +1056,9 @@ static NSMutableSet* hostList;
     
     // Create or delete host shortcuts as needed
     [self updateHostShortcuts];
+    
+    // Update the title in case we now have a PC
+    [self updateTitle];
     
     prevEdge = [self getCompViewX:addComp addComp:addComp prevEdge:prevEdge];
     addComp.center = CGPointMake(prevEdge, hostScrollView.frame.size.height / 2);
