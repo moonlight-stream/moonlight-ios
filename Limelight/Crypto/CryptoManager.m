@@ -9,7 +9,6 @@
 #import "CryptoManager.h"
 #import "mkcert.h"
 
-#include <openssl/aes.h>
 #include <openssl/sha.h>
 #include <openssl/x509.h>
 #include <openssl/pem.h>
@@ -45,46 +44,47 @@ static NSData* p12 = nil;
 }
 
 - (NSData*) aesEncrypt:(NSData*)data withKey:(NSData*)key {
-    AES_KEY aesKey;
-    AES_set_encrypt_key([key bytes], 128, &aesKey);
-    int size = [self getEncryptSize:data];
-    unsigned char* buffer = malloc(size);
-    unsigned char* blockRoundedBuffer = calloc(1, size);
-    memcpy(blockRoundedBuffer, [data bytes], [data length]);
+    EVP_CIPHER_CTX* cipher;
+    int ciphertextLen;
+
+    cipher = EVP_CIPHER_CTX_new();
+
+    EVP_EncryptInit(cipher, EVP_aes_128_ecb(), [key bytes], NULL);
+    EVP_CIPHER_CTX_set_padding(cipher, 0);
+
+    NSMutableData* ciphertext = [NSMutableData dataWithLength:[data length]];
+    EVP_EncryptUpdate(cipher,
+                      [ciphertext mutableBytes],
+                      &ciphertextLen,
+                      [data bytes],
+                      (int)[data length]);
+    assert(ciphertextLen == [ciphertext length]);
+
+    EVP_CIPHER_CTX_free(cipher);
     
-    // AES_encrypt only encrypts the first 16 bytes so iterate the entire buffer
-    int blockOffset = 0;
-    while (blockOffset < size) {
-        AES_encrypt(blockRoundedBuffer + blockOffset, buffer + blockOffset, &aesKey);
-        blockOffset += 16;
-    }
-    
-    NSData* encryptedData = [NSData dataWithBytes:buffer length:size];
-    free(buffer);
-    free(blockRoundedBuffer);
-    return encryptedData;
+    return ciphertext;
 }
 
 - (NSData*) aesDecrypt:(NSData*)data withKey:(NSData*)key {
-    AES_KEY aesKey;
-    AES_set_decrypt_key([key bytes], 128, &aesKey);
-    unsigned char* buffer = malloc([data length]);
-    
-    // AES_decrypt only decrypts the first 16 bytes so iterate the entire buffer
-    int blockOffset = 0;
-    while (blockOffset < [data length]) {
-        AES_decrypt([data bytes] + blockOffset, buffer + blockOffset, &aesKey);
-        blockOffset += 16;
-    }
-    
-    NSData* decryptedData = [NSData dataWithBytes:buffer length:[data length]];
-    free(buffer);
-    return decryptedData;
-}
+    EVP_CIPHER_CTX* cipher;
+    int plaintextLen;
 
-- (int) getEncryptSize:(NSData*)data {
-    // the size is the length of the data ceiling to the nearest 16 bytes
-    return (((int)[data length] + 15) / 16) * 16;
+    cipher = EVP_CIPHER_CTX_new();
+
+    EVP_DecryptInit(cipher, EVP_aes_128_ecb(), [key bytes], NULL);
+    EVP_CIPHER_CTX_set_padding(cipher, 0);
+
+    NSMutableData* plaintext = [NSMutableData dataWithLength:[data length]];
+    EVP_DecryptUpdate(cipher,
+                      [plaintext mutableBytes],
+                      &plaintextLen,
+                      [data bytes],
+                      (int)[data length]);
+    assert(plaintextLen == [plaintext length]);
+
+    EVP_CIPHER_CTX_free(cipher);
+    
+    return plaintext;
 }
 
 + (NSData*) pemToDer:(NSData*)pemCertBytes {

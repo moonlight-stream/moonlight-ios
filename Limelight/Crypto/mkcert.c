@@ -6,7 +6,6 @@
 
 #include <openssl/pem.h>
 #include <openssl/rsa.h>
-#include <openssl/bn.h>
 #include <openssl/x509.h>
 #include <openssl/rand.h>
 
@@ -16,15 +15,18 @@ static const int NUM_YEARS = 20;
 
 void mkcert(X509 **x509p, EVP_PKEY **pkeyp, int bits, int serial, int years) {
     X509* cert = X509_new();
-    EVP_PKEY* pk = EVP_PKEY_new();
-    BIGNUM* bne = BN_new();
-    RSA* rsa = RSA_new();
+    
+    EVP_PKEY_CTX* ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, NULL);
 
-    BN_set_word(bne, RSA_F4);
-    RSA_generate_key_ex(rsa, bits, bne, NULL);
+    EVP_PKEY_keygen_init(ctx);
+    EVP_PKEY_CTX_set_rsa_keygen_bits(ctx, bits);
 
-    EVP_PKEY_assign_RSA(pk, rsa);
+    // pk must be initialized on input
+    EVP_PKEY* pk = NULL;
+    EVP_PKEY_keygen(ctx, &pk);
 
+    EVP_PKEY_CTX_free(ctx);
+    
     X509_set_version(cert, 2);
     ASN1_INTEGER_set(X509_get_serialNumber(cert), serial);
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
@@ -53,8 +55,6 @@ void mkcert(X509 **x509p, EVP_PKEY **pkeyp, int bits, int serial, int years) {
     X509_set_issuer_name(cert, name);
 
     X509_sign(cert, pk, EVP_sha256());
-
-    BN_free(bne);
     
     *x509p = cert;
     *pkeyp = pk;
@@ -66,7 +66,6 @@ struct CertKeyPair generateCertKeyPair(void) {
     EVP_PKEY *pkey = NULL;
     PKCS12 *p12 = NULL;
    
-    CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON);
     bio_err = BIO_new_fp(stderr, BIO_NOCLOSE);
     
     mkcert(&x509, &pkey, NUM_BITS, SERIAL, NUM_YEARS);
