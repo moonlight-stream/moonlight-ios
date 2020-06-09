@@ -152,7 +152,12 @@
     else {
         challengeRespHash = [cryptoMan SHA1HashData: challengeRespHashInput];
     }
-    NSData* challengeRespEncrypted = [cryptoMan aesEncrypt:challengeRespHash withKey:aesKey];
+    
+    assert([challengeRespHash length] <= 32);
+    NSMutableData* paddedHash = [NSMutableData dataWithData:challengeRespHash];
+    [paddedHash setLength:32];
+    
+    NSData* challengeRespEncrypted = [cryptoMan aesEncrypt:paddedHash withKey:aesKey];
     
     HttpResponse* secretResp = [[HttpResponse alloc] init];
     [_httpManager executeRequestSynchronously:[HttpRequest requestForResponse:secretResp withUrlRequest:[_httpManager newChallengeRespRequest:challengeRespEncrypted]]];
