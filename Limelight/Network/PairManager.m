@@ -229,8 +229,8 @@
 
 - (NSString*) generatePIN {
     NSString* PIN = [NSString stringWithFormat:@"%d%d%d%d",
-                     arc4random() % 10, arc4random() % 10,
-                     arc4random() % 10, arc4random() % 10];
+                     arc4random_uniform(10), arc4random_uniform(10),
+                     arc4random_uniform(10), arc4random_uniform(10)];
     return PIN;
 }
 
