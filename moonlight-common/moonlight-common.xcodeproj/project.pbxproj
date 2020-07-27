@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		983091DE24CEB69B00A0835D /* ConnectionTester.c in Sources */ = {isa = PBXBuildFile; fileRef = 983091DD24CEB69B00A0835D /* ConnectionTester.c */; };
+		983091DF24CEB69B00A0835D /* ConnectionTester.c in Sources */ = {isa = PBXBuildFile; fileRef = 983091DD24CEB69B00A0835D /* ConnectionTester.c */; };
 		9857AEEA1EBE85A20084F99E /* RtpFecQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 9857AEE91EBE85A20084F99E /* RtpFecQueue.c */; };
 		9857AEF01EBE85E10084F99E /* rs.c in Sources */ = {isa = PBXBuildFile; fileRef = 9857AEEE1EBE85E10084F99E /* rs.c */; };
 		98AB2E401CAD425A0089BB98 /* AudioStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E1A1CAD423B0089BB98 /* AudioStream.c */; };
@@ -78,6 +80,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		983091DD24CEB69B00A0835D /* ConnectionTester.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ConnectionTester.c; sourceTree = "<group>"; };
 		9857AEE91EBE85A20084F99E /* RtpFecQueue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = RtpFecQueue.c; sourceTree = "<group>"; };
 		9857AEEB1EBE85AB0084F99E /* RtpFecQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RtpFecQueue.h; sourceTree = "<group>"; };
 		9857AEEE1EBE85E10084F99E /* rs.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = rs.c; path = "moonlight-common-c/reedsolomon/rs.c"; sourceTree = "<group>"; };
@@ -264,6 +267,7 @@
 				98AB2E1B1CAD423B0089BB98 /* ByteBuffer.c */,
 				98AB2E1C1CAD423B0089BB98 /* ByteBuffer.h */,
 				98AB2E1D1CAD423B0089BB98 /* Connection.c */,
+				983091DD24CEB69B00A0835D /* ConnectionTester.c */,
 				98AB2E1E1CAD423B0089BB98 /* ControlStream.c */,
 				98AB2E1F1CAD423B0089BB98 /* FakeCallbacks.c */,
 				98AB2E201CAD423B0089BB98 /* Input.h */,
@@ -394,6 +398,7 @@
 				FB1A67FC21324F4900507771 /* Connection.c in Sources */,
 				FB1A67FD21324F4900507771 /* ControlStream.c in Sources */,
 				FB1A67FE21324F4900507771 /* FakeCallbacks.c in Sources */,
+				983091DF24CEB69B00A0835D /* ConnectionTester.c in Sources */,
 				FB1A67FF21324F4900507771 /* InputStream.c in Sources */,
 				FB1A680021324F4900507771 /* LinkedBlockingQueue.c in Sources */,
 				FB1A680121324F4900507771 /* Misc.c in Sources */,
@@ -429,6 +434,7 @@
 				98AB2E431CAD425A0089BB98 /* ControlStream.c in Sources */,
 				98AB2E441CAD425A0089BB98 /* FakeCallbacks.c in Sources */,
 				98AB2E451CAD425A0089BB98 /* InputStream.c in Sources */,
+				983091DE24CEB69B00A0835D /* ConnectionTester.c in Sources */,
 				98AB2E461CAD425A0089BB98 /* LinkedBlockingQueue.c in Sources */,
 				98AB2E471CAD425A0089BB98 /* Misc.c in Sources */,
 				98AB2E481CAD425A0089BB98 /* Platform.c in Sources */,
