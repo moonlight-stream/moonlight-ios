@@ -16,8 +16,12 @@
 
 @implementation WakeOnLanManager
 
-static const int numPorts = 5;
-static const int ports[numPorts] = {7, 9, 47998, 47999, 48000};
+static const int numPorts = 7;
+static const int ports[numPorts] = {
+    9, // Standard WOL port (privileged port)
+    47998, 47999, 48000, 48002, 48010, // Ports opened by GFE
+    47009, // Port opened by Moonlight Internet Hosting Tool for WoL (non-privileged port)
+};
 
 + (void) populateAddress:(struct sockaddr_storage*)addr withPort:(unsigned short)port {
     if (addr->ss_family == AF_INET) {
