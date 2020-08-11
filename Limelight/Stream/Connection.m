@@ -268,7 +268,7 @@ void ClStageComplete(int stage)
 
 void ClStageFailed(int stage, int errorCode)
 {
-    [_callbacks stageFailed:LiGetStageName(stage) withError:errorCode];
+    [_callbacks stageFailed:LiGetStageName(stage) withError:errorCode portTestFlags:LiGetPortFlagsFromStage(stage)];
 }
 
 void ClConnectionStarted(void)

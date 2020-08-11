@@ -509,6 +509,12 @@ static NSMutableSet* hostList;
                         [self updateHosts];
                     });
                 } else {
+                    unsigned int portTestResults = LiTestClientConnectivity(CONN_TEST_SERVER, 443,
+                                                                            ML_PORT_FLAG_TCP_47984 | ML_PORT_FLAG_TCP_47989);
+                    if (portTestResults != ML_TEST_RESULT_INCONCLUSIVE && portTestResults != 0) {
+                        error = [error stringByAppendingString:@"\n\nYour device's Internet connection is blocking Moonlight. Streaming over the Internet may not work while connected to this network."];
+                    }
+                    
                     UIAlertController* hostNotFoundAlert = [UIAlertController alertControllerWithTitle:@"Add Host Manually" message:error preferredStyle:UIAlertControllerStyleAlert];
                     [Utils addHelpOptionToDialog:hostNotFoundAlert];
                     [hostNotFoundAlert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];

@@ -233,6 +233,9 @@
 - (void)connectionTerminated:(int)errorCode {
     Log(LOG_I, @"Connection terminated: %d", errorCode);
     
+    unsigned int portTestResults = LiTestClientConnectivity(CONN_TEST_SERVER, 443,
+                                                            LiGetPortFlagsFromTerminationErrorCode(errorCode));
+    
     dispatch_async(dispatch_get_main_queue(), ^{
         // Allow the display to go to sleep now
         [UIApplication sharedApplication].idleTimerDisabled = NO;
@@ -240,20 +243,26 @@
         NSString* title;
         NSString* message;
         
-        switch (errorCode) {
-            case ML_ERROR_GRACEFUL_TERMINATION:
-                [self returnToMainFrame];
-                return;
-                
-            case ML_ERROR_NO_VIDEO_TRAFFIC:
-                title = @"Connection Error";
-                message = @"No video received from host. Check the host PC's firewall and port forwarding rules.";
-                break;
-                
-            default:
-                title = @"Connection Terminated";
-                message = @"The connection was terminated";
-                break;
+        if (portTestResults != ML_TEST_RESULT_INCONCLUSIVE && portTestResults != 0) {
+            title = @"Connection Error";
+            message = @"Your device's Internet connection is blocking Moonlight. Streaming over the Internet may not work while connected to this network.";
+        }
+        else {
+            switch (errorCode) {
+                case ML_ERROR_GRACEFUL_TERMINATION:
+                    [self returnToMainFrame];
+                    return;
+                    
+                case ML_ERROR_NO_VIDEO_TRAFFIC:
+                    title = @"Connection Error";
+                    message = @"No video received from host. Check the host PC's firewall and port forwarding rules.";
+                    break;
+                    
+                default:
+                    title = @"Connection Terminated";
+                    message = @"The connection was terminated";
+                    break;
+            }
         }
         
         UIAlertController* conTermAlert = [UIAlertController alertControllerWithTitle:title
@@ -283,16 +292,22 @@
 - (void) stageComplete:(const char*)stageName {
 }
 
-- (void) stageFailed:(const char*)stageName withError:(int)errorCode {
+- (void) stageFailed:(const char*)stageName withError:(int)errorCode portTestFlags:(int)portTestFlags {
     Log(LOG_I, @"Stage %s failed: %d", stageName, errorCode);
+    
+    unsigned int portTestResults = LiTestClientConnectivity(CONN_TEST_SERVER, 443, portTestFlags);
 
     dispatch_async(dispatch_get_main_queue(), ^{
         // Allow the display to go to sleep now
         [UIApplication sharedApplication].idleTimerDisabled = NO;
         
+        NSString* message = [NSString stringWithFormat:@"%s failed with error %d", stageName, errorCode];
+        if (portTestResults != ML_TEST_RESULT_INCONCLUSIVE && portTestResults != 0) {
+            message = [message stringByAppendingString:@"\n\nYour device's Internet connection is blocking Moonlight. Streaming over the Internet may not work while connected to this network."];
+        }
+        
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Connection Failed"
-                                                                       message:[NSString stringWithFormat:@"%s failed with error %d",
-                                                                                stageName, errorCode]
+                                                                       message:message
                                                                 preferredStyle:UIAlertControllerStyleAlert];
         [Utils addHelpOptionToDialog:alert];
         [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction* action){
