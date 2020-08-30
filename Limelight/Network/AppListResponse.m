@@ -113,6 +113,7 @@ static const char* TAG_APP_INSTALL_PATH = "AppInstallPath";
     
     xmlFreeDoc(docPtr);
     
+#ifdef ENABLE_APP_STORE_RESTRICTIONS
     // APP STORE REVIEW COMPLIANCE
     //
     // Remove default Steam entry from the app list to comply with Apple App Store Guideline 4.2.7d:
@@ -146,6 +147,7 @@ static const char* TAG_APP_INSTALL_PATH = "AppInstallPath";
             [_appList removeObject:manuallyAddedSteamApp];
         }
     }
+#endif
 }
 
 - (NSSet*) getAppList {
