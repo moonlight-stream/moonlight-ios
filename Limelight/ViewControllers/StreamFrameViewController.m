@@ -245,7 +245,7 @@
         
         if (portTestResults != ML_TEST_RESULT_INCONCLUSIVE && portTestResults != 0) {
             title = @"Connection Error";
-            message = @"Your device's Internet connection is blocking Moonlight. Streaming over the Internet may not work while connected to this network.";
+            message = @"Your device's network connection is blocking Moonlight. Streaming may not work while connected to this network.";
         }
         else {
             switch (errorCode) {
@@ -308,7 +308,7 @@
         
         NSString* message = [NSString stringWithFormat:@"%s failed with error %d", stageName, errorCode];
         if (portTestResults != ML_TEST_RESULT_INCONCLUSIVE && portTestResults != 0) {
-            message = [message stringByAppendingString:@"\n\nYour device's Internet connection is blocking Moonlight. Streaming over the Internet may not work while connected to this network."];
+            message = [message stringByAppendingString:@"\n\nYour device's network connection is blocking Moonlight. Streaming may not work while connected to this network."];
         }
         
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Connection Failed"

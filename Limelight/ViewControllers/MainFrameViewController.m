@@ -476,13 +476,13 @@ static NSMutableSet* hostList;
                         NSString* message;
                         
                         if (portTestResult == 0) {
-                            message = @"This network does not appear to be blocking Moonlight. If you still have trouble connecting, check your PC's firewall settings.\n\nIf you are trying to stream over the Internet, install the Moonlight Internet Hosting Tool on your gaming PC and run the included Internet Streaming Tester to check your gaming PC's Internet connection.";
+                            message = @"This network does not appear to be blocking Moonlight. If you still have trouble connecting, check your PC's firewall settings.\n\nVisit the Moonlight Setup Guide on GitHub for additional setup help and troubleshooting steps.";
                         }
                         else if (portTestResult == ML_TEST_RESULT_INCONCLUSIVE) {
                             message = @"The network test could not be performed because none of Moonlight's connection testing servers were reachable. Check your Internet connection or try again later.";
                         }
                         else {
-                            message = @"Your current network connection seems to be blocking Moonlight. Streaming over the Internet may not work while connected to this network.\n\nThe following network ports were blocked:\n";
+                            message = @"Your current network connection seems to be blocking Moonlight. Streaming may not work while connected to this network.\n\nThe following network ports were blocked:\n";
                             
                             for (int i = 0; i < 32; i++) {
                                 if (portTestResult & (1 << i)) {
@@ -549,7 +549,7 @@ static NSMutableSet* hostList;
                     unsigned int portTestResults = LiTestClientConnectivity(CONN_TEST_SERVER, 443,
                                                                             ML_PORT_FLAG_TCP_47984 | ML_PORT_FLAG_TCP_47989);
                     if (portTestResults != ML_TEST_RESULT_INCONCLUSIVE && portTestResults != 0) {
-                        error = [error stringByAppendingString:@"\n\nYour device's Internet connection is blocking Moonlight. Streaming over the Internet may not work while connected to this network."];
+                        error = [error stringByAppendingString:@"\n\nYour device's network connection is blocking Moonlight. Streaming may not work while connected to this network."];
                     }
                     
                     UIAlertController* hostNotFoundAlert = [UIAlertController alertControllerWithTitle:@"Add Host Manually" message:error preferredStyle:UIAlertControllerStyleAlert];
