@@ -258,6 +258,11 @@
                     message = @"No video received from host. Check the host PC's firewall and port forwarding rules.";
                     break;
                     
+                case ML_ERROR_NO_VIDEO_FRAME:
+                    title = @"Connection Error";
+                    message = @"Your network connection isn't performing well. Reduce your video bitrate setting or try a faster connection.";
+                    break;
+                    
                 default:
                     title = @"Connection Terminated";
                     message = @"The connection was terminated";
