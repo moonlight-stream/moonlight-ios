@@ -158,15 +158,8 @@ static NSMutableSet* hostList;
                 return;
             }
             
-            if ([self isHostDirectToDesktop:host]) {
-                [self hideLoadingFrame: nil];
-                [self prepareToStreamApp:[host.appList anyObject]];
-                [self performSegueWithIdentifier:@"createStreamFrame" sender:nil];
-            }
-            else {
-                [self updateAppsForHost:host];
-                [self hideLoadingFrame: nil];
-            }
+            [self updateAppsForHost:host];
+            [self hideLoadingFrame: nil];
         });
     }
     Log(LOG_I, @"Using cached app list: %d", usingCachedAppList);
@@ -206,18 +199,10 @@ static NSMutableSet* hostList;
                     return;
                 }
                 
-                // We'll hit this case on the first load after pairing
-                if (!usingCachedAppList && [self isHostDirectToDesktop:host]) {
-                    [self hideLoadingFrame: nil];
-                    [self prepareToStreamApp:[host.appList anyObject]];
-                    [self performSegueWithIdentifier:@"createStreamFrame" sender:nil];
-                }
-                else {
-                    [self updateAppsForHost:host];
-                    [self->_appManager stopRetrieving];
-                    [self->_appManager retrieveAssetsFromHost:host];
-                    [self hideLoadingFrame: nil];
-                }
+                [self updateAppsForHost:host];
+                [self->_appManager stopRetrieving];
+                [self->_appManager retrieveAssetsFromHost:host];
+                [self hideLoadingFrame: nil];
             });
         }
     });
@@ -881,8 +866,7 @@ static NSMutableSet* hostList;
     [self retrieveSavedHosts];
     _discMan = [[DiscoveryManager alloc] initWithHosts:[hostList allObjects] andCallback:self];
         
-    if ([hostList count] == 1 && [[hostList anyObject] appList].count > 0 && ![self isHostDirectToDesktop:[hostList anyObject]]) {
-        // Launch directly to the applist if this is the only host (and it's not a direct-to-desktop host)
+    if ([hostList count] == 1) {
         [self hostClicked:[hostList anyObject] view:nil];
     }
     else {
@@ -994,26 +978,6 @@ static NSMutableSet* hostList;
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    
-    // If we're returning from a direct-to-desktop stream, show the host selection view
-    if (_selectedHost != nil && [self isHostDirectToDesktop:_selectedHost]) {
-        // _selectedHost will get wiped out by showHostSelectionView, so we need to save it
-        TemporaryHost* host = self->_selectedHost;
-        
-        // Quit the remote desktop stream
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            HttpManager* hMan = [[HttpManager alloc] initWithHost:host.activeAddress uniqueId:self->_uniqueId serverCert:host.serverCert];
-            HttpResponse* quitResponse = [[HttpResponse alloc] init];
-            HttpRequest* quitRequest = [HttpRequest requestForResponse: quitResponse withUrlRequest:[hMan newQuitAppRequest]];
-            
-            // Exempt this host from discovery while handling the quit operation
-            [self->_discMan pauseDiscoveryForHost:host];
-            [hMan executeRequestSynchronously:quitRequest];
-            [self->_discMan resumeDiscoveryForHost:host];
-        });
-        
-        [self showHostSelectionView];
-    }
     
     // We can get here on home press while streaming
     // since the stream view segues to us just before
@@ -1207,21 +1171,6 @@ static NSMutableSet* hostList;
             [_boxArtCache setObject:image forKey:app];
         }
     }
-}
-
-- (BOOL) isHostDirectToDesktop:(TemporaryHost*)host {
-    // To comply with App Store Guidelines 4.2.7, we will go directly to the stream
-    // like a remote desktop solution if the host is configured to support that.
-    if ([host.appList count] == 1) {
-        TemporaryApp* app = [host.appList anyObject];
-        
-        return [app.name isEqualToString:@"mstsc.exe"] ||
-               [app.name isEqualToString:@"Remote Desktop"] ||
-               [app.name isEqualToString:@"Desktop Stream"] ||
-               [app.name isEqualToString:@"Desktop"];
-    }
-    
-    return false;
 }
 
 - (void) updateAppsForHost:(TemporaryHost*)host {
