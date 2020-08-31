@@ -536,30 +536,37 @@ static NSMutableSet* hostList;
     [alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
     [alertController addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction* action){
         NSString* hostAddress = ((UITextField*)[[alertController textFields] objectAtIndex:0]).text;
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-            [self->_discMan discoverHost:hostAddress withCallback:^(TemporaryHost* host, NSString* error){
-                if (host != nil) {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        @synchronized(hostList) {
-                            [hostList addObject:host];
+        [self showLoadingFrame:^{
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+                [self->_discMan discoverHost:hostAddress withCallback:^(TemporaryHost* host, NSString* error){
+                    if (host != nil) {
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [self hideLoadingFrame:^{
+                                @synchronized(hostList) {
+                                    [hostList addObject:host];
+                                }
+                                [self updateHosts];
+                            }];
+                        });
+                    } else {
+                        unsigned int portTestResults = LiTestClientConnectivity(CONN_TEST_SERVER, 443,
+                                                                                ML_PORT_FLAG_TCP_47984 | ML_PORT_FLAG_TCP_47989);
+                        if (portTestResults != ML_TEST_RESULT_INCONCLUSIVE && portTestResults != 0) {
+                            error = [error stringByAppendingString:@"\n\nYour device's network connection is blocking Moonlight. Streaming may not work while connected to this network."];
                         }
-                        [self updateHosts];
-                    });
-                } else {
-                    unsigned int portTestResults = LiTestClientConnectivity(CONN_TEST_SERVER, 443,
-                                                                            ML_PORT_FLAG_TCP_47984 | ML_PORT_FLAG_TCP_47989);
-                    if (portTestResults != ML_TEST_RESULT_INCONCLUSIVE && portTestResults != 0) {
-                        error = [error stringByAppendingString:@"\n\nYour device's network connection is blocking Moonlight. Streaming may not work while connected to this network."];
+                        
+                        UIAlertController* hostNotFoundAlert = [UIAlertController alertControllerWithTitle:@"Add Host Manually" message:error preferredStyle:UIAlertControllerStyleAlert];
+                        [Utils addHelpOptionToDialog:hostNotFoundAlert];
+                        [hostNotFoundAlert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [self hideLoadingFrame:^{
+                                [[self activeViewController] presentViewController:hostNotFoundAlert animated:YES completion:nil];
+                            }];
+                        });
                     }
-                    
-                    UIAlertController* hostNotFoundAlert = [UIAlertController alertControllerWithTitle:@"Add Host Manually" message:error preferredStyle:UIAlertControllerStyleAlert];
-                    [Utils addHelpOptionToDialog:hostNotFoundAlert];
-                    [hostNotFoundAlert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [[self activeViewController] presentViewController:hostNotFoundAlert animated:YES completion:nil];
-                    });
-                }
-            }];});
+                }];
+            });
+        }];
     }]];
     [alertController addTextFieldWithConfigurationHandler:nil];
     [[self activeViewController] presentViewController:alertController animated:YES completion:nil];
