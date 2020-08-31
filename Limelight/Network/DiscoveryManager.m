@@ -15,6 +15,11 @@
 #import "ServerInfoResponse.h"
 #import "IdManager.h"
 
+#include <Limelight.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <netdb.h>
+
 @implementation DiscoveryManager {
     NSMutableArray* _hostQueue;
     NSMutableSet* _pausedHosts;
@@ -49,10 +54,80 @@
     return self;
 }
 
-- (void) discoverHost:(NSString *)hostAddress withCallback:(void (^)(TemporaryHost *, NSString*))callback {
-    HttpManager* hMan = [[HttpManager alloc] initWithHost:hostAddress uniqueId:_uniqueId serverCert:nil];
++ (BOOL) isAddressLAN:(in_addr_t)addr {
+    addr = htonl(addr);
+    
+    // 10.0.0.0/8
+    if ((addr & 0xFF000000) == 0x0A000000) {
+        return YES;
+    }
+    // 172.16.0.0/12
+    else if ((addr & 0xFFF00000) == 0xAC100000) {
+        return YES;
+    }
+    // 192.168.0.0/16
+    else if ((addr & 0xFFFF0000) == 0xC0A80000) {
+        return YES;
+    }
+    // 169.254.0.0/16
+    else if ((addr & 0xFFFF0000) == 0xA9FE0000) {
+        return YES;
+    }
+    // 100.64.0.0/10 - RFC6598 official CGN address (shouldn't see this in a LAN)
+    else if ((addr & 0xFFC00000) == 0x64400000) {
+        return YES;
+    }
+    
+    return NO;
+}
+
+// This ensures that only RFC 1918 IPv4 addresses can be passed to
+// the Add PC dialog. This is required to comply with Apple App Store
+// Guideline 4.2.7a.
++ (BOOL) isProhibitedAddress:(NSString*)address {
+#ifdef ENABLE_APP_STORE_RESTRICTIONS
+    struct addrinfo hints;
+    struct addrinfo* result;
+    int err;
+    
+    // We're explicitly using AF_INET here because we don't want to
+    // ever receive a synthesized IPv6 address here, even on NAT64.
+    // IPv6 addresses are not restricted here because we cannot easily
+    // tell whether they are local or not.
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    err = getaddrinfo([address UTF8String], NULL, &hints, &result);
+    if (err != 0 || result == NULL) {
+        Log(LOG_W, @"getaddrinfo(%@) failed: %d", address, err);
+        return NO;
+    }
+    
+    if (result->ai_family != AF_INET) {
+        // This should never happen due to our hints
+        assert(result->ai_family == AF_INET);
+        Log(LOG_W, @"Unexpected address family: %d", result->ai_family);
+        freeaddrinfo(result);
+        return NO;
+    }
+    
+    BOOL ret = ![DiscoveryManager isAddressLAN:((struct sockaddr_in*)result->ai_addr)->sin_addr.s_addr];
+    freeaddrinfo(result);
+
+    return ret;
+#else
+    return NO;
+#endif
+}
+
+- (ServerInfoResponse*) getServerInfoResponseForAddress:(NSString*)address {
+    HttpManager* hMan = [[HttpManager alloc] initWithHost:address uniqueId:_uniqueId serverCert:nil];
     ServerInfoResponse* serverInfoResponse = [[ServerInfoResponse alloc] init];
     [hMan executeRequestSynchronously:[HttpRequest requestForResponse:serverInfoResponse withUrlRequest:[hMan newServerInfoRequest:false] fallbackError:401 fallbackRequest:[hMan newHttpServerInfoRequest]]];
+    return serverInfoResponse;
+}
+
+- (void) discoverHost:(NSString *)hostAddress withCallback:(void (^)(TemporaryHost *, NSString*))callback {
+    ServerInfoResponse* serverInfoResponse = [self getServerInfoResponseForAddress:hostAddress];
     
     TemporaryHost* host = nil;
     if ([serverInfoResponse isStatusOk]) {
@@ -60,6 +135,67 @@
         host.activeAddress = host.address = hostAddress;
         host.state = StateOnline;
         [serverInfoResponse populateHost:host];
+        
+        // Check if this is a new PC
+        if (![self getHostInDiscovery:host.uuid]) {
+            BOOL prohibitedAddress;
+            
+            // Enforce LAN restriction for App Store Guideline 4.2.7a
+            if ([DiscoveryManager isProhibitedAddress:hostAddress]) {
+                // We have a prohibited address. This might be because the user specified their WAN address
+                // instead of their LAN address. If that's the case, we'll try their LAN address and if we
+                // can reach it through that address, we'll allow it.
+                ServerInfoResponse* lanInfo = [self getServerInfoResponseForAddress:host.localAddress];
+                if ([lanInfo isStatusOk]) {
+                    TemporaryHost* lanHost = [[TemporaryHost alloc] init];
+                    [lanInfo populateHost:lanHost];
+                    
+                    if (![lanHost.uuid isEqualToString:host.uuid]) {
+                        // This is a different host, so it's prohibited
+                        prohibitedAddress = YES;
+                    }
+                    else {
+                        // This is the same host that is reachable on the LAN
+                        prohibitedAddress = NO;
+                    }
+                }
+                else {
+                    // LAN request failed, so it's a prohibited address
+                    prohibitedAddress = YES;
+                }
+            }
+            else {
+                // It's an RFC 1918 IPv4 address or IPv6 address which counts as LAN
+                prohibitedAddress = NO;
+            }
+            
+            if (prohibitedAddress) {
+                callback(nil, [NSString stringWithFormat: @"Moonlight only supports adding PCs on your local network on %s.",
+#if TARGET_OS_TV
+                               "tvOS"
+#else
+                               "iOS"
+#endif
+                               ]);
+                return;
+            }
+            else if ([DiscoveryManager isAddressLAN:inet_addr([hostAddress UTF8String])]) {
+                // Don't send a STUN request if we're connected to a VPN. We'll likely get the VPN
+                // gateway's external address rather than the external address of the LAN.
+                if (![Utils isActiveNetworkVPN]) {
+                    // This host was discovered over a permissible LAN address, so we can update our
+                    // external address for this host.
+                    struct in_addr wanAddr;
+                    int err = LiFindExternalAddressIP4("stun.moonlight-stream.org", 3478, &wanAddr.s_addr);
+                    if (err == 0) {
+                        char addrStr[INET_ADDRSTRLEN];
+                        inet_ntop(AF_INET, &wanAddr, addrStr, sizeof(addrStr));
+                        host.externalAddress = [NSString stringWithFormat: @"%s", addrStr];
+                    }
+                }
+            }
+        }
+        
         if (![self addHostToDiscovery:host]) {
             callback(nil, @"Host information updated");
         } else {
