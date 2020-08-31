@@ -127,6 +127,14 @@
 }
 
 - (void) discoverHost:(NSString *)hostAddress withCallback:(void (^)(TemporaryHost *, NSString*))callback {
+    BOOL prohibitedAddress = [DiscoveryManager isProhibitedAddress:hostAddress];
+    NSString* prohibitedAddressMessage = [NSString stringWithFormat: @"Moonlight only supports adding PCs on your local network on %s.",
+    #if TARGET_OS_TV
+                                   "tvOS"
+    #else
+                                   "iOS"
+    #endif
+                             ];
     ServerInfoResponse* serverInfoResponse = [self getServerInfoResponseForAddress:hostAddress];
     
     TemporaryHost* host = nil;
@@ -138,8 +146,6 @@
         
         // Check if this is a new PC
         if (![self getHostInDiscovery:host.uuid]) {
-            BOOL prohibitedAddress;
-            
             // Enforce LAN restriction for App Store Guideline 4.2.7a
             if ([DiscoveryManager isProhibitedAddress:hostAddress]) {
                 // We have a prohibited address. This might be because the user specified their WAN address
@@ -170,13 +176,7 @@
             }
             
             if (prohibitedAddress) {
-                callback(nil, [NSString stringWithFormat: @"Moonlight only supports adding PCs on your local network on %s.",
-#if TARGET_OS_TV
-                               "tvOS"
-#else
-                               "iOS"
-#endif
-                               ]);
+                callback(nil, prohibitedAddressMessage);
                 return;
             }
             else if ([DiscoveryManager isAddressLAN:inet_addr([hostAddress UTF8String])]) {
@@ -201,10 +201,11 @@
         } else {
             callback(host, nil);
         }
-    } else {
+    } else if (!prohibitedAddress) {
         callback(nil, @"Could not connect to host. Ensure GameStream is enabled in GeForce Experience on your PC.");
+    } else {
+        callback(nil, prohibitedAddressMessage);
     }
-    
 }
 
 - (void) resetDiscoveryState {
