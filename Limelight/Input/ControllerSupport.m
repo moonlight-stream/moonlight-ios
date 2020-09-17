@@ -17,11 +17,24 @@
 @import GameController;
 @import AudioToolbox;
 
+static const double MOUSE_SPEED_DIVISOR = 2.5;
+
 @implementation ControllerSupport {
+    id _controllerConnectObserver;
+    id _controllerDisconnectObserver;
+    id _mouseConnectObserver;
+    id _mouseDisconnectObserver;
+    id _keyboardConnectObserver;
+    id _keyboardDisconnectObserver;
+    
     NSLock *_controllerStreamLock;
     NSMutableDictionary *_controllers;
     NSTimer *_rumbleTimer;
     id<GamepadPresenceDelegate> _presenceDelegate;
+    
+    float accumulatedDeltaX;
+    float accumulatedDeltaY;
+    float accumulatedScrollY;
     
     OnScreenControls *_osc;
     
@@ -195,6 +208,15 @@
     [_controllerStreamLock unlock];
 }
 
++(BOOL) hasKeyboardOrMouse {
+    if (@available(iOS 14.0, tvOS 14.0, *)) {
+        return GCMouse.mice.count > 0 || GCKeyboard.coalescedKeyboard != nil;
+    }
+    else {
+        return NO;
+    }
+}
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
@@ -327,6 +349,71 @@
     }
 }
 
+-(void) unregisterMouseCallbacks:(GCMouse*)mouse API_AVAILABLE(ios(14.0)) {
+    mouse.mouseInput.mouseMovedHandler = nil;
+    
+    mouse.mouseInput.leftButton.pressedChangedHandler = nil;
+    mouse.mouseInput.middleButton.pressedChangedHandler = nil;
+    mouse.mouseInput.rightButton.pressedChangedHandler = nil;
+    
+    for (GCControllerButtonInput* auxButton in mouse.mouseInput.auxiliaryButtons) {
+        auxButton.pressedChangedHandler = nil;
+    }
+}
+
+-(void) registerMouseCallbacks:(GCMouse*) mouse API_AVAILABLE(ios(14.0)) {
+    mouse.mouseInput.mouseMovedHandler = ^(GCMouseInput * _Nonnull mouse, float deltaX, float deltaY) {
+        self->accumulatedDeltaX += deltaX / MOUSE_SPEED_DIVISOR;
+        self->accumulatedDeltaY += -deltaY / MOUSE_SPEED_DIVISOR;
+        
+        short truncatedDeltaX = (short)self->accumulatedDeltaX;
+        short truncatedDeltaY = (short)self->accumulatedDeltaY;
+        
+        if (truncatedDeltaX != 0 || truncatedDeltaY != 0) {
+            LiSendMouseMoveEvent(truncatedDeltaX, truncatedDeltaY);
+            
+            self->accumulatedDeltaX -= truncatedDeltaX;
+            self->accumulatedDeltaY -= truncatedDeltaY;
+        }
+    };
+    
+    mouse.mouseInput.leftButton.pressedChangedHandler = ^(GCControllerButtonInput * _Nonnull button, float value, BOOL pressed) {
+        LiSendMouseButtonEvent(pressed ? BUTTON_ACTION_PRESS : BUTTON_ACTION_RELEASE, BUTTON_LEFT);
+    };
+    mouse.mouseInput.middleButton.pressedChangedHandler = ^(GCControllerButtonInput * _Nonnull button, float value, BOOL pressed) {
+        LiSendMouseButtonEvent(pressed ? BUTTON_ACTION_PRESS : BUTTON_ACTION_RELEASE, BUTTON_MIDDLE);
+    };
+    mouse.mouseInput.rightButton.pressedChangedHandler = ^(GCControllerButtonInput * _Nonnull button, float value, BOOL pressed) {
+        LiSendMouseButtonEvent(pressed ? BUTTON_ACTION_PRESS : BUTTON_ACTION_RELEASE, BUTTON_RIGHT);
+    };
+    
+    if (mouse.mouseInput.auxiliaryButtons != nil) {
+        if (mouse.mouseInput.auxiliaryButtons.count >= 1) {
+            mouse.mouseInput.auxiliaryButtons[0].pressedChangedHandler = ^(GCControllerButtonInput * _Nonnull button, float value, BOOL pressed) {
+                LiSendMouseButtonEvent(pressed ? BUTTON_ACTION_PRESS : BUTTON_ACTION_RELEASE, BUTTON_X1);
+            };
+        }
+        if (mouse.mouseInput.auxiliaryButtons.count >= 2) {
+            mouse.mouseInput.auxiliaryButtons[1].pressedChangedHandler = ^(GCControllerButtonInput * _Nonnull button, float value, BOOL pressed) {
+                LiSendMouseButtonEvent(pressed ? BUTTON_ACTION_PRESS : BUTTON_ACTION_RELEASE, BUTTON_X2);
+            };
+        }
+    }
+    
+    // TODO: Confirm scroll direction
+    mouse.mouseInput.scroll.yAxis.valueChangedHandler = ^(GCControllerAxisInput * _Nonnull axis, float value) {
+        self->accumulatedScrollY += -value;
+        
+        short truncatedScrollY = (short)self->accumulatedScrollY;
+        
+        if (truncatedScrollY != 0) {
+            LiSendHighResScrollEvent(truncatedScrollY);
+            
+            self->accumulatedScrollY -= truncatedScrollY;
+        }
+    };
+}
+
 -(void) updateAutoOnScreenControlMode
 {
     // Auto on-screen control support may not be enabled
@@ -363,6 +450,17 @@
                 break;
             }
         }
+    }
+    
+    // If we didn't find a gamepad present and we have a keyboard or mouse, turn
+    // the on-screen controls off to get the overlays out of the way.
+    if (level == OnScreenControlsLevelFull && [ControllerSupport hasKeyboardOrMouse]) {
+        level = OnScreenControlsLevelOff;
+        
+        // Ensure the virtual gamepad disappears to avoid confusing some games.
+        // If the mouse and keyboard disconnect later, it will reappear when the
+        // first OSC input is received.
+        LiSendMultiControllerEvent(0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
     
     [_osc setLevel:level];
@@ -452,9 +550,9 @@
     DataManager* dataMan = [[DataManager alloc] init];
     OnScreenControlsLevel level = (OnScreenControlsLevel)[[dataMan getSettings].onscreenControls integerValue];
     
-    // Even if no gamepads are present, we will always count one
-    // if OSC is enabled.
-    if (level != OnScreenControlsLevelOff) {
+    // Even if no gamepads are present, we will always count one if OSC is enabled,
+    // or it's set to auto and no keyboard or mouse is present.
+    if (level != OnScreenControlsLevelOff && (![ControllerSupport hasKeyboardOrMouse] || level != OnScreenControlsLevelAuto)) {
         mask |= 0x1;
     }
     
@@ -512,11 +610,16 @@
         if ([ControllerSupport isSupportedGamepad:controller]) {
             [self assignController:controller];
             [self registerControllerCallbacks:controller];
-            [self updateAutoOnScreenControlMode];
         }
     }
     
-    self.connectObserver = [[NSNotificationCenter defaultCenter] addObserverForName:GCControllerDidConnectNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
+    if (@available(iOS 14.0, tvOS 14.0, *)) {
+        for (GCMouse* mouse in [GCMouse mice]) {
+            [self registerMouseCallbacks:mouse];
+        }
+    }
+    
+    _controllerConnectObserver = [[NSNotificationCenter defaultCenter] addObserverForName:GCControllerDidConnectNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
         Log(LOG_I, @"Controller connected!");
         
         GCController* controller = note.object;
@@ -537,7 +640,7 @@
         // Notify the delegate
         [self->_presenceDelegate gamepadPresenceChanged];
     }];
-    self.disconnectObserver = [[NSNotificationCenter defaultCenter] addObserverForName:GCControllerDidDisconnectNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
+    _controllerDisconnectObserver = [[NSNotificationCenter defaultCenter] addObserverForName:GCControllerDidDisconnectNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
         Log(LOG_I, @"Controller disconnected!");
         
         GCController* controller = note.object;
@@ -565,6 +668,44 @@
         // Notify the delegate
         [self->_presenceDelegate gamepadPresenceChanged];
     }];
+    
+    if (@available(iOS 14.0, tvOS 14.0, *)) {
+        _mouseConnectObserver = [[NSNotificationCenter defaultCenter] addObserverForName:GCMouseDidConnectNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
+            Log(LOG_I, @"Mouse connected!");
+            
+            GCMouse* mouse = note.object;
+            
+            // Register for mouse events
+            [self registerMouseCallbacks: mouse];
+
+            // Re-evaluate the on-screen control mode
+            [self updateAutoOnScreenControlMode];
+        }];
+        _mouseDisconnectObserver = [[NSNotificationCenter defaultCenter] addObserverForName:GCMouseDidDisconnectNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
+            Log(LOG_I, @"Mouse disconnected!");
+            
+            GCMouse* mouse = note.object;
+            
+            // Unregister for mouse events
+            [self unregisterMouseCallbacks: mouse];
+
+            // Re-evaluate the on-screen control mode
+            [self updateAutoOnScreenControlMode];
+        }];
+        _keyboardConnectObserver = [[NSNotificationCenter defaultCenter] addObserverForName:GCKeyboardDidConnectNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
+            Log(LOG_I, @"Keyboard connected!");
+            
+            // Re-evaluate the on-screen control mode
+            [self updateAutoOnScreenControlMode];
+        }];
+        _keyboardDisconnectObserver = [[NSNotificationCenter defaultCenter] addObserverForName:GCKeyboardDidDisconnectNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
+            Log(LOG_I, @"Keyboard disconnected!");
+
+            // Re-evaluate the on-screen control mode
+            [self updateAutoOnScreenControlMode];
+        }];
+    }
+    
     return self;
 }
 
@@ -572,13 +713,23 @@
 {
     [_rumbleTimer invalidate];
     _rumbleTimer = nil;
-    [[NSNotificationCenter defaultCenter] removeObserver:self.connectObserver];
-    [[NSNotificationCenter defaultCenter] removeObserver:self.disconnectObserver];
+    [[NSNotificationCenter defaultCenter] removeObserver:_controllerConnectObserver];
+    [[NSNotificationCenter defaultCenter] removeObserver:_controllerDisconnectObserver];
+    [[NSNotificationCenter defaultCenter] removeObserver:_mouseConnectObserver];
+    [[NSNotificationCenter defaultCenter] removeObserver:_mouseDisconnectObserver];
+    [[NSNotificationCenter defaultCenter] removeObserver:_keyboardConnectObserver];
+    [[NSNotificationCenter defaultCenter] removeObserver:_keyboardDisconnectObserver];
     [_controllers removeAllObjects];
     _controllerNumbers = 0;
     for (GCController* controller in [GCController controllers]) {
         if ([ControllerSupport isSupportedGamepad:controller]) {
             [self unregisterControllerCallbacks:controller];
+        }
+    }
+    
+    if (@available(iOS 14.0, tvOS 14.0, *)) {
+        for (GCMouse* mouse in [GCMouse mice]) {
+            [self unregisterMouseCallbacks:mouse];
         }
     }
 }
