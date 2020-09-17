@@ -44,7 +44,4 @@
 
 -(NSUInteger) getConnectedGamepadCount;
 
-@property (nonatomic, strong) id connectObserver;
-@property (nonatomic, strong) id disconnectObserver;
-
 @end

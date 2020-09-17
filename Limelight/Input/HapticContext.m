@@ -13,11 +13,11 @@
 
 @implementation HapticContext {
     GCControllerPlayerIndex _playerIndex;
-    CHHapticEngine* _hapticEngine API_AVAILABLE(ios(13.0));
-    id<CHHapticPatternPlayer> _hapticPlayer API_AVAILABLE(ios(13.0));
+    CHHapticEngine* _hapticEngine API_AVAILABLE(ios(13.0), tvos(14.0));
+    id<CHHapticPatternPlayer> _hapticPlayer API_AVAILABLE(ios(13.0), tvos(14.0));
 }
 
--(void)cleanup API_AVAILABLE(ios(14.0)) {
+-(void)cleanup API_AVAILABLE(ios(14.0), tvos(14.0)) {
     if (_hapticPlayer != nil) {
         [_hapticPlayer cancelAndReturnError:nil];
         _hapticPlayer = nil;
@@ -28,7 +28,7 @@
     }
 }
 
--(void)setMotorAmplitude:(unsigned short)amplitude API_AVAILABLE(ios(14.0)) {
+-(void)setMotorAmplitude:(unsigned short)amplitude API_AVAILABLE(ios(14.0), tvos(14.0)) {
     NSError* error;
     
     // Cancel the last haptic effect
@@ -69,7 +69,7 @@
     }
 }
 
--(id) initWithGamepad:(GCController*)gamepad locality:(GCHapticsLocality)locality API_AVAILABLE(ios(14.0)) {
+-(id) initWithGamepad:(GCController*)gamepad locality:(GCHapticsLocality)locality API_AVAILABLE(ios(14.0), tvos(14.0)) {
     if (gamepad.haptics == nil) {
         Log(LOG_W, @"Controller %d does not support haptics", gamepad.playerIndex);
         return nil;
