@@ -79,6 +79,10 @@ static const int REFERENCE_HEIGHT = 720;
         [onScreenControls setLevel:level];
     }
     
+    // It would be nice to just use GCMouse on iOS 14+ and the older API on iOS 13
+    // but unfortunately that isn't possible today. GCMouse doesn't recognize many
+    // mice correctly, but UIKit does. We will register for both and ignore UIKit
+    // events if a GCMouse is connected.
     if (@available(iOS 13.4, *)) {
         [self addInteraction:[[UIPointerInteraction alloc] initWithDelegate:self]];
         
@@ -189,6 +193,13 @@ static const int REFERENCE_HEIGHT = 720;
     if (@available(iOS 13.4, *)) {
         UITouch* touch = [touches anyObject];
         if (touch.type == UITouchTypeIndirectPointer) {
+            if (@available(iOS 14.0, *)) {
+                if ([GCMouse current] != nil) {
+                    // We'll handle this with GCMouse. Do nothing here.
+                    return YES;
+                }
+            }
+            
             UIEventButtonMask normalizedButtonMask;
             
             // iOS 14 includes the released button in the buttonMask for the release
@@ -243,6 +254,13 @@ static const int REFERENCE_HEIGHT = 720;
     if (@available(iOS 13.4, *)) {
         UITouch *touch = [touches anyObject];
         if (touch.type == UITouchTypeIndirectPointer) {
+            if (@available(iOS 14.0, *)) {
+                if ([GCMouse current] != nil) {
+                    // We'll handle this with GCMouse. Do nothing here.
+                    return;
+                }
+            }
+            
             // We must handle this event to properly support
             // drags while the middle, X1, or X2 mouse buttons are
             // held down. For some reason, left and right buttons
@@ -513,6 +531,13 @@ static const int REFERENCE_HEIGHT = 720;
 - (UIPointerRegion *)pointerInteraction:(UIPointerInteraction *)interaction
                        regionForRequest:(UIPointerRegionRequest *)request
                           defaultRegion:(UIPointerRegion *)defaultRegion API_AVAILABLE(ios(13.4)) {
+    if (@available(iOS 14.0, *)) {
+        if ([GCMouse current] != nil) {
+            // We'll handle this with GCMouse. Do nothing here.
+            return nil;
+        }
+    }
+    
     // This logic mimics what iOS does with AVLayerVideoGravityResizeAspect
     CGSize videoSize;
     CGPoint videoOrigin;
@@ -540,6 +565,13 @@ static const int REFERENCE_HEIGHT = 720;
 }
 
 - (void)mouseWheelMoved:(UIPanGestureRecognizer *)gesture {
+    if (@available(iOS 14.0, *)) {
+        if ([GCMouse current] != nil) {
+            // We'll handle this with GCMouse. Do nothing here.
+            return;
+        }
+    }
+    
     switch (gesture.state) {
         case UIGestureRecognizerStateBegan:
         case UIGestureRecognizerStateChanged:
