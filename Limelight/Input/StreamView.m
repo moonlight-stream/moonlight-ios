@@ -76,7 +76,11 @@ static const int REFERENCE_HEIGHT = 720;
         [onScreenControls setLevel:level];
     }
     
-    if (@available(iOS 13.4, *)) {
+    if (@available(iOS 14.0, *)) {
+        // Use the new GCMouse API on iOS 14
+    }
+    else if (@available(iOS 13.4, *)) {
+        // Use the legacy mouse API on iOS 13.4
         [self addInteraction:[[UIPointerInteraction alloc] initWithDelegate:self]];
         
         UIPanGestureRecognizer *mouseWheelRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(mouseWheelMoved:)];
@@ -179,32 +183,38 @@ static const int REFERENCE_HEIGHT = 720;
     if (@available(iOS 13.4, *)) {
         UITouch* touch = [touches anyObject];
         if (touch.type == UITouchTypeIndirectPointer) {
-            UIEventButtonMask changedButtons = lastMouseButtonMask ^ event.buttonMask;
-                        
-            for (int i = BUTTON_LEFT; i <= BUTTON_X2; i++) {
-                UIEventButtonMask buttonFlag;
-                
-                switch (i) {
-                    // Right and Middle are reversed from what iOS uses
-                    case BUTTON_RIGHT:
-                        buttonFlag = UIEventButtonMaskForButtonNumber(2);
-                        break;
-                    case BUTTON_MIDDLE:
-                        buttonFlag = UIEventButtonMaskForButtonNumber(3);
-                        break;
-                        
-                    default:
-                        buttonFlag = UIEventButtonMaskForButtonNumber(i);
-                        break;
-                }
-                
-                if (changedButtons & buttonFlag) {
-                    LiSendMouseButtonEvent(buttonAction, i);
-                }
+            if (@available(iOS 14.0, *)) {
+                // We'll handle this with GCMouse. Do nothing here.
+                return YES;
             }
-            
-            lastMouseButtonMask = event.buttonMask;
-            return YES;
+            else {
+                UIEventButtonMask changedButtons = lastMouseButtonMask ^ event.buttonMask;
+                            
+                for (int i = BUTTON_LEFT; i <= BUTTON_X2; i++) {
+                    UIEventButtonMask buttonFlag;
+                    
+                    switch (i) {
+                        // Right and Middle are reversed from what iOS uses
+                        case BUTTON_RIGHT:
+                            buttonFlag = UIEventButtonMaskForButtonNumber(2);
+                            break;
+                        case BUTTON_MIDDLE:
+                            buttonFlag = UIEventButtonMaskForButtonNumber(3);
+                            break;
+                            
+                        default:
+                            buttonFlag = UIEventButtonMaskForButtonNumber(i);
+                            break;
+                    }
+                    
+                    if (changedButtons & buttonFlag) {
+                        LiSendMouseButtonEvent(buttonAction, i);
+                    }
+                }
+                
+                lastMouseButtonMask = event.buttonMask;
+                return YES;
+            }
         }
     }
 #endif
@@ -217,14 +227,20 @@ static const int REFERENCE_HEIGHT = 720;
     if (@available(iOS 13.4, *)) {
         UITouch *touch = [touches anyObject];
         if (touch.type == UITouchTypeIndirectPointer) {
-            // We must handle this event to properly support
-            // drags while the middle, X1, or X2 mouse buttons are
-            // held down. For some reason, left and right buttons
-            // don't require this, but we do it anyway for them too.
-            // Cursor movement without a button held down is handled
-            // in pointerInteraction:regionForRequest:defaultRegion.
-            [self updateCursorLocation:[touch locationInView:self]];
-            return;
+            if (@available(iOS 14.0, *)) {
+                // We'll handle this with GCMouse. Do nothing here.
+                return;
+            }
+            else {
+                // We must handle this event to properly support
+                // drags while the middle, X1, or X2 mouse buttons are
+                // held down. For some reason, left and right buttons
+                // don't require this, but we do it anyway for them too.
+                // Cursor movement without a button held down is handled
+                // in pointerInteraction:regionForRequest:defaultRegion.
+                [self updateCursorLocation:[touch locationInView:self]];
+                return;
+            }
         }
     }
 #endif
