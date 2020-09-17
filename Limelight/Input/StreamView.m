@@ -12,8 +12,6 @@
 #import "ControllerSupport.h"
 #import "KeyboardSupport.h"
 
-static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
-
 static const int REFERENCE_WIDTH = 1280;
 static const int REFERENCE_HEIGHT = 720;
 
@@ -33,8 +31,7 @@ static const int REFERENCE_HEIGHT = 720;
     float lastMouseX;
     float lastMouseY;
     
-    // Citrix X1 mouse support
-    X1Mouse* x1mouse;
+    // iOS 14 mouse support
     double accumulatedMouseDeltaX;
     double accumulatedMouseDeltaY;
     
@@ -88,13 +85,6 @@ static const int REFERENCE_HEIGHT = 720;
         [self addGestureRecognizer:mouseWheelRecognizer];
     }
 #endif
-    
-    x1mouse = [[X1Mouse alloc] init];
-    x1mouse.delegate = self;
-    
-    if (settings.btMouseSupport) {
-        [x1mouse start];
-    }
 }
 
 - (void)startInteractionTimer {
@@ -660,53 +650,6 @@ static const int REFERENCE_HEIGHT = 720;
     }
     
     return commands;
-}
-
-- (void)connectedStateDidChangeWithIdentifier:(NSUUID * _Nonnull)identifier isConnected:(BOOL)isConnected {
-    NSLog(@"Citrix X1 mouse state change: %@ -> %s",
-          identifier, isConnected ? "connected" : "disconnected");
-}
-
-- (void)mouseDidMoveWithIdentifier:(NSUUID * _Nonnull)identifier deltaX:(int16_t)deltaX deltaY:(int16_t)deltaY {
-    accumulatedMouseDeltaX += deltaX / X1_MOUSE_SPEED_DIVISOR;
-    accumulatedMouseDeltaY += deltaY / X1_MOUSE_SPEED_DIVISOR;
-    
-    short shortX = (short)accumulatedMouseDeltaX;
-    short shortY = (short)accumulatedMouseDeltaY;
-    
-    if (shortX == 0 && shortY == 0) {
-        return;
-    }
-    
-    LiSendMouseMoveEvent(shortX, shortY);
-    
-    accumulatedMouseDeltaX -= shortX;
-    accumulatedMouseDeltaY -= shortY;
-}
-
-- (int) buttonFromX1ButtonCode:(enum X1MouseButton)button {
-    switch (button) {
-        case X1MouseButtonLeft:
-            return BUTTON_LEFT;
-        case X1MouseButtonRight:
-            return BUTTON_RIGHT;
-        case X1MouseButtonMiddle:
-            return BUTTON_MIDDLE;
-        default:
-            return -1;
-    }
-}
-
-- (void)mouseDownWithIdentifier:(NSUUID * _Nonnull)identifier button:(enum X1MouseButton)button {
-    LiSendMouseButtonEvent(BUTTON_ACTION_PRESS, [self buttonFromX1ButtonCode:button]);
-}
-
-- (void)mouseUpWithIdentifier:(NSUUID * _Nonnull)identifier button:(enum X1MouseButton)button {
-    LiSendMouseButtonEvent(BUTTON_ACTION_RELEASE, [self buttonFromX1ButtonCode:button]);
-}
-
-- (void)wheelDidScrollWithIdentifier:(NSUUID * _Nonnull)identifier deltaZ:(int8_t)deltaZ {
-    LiSendScrollEvent(deltaZ);
 }
 
 @end

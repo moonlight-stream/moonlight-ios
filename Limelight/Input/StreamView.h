@@ -8,7 +8,6 @@
 
 #import "ControllerSupport.h"
 #import "OnScreenControls.h"
-#import "Moonlight-Swift.h"
 #import "StreamConfiguration.h"
 
 @protocol EdgeDetectionDelegate <NSObject>
@@ -25,9 +24,9 @@
 @end
 
 #if TARGET_OS_TV
-@interface StreamView : OSView <X1KitMouseDelegate, UITextFieldDelegate>
+@interface StreamView : OSView <UITextFieldDelegate>
 #else
-@interface StreamView : OSView <X1KitMouseDelegate, UITextFieldDelegate, UIPointerInteractionDelegate>
+@interface StreamView : OSView <UITextFieldDelegate, UIPointerInteractionDelegate>
 #endif
 
 @property (nonatomic, retain) IBOutlet UITextField* keyInputField;
