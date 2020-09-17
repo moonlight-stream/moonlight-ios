@@ -19,7 +19,7 @@
 @property (strong, nonatomic) IBOutlet UISegmentedControl *multiControllerSelector;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *audioOnPCSelector;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *hevcSelector;
-@property (strong, nonatomic) IBOutlet UISegmentedControl *btMouseSelector;
+@property (strong, nonatomic) IBOutlet UISegmentedControl *touchscreenModeSelector;
 @property (strong, nonatomic) IBOutlet UIScrollView *scrollView;
 
 #pragma clang diagnostic push

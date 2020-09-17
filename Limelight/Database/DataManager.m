@@ -58,13 +58,12 @@
                           height:(NSInteger)height
                            width:(NSInteger)width
                 onscreenControls:(NSInteger)onscreenControls
-                          remote:(BOOL)streamingRemotely
                    optimizeGames:(BOOL)optimizeGames
                  multiController:(BOOL)multiController
                        audioOnPC:(BOOL)audioOnPC
                          useHevc:(BOOL)useHevc
                        enableHdr:(BOOL)enableHdr
-                  btMouseSupport:(BOOL)btMouseSupport {
+               absoluteTouchMode:(BOOL)absoluteTouchMode {
     
     [_managedObjectContext performBlockAndWait:^{
         Settings* settingsToSave = [self retrieveSettings];
@@ -73,13 +72,12 @@
         settingsToSave.height = [NSNumber numberWithInteger:height];
         settingsToSave.width = [NSNumber numberWithInteger:width];
         settingsToSave.onscreenControls = [NSNumber numberWithInteger:onscreenControls];
-        settingsToSave.streamingRemotely = streamingRemotely;
         settingsToSave.optimizeGames = optimizeGames;
         settingsToSave.multiController = multiController;
         settingsToSave.playAudioOnPC = audioOnPC;
         settingsToSave.useHevc = useHevc;
         settingsToSave.enableHdr = enableHdr;
-        settingsToSave.btMouseSupport = btMouseSupport;
+        settingsToSave.absoluteTouchMode = absoluteTouchMode;
         
         [self saveData];
     }];

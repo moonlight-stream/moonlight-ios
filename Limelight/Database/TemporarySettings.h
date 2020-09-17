@@ -24,7 +24,7 @@
 @property (nonatomic) BOOL playAudioOnPC;
 @property (nonatomic) BOOL optimizeGames;
 @property (nonatomic) BOOL enableHdr;
-@property (nonatomic) BOOL btMouseSupport;
+@property (nonatomic) BOOL absoluteTouchMode;
 
 - (id) initFromSettings:(Settings*)settings;
 
