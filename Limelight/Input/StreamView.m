@@ -189,7 +189,23 @@ static const int REFERENCE_HEIGHT = 720;
     if (@available(iOS 13.4, *)) {
         UITouch* touch = [touches anyObject];
         if (touch.type == UITouchTypeIndirectPointer) {
-            UIEventButtonMask changedButtons = lastMouseButtonMask ^ event.buttonMask;
+            UIEventButtonMask normalizedButtonMask;
+            
+            // iOS 14 includes the released button in the buttonMask for the release
+            // event, while iOS 13 does not. Normalize that behavior here.
+            if (@available(iOS 14.0, *)) {
+                if (buttonAction == BUTTON_ACTION_RELEASE) {
+                    normalizedButtonMask = lastMouseButtonMask & ~event.buttonMask;
+                }
+                else {
+                    normalizedButtonMask = event.buttonMask;
+                }
+            }
+            else {
+                normalizedButtonMask = event.buttonMask;
+            }
+            
+            UIEventButtonMask changedButtons = lastMouseButtonMask ^ normalizedButtonMask;
                         
             for (int i = BUTTON_LEFT; i <= BUTTON_X2; i++) {
                 UIEventButtonMask buttonFlag;
@@ -213,7 +229,7 @@ static const int REFERENCE_HEIGHT = 720;
                 }
             }
             
-            lastMouseButtonMask = event.buttonMask;
+            lastMouseButtonMask = normalizedButtonMask;
             return YES;
         }
     }
