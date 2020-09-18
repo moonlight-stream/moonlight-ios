@@ -29,7 +29,7 @@ static const double MOUSE_SPEED_DIVISOR = 2.5;
     
     NSLock *_controllerStreamLock;
     NSMutableDictionary *_controllers;
-    id<GamepadPresenceDelegate> _presenceDelegate;
+    id<InputPresenceDelegate> _presenceDelegate;
     
     float accumulatedDeltaX;
     float accumulatedDeltaY;
@@ -560,7 +560,7 @@ static const double MOUSE_SPEED_DIVISOR = 2.5;
     return _controllers.count;
 }
 
--(id) initWithConfig:(StreamConfiguration*)streamConfig presenceDelegate:(id<GamepadPresenceDelegate>)delegate
+-(id) initWithConfig:(StreamConfiguration*)streamConfig presenceDelegate:(id<InputPresenceDelegate>)delegate
 {
     self = [super init];
     
@@ -657,6 +657,9 @@ static const double MOUSE_SPEED_DIVISOR = 2.5;
 
             // Re-evaluate the on-screen control mode
             [self updateAutoOnScreenControlMode];
+            
+            // Notify the delegate
+            [self->_presenceDelegate mousePresenceChanged];
         }];
         _mouseDisconnectObserver = [[NSNotificationCenter defaultCenter] addObserverForName:GCMouseDidDisconnectNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
             Log(LOG_I, @"Mouse disconnected!");
@@ -668,6 +671,9 @@ static const double MOUSE_SPEED_DIVISOR = 2.5;
 
             // Re-evaluate the on-screen control mode
             [self updateAutoOnScreenControlMode];
+            
+            // Notify the delegate
+            [self->_presenceDelegate mousePresenceChanged];
         }];
         _keyboardConnectObserver = [[NSNotificationCenter defaultCenter] addObserverForName:GCKeyboardDidConnectNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
             Log(LOG_I, @"Keyboard connected!");

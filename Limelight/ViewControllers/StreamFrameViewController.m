@@ -383,6 +383,14 @@
 #endif
 }
 
+- (void)mousePresenceChanged {
+#if !TARGET_OS_TV
+    if (@available(iOS 14.0, *)) {
+        [self setNeedsUpdateOfPrefersPointerLocked];
+    }
+#endif
+}
+
 - (void)userInteractionBegan {
     // Disable hiding home bar when user is interacting.
     // iOS will force it to be shown anyway, but it will
@@ -434,7 +442,10 @@
 }
 
 - (BOOL)prefersPointerLocked {
-    return YES;
+    // Pointer lock breaks the UIKit mouse APIs, which is a problem because
+    // GCMouse is horribly broken on iOS 14.0 for certain mice. Only lock
+    // the cursor if there is a GCMouse present.
+    return [GCMouse mice].count > 0;
 }
 #endif
 
