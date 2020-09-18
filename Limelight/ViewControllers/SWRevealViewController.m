@@ -1387,15 +1387,11 @@ const int FrontViewPositionNone = 0xff;
 
     // These are derived from the primary view controller
     if (@available(iOS 11.0, *)) {
-        // iOS 11 betas (which are still installed in some places :\) crash with
-        // doesNotRecognizeSelector since this wasn't added until after the iPhone X
-        // announcement.
-        if ([self respondsToSelector: @selector(setNeedsUpdateOfHomeIndicatorAutoHidden)]) {
-            [self setNeedsUpdateOfHomeIndicatorAutoHidden];
-        }
-        if ([self respondsToSelector: @selector(setNeedsUpdateOfScreenEdgesDeferringSystemGestures)]) {
-            [self setNeedsUpdateOfScreenEdgesDeferringSystemGestures];
-        }
+        [self setNeedsUpdateOfHomeIndicatorAutoHidden];
+        [self setNeedsUpdateOfScreenEdgesDeferringSystemGestures];
+    }
+    if (@available(iOS 14.0, *)) {
+        [self setNeedsUpdateOfPrefersPointerLocked];
     }
 }
 
@@ -1405,6 +1401,11 @@ const int FrontViewPositionNone = 0xff;
 }
 
 - (UIViewController*)childViewControllerForScreenEdgesDeferringSystemGestures
+{
+    return _primaryViewController;
+}
+
+- (UIViewController*)childViewControllerForPointerLock
 {
     return _primaryViewController;
 }

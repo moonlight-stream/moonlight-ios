@@ -432,6 +432,10 @@
 - (BOOL)shouldAutorotate {
     return YES;
 }
+
+- (BOOL)prefersPointerLocked {
+    return YES;
+}
 #endif
 
 @end
