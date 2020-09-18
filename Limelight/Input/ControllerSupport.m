@@ -20,7 +20,6 @@
 @implementation ControllerSupport {
     NSLock *_controllerStreamLock;
     NSMutableDictionary *_controllers;
-    NSTimer *_rumbleTimer;
     id<GamepadPresenceDelegate> _presenceDelegate;
     
     OnScreenControls *_osc;
@@ -41,20 +40,6 @@
 #define UPDATE_BUTTON_FLAG(controller, x, y) \
 ((y) ? [self setButtonFlag:controller flags:x] : [self clearButtonFlag:controller flags:x])
 
--(void) rumbleController: (Controller*)controller
-{
-#if 0
-    // Only vibrate if the amplitude is large enough
-    if (controller.lowFreqMotor > 0x5000 || controller.highFreqMotor > 0x5000) {
-        // If the gamepad is nil (on-screen controls) or it's attached to the device,
-        // then vibrate the device itself
-        if (controller.gamepad == nil || [controller.gamepad isAttachedToDevice]) {
-            AudioServicesPlayAlertSound(kSystemSoundID_Vibrate);
-        }
-    }
-#endif
-}
-
 -(void) rumble:(unsigned short)controllerNumber lowFreqMotor:(unsigned short)lowFreqMotor highFreqMotor:(unsigned short)highFreqMotor
 {
     Controller* controller = [_controllers objectForKey:[NSNumber numberWithInteger:controllerNumber]];
@@ -67,12 +52,8 @@
         return;
     }
     
-    // Update the motor levels for the rumble timer to grab next iteration
-    controller.lowFreqMotor = lowFreqMotor;
-    controller.highFreqMotor = highFreqMotor;
-    
-    // Rumble now to ensure short vibrations aren't missed
-    [self rumbleController:controller];
+    [controller.lowFreqMotor setMotorAmplitude:lowFreqMotor];
+    [controller.highFreqMotor setMotorAmplitude:highFreqMotor];
 }
 
 -(void) updateLeftStick:(Controller*)controller x:(short)x y:(short)y
@@ -210,6 +191,18 @@
             controller.gamepad.valueChangedHandler = NULL;
         }
     }
+}
+
+-(void) initializeControllerHaptics:(Controller*) controller
+{
+    controller.lowFreqMotor = [HapticContext createContextForLowFreqMotor:controller.gamepad];
+    controller.highFreqMotor = [HapticContext createContextForHighFreqMotor:controller.gamepad];
+}
+
+-(void) cleanupControllerHaptics:(Controller*) controller
+{
+    [controller.lowFreqMotor cleanup];
+    [controller.highFreqMotor cleanup];
 }
 
 -(void) registerControllerCallbacks:(GCController*) controller
@@ -401,6 +394,9 @@
                     limeController.supportedEmulationFlags &= ~EMULATING_SELECT;
                 }
             }
+            
+            // Prepare controller haptics for use
+            [self initializeControllerHaptics:limeController];
 
             [_controllers setObject:limeController forKey:[NSNumber numberWithInteger:controller.playerIndex]];
             
@@ -461,23 +457,6 @@
     return mask;
 }
 
--(void) rumbleTimer
-{
-    for (int i = 0; i < 4; i++) {
-        Controller* controller = [_controllers objectForKey:[NSNumber numberWithInteger:i]];
-        if (controller == nil && i == 0 && _oscEnabled) {
-            // No physical controller, but we have on-screen controls
-            controller = _player0osc;
-        }
-        if (controller == nil) {
-            // No connected controller for this player
-            continue;
-        }
-        
-        [self rumbleController:controller];
-    }
-}
-
 -(NSUInteger) getConnectedGamepadCount
 {
     return _controllers.count;
@@ -498,12 +477,6 @@
 
     DataManager* dataMan = [[DataManager alloc] init];
     _oscEnabled = (OnScreenControlsLevel)[[dataMan getSettings].onscreenControls integerValue] != OnScreenControlsLevelOff;
-    
-    _rumbleTimer = [NSTimer scheduledTimerWithTimeInterval:0.20
-                                                    target:self
-                                                  selector:@selector(rumbleTimer)
-                                                  userInfo:nil
-                                                   repeats:YES];
     
     Log(LOG_I, @"Number of supported controllers connected: %d", [ControllerSupport getGamepadCount]);
     Log(LOG_I, @"Multi-controller: %d", _multiController);
@@ -553,6 +526,10 @@
         
         // Unset the GCController on this object (in case it is the OSC, which will persist)
         Controller* limeController = [self->_controllers objectForKey:[NSNumber numberWithInteger:controller.playerIndex]];
+        
+        // Stop haptics on this controller
+        [self cleanupControllerHaptics:limeController];
+        
         limeController.gamepad = nil;
         
         // Inform the server of the updated active gamepads before removing this controller
@@ -570,12 +547,15 @@
 
 -(void) cleanup
 {
-    [_rumbleTimer invalidate];
-    _rumbleTimer = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self.connectObserver];
     [[NSNotificationCenter defaultCenter] removeObserver:self.disconnectObserver];
-    [_controllers removeAllObjects];
     _controllerNumbers = 0;
+    
+    for (Controller* controller in [_controllers allValues]) {
+        [self cleanupControllerHaptics:controller];
+    }
+    [_controllers removeAllObjects];
+    
     for (GCController* controller in [GCController controllers]) {
         if ([ControllerSupport isSupportedGamepad:controller]) {
             [self unregisterControllerCallbacks:controller];
