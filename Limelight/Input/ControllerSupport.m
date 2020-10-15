@@ -303,6 +303,13 @@ static const double MOUSE_SPEED_DIVISOR = 2.5;
                     }
                 }
                 
+                if (@available(iOS 14.0, tvOS 14.0, *)) {
+                    // Home/Guide button is optional (only present on Xbox One S and PS4 gamepads)
+                    if (gamepad.buttonHome != nil) {
+                        UPDATE_BUTTON_FLAG(limeController, SPECIAL_FLAG, gamepad.buttonHome.pressed);
+                    }
+                }
+                
                 leftStickX = gamepad.leftThumbstick.xAxis.value * 0x7FFE;
                 leftStickY = gamepad.leftThumbstick.yAxis.value * 0x7FFE;
                 
