@@ -168,11 +168,7 @@
         [_inactivityTimer invalidate];
     }
     
-#if TARGET_OS_TV
-    // Terminate the stream immediately on tvOS
-    Log(LOG_I, @"Terminating stream after resigning active");
-    [self returnToMainFrame];
-#else
+#if !TARGET_OS_TV
     // Terminate the stream if the app is inactive for 10 seconds
     Log(LOG_I, @"Starting inactivity termination timer");
     _inactivityTimer = [NSTimer scheduledTimerWithTimeInterval:10
