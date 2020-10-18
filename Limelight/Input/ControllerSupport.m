@@ -109,17 +109,26 @@ static const double MOUSE_SPEED_DIVISOR = 2.5;
 
 -(void) handleSpecialCombosReleased:(Controller*)controller releasedButtons:(int)releasedButtons
 {
-    if ((controller.emulatingButtonFlags & EMULATING_SELECT) &&
-        ((releasedButtons & LB_FLAG) || (releasedButtons & PLAY_FLAG))) {
+    if ((controller.emulatingButtonFlags & EMULATING_SELECT) && (releasedButtons & (LB_FLAG | PLAY_FLAG))) {
         controller.lastButtonFlags &= ~BACK_FLAG;
         controller.emulatingButtonFlags &= ~EMULATING_SELECT;
     }
-    if ((controller.emulatingButtonFlags & EMULATING_SPECIAL) &&
-        ((releasedButtons & RB_FLAG) || (releasedButtons & PLAY_FLAG) ||
-         (releasedButtons & BACK_FLAG))) {
-            controller.lastButtonFlags &= ~SPECIAL_FLAG;
-            controller.emulatingButtonFlags &= ~EMULATING_SPECIAL;
+    
+    if (controller.emulatingButtonFlags & EMULATING_SPECIAL) {
+        // If Select is emulated, we use RB+Start to emulate special, otherwise we use Start+Select
+        if (controller.supportedEmulationFlags & EMULATING_SELECT) {
+            if (releasedButtons & (RB_FLAG | PLAY_FLAG)) {
+                controller.lastButtonFlags &= ~SPECIAL_FLAG;
+                controller.emulatingButtonFlags &= ~EMULATING_SPECIAL;
+            }
         }
+        else {
+            if (releasedButtons & (BACK_FLAG | PLAY_FLAG)) {
+                controller.lastButtonFlags &= ~SPECIAL_FLAG;
+                controller.emulatingButtonFlags &= ~EMULATING_SPECIAL;
+            }
+        }
+    }
 }
 
 -(void) handleSpecialCombosPressed:(Controller*)controller pressedButtons:(int)pressedButtons
@@ -134,16 +143,25 @@ static const double MOUSE_SPEED_DIVISOR = 2.5;
                 controller.emulatingButtonFlags |= EMULATING_SELECT;
             }
         }
-        // If (RB or select) and start are down, trigger special
-        else if ((controller.lastButtonFlags & RB_FLAG) || (controller.lastButtonFlags & BACK_FLAG)) {
-            if (controller.supportedEmulationFlags & EMULATING_SPECIAL) {
-                controller.lastButtonFlags |= SPECIAL_FLAG;
-                controller.lastButtonFlags &= ~(pressedButtons & (PLAY_FLAG | RB_FLAG | BACK_FLAG));
-                controller.emulatingButtonFlags |= EMULATING_SPECIAL;
+        else if (controller.supportedEmulationFlags & EMULATING_SPECIAL) {
+            // If Select is emulated too, use RB+Start to emulate special
+            if (controller.supportedEmulationFlags & EMULATING_SELECT) {
+                if (controller.lastButtonFlags & RB_FLAG) {
+                    controller.lastButtonFlags |= SPECIAL_FLAG;
+                    controller.lastButtonFlags &= ~(pressedButtons & (PLAY_FLAG | RB_FLAG));
+                    controller.emulatingButtonFlags |= EMULATING_SPECIAL;
+                }
+            }
+            else {
+                // If Select is physical, use Start+Select to emulate special
+                if (controller.lastButtonFlags & BACK_FLAG) {
+                    controller.lastButtonFlags |= SPECIAL_FLAG;
+                    controller.lastButtonFlags &= ~(pressedButtons & (PLAY_FLAG | BACK_FLAG));
+                    controller.emulatingButtonFlags |= EMULATING_SPECIAL;
+                }
             }
         }
     }
-    
 }
 
 -(void) updateButtonFlags:(Controller*)controller flags:(int)flags
