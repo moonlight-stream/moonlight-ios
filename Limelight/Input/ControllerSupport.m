@@ -500,6 +500,14 @@ static const double MOUSE_SPEED_DIVISOR = 2.5;
                 }
             }
             
+            if (@available(iOS 14.0, tvOS 14.0, *)) {
+                if (controller.extendedGamepad != nil &&
+                    controller.extendedGamepad.buttonHome != nil) {
+                    // Disable special button emulation since we have a physical special button
+                    limeController.supportedEmulationFlags &= ~EMULATING_SPECIAL;
+                }
+            }
+            
             // Prepare controller haptics for use
             [self initializeControllerHaptics:limeController];
 
