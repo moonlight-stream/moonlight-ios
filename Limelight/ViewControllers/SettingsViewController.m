@@ -43,7 +43,9 @@ static const int bitrateTable[] = {
     60000,
     70000,
     80000,
-    100000
+    100000,
+    120000,
+    150000,
 };
 
 -(int)getSliderValueForBitrate:(NSInteger)bitrate {
