@@ -30,7 +30,7 @@
     
     displayLayer = [[AVSampleBufferDisplayLayer alloc] init];
     displayLayer.bounds = _view.bounds;
-    displayLayer.backgroundColor = [OSColor blackColor].CGColor;
+    displayLayer.backgroundColor = [UIColor blackColor].CGColor;
     
     displayLayer.position = CGPointMake(CGRectGetMidX(_view.bounds), CGRectGetMidY(_view.bounds));
     displayLayer.videoGravity = AVLayerVideoGravityResizeAspect;

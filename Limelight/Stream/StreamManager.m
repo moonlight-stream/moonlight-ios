@@ -20,12 +20,12 @@
 @implementation StreamManager {
     StreamConfiguration* _config;
 
-    OSView* _renderView;
+    UIView* _renderView;
     id<ConnectionCallbacks> _callbacks;
     Connection* _connection;
 }
 
-- (id) initWithConfig:(StreamConfiguration*)config renderView:(OSView*)view connectionCallbacks:(id<ConnectionCallbacks>)callbacks {
+- (id) initWithConfig:(StreamConfiguration*)config renderView:(UIView*)view connectionCallbacks:(id<ConnectionCallbacks>)callbacks {
     self = [super init];
     _config = config;
     _renderView = view;

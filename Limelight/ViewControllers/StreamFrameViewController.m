@@ -151,8 +151,8 @@
             [_overlayView setTextAlignment:NSTextAlignmentCenter];
         }
         
-        [_overlayView setTextColor:[OSColor lightGrayColor]];
-        [_overlayView setBackgroundColor:[OSColor blackColor]];
+        [_overlayView setTextColor:[UIColor lightGrayColor]];
+        [_overlayView setBackgroundColor:[UIColor blackColor]];
 #if TARGET_OS_TV
         [_overlayView setFont:[UIFont systemFontOfSize:24]];
 #else

@@ -16,8 +16,8 @@
     self.statusMessage = @"App asset has no status message";
     self.statusCode = -1;
 }
-- (OSImage*) getImage {
-    return [[OSImage alloc] initWithData:self.data];
+- (UIImage*) getImage {
+    return [[UIImage alloc] initWithData:self.data];
 }
 
 @end

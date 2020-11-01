@@ -10,7 +10,7 @@
 
 @interface VideoDecoderRenderer : NSObject
 
-- (id)initWithView:(OSView*)view;
+- (id)initWithView:(UIView*)view;
 
 - (void)setupWithVideoFormat:(int)videoFormat refreshRate:(int)refreshRate;
 

@@ -21,12 +21,11 @@
     // HACK: Avoid calling [UIApplication delegate] off the UI thread to keep
     // Main Thread Checker happy.
     if ([NSThread isMainThread]) {
-        _appDelegate = (AppDelegate *)[[OSApplication sharedApplication] delegate];
-        
+        _appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
     }
     else {
         dispatch_sync(dispatch_get_main_queue(), ^{
-            self->_appDelegate = (AppDelegate *)[[OSApplication sharedApplication] delegate];
+            self->_appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
         });
     }
     
