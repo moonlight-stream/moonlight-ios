@@ -605,7 +605,6 @@ static NSMutableSet* hostList;
 #endif
     
     _streamConfig.bitRate = [streamSettings.bitrate intValue];
-    _streamConfig.streamingRemotely = streamSettings.streamingRemotely;
     _streamConfig.optimizeGameSettings = streamSettings.optimizeGames;
     _streamConfig.playAudioOnPC = streamSettings.playAudioOnPC;
     _streamConfig.allowHevc = streamSettings.useHevc;

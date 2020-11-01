@@ -18,13 +18,14 @@
 @property (nonatomic, retain) NSNumber * width;
 @property (nonatomic, retain) NSNumber * onscreenControls;
 @property (nonatomic, retain) NSString * uniqueId;
-@property (nonatomic) BOOL streamingRemotely;
 @property (nonatomic) BOOL useHevc;
 @property (nonatomic) BOOL multiController;
 @property (nonatomic) BOOL playAudioOnPC;
 @property (nonatomic) BOOL optimizeGames;
 @property (nonatomic) BOOL enableHdr;
 @property (nonatomic) BOOL btMouseSupport;
+@property (nonatomic) BOOL absoluteTouchMode;
+@property (nonatomic) BOOL statsOverlay;
 
 - (id) initFromSettings:(Settings*)settings;
 

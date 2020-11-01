@@ -40,6 +40,7 @@
     self.optimizeGames = [[NSUserDefaults standardUserDefaults] boolForKey:@"optimizeGames"];
     self.multiController = [[NSUserDefaults standardUserDefaults] boolForKey:@"multipleControllers"];
     self.btMouseSupport = [[NSUserDefaults standardUserDefaults] boolForKey:@"btMouseSupport"];
+    self.statsOverlay = [[NSUserDefaults standardUserDefaults] boolForKey:@"statsOverlay"];
     
     NSInteger _screenSize = [[NSUserDefaults standardUserDefaults] integerForKey:@"streamResolution"];
     switch (_screenSize) {
@@ -71,9 +72,10 @@
     self.multiController = settings.multiController;
     self.onscreenControls = settings.onscreenControls;
     self.btMouseSupport = settings.btMouseSupport;
+    self.absoluteTouchMode = settings.absoluteTouchMode;
+    self.statsOverlay = settings.statsOverlay;
 #endif
     self.uniqueId = settings.uniqueId;
-    self.streamingRemotely = settings.streamingRemotely;
     
     return self;
 }

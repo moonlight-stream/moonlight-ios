@@ -193,6 +193,9 @@ static const int bitrateTable[] = {
         [self.hevcSelector setEnabled:NO];
     }
     
+    [self.touchModeSelector setSelectedSegmentIndex:currentSettings.absoluteTouchMode ? 1 : 0];
+    [self.touchModeSelector addTarget:self action:@selector(touchModeChanged) forControlEvents:UIControlEventValueChanged];
+    [self.statsOverlaySelector setSelectedSegmentIndex:currentSettings.statsOverlay ? 1 : 0];
     [self.btMouseSelector setSelectedSegmentIndex:currentSettings.btMouseSupport ? 1 : 0];
     [self.optimizeSettingsSelector setSelectedSegmentIndex:currentSettings.optimizeGames ? 1 : 0];
     [self.multiControllerSelector setSelectedSegmentIndex:currentSettings.multiController ? 1 : 0];
@@ -203,11 +206,17 @@ static const int bitrateTable[] = {
     [self.framerateSelector setSelectedSegmentIndex:framerate];
     [self.framerateSelector addTarget:self action:@selector(newResolutionFpsChosen) forControlEvents:UIControlEventValueChanged];
     [self.onscreenControlSelector setSelectedSegmentIndex:onscreenControls];
+    [self.onscreenControlSelector setEnabled:!currentSettings.absoluteTouchMode];
     [self.bitrateSlider setMinimumValue:0];
     [self.bitrateSlider setMaximumValue:(sizeof(bitrateTable) / sizeof(*bitrateTable)) - 1];
     [self.bitrateSlider setValue:[self getSliderValueForBitrate:_bitrate] animated:YES];
     [self.bitrateSlider addTarget:self action:@selector(bitrateSliderMoved) forControlEvents:UIControlEventValueChanged];
     [self updateBitrateText];
+}
+
+- (void) touchModeChanged {
+    // Disable on-screen controls in absolute touch mode
+    [self.onscreenControlSelector setEnabled:[self.touchModeSelector selectedSegmentIndex] == 0];
 }
 
 - (void) newResolutionFpsChosen {
@@ -294,18 +303,21 @@ static const int bitrateTable[] = {
     BOOL audioOnPC = [self.audioOnPCSelector selectedSegmentIndex] == 1;
     BOOL useHevc = [self.hevcSelector selectedSegmentIndex] == 1;
     BOOL btMouseSupport = [self.btMouseSelector selectedSegmentIndex] == 1;
+    BOOL absoluteTouchMode = [self.touchModeSelector selectedSegmentIndex] == 1;
+    BOOL statsOverlay = [self.statsOverlaySelector selectedSegmentIndex] == 1;
     [dataMan saveSettingsWithBitrate:_bitrate
                            framerate:framerate
                               height:height
                                width:width
                     onscreenControls:onscreenControls
-                              remote:NO
                        optimizeGames:optimizeGames
                      multiController:multiController
                            audioOnPC:audioOnPC
                              useHevc:useHevc
                            enableHdr:NO
-                      btMouseSupport:btMouseSupport];
+                      btMouseSupport:btMouseSupport
+                   absoluteTouchMode:absoluteTouchMode
+                        statsOverlay:statsOverlay];
 }
 
 - (void)didReceiveMemoryWarning {

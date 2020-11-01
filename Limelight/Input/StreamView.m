@@ -12,6 +12,7 @@
 #import "ControllerSupport.h"
 #import "KeyboardSupport.h"
 #import "RelativeTouchHandler.h"
+#import "AbsoluteTouchHandler.h"
 
 static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
@@ -32,7 +33,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     double accumulatedMouseDeltaX;
     double accumulatedMouseDeltaY;
     
-    RelativeTouchHandler* touchHandler;
+    UIResponder* touchHandler;
     
     id<UserInteractionDelegate> interactionDelegate;
     NSTimer* interactionTimer;
@@ -48,14 +49,27 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     self->interactionDelegate = interactionDelegate;
     self->streamAspectRatio = (float)streamConfig.width / (float)streamConfig.height;
     
-    self->touchHandler = [[RelativeTouchHandler alloc] initWithView:self];
-    
     TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
     
-#if !TARGET_OS_TV
+#if TARGET_OS_TV
+    // tvOS requires RelativeTouchHandler to manage Apple Remote input
+    self->touchHandler = [[RelativeTouchHandler alloc] initWithView:self];
+#else
+    // iOS uses RelativeTouchHandler or AbsoluteTouchHandler depending on user preference
+    if (settings.absoluteTouchMode) {
+        self->touchHandler = [[AbsoluteTouchHandler alloc] initWithView:self];
+    }
+    else {
+        self->touchHandler = [[RelativeTouchHandler alloc] initWithView:self];
+    }
+    
     onScreenControls = [[OnScreenControls alloc] initWithView:self controllerSup:controllerSupport swipeDelegate:swipeDelegate];
     OnScreenControlsLevel level = (OnScreenControlsLevel)[settings.onscreenControls integerValue];
-    if (level == OnScreenControlsLevelAuto) {
+    if (settings.absoluteTouchMode) {
+        Log(LOG_I, @"On-screen controls disabled in absolute touch mode");
+        [onScreenControls setLevel:OnScreenControlsLevelOff];
+    }
+    else if (level == OnScreenControlsLevelAuto) {
         [controllerSupport initAutoOnScreenControlMode:onScreenControls];
     }
     else {

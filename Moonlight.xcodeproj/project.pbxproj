@@ -166,6 +166,7 @@
 		9819CC13254F107A008A7C8E /* RelativeTouchHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RelativeTouchHandler.m; sourceTree = "<group>"; };
 		9819CC20254F180F008A7C8E /* AbsoluteTouchHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AbsoluteTouchHandler.h; sourceTree = "<group>"; };
 		9819CC21254F180F008A7C8E /* AbsoluteTouchHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AbsoluteTouchHandler.m; sourceTree = "<group>"; };
+		9819CC25254F2734008A7C8E /* Moonlight v1.6.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Moonlight v1.6.xcdatamodel"; sourceTree = "<group>"; };
 		9827E7A22514366900F25707 /* HapticContext.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HapticContext.m; sourceTree = "<group>"; };
 		9827E7A7251436EA00F25707 /* HapticContext.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HapticContext.h; sourceTree = "<group>"; };
 		9832D1341BBCD5C50036EF48 /* TemporaryApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TemporaryApp.h; path = Database/TemporaryApp.h; sourceTree = "<group>"; };
@@ -1411,6 +1412,7 @@
 		FB290D0519B2C406004C83CF /* Limelight.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				9819CC25254F2734008A7C8E /* Moonlight v1.6.xcdatamodel */,
 				98783FEA242EAC5D00F00EF4 /* Moonlight v1.5.xcdatamodel */,
 				98608BDD22DC0C2C000E5672 /* Moonlight v1.4.xcdatamodel */,
 				98517B1B21CE0A9000481377 /* Moonlight v1.3.xcdatamodel */,
@@ -1422,7 +1424,7 @@
 				FB4678F21A51BDCB00377732 /* Limelight 0.3.0.xcdatamodel */,
 				FB290D0619B2C406004C83CF /* Limelight.xcdatamodel */,
 			);
-			currentVersion = 98783FEA242EAC5D00F00EF4 /* Moonlight v1.5.xcdatamodel */;
+			currentVersion = 9819CC25254F2734008A7C8E /* Moonlight v1.6.xcdatamodel */;
 			path = Limelight.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
