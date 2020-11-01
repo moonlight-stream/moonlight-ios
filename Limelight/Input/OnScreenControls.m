@@ -255,7 +255,7 @@ static float L3_Y;
 }
 
 - (void) setupEdgeDetection {
-    _edge.frame = CGRectMake(0, 0, _view.frame.size.width * EDGE_WIDTH, _view.frame.size.height);
+    _edge.frame = CGRectMake(0, 0, 5, _view.frame.size.height);
     [_view.layer addSublayer:_edge];
 }
 
@@ -650,6 +650,8 @@ static float L3_Y;
             buttonTouch = true;
         } else if (touch == _r3Touch) {
             buttonTouch = true;
+        } else if (touch == _edgeTouch) {
+            buttonTouch = true;
         }
         if ([_deadTouches containsObject:touch]) {
             updated = true;
@@ -658,7 +660,7 @@ static float L3_Y;
     if (updated) {
         [_controllerSupport updateFinished:_controller];
     }
-        return updated || buttonTouch;
+    return updated || buttonTouch;
 }
 
 - (BOOL)handleTouchDownEvent:touches {
@@ -771,6 +773,7 @@ static float L3_Y;
             stickTouch = true;
         } else if ([_edge.presentationLayer hitTest:touchLocation]) {
             _edgeTouch = touch;
+            updated = true;
         }
         if (!updated && !stickTouch && [self isInDeadZone:touch]) {
             [_deadTouches addObject:touch];
