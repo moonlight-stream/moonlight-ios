@@ -130,4 +130,25 @@
     return TRUE;
 }
 
+- (NSString*) getStatsOverlayText {
+    video_stats_t stats;
+    
+    if (!_connection) {
+        return nil;
+    }
+    
+    if (![_connection getVideoStats:&stats]) {
+        return nil;
+    }
+    
+    float interval = stats.endTime - stats.startTime;
+    return [NSString stringWithFormat:@"Video stream: %dx%d %.2f FPS (Codec: %@)\nIncoming frame rate from network: %.2f FPS\nFrames dropped by your network connection: %.2f%%\n",
+            _config.width,
+            _config.height,
+            stats.totalFrames / interval,
+            [_connection getActiveCodecName],
+            stats.receivedFrames / interval,
+            stats.networkDroppedFrames / interval];
+}
+
 @end

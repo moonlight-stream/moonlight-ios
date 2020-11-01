@@ -11,6 +11,7 @@
 #import "VideoDecoderRenderer.h"
 #import "StreamManager.h"
 #import "ControllerSupport.h"
+#import "DataManager.h"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -21,6 +22,7 @@
     ControllerSupport *_controllerSupport;
     StreamManager *_streamMan;
     NSTimer *_inactivityTimer;
+    NSTimer *_statsUpdateTimer;
     UITapGestureRecognizer *_menuGestureRecognizer;
     UITapGestureRecognizer *_menuDoubleTapGestureRecognizer;
     UITextView *_overlayView;
@@ -126,6 +128,14 @@
     }
 }
 
+- (void)updateStatsOverlay {
+    NSString* overlayText = [self->_streamMan getStatsOverlayText];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self updateOverlayText:overlayText];
+    });
+}
+
 - (void)updateOverlayText:(NSString*)text {
     if (_overlayView == nil) {
         _overlayView = [[UITextView alloc] init];
@@ -135,7 +145,12 @@
         [_overlayView setUserInteractionEnabled:NO];
         [_overlayView setSelectable:NO];
         [_overlayView setScrollEnabled:NO];
-        [_overlayView setTextAlignment:NSTextAlignmentCenter];
+        
+        // HACK: If not using stats overlay, center the text
+        if (_statsUpdateTimer == nil) {
+            [_overlayView setTextAlignment:NSTextAlignmentCenter];
+        }
+        
         [_overlayView setTextColor:[OSColor lightGrayColor]];
         [_overlayView setBackgroundColor:[OSColor blackColor]];
 #if TARGET_OS_TV
@@ -159,6 +174,9 @@
 }
 
 - (void) returnToMainFrame {
+    [_statsUpdateTimer invalidate];
+    _statsUpdateTimer = nil;
+    
     [self.navigationController popToRootViewControllerAnimated:YES];
 }
 
@@ -223,6 +241,15 @@
         self.tipLabel.hidden = YES;
         
         [self->_streamView showOnScreenControls];
+        
+        TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
+        if (settings.statsOverlay) {
+            self->_statsUpdateTimer = [NSTimer scheduledTimerWithTimeInterval:1.0f
+                                                                       target:self
+                                                                     selector:@selector(updateStatsOverlay)
+                                                                     userInfo:nil
+                                                                      repeats:YES];
+        }
     });
 }
 
@@ -347,6 +374,11 @@
 - (void)connectionStatusUpdate:(int)status {
     Log(LOG_W, @"Connection status update: %d", status);
 
+    // The stats overlay takes precedence over these warnings
+    if (_statsUpdateTimer != nil) {
+        return;
+    }
+    
     dispatch_async(dispatch_get_main_queue(), ^{
         switch (status) {
             case CONN_STATUS_OKAY:

@@ -15,4 +15,6 @@
 
 - (void) stopStream;
 
+- (NSString*) getStatsOverlayText;
+
 @end

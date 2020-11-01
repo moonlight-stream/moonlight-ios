@@ -30,6 +30,10 @@
 static NSLock* initLock;
 static OpusMSDecoder* opusDecoder;
 static id<ConnectionCallbacks> _callbacks;
+static int lastFrameNumber;
+static int activeVideoFormat;
+static video_stats_t currentVideoStats;
+static video_stats_t lastVideoStats;
 
 #define OUTPUT_BUS 0
 
@@ -54,12 +58,43 @@ static VideoDecoderRenderer* renderer;
 int DrDecoderSetup(int videoFormat, int width, int height, int redrawRate, void* context, int drFlags)
 {
     [renderer setupWithVideoFormat:videoFormat refreshRate:redrawRate];
+    lastFrameNumber = 0;
+    activeVideoFormat = videoFormat;
+    memset(&currentVideoStats, 0, sizeof(currentVideoStats));
+    memset(&lastVideoStats, 0, sizeof(lastVideoStats));
     return 0;
 }
 
 void DrCleanup(void)
 {
     [renderer cleanup];
+}
+
+-(BOOL) getVideoStats:(video_stats_t*)stats
+{
+    // We return lastVideoStats because it is a complete 1 second window
+    if (lastVideoStats.endTime != 0) {
+        memcpy(stats, &lastVideoStats, sizeof(*stats));
+        return YES;
+    }
+    
+    // No stats yet
+    return NO;
+}
+
+-(NSString*) getActiveCodecName
+{
+    switch (activeVideoFormat)
+    {
+        case VIDEO_FORMAT_H264:
+            return @"H.264";
+        case VIDEO_FORMAT_H265:
+            return @"HEVC";
+        case VIDEO_FORMAT_H265_MAIN10:
+            return @"HEVC Main 10";
+        default:
+            return @"UNKNOWN";
+    }
 }
 
 int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit)
@@ -71,6 +106,30 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit)
         // A frame was lost due to OOM condition
         return DR_NEED_IDR;
     }
+    
+    CFTimeInterval now = CACurrentMediaTime();
+    if (!lastFrameNumber) {
+        currentVideoStats.startTime = now;
+        lastFrameNumber = decodeUnit->frameNumber;
+    }
+    else {
+        // Flip stats roughly every second
+        if (now - currentVideoStats.startTime > 1.0f) {
+            lastVideoStats = currentVideoStats;
+            
+            memset(&currentVideoStats, 0, sizeof(currentVideoStats));
+            currentVideoStats.startTime = now;
+        }
+        
+        // Any frame number greater than m_LastFrameNumber + 1 represents a dropped frame
+        currentVideoStats.networkDroppedFrames += decodeUnit->frameNumber - (lastFrameNumber + 1);
+        currentVideoStats.totalFrames += decodeUnit->frameNumber - (lastFrameNumber + 1);
+        lastFrameNumber = decodeUnit->frameNumber;
+    }
+    
+    currentVideoStats.receivedFrames++;
+    currentVideoStats.totalFrames++;
+    currentVideoStats.endTime = now;
 
     PLENTRY entry = decodeUnit->bufferList;
     while (entry != NULL) {

@@ -11,6 +11,14 @@
 
 #define CONN_TEST_SERVER "ios.conntest.moonlight-stream.org"
 
+typedef struct {
+    CFTimeInterval startTime;
+    CFTimeInterval endTime;
+    int totalFrames;
+    int receivedFrames;
+    int networkDroppedFrames;
+} video_stats_t;
+
 @protocol ConnectionCallbacks <NSObject>
 
 - (void) connectionStarted;
@@ -29,5 +37,7 @@
 -(id) initWithConfig:(StreamConfiguration*)config renderer:(VideoDecoderRenderer*)myRenderer connectionCallbacks:(id<ConnectionCallbacks>)callbacks;
 -(void) terminate;
 -(void) main;
+-(BOOL) getVideoStats:(video_stats_t*)stats;
+-(NSString*) getActiveCodecName;
 
 @end
