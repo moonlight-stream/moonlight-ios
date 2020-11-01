@@ -464,13 +464,6 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
 #endif
 
-- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
-    // Disable all gesture recognizers to prevent them from eating our touches.
-    // This can happen on iOS 13 where the 3 finger tap gesture is taken over for
-    // displaying custom edit controls.
-    return NO;
-}
-
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
     // This method is called when the "Return" key is pressed.
     LiSendKeyboardEvent(0x0d, KEY_ACTION_DOWN, 0);
