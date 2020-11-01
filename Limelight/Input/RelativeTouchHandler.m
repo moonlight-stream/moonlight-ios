@@ -98,7 +98,7 @@ static const int REFERENCE_HEIGHT = 720;
         
         CGPoint avgLocation = CGPointMake((firstLocation.x + secondLocation.x) / 2, (firstLocation.y + secondLocation.y) / 2);
         if (touchLocation.y != avgLocation.y) {
-            LiSendScrollEvent(avgLocation.y - touchLocation.y);
+            LiSendHighResScrollEvent(avgLocation.y - touchLocation.y);
         }
 
         // If we've moved far enough to confirm this wasn't just human/machine error,
