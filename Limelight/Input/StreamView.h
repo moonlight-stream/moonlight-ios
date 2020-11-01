@@ -39,4 +39,8 @@
 - (void) showOnScreenControls;
 - (OnScreenControlsLevel) getCurrentOscState;
 
+#if !TARGET_OS_TV
+- (void) updateCursorLocation:(CGPoint)location;
+#endif
+
 @end

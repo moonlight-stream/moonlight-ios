@@ -1,5 +1,5 @@
 //
-//  RelativeTouchHandler.h
+//  AbsoluteTouchHandler.h
 //  Moonlight
 //
 //  Created by Cameron Gutman on 11/1/20.
@@ -10,7 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface RelativeTouchHandler : UIResponder
+@interface AbsoluteTouchHandler : UIResponder
 
 -(id)initWithView:(StreamView*)view;
 

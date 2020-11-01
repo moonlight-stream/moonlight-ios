@@ -27,7 +27,7 @@ static const int REFERENCE_HEIGHT = 720;
     UIView* view;
 }
 
-- (id)initWithView:(UIView*)view {
+- (id)initWithView:(StreamView*)view {
     self = [self init];
     self->view = view;
     
