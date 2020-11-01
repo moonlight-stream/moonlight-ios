@@ -10,7 +10,7 @@
 			<key>Type</key>
 			<string>PSGroupSpecifier</string>
 			<key>Title</key>
-			<string>Stream Configuration</string>
+			<string>Basic Configuration</string>
 		</dict>
 		<dict>
 			<key>Type</key>
@@ -94,7 +94,7 @@
 			<key>Type</key>
 			<string>PSGroupSpecifier</string>
 			<key>Title</key>
-			<string>Host Configuration</string>
+			<string>Host Options</string>
 		</dict>
 		<dict>
 			<key>Type</key>
@@ -118,23 +118,9 @@
 		</dict>
 		<dict>
 			<key>Type</key>
-			<string>PSToggleSwitchSpecifier</string>
+			<string>PSGroupSpecifier</string>
 			<key>Title</key>
-			<string>Use HEVC Codec</string>
-			<key>Key</key>
-			<string>useHevc</string>
-			<key>DefaultValue</key>
-			<false/>
-		</dict>
-		<dict>
-			<key>Type</key>
-			<string>PSToggleSwitchSpecifier</string>
-			<key>Title</key>
-			<string>Request HDR Video</string>
-			<key>Key</key>
-			<string>enableHdr</string>
-			<key>DefaultValue</key>
-			<false/>
+			<string>Input Options</string>
 		</dict>
 		<dict>
 			<key>Type</key>
@@ -155,6 +141,38 @@
 			<string>btMouseSupport</string>
 			<key>DefaultValue</key>
 			<false/>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSGroupSpecifier</string>
+			<key>Title</key>
+			<string>Video Options</string>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>Title</key>
+			<string>Use HEVC Codec</string>
+			<key>Key</key>
+			<string>useHevc</string>
+			<key>DefaultValue</key>
+			<false/>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+			<key>Title</key>
+			<string>Request HDR Video</string>
+			<key>Key</key>
+			<string>enableHdr</string>
+			<key>DefaultValue</key>
+			<false/>
+		</dict>
+		<dict>
+			<key>Type</key>
+			<string>PSGroupSpecifier</string>
+			<key>Title</key>
+			<string>Troubleshooting</string>
 		</dict>
 		<dict>
 			<key>Type</key>
