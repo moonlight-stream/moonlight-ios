@@ -34,6 +34,7 @@ static int lastFrameNumber;
 static int activeVideoFormat;
 static video_stats_t currentVideoStats;
 static video_stats_t lastVideoStats;
+static NSLock* videoStatsLock;
 
 #define OUTPUT_BUS 0
 
@@ -73,12 +74,15 @@ void DrCleanup(void)
 -(BOOL) getVideoStats:(video_stats_t*)stats
 {
     // We return lastVideoStats because it is a complete 1 second window
+    [videoStatsLock lock];
     if (lastVideoStats.endTime != 0) {
         memcpy(stats, &lastVideoStats, sizeof(*stats));
+        [videoStatsLock unlock];
         return YES;
     }
     
     // No stats yet
+    [videoStatsLock unlock];
     return NO;
 }
 
@@ -115,7 +119,9 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit)
     else {
         // Flip stats roughly every second
         if (now - currentVideoStats.startTime > 1.0f) {
+            [videoStatsLock lock];
             lastVideoStats = currentVideoStats;
+            [videoStatsLock unlock];
             
             memset(&currentVideoStats, 0, sizeof(currentVideoStats));
             currentVideoStats.startTime = now;
@@ -384,6 +390,10 @@ void ClConnectionStatusUpdate(int status)
     // or deinitializing a connection at a time.
     if (initLock == nil) {
         initLock = [[NSLock alloc] init];
+    }
+    
+    if (videoStatsLock == nil) {
+        videoStatsLock = [[NSLock alloc] init];
     }
     
     strncpy(_hostString,
