@@ -265,7 +265,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
             // don't require this, but we do it anyway for them too.
             // Cursor movement without a button held down is handled
             // in pointerInteraction:regionForRequest:defaultRegion.
-            [self updateCursorLocation:[touch locationInView:self]];
+            [self updateCursorLocation:[touch locationInView:self] isMouse:YES];
             return;
         }
     }
@@ -341,7 +341,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 }
 
 #if !TARGET_OS_TV
-- (void) updateCursorLocation:(CGPoint)location {
+- (void) updateCursorLocation:(CGPoint)location isMouse:(BOOL)isMouse {
     // These are now relative to the StreamView, however we need to scale them
     // further to make them relative to the actual video portion.
     float x = location.x - self.bounds.origin.x;
@@ -382,19 +382,22 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     y = MIN(MAX(y, videoOrigin.y), videoOrigin.y + videoSize.height);
     
     // Send the mouse position relative to the video region if it has changed
+    // if we're receiving coordinates from a real mouse.
     //
     // NB: It is important for functionality (not just optimization) to only
     // send it if the value has changed. We will receive one of these events
     // any time the user presses a modifier key, which can result in errant
     // mouse motion when using a Citrix X1 mouse.
-    if (x != lastMouseX || y != lastMouseY) {
-        if (lastMouseX != 0 || lastMouseY != 0) {
+    if (x != lastMouseX || y != lastMouseY || !isMouse) {
+        if (lastMouseX != 0 || lastMouseY != 0 || !isMouse) {
             LiSendMousePositionEvent(x - videoOrigin.x, y - videoOrigin.y,
                                      videoSize.width, videoSize.height);
         }
         
-        lastMouseX = x;
-        lastMouseY = y;
+        if (isMouse) {
+            lastMouseX = x;
+            lastMouseY = y;
+        }
     }
 }
 
@@ -422,7 +425,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     // Move the cursor on the host if no buttons are pressed.
     // Motion with buttons pressed in handled in touchesMoved:
     if (lastMouseButtonMask == 0) {
-        [self updateCursorLocation:request.location];
+        [self updateCursorLocation:request.location isMouse:YES];
     }
     
     // The pointer interaction should cover the video region only
