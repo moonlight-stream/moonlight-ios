@@ -14,13 +14,13 @@
 #define LONG_PRESS_ACTIVATION_DELAY 0.650f
 
 // How far the finger can move before it cancels a right click
-#define LONG_PRESS_ACTIVATION_DELTA 5
+#define LONG_PRESS_ACTIVATION_DELTA 0.01f
 
 // How long the double tap deadzone stays in effect between touch up and touch down
 #define DOUBLE_TAP_DEAD_ZONE_DELAY 0.250f
 
 // How far the finger can move before it can override the double tap deadzone
-#define DOUBLE_TAP_DEAD_ZONE_DELTA 10
+#define DOUBLE_TAP_DEAD_ZONE_DELTA 0.025f
 
 @implementation AbsoluteTouchHandler {
     StreamView* view;
@@ -55,8 +55,8 @@
     
     // Don't reposition for finger down events within the deadzone. This makes double-clicking easier.
     if (touch.timestamp - lastTouchUp.timestamp > DOUBLE_TAP_DEAD_ZONE_DELAY ||
-        sqrt(pow(touchLocation.x - lastTouchUpLocation.x, 2) +
-             pow(touchLocation.y - lastTouchUpLocation.y, 2)) > DOUBLE_TAP_DEAD_ZONE_DELTA) {
+        sqrt(pow((touchLocation.x / view.bounds.size.width) - (lastTouchUpLocation.x / view.bounds.size.width), 2) +
+             pow((touchLocation.y / view.bounds.size.height) - (lastTouchUpLocation.y / view.bounds.size.height), 2)) > DOUBLE_TAP_DEAD_ZONE_DELTA) {
         [view updateCursorLocation:touchLocation];
     }
     
@@ -83,8 +83,8 @@
     UITouch* touch = [touches anyObject];
     CGPoint touchLocation = [touch locationInView:view];
     
-    if (sqrt(pow(touchLocation.x - lastTouchDownLocation.x, 2) +
-             pow(touchLocation.y - lastTouchDownLocation.y, 2)) > LONG_PRESS_ACTIVATION_DELTA) {
+    if (sqrt(pow((touchLocation.x / view.bounds.size.width) - (lastTouchDownLocation.x / view.bounds.size.width), 2) +
+             pow((touchLocation.y / view.bounds.size.height) - (lastTouchDownLocation.y / view.bounds.size.height), 2)) > LONG_PRESS_ACTIVATION_DELTA) {
         // Moved too far since touch down. Cancel the long press timer.
         [longPressTimer invalidate];
         longPressTimer = nil;
