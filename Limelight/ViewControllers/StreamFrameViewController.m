@@ -163,6 +163,13 @@
     }
     
     if (text != nil) {
+        // We set our bounds to the maximum width in order to work around a bug where
+        // sizeToFit interacts badly with the UITextView's line breaks, causing the
+        // width to get smaller and smaller each time as more line breaks are inserted.
+        [_overlayView setBounds:CGRectMake(self.view.frame.origin.x,
+                                           _overlayView.frame.origin.y,
+                                           self.view.frame.size.width,
+                                           _overlayView.frame.size.height)];
         [_overlayView setText:text];
         [_overlayView sizeToFit];
         [_overlayView setCenter:CGPointMake(self.view.frame.size.width / 2, _overlayView.frame.size.height / 2)];
