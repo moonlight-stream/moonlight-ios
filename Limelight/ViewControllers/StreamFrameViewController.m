@@ -21,6 +21,7 @@
 @implementation StreamFrameViewController {
     ControllerSupport *_controllerSupport;
     StreamManager *_streamMan;
+    TemporarySettings *_settings;
     NSTimer *_inactivityTimer;
     NSTimer *_statsUpdateTimer;
     UITapGestureRecognizer *_menuGestureRecognizer;
@@ -30,6 +31,7 @@
     UILabel *_tipLabel;
     UIActivityIndicatorView *_spinner;
     StreamView *_streamView;
+    UIScrollView *_scrollView;
     BOOL _userIsInteracting;
 }
 
@@ -58,6 +60,8 @@
     [self.navigationController setNavigationBarHidden:YES animated:YES];
     
     [UIApplication sharedApplication].idleTimerDisabled = YES;
+    
+    _settings = [[[DataManager alloc] init] getSettings];
     
     _stageLabel = [[UILabel alloc] init];
     [_stageLabel setUserInteractionEnabled:NO];
@@ -135,10 +139,33 @@
                                                  name: UIApplicationDidEnterBackgroundNotification
                                                object: nil];
     
-    [self.view addSubview:_streamView];
+    // Only enable scroll and zoom in absolute touch mode
+    if (_settings.absoluteTouchMode) {
+        _scrollView = [[UIScrollView alloc] initWithFrame:self.view.frame];
+#if !TARGET_OS_TV
+        [_scrollView.panGestureRecognizer setMinimumNumberOfTouches:2];
+#endif
+        [_scrollView setShowsHorizontalScrollIndicator:NO];
+        [_scrollView setShowsVerticalScrollIndicator:NO];
+        [_scrollView setDelegate:self];
+        [_scrollView setMaximumZoomScale:10.0f];
+        
+        // Add StreamView inside a UIScrollView for absolute mode
+        [_scrollView addSubview:_streamView];
+        [self.view addSubview:_scrollView];
+    }
+    else {
+        // Add StreamView directly in relative mode
+        [self.view addSubview:_streamView];
+    }
+    
     [self.view addSubview:_stageLabel];
     [self.view addSubview:_spinner];
     [self.view addSubview:_tipLabel];
+}
+
+- (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView {
+    return _streamView;
 }
 
 - (void)willMoveToParentViewController:(UIViewController *)parent {
@@ -276,8 +303,7 @@
         
         [self->_streamView showOnScreenControls];
         
-        TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
-        if (settings.statsOverlay) {
+        if (self->_settings.statsOverlay) {
             self->_statsUpdateTimer = [NSTimer scheduledTimerWithTimeInterval:1.0f
                                                                        target:self
                                                                      selector:@selector(updateStatsOverlay)
@@ -433,6 +459,7 @@
 
 - (void) videoContentShown {
     [_spinner stopAnimating];
+    [self.view setBackgroundColor:[UIColor blackColor]];
 }
 
 - (void)didReceiveMemoryWarning
