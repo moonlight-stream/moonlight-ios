@@ -13,6 +13,7 @@
 
 @implementation VideoDecoderRenderer {
     StreamView* _view;
+    id<ConnectionCallbacks> _callbacks;
     
     AVSampleBufferDisplayLayer* displayLayer;
     Boolean waitingForSps, waitingForPps, waitingForVps;
@@ -61,11 +62,12 @@
     }
 }
 
-- (id)initWithView:(StreamView*)view
+- (id)initWithView:(StreamView*)view callbacks:(id<ConnectionCallbacks>)callbacks
 {
     self = [super init];
     
     _view = view;
+    _callbacks = callbacks;
     
     [self reinitializeDisplayLayer];
     
@@ -371,6 +373,9 @@
         if ([self isNalReferencePicture:nalType]) {
             // Ensure the layer is visible now
             self->displayLayer.hidden = NO;
+            
+            // Tell our parent VC to hide the progress indicator
+            [self->_callbacks videoContentShown];
         }
         
         // Dereference the buffers

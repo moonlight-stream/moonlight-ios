@@ -19,9 +19,6 @@
 #else
 @interface StreamFrameViewController : UIViewController <ConnectionCallbacks, EdgeDetectionDelegate, InputPresenceDelegate, UserInteractionDelegate>
 #endif
-@property (strong, nonatomic) IBOutlet UILabel *stageLabel;
-@property (strong, nonatomic) IBOutlet UILabel *tipLabel;
-@property (strong, nonatomic) IBOutlet UIActivityIndicatorView *spinner;
 @property (nonatomic) StreamConfiguration* streamConfig;
 
 @end

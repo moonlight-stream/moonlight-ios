@@ -19,6 +19,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 @implementation StreamView {
     OnScreenControls* onScreenControls;
     
+    UITextField* keyInputField;
     BOOL isInputingText;
     
     float streamAspectRatio;
@@ -50,6 +51,9 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     self->streamAspectRatio = (float)streamConfig.width / (float)streamConfig.height;
     
     TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
+    
+    keyInputField = [[UITextField alloc] initWithFrame:CGRectZero];
+    [self addSubview:keyInputField];
     
 #if TARGET_OS_TV
     // tvOS requires RelativeTouchHandler to manage Apple Remote input
@@ -164,18 +168,18 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         if ([[event allTouches] count] == 3) {
             if (isInputingText) {
                 Log(LOG_D, @"Closing the keyboard");
-                [_keyInputField resignFirstResponder];
+                [keyInputField resignFirstResponder];
                 isInputingText = false;
             } else {
                 Log(LOG_D, @"Opening the keyboard");
                 // Prepare the textbox used to capture keyboard events.
-                _keyInputField.delegate = self;
-                _keyInputField.text = @"0";
-                [_keyInputField becomeFirstResponder];
-                [_keyInputField addTarget:self action:@selector(onKeyboardPressed:) forControlEvents:UIControlEventEditingChanged];
+                keyInputField.delegate = self;
+                keyInputField.text = @"0";
+                [keyInputField becomeFirstResponder];
+                [keyInputField addTarget:self action:@selector(onKeyboardPressed:) forControlEvents:UIControlEventEditingChanged];
                 
                 // Undo causes issues for our state management, so turn it off
-                [_keyInputField.undoManager disableUndoRegistration];
+                [keyInputField.undoManager disableUndoRegistration];
                 
                 isInputingText = true;
             }

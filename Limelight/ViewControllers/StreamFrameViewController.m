@@ -26,6 +26,9 @@
     UITapGestureRecognizer *_menuGestureRecognizer;
     UITapGestureRecognizer *_menuDoubleTapGestureRecognizer;
     UITextView *_overlayView;
+    UILabel *_stageLabel;
+    UILabel *_tipLabel;
+    UIActivityIndicatorView *_spinner;
     StreamView *_streamView;
     BOOL _userIsInteracting;
 }
@@ -54,17 +57,31 @@
     
     [self.navigationController setNavigationBarHidden:YES animated:YES];
     
-    [self.stageLabel setText:[NSString stringWithFormat:@"Starting %@...", self.streamConfig.appName]];
-    [self.stageLabel sizeToFit];
-    self.stageLabel.textAlignment = NSTextAlignmentCenter;
-    self.stageLabel.center = CGPointMake(self.view.frame.size.width / 2, self.view.frame.size.height / 2);
-    self.spinner.center = CGPointMake(self.view.frame.size.width / 2, self.view.frame.size.height / 2 - self.stageLabel.frame.size.height - self.spinner.frame.size.height);
     [UIApplication sharedApplication].idleTimerDisabled = YES;
+    
+    _stageLabel = [[UILabel alloc] init];
+    [_stageLabel setUserInteractionEnabled:NO];
+    [_stageLabel setText:[NSString stringWithFormat:@"Starting %@...", self.streamConfig.appName]];
+    [_stageLabel sizeToFit];
+    _stageLabel.textAlignment = NSTextAlignmentCenter;
+    _stageLabel.textColor = [UIColor whiteColor];
+    _stageLabel.center = CGPointMake(self.view.frame.size.width / 2, self.view.frame.size.height / 2);
+    
+    _spinner = [[UIActivityIndicatorView alloc] init];
+    [_spinner setUserInteractionEnabled:NO];
+#if TARGET_OS_TV
+    [_spinner setActivityIndicatorViewStyle:UIActivityIndicatorViewStyleWhiteLarge];
+#else
+    [_spinner setActivityIndicatorViewStyle:UIActivityIndicatorViewStyleWhite];
+#endif
+    [_spinner sizeToFit];
+    [_spinner startAnimating];
+    _spinner.center = CGPointMake(self.view.frame.size.width / 2, self.view.frame.size.height / 2 - _stageLabel.frame.size.height - _spinner.frame.size.height);
     
     _controllerSupport = [[ControllerSupport alloc] initWithConfig:self.streamConfig presenceDelegate:self];
     _inactivityTimer = nil;
     
-    _streamView = (StreamView*)self.view;
+    _streamView = [[StreamView alloc] initWithFrame:self.view.frame];
     [_streamView setupStreamView:_controllerSupport swipeDelegate:self interactionDelegate:self config:self.streamConfig];
     
 #if TARGET_OS_TV
@@ -82,18 +99,23 @@
     [self.view addGestureRecognizer:_menuDoubleTapGestureRecognizer];
 #endif
     
+    
+    _tipLabel = [[UILabel alloc] init];
+    [_tipLabel setUserInteractionEnabled:NO];
+    
 #if TARGET_OS_TV
-    [self.tipLabel setText:@"Tip: Double tap the Menu button to disconnect from your PC"];
+    [_tipLabel setText:@"Tip: Double tap the Menu button to disconnect from your PC"];
 #else
-    [self.tipLabel setText:@"Tip: Swipe from the left edge to disconnect from your PC"];
+    [_tipLabel setText:@"Tip: Swipe from the left edge to disconnect from your PC"];
 #endif
     
-    [self.tipLabel sizeToFit];
-    self.tipLabel.textAlignment = NSTextAlignmentCenter;
-    self.tipLabel.center = CGPointMake(self.view.frame.size.width / 2, self.view.frame.size.height * 0.9);
+    [_tipLabel sizeToFit];
+    _tipLabel.textColor = [UIColor whiteColor];
+    _tipLabel.textAlignment = NSTextAlignmentCenter;
+    _tipLabel.center = CGPointMake(self.view.frame.size.width / 2, self.view.frame.size.height * 0.9);
     
     _streamMan = [[StreamManager alloc] initWithConfig:self.streamConfig
-                                            renderView:self.view
+                                            renderView:_streamView
                                    connectionCallbacks:self];
     NSOperationQueue* opQueue = [[NSOperationQueue alloc] init];
     [opQueue addOperation:_streamMan];
@@ -112,6 +134,11 @@
                                              selector: @selector(applicationDidEnterBackground:)
                                                  name: UIApplicationDidEnterBackgroundNotification
                                                object: nil];
+    
+    [self.view addSubview:_streamView];
+    [self.view addSubview:_stageLabel];
+    [self.view addSubview:_spinner];
+    [self.view addSubview:_tipLabel];
 }
 
 - (void)willMoveToParentViewController:(UIViewController *)parent {
@@ -244,8 +271,8 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         // Leave the spinner spinning until it's obscured by
         // the first frame of video.
-        self.stageLabel.hidden = YES;
-        self.tipLabel.hidden = YES;
+        self->_stageLabel.hidden = YES;
+        self->_tipLabel.hidden = YES;
         
         [self->_streamView showOnScreenControls];
         
@@ -318,9 +345,9 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         NSString* lowerCase = [NSString stringWithFormat:@"%s in progress...", stageName];
         NSString* titleCase = [[[lowerCase substringToIndex:1] uppercaseString] stringByAppendingString:[lowerCase substringFromIndex:1]];
-        [self.stageLabel setText:titleCase];
-        [self.stageLabel sizeToFit];
-        self.stageLabel.center = CGPointMake(self.view.frame.size.width / 2, self.stageLabel.center.y);
+        [self->_stageLabel setText:titleCase];
+        [self->_stageLabel sizeToFit];
+        self->_stageLabel.center = CGPointMake(self.view.frame.size.width / 2, self->_stageLabel.center.y);
     });
 }
 
@@ -402,6 +429,10 @@
                 break;
         }
     });
+}
+
+- (void) videoContentShown {
+    [_spinner stopAnimating];
 }
 
 - (void)didReceiveMemoryWarning

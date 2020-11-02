@@ -30,8 +30,6 @@
 @interface StreamView : UIView <X1KitMouseDelegate, UITextFieldDelegate, UIPointerInteractionDelegate>
 #endif
 
-@property (nonatomic, retain) IBOutlet UITextField* keyInputField;
-
 - (void) setupStreamView:(ControllerSupport*)controllerSupport
            swipeDelegate:(id<EdgeDetectionDelegate>)swipeDelegate
      interactionDelegate:(id<UserInteractionDelegate>)interactionDelegate

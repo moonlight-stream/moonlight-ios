@@ -19,19 +19,6 @@ typedef struct {
     int networkDroppedFrames;
 } video_stats_t;
 
-@protocol ConnectionCallbacks <NSObject>
-
-- (void) connectionStarted;
-- (void) connectionTerminated:(int)errorCode;
-- (void) stageStarting:(const char*)stageName;
-- (void) stageComplete:(const char*)stageName;
-- (void) stageFailed:(const char*)stageName withError:(int)errorCode portTestFlags:(int)portTestFlags;
-- (void) launchFailed:(NSString*)message;
-- (void) rumble:(unsigned short)controllerNumber lowFreqMotor:(unsigned short)lowFreqMotor highFreqMotor:(unsigned short)highFreqMotor;
-- (void) connectionStatusUpdate:(int)status;
-
-@end
-
 @interface Connection : NSOperation <NSStreamDelegate>
 
 -(id) initWithConfig:(StreamConfiguration*)config renderer:(VideoDecoderRenderer*)myRenderer connectionCallbacks:(id<ConnectionCallbacks>)callbacks;

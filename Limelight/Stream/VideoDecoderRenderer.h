@@ -8,9 +8,11 @@
 
 @import AVFoundation;
 
+#import "ConnectionCallbacks.h"
+
 @interface VideoDecoderRenderer : NSObject
 
-- (id)initWithView:(UIView*)view;
+- (id)initWithView:(UIView*)view callbacks:(id<ConnectionCallbacks>)callbacks;
 
 - (void)setupWithVideoFormat:(int)videoFormat refreshRate:(int)refreshRate;
 
