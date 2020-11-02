@@ -53,6 +53,10 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
     
     keyInputField = [[UITextField alloc] initWithFrame:CGRectZero];
+    [keyInputField setKeyboardType:UIKeyboardTypeASCIICapable];
+    [keyInputField setAutocorrectionType:UITextAutocorrectionTypeNo];
+    [keyInputField setAutocapitalizationType:UITextAutocapitalizationTypeNone];
+    [keyInputField setSpellCheckingType:UITextSpellCheckingTypeNo];
     [self addSubview:keyInputField];
     
 #if TARGET_OS_TV
