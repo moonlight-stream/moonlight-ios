@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 
-@protocol EdgeDetectionDelegate;
 @class ControllerSupport;
 
 @interface OnScreenControls : NSObject
@@ -25,7 +24,7 @@ typedef NS_ENUM(NSInteger, OnScreenControlsLevel) {
     OnScreenControlsLevelAutoGCExtendedGamepadWithStickButtons
 };
 
-- (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport swipeDelegate:(id<EdgeDetectionDelegate>)edgeDelegate;
+- (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport;
 - (BOOL) handleTouchDownEvent:(NSSet*)touches;
 - (BOOL) handleTouchUpEvent:(NSSet*)touches;
 - (BOOL) handleTouchMovedEvent:(NSSet*)touches;

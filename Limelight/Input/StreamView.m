@@ -44,7 +44,6 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 }
 
 - (void) setupStreamView:(ControllerSupport*)controllerSupport
-           swipeDelegate:(id<EdgeDetectionDelegate>)swipeDelegate
      interactionDelegate:(id<UserInteractionDelegate>)interactionDelegate
                   config:(StreamConfiguration*)streamConfig {
     self->interactionDelegate = interactionDelegate;
@@ -71,7 +70,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         self->touchHandler = [[RelativeTouchHandler alloc] initWithView:self];
     }
     
-    onScreenControls = [[OnScreenControls alloc] initWithView:self controllerSup:controllerSupport swipeDelegate:swipeDelegate];
+    onScreenControls = [[OnScreenControls alloc] initWithView:self controllerSup:controllerSupport];
     OnScreenControlsLevel level = (OnScreenControlsLevel)[settings.onscreenControls integerValue];
     if (settings.absoluteTouchMode) {
         Log(LOG_I, @"On-screen controls disabled in absolute touch mode");
@@ -631,8 +630,10 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     LiSendScrollEvent(deltaZ);
 }
 
+#if !TARGET_OS_TV
 - (BOOL)isMultipleTouchEnabled {
     return YES;
 }
+#endif
 
 @end

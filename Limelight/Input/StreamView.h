@@ -11,12 +11,6 @@
 #import "Moonlight-Swift.h"
 #import "StreamConfiguration.h"
 
-@protocol EdgeDetectionDelegate <NSObject>
-
-- (void) edgeSwiped;
-
-@end
-
 @protocol UserInteractionDelegate <NSObject>
 
 - (void) userInteractionBegan;
@@ -31,7 +25,6 @@
 #endif
 
 - (void) setupStreamView:(ControllerSupport*)controllerSupport
-           swipeDelegate:(id<EdgeDetectionDelegate>)swipeDelegate
      interactionDelegate:(id<UserInteractionDelegate>)interactionDelegate
                   config:(StreamConfiguration*)streamConfig;
 - (void) showOnScreenControls;

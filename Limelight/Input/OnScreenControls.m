@@ -36,7 +36,6 @@
     CALayer* _l1Button;
     CALayer* _l2Button;
     CALayer* _l3Button;
-    CALayer* _edge;
     
     UITouch* _aTouch;
     UITouch* _bTouch;
@@ -53,7 +52,6 @@
     UITouch* _l1Touch;
     UITouch* _l2Touch;
     UITouch* _l3Touch;
-    UITouch* _edgeTouch;
     
     NSDate* l3TouchStart;
     NSDate* r3TouchStart;
@@ -69,7 +67,6 @@
     
     ControllerSupport *_controllerSupport;
     Controller *_controller;
-    id<EdgeDetectionDelegate> _edgeDelegate;
     NSMutableArray* _deadTouches;
 }
 
@@ -114,12 +111,11 @@ static float L2_Y;
 static float L3_X;
 static float L3_Y;
 
-- (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport swipeDelegate:(id<EdgeDetectionDelegate>)swipeDelegate {
+- (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport {
     self = [self init];
     _view = view;
     _controllerSupport = controllerSupport;
     _controller = [controllerSupport getOscController];
-    _edgeDelegate = swipeDelegate;
     _deadTouches = [[NSMutableArray alloc] init];
     
     _iPad = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad);
@@ -156,16 +152,13 @@ static float L3_Y;
     _rightStickBackground = [CALayer layer];
     _leftStick = [CALayer layer];
     _rightStick = [CALayer layer];
-    _edge = [CALayer layer];
     
     return self;
 }
 
 - (void) show {
     _visible = YES;
-    
-    [self setupEdgeDetection];
-    
+        
     [self updateControls];
 }
 
@@ -252,11 +245,6 @@ static float L3_Y;
             Log(LOG_W, @"Unknown on-screen controls level: %d", (int)_level);
             break;
     }
-}
-
-- (void) setupEdgeDetection {
-    _edge.frame = CGRectMake(0, 0, 5, _view.frame.size.height);
-    [_view.layer addSublayer:_edge];
 }
 
 // For GCExtendedGamepad controls we move start, select, L3, and R3 to the button
@@ -650,8 +638,6 @@ static float L3_Y;
             buttonTouch = true;
         } else if (touch == _r3Touch) {
             buttonTouch = true;
-        } else if (touch == _edgeTouch) {
-            buttonTouch = true;
         }
         if ([_deadTouches containsObject:touch]) {
             updated = true;
@@ -771,9 +757,6 @@ static float L3_Y;
             }
             _rsTouch = touch;
             stickTouch = true;
-        } else if ([_edge.presentationLayer hitTest:touchLocation]) {
-            _edgeTouch = touch;
-            updated = true;
         }
         if (!updated && !stickTouch && [self isInDeadZone:touch]) {
             [_deadTouches addObject:touch];
@@ -857,11 +840,6 @@ static float L3_Y;
         else if (touch == _r3Touch) {
             _r3Touch = nil;
             touched = true;
-        } else if (touch == _edgeTouch) {
-            _edgeTouch = nil;
-            if ([touch locationInView:_view].x >= _view.frame.size.width / 4) {
-                [_edgeDelegate edgeSwiped];
-            }
         }
         if ([_deadTouches containsObject:touch]) {
             [_deadTouches removeObject:touch];

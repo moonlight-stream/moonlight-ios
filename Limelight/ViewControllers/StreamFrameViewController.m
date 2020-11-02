@@ -33,6 +33,10 @@
     StreamView *_streamView;
     UIScrollView *_scrollView;
     BOOL _userIsInteracting;
+    
+#if !TARGET_OS_TV
+    UIScreenEdgePanGestureRecognizer *_exitSwipeRecognizer;
+#endif
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -86,7 +90,7 @@
     _inactivityTimer = nil;
     
     _streamView = [[StreamView alloc] initWithFrame:self.view.frame];
-    [_streamView setupStreamView:_controllerSupport swipeDelegate:self interactionDelegate:self config:self.streamConfig];
+    [_streamView setupStreamView:_controllerSupport interactionDelegate:self config:self.streamConfig];
     
 #if TARGET_OS_TV
     if (!_menuGestureRecognizer || !_menuDoubleTapGestureRecognizer) {
@@ -101,8 +105,12 @@
     
     [self.view addGestureRecognizer:_menuGestureRecognizer];
     [self.view addGestureRecognizer:_menuDoubleTapGestureRecognizer];
-#endif
+#else
+    _exitSwipeRecognizer = [[UIScreenEdgePanGestureRecognizer alloc] initWithTarget:self action:@selector(edgeSwiped)];
+    _exitSwipeRecognizer.edges = UIRectEdgeLeft;
     
+    [self.view addGestureRecognizer:_exitSwipeRecognizer];
+#endif
     
     _tipLabel = [[UILabel alloc] init];
     [_tipLabel setUserInteractionEnabled:NO];
