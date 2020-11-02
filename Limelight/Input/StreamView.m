@@ -631,4 +631,8 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     LiSendScrollEvent(deltaZ);
 }
 
+- (BOOL)isMultipleTouchEnabled {
+    return YES;
+}
+
 @end
