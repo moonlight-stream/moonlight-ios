@@ -150,6 +150,7 @@
                                                  name: UIApplicationDidEnterBackgroundNotification
                                                object: nil];
 
+#if !TARGET_OS_TV
     [[NSNotificationCenter defaultCenter] addObserver: self
                                              selector: @selector(keyboardWillShow:)
                                                  name: UIKeyboardWillShowNotification
@@ -159,6 +160,7 @@
                                              selector: @selector(keyboardWillHide:)
                                                  name: UIKeyboardWillHideNotification
                                                object: nil];
+#endif
     
     // Only enable scroll and zoom in absolute touch mode
     if (_settings.absoluteTouchMode) {
@@ -203,6 +205,7 @@
     }
 }
 
+#if !TARGET_OS_TV
 - (void)keyboardWillShow:(NSNotification *)notification {
     _keyboardSize = [[[notification userInfo] objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
 
@@ -224,6 +227,7 @@
         self->_scrollView.frame = frame;
     }];
 }
+#endif
 
 - (void)updateStatsOverlay {
     NSString* overlayText = [self->_streamMan getStatsOverlayText];
