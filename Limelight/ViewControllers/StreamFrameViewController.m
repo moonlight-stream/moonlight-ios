@@ -33,6 +33,7 @@
     StreamView *_streamView;
     UIScrollView *_scrollView;
     BOOL _userIsInteracting;
+    CGSize _keyboardSize;
     
 #if !TARGET_OS_TV
     UIScreenEdgePanGestureRecognizer *_exitSwipeRecognizer;
@@ -108,6 +109,8 @@
 #else
     _exitSwipeRecognizer = [[UIScreenEdgePanGestureRecognizer alloc] initWithTarget:self action:@selector(edgeSwiped)];
     _exitSwipeRecognizer.edges = UIRectEdgeLeft;
+    _exitSwipeRecognizer.delaysTouchesBegan = NO;
+    _exitSwipeRecognizer.delaysTouchesEnded = NO;
     
     [self.view addGestureRecognizer:_exitSwipeRecognizer];
 #endif
@@ -145,6 +148,16 @@
     [[NSNotificationCenter defaultCenter] addObserver: self
                                              selector: @selector(applicationDidEnterBackground:)
                                                  name: UIApplicationDidEnterBackgroundNotification
+                                               object: nil];
+
+    [[NSNotificationCenter defaultCenter] addObserver: self
+                                             selector: @selector(keyboardWillShow:)
+                                                 name: UIKeyboardWillShowNotification
+                                               object: nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver: self
+                                             selector: @selector(keyboardWillHide:)
+                                                 name: UIKeyboardWillHideNotification
                                                object: nil];
     
     // Only enable scroll and zoom in absolute touch mode
@@ -188,6 +201,28 @@
         }
         [[NSNotificationCenter defaultCenter] removeObserver:self];
     }
+}
+
+- (void)keyboardWillShow:(NSNotification *)notification {
+    _keyboardSize = [[[notification userInfo] objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
+
+    [UIView animateWithDuration:0.3 animations:^{
+        CGRect frame = self->_scrollView.frame;
+        frame.size.height -= self->_keyboardSize.height;
+        self->_scrollView.frame = frame;
+    }];
+}
+
+-(void)keyboardWillHide:(NSNotification *)notification {
+    // NOTE: UIKeyboardFrameEndUserInfoKey returns a different keyboard size
+    // than UIKeyboardFrameBeginUserInfoKey, so it's unsuitable for use here
+    // to undo the changes made by keyboardWillShow.
+    
+    [UIView animateWithDuration:0.3 animations:^{
+        CGRect frame = self->_scrollView.frame;
+        frame.size.height += self->_keyboardSize.height;
+        self->_scrollView.frame = frame;
+    }];
 }
 
 - (void)updateStatsOverlay {
