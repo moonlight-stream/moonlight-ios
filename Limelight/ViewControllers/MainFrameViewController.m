@@ -40,6 +40,7 @@
 @implementation MainFrameViewController {
     NSOperationQueue* _opQueue;
     TemporaryHost* _selectedHost;
+    BOOL _showHiddenApps;
     NSString* _uniqueId;
     NSData* _clientCert;
     DiscoveryManager* _discMan;
@@ -208,6 +209,24 @@ static NSMutableSet* hostList;
     });
 }
 
+- (void) updateAppEntry:(TemporaryApp*)app forHost:(TemporaryHost*)host {
+    DataManager* database = [[DataManager alloc] init];
+    NSMutableSet* newHostAppList = [NSMutableSet setWithSet:host.appList];
+
+    for (TemporaryApp* savedApp in newHostAppList) {
+        if ([app.id isEqualToString:savedApp.id]) {
+            savedApp.name = app.name;
+            savedApp.hdrSupported = app.hdrSupported;
+            savedApp.hidden = app.hidden;
+            
+            host.appList = newHostAppList;
+
+            [database updateAppsForExistingHost:host];
+            return;
+        }
+    }
+}
+    
 - (void) updateApplist:(NSSet*) newList forHost:(TemporaryHost*)host {
     DataManager* database = [[DataManager alloc] init];
     NSMutableSet* newHostAppList = [NSMutableSet setWithSet:host.appList];
@@ -218,6 +237,7 @@ static NSMutableSet* hostList;
             if ([app.id isEqualToString:savedApp.id]) {
                 savedApp.name = app.name;
                 savedApp.hdrSupported = app.hdrSupported;
+                // Don't propagate hidden, because we want the local data to prevail
                 appAlreadyInList = YES;
                 break;
             }
@@ -275,6 +295,7 @@ static NSMutableSet* hostList;
 #endif
     
     [_appManager stopRetrieving];
+    _showHiddenApps = NO;
     _selectedHost = nil;
     _sortedAppList = nil;
     
@@ -466,6 +487,12 @@ static NSMutableSet* hostList;
             [[self activeViewController] presentViewController:wolAlert animated:YES completion:nil];
         }]];
     }
+    else if (host.pairState == PairStatePaired) {
+        [longClickAlert addAction:[UIAlertAction actionWithTitle:@"Show Hidden Apps" style:UIAlertActionStyleDefault handler:^(UIAlertAction* action){
+            self->_showHiddenApps = YES;
+            [self hostClicked:host view:view];
+        }]];
+    }
     [longClickAlert addAction:[UIAlertAction actionWithTitle:@"Test Network" style:UIAlertActionStyleDefault handler:^(UIAlertAction* action) {
         [self showLoadingFrame:^{
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -642,8 +669,8 @@ static NSMutableSet* hostList;
     }
 }
 
-- (void) appClicked:(TemporaryApp *)app {
-    Log(LOG_D, @"Clicked app: %@", app.name);
+- (void) appLongClicked:(TemporaryApp*) app {
+    Log(LOG_D, @"Long clicked app: %@", app.name);
     
     [_appManager stopRetrieving];
     
@@ -655,18 +682,43 @@ static NSMutableSet* hostList;
         [[self revealViewController] revealToggleAnimated:NO];
     }
 #endif
-    
+
     TemporaryApp* currentApp = [self findRunningApp:app.host];
+    
+    NSString* message;
+    
+    if (currentApp == nil || [app.id isEqualToString:currentApp.id]) {
+        if (app.hidden) {
+            message = @"Hidden";
+        }
+        else {
+            message = @"";
+        }
+    }
+    else {
+        message = [NSString stringWithFormat:@"%@ is currently running", currentApp.name];
+    }
+    
+    UIAlertController* alertController = [UIAlertController
+                                          alertControllerWithTitle: app.name
+                                          message:message
+                                          preferredStyle:UIAlertControllerStyleActionSheet];
+    
+    [alertController addAction:[UIAlertAction
+                                actionWithTitle:currentApp == nil ? @"Launch App" : ([app.id isEqualToString:currentApp.id] ? @"Resume App" : @"Resume Running App") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action){
+        if (currentApp != nil) {
+            Log(LOG_I, @"Resuming application: %@", currentApp.name);
+            [self prepareToStreamApp:currentApp];
+        }
+        else {
+            Log(LOG_I, @"Launching application: %@", app.name);
+            [self prepareToStreamApp:app];
+        }
+
+        [self performSegueWithIdentifier:@"createStreamFrame" sender:nil];
+    }]];
+    
     if (currentApp != nil) {
-        UIAlertController* alertController = [UIAlertController
-                                              alertControllerWithTitle: app.name
-                                              message: [app.id isEqualToString:currentApp.id] ? @"" : [NSString stringWithFormat:@"%@ is currently running", currentApp.name]preferredStyle:UIAlertControllerStyleAlert];
-        [alertController addAction:[UIAlertAction
-                                    actionWithTitle:[app.id isEqualToString:currentApp.id] ? @"Resume App" : @"Resume Running App" style:UIAlertActionStyleDefault handler:^(UIAlertAction* action){
-                                        Log(LOG_I, @"Resuming application: %@", currentApp.name);
-                                        [self prepareToStreamApp:currentApp];
-                                        [self performSegueWithIdentifier:@"createStreamFrame" sender:nil];
-                                    }]];
         [alertController addAction:[UIAlertAction actionWithTitle:
                                     [app.id isEqualToString:currentApp.id] ? @"Quit App" : @"Quit Running App and Start" style:UIAlertActionStyleDestructive handler:^(UIAlertAction* action){
                                         Log(LOG_I, @"Quitting application: %@", currentApp.name);
@@ -713,9 +765,6 @@ static NSMutableSet* hostList;
                                                 else {
                                                     app.host.currentGame = @"0";
                                                     dispatch_async(dispatch_get_main_queue(), ^{
-                                                        // Refresh the UI
-                                                        [self updateAppsForHost:app.host];
-                                                        
                                                         // If it succeeds and we're to start streaming, segue to the stream
                                                         if (![app.id isEqualToString:currentApp.id]) {
                                                             [self prepareToStreamApp:app];
@@ -733,8 +782,39 @@ static NSMutableSet* hostList;
                                         }];
                                         
                                     }]];
-        [alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
-        [[self activeViewController] presentViewController:alertController animated:YES completion:nil];
+    }
+
+    if (currentApp == nil || ![app.id isEqualToString:currentApp.id] || app.hidden) {
+        [alertController addAction:[UIAlertAction actionWithTitle:app.hidden ? @"Show App" : @"Hide App" style:UIAlertActionStyleDefault handler:^(UIAlertAction* action) {
+            app.hidden = !app.hidden;
+            [self updateAppEntry:app forHost:app.host];
+            
+            // Don't call updateAppsForHost because that will nuke this
+            // app immediately if we're not showing hidden apps.
+        }]];
+    }
+    
+    [alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
+    [[self activeViewController] presentViewController:alertController animated:YES completion:nil];
+}
+
+- (void) appClicked:(TemporaryApp *)app {
+    Log(LOG_D, @"Clicked app: %@", app.name);
+    
+    [_appManager stopRetrieving];
+    
+#if !TARGET_OS_TV
+    if (currentPosition != FrontViewPositionLeft) {
+        // This must not be animated because we need the position
+        // to change (and notify our callback to save settings data)
+        // before we call prepareToStreamApp.
+        [[self revealViewController] revealToggleAnimated:NO];
+    }
+#endif
+    
+    if ([self findRunningApp:app.host]) {
+        // If there's a running app, display a menu
+        [self appLongClicked:app];
     } else {
         [self prepareToStreamApp:app];
         [self performSegueWithIdentifier:@"createStreamFrame" sender:nil];
@@ -1187,6 +1267,16 @@ static NSMutableSet* hostList;
     
     _sortedAppList = [host.appList allObjects];
     _sortedAppList = [_sortedAppList sortedArrayUsingSelector:@selector(compareName:)];
+    
+    if (!_showHiddenApps) {
+        NSMutableArray* visibleAppList = [NSMutableArray array];
+        for (TemporaryApp* app in _sortedAppList) {
+            if (!app.hidden) {
+                [visibleAppList addObject:app];
+            }
+        }
+        _sortedAppList = visibleAppList;
+    }
     
     [hostScrollView removeFromSuperview];
     [self.collectionView reloadData];

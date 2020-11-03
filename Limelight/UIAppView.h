@@ -12,6 +12,7 @@
 @protocol AppCallback <NSObject>
 
 - (void) appClicked:(TemporaryApp*) app;
+- (void) appLongClicked:(TemporaryApp*) app;
 
 @end
 

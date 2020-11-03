@@ -15,6 +15,7 @@
 @property (nullable, nonatomic, retain) NSString *name;
 @property (nullable, nonatomic, retain) NSString *installPath;
 @property (nonatomic)                   BOOL hdrSupported;
+@property (nonatomic)                   BOOL hidden;
 @property (nullable, nonatomic, retain) TemporaryHost *host;
 
 NS_ASSUME_NONNULL_BEGIN

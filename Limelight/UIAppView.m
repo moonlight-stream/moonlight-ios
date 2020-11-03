@@ -9,7 +9,7 @@
 #import "UIAppView.h"
 #import "AppAssetManager.h"
 
-static const float REFRESH_CYCLE = 2.0f;
+static const float REFRESH_CYCLE = 1.0f;
 
 @implementation UIAppView {
     TemporaryApp* _app;
@@ -40,9 +40,14 @@ static UIImage* noImage;
     self.frame = CGRectMake(0, 0, 150, 200);
 #endif
     
+    [self setAlpha:app.hidden ? 0.4 : 1.0];
+    
     _appImage = [[UIImageView alloc] initWithFrame:self.frame];
     [_appImage setImage:noImage];
     [self addSubview:_appImage];
+    
+    UILongPressGestureRecognizer* longPressRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(appLongClicked:)];
+    [self addGestureRecognizer:longPressRecognizer];
     
     if (@available(iOS 9.0, tvOS 9.0, *)) {
         [self addTarget:self action:@selector(appClicked) forControlEvents:UIControlEventPrimaryActionTriggered];
@@ -76,6 +81,12 @@ static UIImage* noImage;
 
 - (void) appClicked {
     [_callback appClicked:_app];
+}
+
+- (void) appLongClicked:(UILongPressGestureRecognizer*)gesture {
+    if (gesture.state == UIGestureRecognizerStateBegan) {
+        [_callback appLongClicked:_app];
+    }
 }
 
 - (void) updateAppImage {
@@ -184,6 +195,9 @@ static UIImage* noImage;
         (_appOverlay == nil && [_app.id isEqualToString:_app.host.currentGame])) {
         [self updateAppImage];
     }
+    
+    // Update opacity if neccessary
+    [self setAlpha:_app.hidden ? 0.4 : 1.0];
     
     // Stop updating when we detach from our parent view
     if (self.superview != nil) {
