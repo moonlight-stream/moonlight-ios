@@ -11,8 +11,8 @@
 
 @protocol AppCallback <NSObject>
 
-- (void) appClicked:(TemporaryApp*) app;
-- (void) appLongClicked:(TemporaryApp*) app;
+- (void) appClicked:(TemporaryApp*)app view:(UIView*)view;
+- (void) appLongClicked:(TemporaryApp*)app view:(UIView*)view;
 
 @end
 
