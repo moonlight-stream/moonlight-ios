@@ -552,9 +552,7 @@ static NSMutableSet* hostList;
     longClickAlert.popoverPresentationController.sourceView = view;
     
     longClickAlert.popoverPresentationController.sourceRect = CGRectMake(view.bounds.size.width / 2.0, view.bounds.size.height / 2.0, 1.0, 1.0); // center of the view
-    [[self activeViewController] presentViewController:longClickAlert animated:YES completion:^{
-        [self updateHosts];
-    }];
+    [[self activeViewController] presentViewController:longClickAlert animated:YES completion:nil];
 }
 
 - (void) addHostClicked {
