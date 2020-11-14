@@ -102,12 +102,7 @@ static const int LABEL_DY = 20;
     self = [self init];
     _callback = callback;
     
-    if (@available(iOS 9.0, tvOS 9.0, *)) {
-        [self addTarget:self action:@selector(addClicked) forControlEvents:UIControlEventPrimaryActionTriggered];
-    }
-    else {
-        [self addTarget:self action:@selector(addClicked) forControlEvents:UIControlEventTouchUpInside];
-    }
+    [self addTarget:self action:@selector(addClicked) forControlEvents:UIControlEventPrimaryActionTriggered];
     
     [_hostLabel setText:@"Add Host Manually"];
     [_hostLabel sizeToFit];
@@ -127,12 +122,7 @@ static const int LABEL_DY = 20;
     UILongPressGestureRecognizer* longPressRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(hostLongClicked:)];
     [self addGestureRecognizer:longPressRecognizer];
     
-    if (@available(iOS 9.0, tvOS 9.0, *)) {
-        [self addTarget:self action:@selector(hostClicked) forControlEvents:UIControlEventPrimaryActionTriggered];
-    }
-    else {
-        [self addTarget:self action:@selector(hostClicked) forControlEvents:UIControlEventTouchUpInside];
-    }
+    [self addTarget:self action:@selector(hostClicked) forControlEvents:UIControlEventPrimaryActionTriggered];
     
     [self updateContentsForHost:host];
     [self startUpdateLoop];

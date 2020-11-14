@@ -1138,27 +1138,25 @@ static NSMutableSet* hostList;
 
 - (void)updateHostShortcuts {
 #if !TARGET_OS_TV
-    if (@available(iOS 9.0, *)) {
-        NSMutableArray* quickActions = [[NSMutableArray alloc] init];
-        
-        @synchronized (hostList) {
-            for (TemporaryHost* host in hostList) {
-                // Pair state may be unknown if we haven't polled it yet, but the app list
-                // count will persist from paired PCs
-                if ([host.appList count] > 0) {
-                    UIApplicationShortcutItem* shortcut = [[UIApplicationShortcutItem alloc]
-                                                           initWithType:@"PC"
-                                                           localizedTitle:host.name
-                                                           localizedSubtitle:nil
-                                                           icon:[UIApplicationShortcutIcon iconWithType:UIApplicationShortcutIconTypePlay]
-                                                           userInfo:[NSDictionary dictionaryWithObject:host.uuid forKey:@"UUID"]];
-                    [quickActions addObject: shortcut];
-                }
+    NSMutableArray* quickActions = [[NSMutableArray alloc] init];
+    
+    @synchronized (hostList) {
+        for (TemporaryHost* host in hostList) {
+            // Pair state may be unknown if we haven't polled it yet, but the app list
+            // count will persist from paired PCs
+            if ([host.appList count] > 0) {
+                UIApplicationShortcutItem* shortcut = [[UIApplicationShortcutItem alloc]
+                                                       initWithType:@"PC"
+                                                       localizedTitle:host.name
+                                                       localizedSubtitle:nil
+                                                       icon:[UIApplicationShortcutIcon iconWithType:UIApplicationShortcutIconTypePlay]
+                                                       userInfo:[NSDictionary dictionaryWithObject:host.uuid forKey:@"UUID"]];
+                [quickActions addObject: shortcut];
             }
         }
-        
-        [UIApplication sharedApplication].shortcutItems = quickActions;
     }
+    
+    [UIApplication sharedApplication].shortcutItems = quickActions;
 #endif
 }
 

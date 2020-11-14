@@ -49,12 +49,7 @@ static UIImage* noImage;
     UILongPressGestureRecognizer* longPressRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(appLongClicked:)];
     [self addGestureRecognizer:longPressRecognizer];
     
-    if (@available(iOS 9.0, tvOS 9.0, *)) {
-        [self addTarget:self action:@selector(appClicked:) forControlEvents:UIControlEventPrimaryActionTriggered];
-    }
-    else {
-        [self addTarget:self action:@selector(appClicked:) forControlEvents:UIControlEventTouchUpInside];
-    }
+    [self addTarget:self action:@selector(appClicked:) forControlEvents:UIControlEventPrimaryActionTriggered];
     
     [self addTarget:self action:@selector(buttonSelected:) forControlEvents:UIControlEventTouchDown];
     [self addTarget:self action:@selector(buttonDeselected:) forControlEvents:UIControlEventTouchUpInside | UIControlEventTouchCancel | UIControlEventTouchDragExit];
