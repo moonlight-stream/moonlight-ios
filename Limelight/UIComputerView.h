@@ -17,7 +17,11 @@
 
 @end
 
+#if !TARGET_OS_TV
+@interface UIComputerView : UIButton <UIContextMenuInteractionDelegate>
+#else
 @interface UIComputerView : UIButton
+#endif
 
 - (id) initWithComputer:(TemporaryHost*)host andCallback:(id<HostCallback>)callback;
 - (id) initForAddWithCallback:(id<HostCallback>)callback;

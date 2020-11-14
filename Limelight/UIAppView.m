@@ -46,6 +46,13 @@ static UIImage* noImage;
     [_appImage setImage:noImage];
     [self addSubview:_appImage];
     
+#if !TARGET_OS_TV
+    if (@available(iOS 13.0, *)) {
+        UIContextMenuInteraction* rightClickInteraction = [[UIContextMenuInteraction alloc] initWithDelegate:self];
+        [self addInteraction:rightClickInteraction];
+    }
+#endif
+    
     UILongPressGestureRecognizer* longPressRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(appLongClicked:)];
     [self addGestureRecognizer:longPressRecognizer];
     
@@ -79,10 +86,25 @@ static UIImage* noImage;
 }
 
 - (void) appLongClicked:(UILongPressGestureRecognizer*)gesture {
+#if !TARGET_OS_TV
+    if (@available(iOS 13.0, *)) {
+        // contextMenuInteraction will handle this
+        return;
+    }
+#endif
+    
     if (gesture.state == UIGestureRecognizerStateBegan) {
         [_callback appLongClicked:_app view:self];
     }
 }
+
+#if !TARGET_OS_TV
+- (UIContextMenuConfiguration *)contextMenuInteraction:(UIContextMenuInteraction *)interaction
+                        configurationForMenuAtLocation:(CGPoint)location {
+    [_callback appLongClicked:_app view:self];
+    return nil;
+}
+#endif
 
 - (void) updateAppImage {
     if (_appOverlay != nil) {

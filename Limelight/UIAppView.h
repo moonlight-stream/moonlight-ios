@@ -16,7 +16,11 @@
 
 @end
 
+#if !TARGET_OS_TV
+@interface UIAppView : UIButton <UIContextMenuInteractionDelegate>
+#else
 @interface UIAppView : UIButton
+#endif
 
 - (id) initWithApp:(TemporaryApp*)app cache:(NSCache*)cache andCallback:(id<AppCallback>)callback;
 - (void) updateAppImage;
