@@ -119,15 +119,19 @@ static const int LABEL_DY = 20;
     _host = host;
     _callback = callback;
     
-    UILongPressGestureRecognizer* longPressRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(hostLongClicked:)];
-    [self addGestureRecognizer:longPressRecognizer];
-    
+    // Use UIContextMenuInteraction on iOS 13.0+ and a standard UILongPressGestureRecognizer
+    // for tvOS devices and iOS prior to 13.0.
 #if !TARGET_OS_TV
     if (@available(iOS 13.0, *)) {
         UIContextMenuInteraction* rightClickInteraction = [[UIContextMenuInteraction alloc] initWithDelegate:self];
         [self addInteraction:rightClickInteraction];
     }
+    else
 #endif
+    {
+        UILongPressGestureRecognizer* longPressRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(hostLongClicked:)];
+        [self addGestureRecognizer:longPressRecognizer];
+    }
     
     [self addTarget:self action:@selector(hostClicked) forControlEvents:UIControlEventPrimaryActionTriggered];
     
@@ -206,13 +210,6 @@ static const int LABEL_DY = 20;
 }
 
 - (void) hostLongClicked:(UILongPressGestureRecognizer*)gesture {
-#if !TARGET_OS_TV
-    if (@available(iOS 13.0, *)) {
-        // contextMenuInteraction will handle this
-        return;
-    }
-#endif
-    
     if (gesture.state == UIGestureRecognizerStateBegan) {
         [_callback hostLongClicked:_host view:self];
     }
@@ -221,6 +218,11 @@ static const int LABEL_DY = 20;
 #if !TARGET_OS_TV
 - (UIContextMenuConfiguration *)contextMenuInteraction:(UIContextMenuInteraction *)interaction
                         configurationForMenuAtLocation:(CGPoint)location {
+    // We don't want to trigger the primary action at this point, so cancel
+    // tracking touch on this view now. This will also have the (intended)
+    // effect of removing the touch highlight on this view.
+    [self cancelTrackingWithEvent:nil];
+    
     [_callback hostLongClicked:_host view:self];
     return nil;
 }
