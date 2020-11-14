@@ -1297,13 +1297,13 @@ static NSMutableSet* hostList;
     
     [cell.subviews.firstObject removeFromSuperview]; // Remove a view that was previously added
     [cell addSubview:appView];
-
     
+    // Shadow opacity is controlled inside UIAppView based on whether the app
+    // is hidden or not during the update cycle.
     UIBezierPath *shadowPath = [UIBezierPath bezierPathWithRect:cell.bounds];
     cell.layer.masksToBounds = NO;
     cell.layer.shadowColor = [UIColor blackColor].CGColor;
     cell.layer.shadowOffset = CGSizeMake(1.0f, 5.0f);
-    cell.layer.shadowOpacity = 0.5f;
     cell.layer.shadowPath = shadowPath.CGPath;
     
 #if !TARGET_OS_TV

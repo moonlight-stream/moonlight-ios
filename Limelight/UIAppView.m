@@ -220,6 +220,11 @@ static UIImage* noImage;
         [self updateAppImage];
     }
     
+    // Show no shadow for hidden apps. Because we adjust the opacity of the
+    // cells for hidden apps, it makes them look bad when the shadow draws
+    // through the app tile.
+    self.superview.layer.shadowOpacity = _app.hidden ? 0.0f : 0.5f;
+    
     // Update opacity if neccessary
     [self setAlpha:_app.hidden ? 0.4 : 1.0];
     
