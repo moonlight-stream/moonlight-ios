@@ -50,10 +50,10 @@ static UIImage* noImage;
     [self addGestureRecognizer:longPressRecognizer];
     
     if (@available(iOS 9.0, tvOS 9.0, *)) {
-        [self addTarget:self action:@selector(appClicked) forControlEvents:UIControlEventPrimaryActionTriggered];
+        [self addTarget:self action:@selector(appClicked:) forControlEvents:UIControlEventPrimaryActionTriggered];
     }
     else {
-        [self addTarget:self action:@selector(appClicked) forControlEvents:UIControlEventTouchUpInside];
+        [self addTarget:self action:@selector(appClicked:) forControlEvents:UIControlEventTouchUpInside];
     }
     
     [self addTarget:self action:@selector(buttonSelected:) forControlEvents:UIControlEventTouchDown];
@@ -79,13 +79,13 @@ static UIImage* noImage;
     return self;
 }
 
-- (void) appClicked {
-    [_callback appClicked:_app];
+- (void) appClicked:(UIView *)view {
+    [_callback appClicked:_app view:view];
 }
 
 - (void) appLongClicked:(UILongPressGestureRecognizer*)gesture {
     if (gesture.state == UIGestureRecognizerStateBegan) {
-        [_callback appLongClicked:_app];
+        [_callback appLongClicked:_app view:self];
     }
 }
 

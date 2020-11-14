@@ -669,7 +669,7 @@ static NSMutableSet* hostList;
     }
 }
 
-- (void) appLongClicked:(TemporaryApp*) app {
+- (void)appLongClicked:(TemporaryApp *)app view:(UIView *)view {
     Log(LOG_D, @"Long clicked app: %@", app.name);
     
     [_appManager stopRetrieving];
@@ -795,10 +795,15 @@ static NSMutableSet* hostList;
     }
     
     [alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
+
+    // these two lines are required for iPad support of UIAlertSheet
+    alertController.popoverPresentationController.sourceView = view;
+    
+    alertController.popoverPresentationController.sourceRect = CGRectMake(view.bounds.size.width / 2.0, view.bounds.size.height / 2.0, 1.0, 1.0); // center of the view
     [[self activeViewController] presentViewController:alertController animated:YES completion:nil];
 }
 
-- (void) appClicked:(TemporaryApp *)app {
+- (void) appClicked:(TemporaryApp *)app view:(UIView *)view {
     Log(LOG_D, @"Clicked app: %@", app.name);
     
     [_appManager stopRetrieving];
@@ -814,7 +819,7 @@ static NSMutableSet* hostList;
     
     if ([self findRunningApp:app.host]) {
         // If there's a running app, display a menu
-        [self appLongClicked:app];
+        [self appLongClicked:app view:view];
     } else {
         [self prepareToStreamApp:app];
         [self performSegueWithIdentifier:@"createStreamFrame" sender:nil];
@@ -843,7 +848,7 @@ static NSMutableSet* hostList;
 
 #if TARGET_OS_TV
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
-    [self appClicked:_sortedAppList[indexPath.row]];
+    [self appClicked:_sortedAppList[indexPath.row] view:nil];
 }
 #endif
 
