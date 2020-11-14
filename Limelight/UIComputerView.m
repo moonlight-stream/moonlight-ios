@@ -132,9 +132,15 @@ static const int LABEL_DY = 20;
     [self addTarget:self action:@selector(hostClicked) forControlEvents:UIControlEventPrimaryActionTriggered];
     
     [self updateContentsForHost:host];
-    [self startUpdateLoop];
 
     return self;
+}
+
+- (void)didMoveToSuperview {
+    // Start our update loop when we are added to our cell
+    if (self.superview != nil && _host != nil) {
+        [self updateLoop];
+    }
 }
 
 - (void) updateBounds {
@@ -187,17 +193,16 @@ static const int LABEL_DY = 20;
     [self updateBounds];
 }
 
-- (void) startUpdateLoop {
-    [self performSelector:@selector(updateLoop) withObject:self afterDelay:REFRESH_CYCLE];
-}
-
 - (void) updateLoop {
+    // Stop immediately if the view has been detached
+    if (self.superview == nil) {
+        return;
+    }
+    
     [self updateContentsForHost:_host];
     
-    // Stop updating when we detach from our parent view
-    if (self.superview != nil) {
-        [self performSelector:@selector(updateLoop) withObject:self afterDelay:REFRESH_CYCLE];
-    }
+    // Queue the next refresh cycle
+    [self performSelector:@selector(updateLoop) withObject:self afterDelay:REFRESH_CYCLE];
 }
 
 - (void) hostLongClicked:(UILongPressGestureRecognizer*)gesture {

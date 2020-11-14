@@ -76,9 +76,15 @@ static UIImage* noImage;
 #endif
     
     [self updateAppImage];
-    [self startUpdateLoop];
     
     return self;
+}
+
+- (void)didMoveToSuperview {
+    // Start our update loop when we are added to our cell
+    if (self.superview != nil) {
+        [self updateLoop];
+    }
 }
 
 - (void) appClicked:(UIView *)view {
@@ -202,11 +208,12 @@ static UIImage* noImage;
     }
 }
 
-- (void) startUpdateLoop {
-    [self performSelector:@selector(updateLoop) withObject:self afterDelay:REFRESH_CYCLE];
-}
-
 - (void) updateLoop {
+    // Stop immediately if the view has been detached
+    if (self.superview == nil) {
+        return;
+    }
+    
     // Update the app image if neccessary
     if ((_appOverlay != nil && ![_app.id isEqualToString:_app.host.currentGame]) ||
         (_appOverlay == nil && [_app.id isEqualToString:_app.host.currentGame])) {
@@ -216,10 +223,8 @@ static UIImage* noImage;
     // Update opacity if neccessary
     [self setAlpha:_app.hidden ? 0.4 : 1.0];
     
-    // Stop updating when we detach from our parent view
-    if (self.superview != nil) {
-        [self performSelector:@selector(updateLoop) withObject:self afterDelay:REFRESH_CYCLE];
-    }
+    // Queue the next refresh cycle
+    [self performSelector:@selector(updateLoop) withObject:self afterDelay:REFRESH_CYCLE];
 }
 
 @end
