@@ -488,7 +488,7 @@ static NSMutableSet* hostList;
         }]];
     }
     else if (host.pairState == PairStatePaired) {
-        [longClickAlert addAction:[UIAlertAction actionWithTitle:@"Show Hidden Apps" style:UIAlertActionStyleDefault handler:^(UIAlertAction* action){
+        [longClickAlert addAction:[UIAlertAction actionWithTitle:@"View All Apps" style:UIAlertActionStyleDefault handler:^(UIAlertAction* action){
             self->_showHiddenApps = YES;
             [self hostClicked:host view:view];
         }]];
@@ -783,7 +783,9 @@ static NSMutableSet* hostList;
     }
 
     if (currentApp == nil || ![app.id isEqualToString:currentApp.id] || app.hidden) {
-        [alertController addAction:[UIAlertAction actionWithTitle:app.hidden ? @"Show App" : @"Hide App" style:UIAlertActionStyleDefault handler:^(UIAlertAction* action) {
+        [alertController addAction:[UIAlertAction actionWithTitle:app.hidden ? @"Show App" : @"Hide App"
+                                                            style:app.hidden ? UIAlertActionStyleDefault : UIAlertActionStyleDestructive
+                                                          handler:^(UIAlertAction* action) {
             app.hidden = !app.hidden;
             [self updateAppEntry:app forHost:app.host];
             
