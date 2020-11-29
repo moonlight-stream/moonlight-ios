@@ -150,7 +150,9 @@
                                                  name: UIApplicationDidEnterBackgroundNotification
                                                object: nil];
 
-#if !TARGET_OS_TV
+#if 0
+    // FIXME: This doesn't work reliably on iPad for some reason. Showing and hiding the keyboard
+    // several times in a row will not correctly restore the state of the UIScrollView.
     [[NSNotificationCenter defaultCenter] addObserver: self
                                              selector: @selector(keyboardWillShow:)
                                                  name: UIKeyboardWillShowNotification
@@ -205,7 +207,7 @@
     }
 }
 
-#if !TARGET_OS_TV
+#if 0
 - (void)keyboardWillShow:(NSNotification *)notification {
     _keyboardSize = [[[notification userInfo] objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
 
