@@ -119,7 +119,7 @@
     [_tipLabel setUserInteractionEnabled:NO];
     
 #if TARGET_OS_TV
-    [_tipLabel setText:@"Tip: Double tap the Menu button to disconnect from your PC"];
+    [_tipLabel setText:@"Tip: Double tap the Menu button on the Apple TV Remote to disconnect from your PC"];
 #else
     [_tipLabel setText:@"Tip: Swipe from the left edge to disconnect from your PC"];
 #endif
