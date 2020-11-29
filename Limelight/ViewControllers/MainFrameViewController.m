@@ -952,6 +952,11 @@ static NSMutableSet* hostList;
     self.collectionView.allowsMultipleSelection = NO;
 #if !TARGET_OS_TV
     self.collectionView.multipleTouchEnabled = NO;
+#else
+    // This is the only way to get long press events on a UICollectionViewCell :(
+    UILongPressGestureRecognizer* cellLongPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleCollectionViewLongPress:)];
+    cellLongPress.delaysTouchesBegan = YES;
+    [self.collectionView addGestureRecognizer:cellLongPress];
 #endif
     
     [self retrieveSavedHosts];
@@ -967,6 +972,21 @@ static NSMutableSet* hostList;
 }
 
 #if TARGET_OS_TV
+-(void)handleCollectionViewLongPress:(UILongPressGestureRecognizer *)gestureRecognizer
+{
+    // FIXME: Something is delaying touches so we only get to the Begin state
+    // before we actually want to signal the long press.
+    if (gestureRecognizer.state != UIGestureRecognizerStateBegan) {
+        return;
+    }
+    
+    CGPoint point = [gestureRecognizer locationInView:self.collectionView];
+    NSIndexPath *indexPath = [self.collectionView indexPathForItemAtPoint:point];
+    if (indexPath != nil) {
+        [self appLongClicked:_sortedAppList[indexPath.row] view:nil];
+    }
+}
+
 - (void)openTvSettings:(id)sender
 {
     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString] options:@{} completionHandler:nil];
