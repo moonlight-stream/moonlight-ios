@@ -104,6 +104,10 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     if (settings.btMouseSupport) {
         [x1mouse start];
     }
+    
+    // This is critical to ensure keyboard events are delivered to this
+    // StreamView and not our parent UIView, especially on tvOS.
+    [self becomeFirstResponder];
 }
 
 - (void)startInteractionTimer {
@@ -141,7 +145,6 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 - (void) showOnScreenControls {
 #if !TARGET_OS_TV
     [onScreenControls show];
-    [self becomeFirstResponder];
 #endif
 }
 
