@@ -1145,14 +1145,17 @@ static NSMutableSet* hostList;
 }
 
 - (void) updateAllHosts:(NSArray *)hosts {
+    // We must copy the array here because it could be modified
+    // before our main thread dispatch happens.
+    NSArray* hostsCopy = [NSArray arrayWithArray:hosts];
     dispatch_async(dispatch_get_main_queue(), ^{
         Log(LOG_D, @"New host list:");
-        for (TemporaryHost* host in hosts) {
+        for (TemporaryHost* host in hostsCopy) {
             Log(LOG_D, @"Host: \n{\n\t name:%@ \n\t address:%@ \n\t localAddress:%@ \n\t externalAddress:%@ \n\t ipv6Address:%@ \n\t uuid:%@ \n\t mac:%@ \n\t pairState:%d \n\t online:%d \n\t activeAddress:%@ \n}", host.name, host.address, host.localAddress, host.externalAddress, host.ipv6Address, host.uuid, host.mac, host.pairState, host.state, host.activeAddress);
         }
         @synchronized(hostList) {
             [hostList removeAllObjects];
-            [hostList addObjectsFromArray:hosts];
+            [hostList addObjectsFromArray:hostsCopy];
         }
         [self updateHosts];
     });
