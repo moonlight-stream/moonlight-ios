@@ -577,11 +577,13 @@ static const double MOUSE_SPEED_DIVISOR = 2.5;
     }
     
     DataManager* dataMan = [[DataManager alloc] init];
-    OnScreenControlsLevel level = (OnScreenControlsLevel)[[dataMan getSettings].onscreenControls integerValue];
+    TemporarySettings* settings = [dataMan getSettings];
+    OnScreenControlsLevel level = (OnScreenControlsLevel)[settings.onscreenControls integerValue];
     
     // Even if no gamepads are present, we will always count one if OSC is enabled,
-    // or it's set to auto and no keyboard or mouse is present.
-    if (level != OnScreenControlsLevelOff && (![ControllerSupport hasKeyboardOrMouse] || level != OnScreenControlsLevelAuto)) {
+    // or it's set to auto and no keyboard or mouse is present. Absolute touch mode
+    // disables the OSC.
+    if (level != OnScreenControlsLevelOff && (![ControllerSupport hasKeyboardOrMouse] || level != OnScreenControlsLevelAuto) && !settings.absoluteTouchMode) {
         mask |= 0x1;
     }
     
