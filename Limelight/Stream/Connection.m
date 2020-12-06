@@ -118,7 +118,9 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit)
     }
     else {
         // Flip stats roughly every second
-        if (now - currentVideoStats.startTime > 1.0f) {
+        if (now - currentVideoStats.startTime >= 1.0f) {
+            currentVideoStats.endTime = now;
+            
             [videoStatsLock lock];
             lastVideoStats = currentVideoStats;
             [videoStatsLock unlock];
@@ -135,7 +137,6 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit)
     
     currentVideoStats.receivedFrames++;
     currentVideoStats.totalFrames++;
-    currentVideoStats.endTime = now;
 
     PLENTRY entry = decodeUnit->bufferList;
     while (entry != NULL) {
