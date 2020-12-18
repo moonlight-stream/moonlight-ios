@@ -92,6 +92,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         [self addInteraction:[[UIPointerInteraction alloc] initWithDelegate:self]];
         
         UIPanGestureRecognizer *mouseWheelRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(mouseWheelMoved:)];
+        mouseWheelRecognizer.maximumNumberOfTouches = 0;
         mouseWheelRecognizer.allowedScrollTypesMask = UIScrollTypeMaskAll;
         mouseWheelRecognizer.allowedTouchTypes = @[@(UITouchTypeIndirectPointer)];
         [self addGestureRecognizer:mouseWheelRecognizer];
