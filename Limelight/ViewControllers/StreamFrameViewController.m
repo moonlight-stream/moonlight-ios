@@ -365,8 +365,8 @@
 - (void)connectionTerminated:(int)errorCode {
     Log(LOG_I, @"Connection terminated: %d", errorCode);
     
-    unsigned int portTestResults = LiTestClientConnectivity(CONN_TEST_SERVER, 443,
-                                                            LiGetPortFlagsFromTerminationErrorCode(errorCode));
+    unsigned int portFlags = LiGetPortFlagsFromTerminationErrorCode(errorCode);
+    unsigned int portTestResults = LiTestClientConnectivity(CONN_TEST_SERVER, 443, portFlags);
     
     dispatch_async(dispatch_get_main_queue(), ^{
         // Allow the display to go to sleep now
@@ -387,7 +387,12 @@
                     
                 case ML_ERROR_NO_VIDEO_TRAFFIC:
                     title = @"Connection Error";
-                    message = @"No video received from host. Check the host PC's firewall and port forwarding rules.";
+                    message = @"No video received from host.";
+                    if (portFlags != 0) {
+                        char failingPorts[256];
+                        LiStringifyPortFlags(portFlags, "\n", failingPorts, sizeof(failingPorts));
+                        message = [message stringByAppendingString:[NSString stringWithFormat:@"\n\nCheck your firewall and port forwarding rules for port(s):\n%s", failingPorts]];
+                    }
                     break;
                     
                 case ML_ERROR_NO_VIDEO_FRAME:
@@ -439,6 +444,11 @@
         [UIApplication sharedApplication].idleTimerDisabled = NO;
         
         NSString* message = [NSString stringWithFormat:@"%s failed with error %d", stageName, errorCode];
+        if (portTestFlags != 0) {
+            char failingPorts[256];
+            LiStringifyPortFlags(portTestFlags, "\n", failingPorts, sizeof(failingPorts));
+            message = [message stringByAppendingString:[NSString stringWithFormat:@"\n\nCheck your firewall and port forwarding rules for port(s):\n%s", failingPorts]];
+        }
         if (portTestResults != ML_TEST_RESULT_INCONCLUSIVE && portTestResults != 0) {
             message = [message stringByAppendingString:@"\n\nYour device's network connection is blocking Moonlight. Streaming may not work while connected to this network."];
         }
