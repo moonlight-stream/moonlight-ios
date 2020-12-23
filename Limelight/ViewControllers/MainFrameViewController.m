@@ -509,16 +509,9 @@ static NSMutableSet* hostList;
                             message = @"The network test could not be performed because none of Moonlight's connection testing servers were reachable. Check your Internet connection or try again later.";
                         }
                         else {
-                            message = @"Your current network connection seems to be blocking Moonlight. Streaming may not work while connected to this network.\n\nThe following network ports were blocked:\n";
-                            
-                            for (int i = 0; i < 32; i++) {
-                                if (portTestResult & (1 << i)) {
-                                    NSString* portString = [NSString stringWithFormat:@"%s %u\n",
-                                                            LiGetProtocolFromPortFlagIndex(i) == 17 ? "UDP" : "TCP",
-                                                            LiGetPortFromPortFlagIndex(i)];
-                                    message = [message stringByAppendingString:portString];
-                                }
-                            }
+                            char blockedPorts[512];
+                            LiStringifyPortFlags(portTestResult, "\n", blockedPorts, sizeof(blockedPorts));
+                            message = [NSString stringWithFormat:@"Your current network connection seems to be blocking Moonlight. Streaming may not work while connected to this network.\n\nThe following network ports were blocked:\n%s", blockedPorts];
                         }
                         
                         UIAlertController* netTestAlert = [UIAlertController alertControllerWithTitle:@"Network Test Complete" message:message preferredStyle:UIAlertControllerStyleAlert];
