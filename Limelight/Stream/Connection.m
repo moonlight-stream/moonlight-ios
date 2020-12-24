@@ -447,6 +447,11 @@ void ClConnectionStatusUpdate(int status)
     if (config.enableHdr) {
         config.allowHevc = YES;
     }
+    
+    // Streaming at resolutions above 4K requires HEVC
+    if (config.width > 4096 || config.height > 4096) {
+        config.allowHevc = YES;
+    }
 
     // On iOS 11, we can use HEVC if the server supports encoding it
     // and this device has hardware decode for it (A9 and later).

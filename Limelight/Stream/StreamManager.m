@@ -65,6 +65,16 @@
         return;
     }
     
+    if (_config.width > 4096 || _config.height > 4096) {
+        // Pascal added support for 8K HEVC encoding support. Maxwell 2 could encode HEVC but only up to 4K.
+        // We can't directly identify Pascal, but we can look for HEVC Main10 which was added in the same generation.
+        NSString* codecSupport = [serverInfoResp getStringTag:@"ServerCodecModeSupport"];
+        if (codecSupport == nil || !([codecSupport intValue] & 0x200)) {
+            [_callbacks launchFailed:@"Your host PC's GPU doesn't support streaming video resolutions over 4K."];
+            return;
+        }
+    }
+    
     // resumeApp and launchApp handle calling launchFailed
     if ([serverState hasSuffix:@"_SERVER_BUSY"]) {
         // App already running, resume it
