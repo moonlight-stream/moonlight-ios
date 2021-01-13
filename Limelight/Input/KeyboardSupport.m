@@ -215,7 +215,7 @@
         }
     }
     
-    LiSendKeyboardEvent(keyCode,
+    LiSendKeyboardEvent(0x8000 | keyCode,
                         down ? KEY_ACTION_DOWN : KEY_ACTION_UP,
                         modifierFlags);
     return true;
