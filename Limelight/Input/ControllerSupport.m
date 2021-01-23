@@ -736,6 +736,13 @@ static const double MOUSE_SPEED_DIVISOR = 2.5;
     [[NSNotificationCenter defaultCenter] removeObserver:_keyboardConnectObserver];
     [[NSNotificationCenter defaultCenter] removeObserver:_keyboardDisconnectObserver];
     
+    _controllerConnectObserver = nil;
+    _controllerDisconnectObserver = nil;
+    _mouseConnectObserver = nil;
+    _mouseDisconnectObserver = nil;
+    _keyboardConnectObserver = nil;
+    _keyboardDisconnectObserver = nil;
+    
     _controllerNumbers = 0;
     
     for (Controller* controller in [_controllers allValues]) {
