@@ -140,7 +140,6 @@ static const int bitrateTable[] = {
         case 360:
             resolution = 0;
             break;
-        default:
         case 720:
             resolution = 1;
             break;
@@ -149,6 +148,9 @@ static const int bitrateTable[] = {
             break;
         case 2160:
             resolution = 3;
+            break;
+        default:
+            resolution = 4;
             break;
     }
     
@@ -283,13 +285,23 @@ static const int bitrateTable[] = {
 }
 
 - (NSInteger) getChosenStreamHeight {
-    const int resolutionTable[] = { 360, 720, 1080, 2160 };
+    const int nativeHeight = [UIScreen mainScreen].bounds.size.height * [UIScreen mainScreen].scale;
+    const int resolutionTable[] = { 360, 720, 1080, 2160, nativeHeight };
     return resolutionTable[[self.resolutionSelector selectedSegmentIndex]];
 }
 
 - (NSInteger) getChosenStreamWidth {
-    // Assumes fixed 16:9 aspect ratio
-    return ([self getChosenStreamHeight] * 16) / 9;
+    const NSInteger choosenHeight = [self getChosenStreamHeight];
+    switch (choosenHeight) {
+        case 360:
+        case 720:
+        case 1080:
+        case 2160:
+            // Assumes fixed 16:9 aspect ratio
+            return choosenHeight * 16 / 9;
+        default:
+            return [UIScreen mainScreen].bounds.size.width * [UIScreen mainScreen].scale;
+    }
 }
 
 - (void) saveSettings {
