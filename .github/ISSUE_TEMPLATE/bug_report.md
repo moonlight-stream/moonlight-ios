@@ -1,10 +1,12 @@
 ---
 name: Bug report
-about: Ask for help on Discord before reporting a bug
+about: Follow the troubleshooting guide before reporting a bug
 
 ---
 **READ ME FIRST!**
-This issue tracker is not the right place to ask for troubleshooting help if you're not able to connect or stream at all. For those requests, please use the #ios-tvos-help channel on our Discord server where there are many more people who can help (or direct you back here if it looks like a Moonlight bug after all). https://moonlight-stream.org/discord
+If you're here because something basic is not working (like gamepad input, video, or similar), it's probably something specific to your setup, so make sure you've gone through the Troubleshooting Guide first: https://github.com/moonlight-stream/moonlight-docs/wiki/Troubleshooting
+
+If you still have trouble with basic functionality after following the guide, join our Discord server where there are many other volunteers who can help (or direct you back here if it looks like a Moonlight bug after all). https://moonlight-stream.org/discord
 
 **Describe the bug**
 A clear and concise description of what the bug is.
