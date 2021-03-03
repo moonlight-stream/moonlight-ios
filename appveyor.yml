@@ -1,0 +1,15 @@
+version: 0.0.0.{build}
+
+clone_depth: 1
+
+image: macOS
+
+before_build:
+  - 'git submodule update --init --recursive'
+
+build_script:
+  - sh: set -o pipefail && xcodebuild -project Moonlight.xcodeproj -scheme "Moonlight" -destination "platform=iOS Simulator,OS=14.3,name=iPhone 11 Pro" clean build | xcpretty
+  - sh: set -o pipefail && xcodebuild -project Moonlight.xcodeproj -scheme "Moonlight" -destination "platform=iOS Simulator,OS=14.3,name=iPad Pro (9.7-inch)" clean build | xcpretty
+  - sh: set -o pipefail && xcodebuild -project Moonlight.xcodeproj -scheme "Moonlight TV" -destination "platform=tvOS Simulator,OS=14.3,name=Apple TV 4K" clean build | xcpretty
+
+deploy: off
