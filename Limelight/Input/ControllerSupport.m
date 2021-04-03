@@ -225,6 +225,13 @@ static const double MOUSE_SPEED_DIVISOR = 2.5;
         controller.controllerPausedHandler = NULL;
         
         if (controller.extendedGamepad != NULL) {
+            // Re-enable system gestures on the gamepad buttons now
+            if (@available(iOS 14.0, tvOS 14.0, *)) {
+                for (GCControllerElement* element in controller.extendedGamepad.allElements) {
+                    element.preferredSystemGestureState = GCSystemGestureStateEnabled;
+                }
+            }
+            
             controller.extendedGamepad.valueChangedHandler = NULL;
         }
         else if (controller.gamepad != NULL) {
@@ -281,6 +288,14 @@ static const double MOUSE_SPEED_DIVISOR = 2.5;
         }
         
         if (controller.extendedGamepad != NULL) {
+            // Disable system gestures on the gamepad to avoid interfering
+            // with in-game controller actions
+            if (@available(iOS 14.0, tvOS 14.0, *)) {
+                for (GCControllerElement* element in controller.extendedGamepad.allElements) {
+                    element.preferredSystemGestureState = GCSystemGestureStateDisabled;
+                }
+            }
+            
             controller.extendedGamepad.valueChangedHandler = ^(GCExtendedGamepad *gamepad, GCControllerElement *element) {
                 Controller* limeController = [self->_controllers objectForKey:[NSNumber numberWithInteger:gamepad.controller.playerIndex]];
                 short leftStickX, leftStickY;
