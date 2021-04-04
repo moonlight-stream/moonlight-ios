@@ -18,6 +18,7 @@
 
 @dynamic overrideUserInterfaceStyle;
 
+static NSString* resolutionFormat = @"%dx%d";
 static NSString* bitrateFormat = @"Bitrate: %.1f Mbps";
 static const int bitrateTable[] = {
     500,
@@ -214,6 +215,7 @@ static const int bitrateTable[] = {
     [self.bitrateSlider setValue:[self getSliderValueForBitrate:_bitrate] animated:YES];
     [self.bitrateSlider addTarget:self action:@selector(bitrateSliderMoved) forControlEvents:UIControlEventValueChanged];
     [self updateBitrateText];
+    [self updateResolutionText];
 }
 
 - (void) touchModeChanged {
@@ -258,6 +260,7 @@ static const int bitrateTable[] = {
     [self.bitrateSlider setValue:[self getSliderValueForBitrate:_bitrate] animated:YES];
     
     [self updateBitrateText];
+    [self updateResolutionText];
 }
 
 - (void) bitrateSliderMoved {
@@ -269,6 +272,10 @@ static const int bitrateTable[] = {
 - (void) updateBitrateText {
     // Display bitrate in Mbps
     [self.bitrateLabel setText:[NSString stringWithFormat:bitrateFormat, _bitrate / 1000.]];
+}
+
+- (void) updateResolutionText {
+    [self.resolutionLabel setText:[NSString stringWithFormat:resolutionFormat, self. getChosenStreamWidth, self.getChosenStreamHeight]];
 }
 
 - (NSInteger) getChosenFrameRate {
