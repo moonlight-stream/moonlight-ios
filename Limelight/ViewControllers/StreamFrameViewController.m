@@ -401,6 +401,7 @@
                     break;
                     
                 case ML_ERROR_UNEXPECTED_EARLY_TERMINATION:
+                case ML_ERROR_PROTECTED_CONTENT:
                     title = @"Connection Error";
                     message = @"Something went wrong on your host PC when starting the stream.\n\nMake sure you don't have any DRM-protected content open on your host PC. You can also try restarting your host PC.\n\nIf the issue persists, try reinstalling your GPU drivers and GeForce Experience.";
                     break;
