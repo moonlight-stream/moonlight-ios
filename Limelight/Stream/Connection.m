@@ -427,6 +427,10 @@ void ClConnectionStatusUpdate(int status)
     _streamConfig.enableHdr = config.enableHdr;
     _streamConfig.audioConfiguration = config.audioConfiguration;
     
+    // TODO: If/when video encryption is added, we'll probably want to
+    // limit that to devices that support the ARMv8 AES instructions.
+    _streamConfig.encryptionFlags = ENCFLG_AUDIO;
+    
     // Use some of the HEVC encoding efficiency improvements to
     // reduce bandwidth usage while still gaining some image
     // quality improvement.
