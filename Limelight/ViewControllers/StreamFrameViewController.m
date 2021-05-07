@@ -24,8 +24,9 @@
     TemporarySettings *_settings;
     NSTimer *_inactivityTimer;
     NSTimer *_statsUpdateTimer;
-    UITapGestureRecognizer *_menuGestureRecognizer;
+    UITapGestureRecognizer *_menuTapGestureRecognizer;
     UITapGestureRecognizer *_menuDoubleTapGestureRecognizer;
+    UITapGestureRecognizer *_playPauseTapGestureRecognizer;
     UITextView *_overlayView;
     UILabel *_stageLabel;
     UILabel *_tipLabel;
@@ -53,6 +54,10 @@
 - (void)controllerPauseButtonPressed:(id)sender { }
 - (void)controllerPauseButtonDoublePressed:(id)sender {
     Log(LOG_I, @"Menu double-pressed -- backing out of stream");
+    [self returnToMainFrame];
+}
+- (void)controllerPlayPauseButtonPressed:(id)sender {
+    Log(LOG_I, @"Play/Pause button pressed -- backing out of stream");
     [self returnToMainFrame];
 }
 #endif
@@ -94,18 +99,23 @@
     [_streamView setupStreamView:_controllerSupport interactionDelegate:self config:self.streamConfig];
     
 #if TARGET_OS_TV
-    if (!_menuGestureRecognizer || !_menuDoubleTapGestureRecognizer) {
-        _menuGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(controllerPauseButtonPressed:)];
-        _menuGestureRecognizer.allowedPressTypes = @[@(UIPressTypeMenu)];
+    if (!_menuTapGestureRecognizer || !_menuDoubleTapGestureRecognizer || !_playPauseTapGestureRecognizer) {
+        _menuTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(controllerPauseButtonPressed:)];
+        _menuTapGestureRecognizer.allowedPressTypes = @[@(UIPressTypeMenu)];
 
+        _playPauseTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(controllerPlayPauseButtonPressed:)];
+        _playPauseTapGestureRecognizer.allowedPressTypes = @[@(UIPressTypePlayPause)];
+        
         _menuDoubleTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(controllerPauseButtonDoublePressed:)];
         _menuDoubleTapGestureRecognizer.numberOfTapsRequired = 2;
-        [_menuGestureRecognizer requireGestureRecognizerToFail:_menuDoubleTapGestureRecognizer];
+        [_menuTapGestureRecognizer requireGestureRecognizerToFail:_menuDoubleTapGestureRecognizer];
         _menuDoubleTapGestureRecognizer.allowedPressTypes = @[@(UIPressTypeMenu)];
     }
     
-    [self.view addGestureRecognizer:_menuGestureRecognizer];
+    [self.view addGestureRecognizer:_menuTapGestureRecognizer];
     [self.view addGestureRecognizer:_menuDoubleTapGestureRecognizer];
+    [self.view addGestureRecognizer:_playPauseTapGestureRecognizer];
+
 #else
     _exitSwipeRecognizer = [[UIScreenEdgePanGestureRecognizer alloc] initWithTarget:self action:@selector(edgeSwiped)];
     _exitSwipeRecognizer.edges = UIRectEdgeLeft;
@@ -119,7 +129,7 @@
     [_tipLabel setUserInteractionEnabled:NO];
     
 #if TARGET_OS_TV
-    [_tipLabel setText:@"Tip: Double tap the Menu button on the Apple TV Remote to disconnect from your PC"];
+    [_tipLabel setText:@"Tip: Tap the Play/Pause button on the Apple TV Remote to disconnect from your PC"];
 #else
     [_tipLabel setText:@"Tip: Swipe from the left edge to disconnect from your PC"];
 #endif
