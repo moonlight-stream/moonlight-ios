@@ -463,7 +463,11 @@ void ClConnectionStatusUpdate(int status)
     // to freeze after a few minutes with HEVC prior to iOS 11.3.
     // As a result, we will only use HEVC on iOS 11.3 or later.
     if (@available(iOS 11.3, tvOS 11.3, *)) {
-        _streamConfig.supportsHevc = config.allowHevc && VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC);
+        _streamConfig.supportsHevc =
+#if !TARGET_OS_TV
+            config.allowHevc &&
+#endif
+            VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC);
     }
     
     // HEVC must be supported when HDR is enabled
@@ -481,7 +485,12 @@ void ClConnectionStatusUpdate(int status)
 
     // RFI doesn't work properly with HEVC on iOS 11 with an iPhone SE (at least)
     // It doesnt work on macOS either, tested with Network Link Conditioner.
-    _drCallbacks.capabilities = CAPABILITY_REFERENCE_FRAME_INVALIDATION_AVC |
+    // RFI seems to be broken at all resolutions on the Apple TV 4K (1st gen)
+    // on tvOS 14.5.
+    _drCallbacks.capabilities =
+#if !TARGET_OS_TV
+                                CAPABILITY_REFERENCE_FRAME_INVALIDATION_AVC |
+#endif
                                 CAPABILITY_DIRECT_SUBMIT;
 
     LiInitializeAudioCallbacks(&_arCallbacks);
