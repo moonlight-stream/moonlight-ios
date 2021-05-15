@@ -17,6 +17,8 @@
 #import "HttpRequest.h"
 #import "IdManager.h"
 
+#include <Limelight.h>
+
 @implementation StreamManager {
     StreamConfiguration* _config;
 
@@ -151,13 +153,23 @@
         return nil;
     }
     
+    uint32_t rtt, variance;
+    NSString* latencyString;
+    if (LiGetEstimatedRttInfo(&rtt, &variance)) {
+        latencyString = [NSString stringWithFormat:@"%u ms (variance: %u ms)", rtt, variance];
+    }
+    else {
+        latencyString = @"N/A";
+    }
+    
     float interval = stats.endTime - stats.startTime;
-    return [NSString stringWithFormat:@"Video stream: %dx%d %.2f FPS (Codec: %@)\nFrames dropped by your network connection: %.2f%%\n",
+    return [NSString stringWithFormat:@"Video stream: %dx%d %.2f FPS (Codec: %@)\nFrames dropped by your network connection: %.2f%%\nAverage network latency: %@",
             _config.width,
             _config.height,
             stats.totalFrames / interval,
             [_connection getActiveCodecName],
-            stats.networkDroppedFrames / interval];
+            stats.networkDroppedFrames / interval,
+            latencyString];
 }
 
 @end
