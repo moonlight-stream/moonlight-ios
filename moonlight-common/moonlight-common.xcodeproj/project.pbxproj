@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		983091DE24CEB69B00A0835D /* ConnectionTester.c in Sources */ = {isa = PBXBuildFile; fileRef = 983091DD24CEB69B00A0835D /* ConnectionTester.c */; };
 		983091DF24CEB69B00A0835D /* ConnectionTester.c in Sources */ = {isa = PBXBuildFile; fileRef = 983091DD24CEB69B00A0835D /* ConnectionTester.c */; };
-		9857AEEA1EBE85A20084F99E /* RtpFecQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 9857AEE91EBE85A20084F99E /* RtpFecQueue.c */; };
 		9857AEF01EBE85E10084F99E /* rs.c in Sources */ = {isa = PBXBuildFile; fileRef = 9857AEEE1EBE85E10084F99E /* rs.c */; };
 		98AB2E401CAD425A0089BB98 /* AudioStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E1A1CAD423B0089BB98 /* AudioStream.c */; };
 		98AB2E411CAD425A0089BB98 /* ByteBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E1B1CAD423B0089BB98 /* ByteBuffer.c */; };
@@ -21,7 +20,6 @@
 		98AB2E471CAD425A0089BB98 /* Misc.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E261CAD423B0089BB98 /* Misc.c */; };
 		98AB2E481CAD425A0089BB98 /* Platform.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E311CAD423B0089BB98 /* Platform.c */; };
 		98AB2E491CAD425A0089BB98 /* PlatformSockets.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E331CAD423B0089BB98 /* PlatformSockets.c */; };
-		98AB2E4A1CAD425A0089BB98 /* RtpReorderQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E361CAD423B0089BB98 /* RtpReorderQueue.c */; };
 		98AB2E4B1CAD425A0089BB98 /* RtspConnection.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E391CAD423B0089BB98 /* RtspConnection.c */; };
 		98AB2E4C1CAD425A0089BB98 /* RtspParser.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E3A1CAD423B0089BB98 /* RtspParser.c */; };
 		98AB2E4D1CAD425A0089BB98 /* SdpGenerator.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E3B1CAD423B0089BB98 /* SdpGenerator.c */; };
@@ -40,8 +38,11 @@
 		98B8C2B7262BC1220027F659 /* PlatformCrypto.c in Sources */ = {isa = PBXBuildFile; fileRef = 98B8C2B5262BC1220027F659 /* PlatformCrypto.c */; };
 		98C1FC13218404040023FDDF /* SimpleStun.c in Sources */ = {isa = PBXBuildFile; fileRef = 98C1FC11218404030023FDDF /* SimpleStun.c */; };
 		98C1FC142184124C0023FDDF /* SimpleStun.c in Sources */ = {isa = PBXBuildFile; fileRef = 98C1FC11218404030023FDDF /* SimpleStun.c */; };
+		98F145352667D847004018E3 /* RtpAudioQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 98F145332667D847004018E3 /* RtpAudioQueue.c */; };
+		98F145362667D847004018E3 /* RtpAudioQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 98F145332667D847004018E3 /* RtpAudioQueue.c */; };
+		98F145372667D847004018E3 /* RtpVideoQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 98F145342667D847004018E3 /* RtpVideoQueue.c */; };
+		98F145382667D847004018E3 /* RtpVideoQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 98F145342667D847004018E3 /* RtpVideoQueue.c */; };
 		FB1A67F821324F4900507771 /* rs.c in Sources */ = {isa = PBXBuildFile; fileRef = 9857AEEE1EBE85E10084F99E /* rs.c */; };
-		FB1A67F921324F4900507771 /* RtpFecQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 9857AEE91EBE85A20084F99E /* RtpFecQueue.c */; };
 		FB1A67FA21324F4900507771 /* AudioStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E1A1CAD423B0089BB98 /* AudioStream.c */; };
 		FB1A67FB21324F4900507771 /* ByteBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E1B1CAD423B0089BB98 /* ByteBuffer.c */; };
 		FB1A67FC21324F4900507771 /* Connection.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E1D1CAD423B0089BB98 /* Connection.c */; };
@@ -52,7 +53,6 @@
 		FB1A680121324F4900507771 /* Misc.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E261CAD423B0089BB98 /* Misc.c */; };
 		FB1A680221324F4900507771 /* Platform.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E311CAD423B0089BB98 /* Platform.c */; };
 		FB1A680321324F4900507771 /* PlatformSockets.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E331CAD423B0089BB98 /* PlatformSockets.c */; };
-		FB1A680421324F4900507771 /* RtpReorderQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E361CAD423B0089BB98 /* RtpReorderQueue.c */; };
 		FB1A680521324F4900507771 /* RtspConnection.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E391CAD423B0089BB98 /* RtspConnection.c */; };
 		FB1A680621324F4900507771 /* RtspParser.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E3A1CAD423B0089BB98 /* RtspParser.c */; };
 		FB1A680721324F4900507771 /* SdpGenerator.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E3B1CAD423B0089BB98 /* SdpGenerator.c */; };
@@ -83,8 +83,6 @@
 
 /* Begin PBXFileReference section */
 		983091DD24CEB69B00A0835D /* ConnectionTester.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ConnectionTester.c; sourceTree = "<group>"; };
-		9857AEE91EBE85A20084F99E /* RtpFecQueue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = RtpFecQueue.c; sourceTree = "<group>"; };
-		9857AEEB1EBE85AB0084F99E /* RtpFecQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RtpFecQueue.h; sourceTree = "<group>"; };
 		9857AEEE1EBE85E10084F99E /* rs.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = rs.c; path = "moonlight-common-c/reedsolomon/rs.c"; sourceTree = "<group>"; };
 		9857AEEF1EBE85E10084F99E /* rs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = rs.h; path = "moonlight-common-c/reedsolomon/rs.h"; sourceTree = "<group>"; };
 		98AB2DF01CAD422B0089BB98 /* callbacks.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = callbacks.c; sourceTree = "<group>"; };
@@ -142,8 +140,6 @@
 		98AB2E331CAD423B0089BB98 /* PlatformSockets.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = PlatformSockets.c; sourceTree = "<group>"; };
 		98AB2E341CAD423B0089BB98 /* PlatformSockets.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PlatformSockets.h; sourceTree = "<group>"; };
 		98AB2E351CAD423B0089BB98 /* PlatformThreads.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PlatformThreads.h; sourceTree = "<group>"; };
-		98AB2E361CAD423B0089BB98 /* RtpReorderQueue.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = RtpReorderQueue.c; sourceTree = "<group>"; };
-		98AB2E371CAD423B0089BB98 /* RtpReorderQueue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RtpReorderQueue.h; sourceTree = "<group>"; };
 		98AB2E381CAD423B0089BB98 /* Rtsp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Rtsp.h; sourceTree = "<group>"; };
 		98AB2E391CAD423B0089BB98 /* RtspConnection.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = RtspConnection.c; sourceTree = "<group>"; };
 		98AB2E3A1CAD423B0089BB98 /* RtspParser.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = RtspParser.c; sourceTree = "<group>"; };
@@ -154,6 +150,10 @@
 		98B8C2B5262BC1220027F659 /* PlatformCrypto.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = PlatformCrypto.c; sourceTree = "<group>"; };
 		98B8C2BA262BC12F0027F659 /* PlatformCrypto.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PlatformCrypto.h; sourceTree = "<group>"; };
 		98C1FC11218404030023FDDF /* SimpleStun.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SimpleStun.c; sourceTree = "<group>"; };
+		98F145332667D847004018E3 /* RtpAudioQueue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = RtpAudioQueue.c; sourceTree = "<group>"; };
+		98F145342667D847004018E3 /* RtpVideoQueue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = RtpVideoQueue.c; sourceTree = "<group>"; };
+		98F145392667D852004018E3 /* RtpVideoQueue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RtpVideoQueue.h; sourceTree = "<group>"; };
+		98F1453A2667D852004018E3 /* RtpAudioQueue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RtpAudioQueue.h; sourceTree = "<group>"; };
 		FB1A67EF21324EE300507771 /* libmoonlight-common-tv.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libmoonlight-common-tv.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB290E2E19B37A4E004C83CF /* libmoonlight-common.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libmoonlight-common.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -265,8 +265,10 @@
 		98AB2E191CAD423B0089BB98 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				9857AEEB1EBE85AB0084F99E /* RtpFecQueue.h */,
-				9857AEE91EBE85A20084F99E /* RtpFecQueue.c */,
+				98F1453A2667D852004018E3 /* RtpAudioQueue.h */,
+				98F145392667D852004018E3 /* RtpVideoQueue.h */,
+				98F145332667D847004018E3 /* RtpAudioQueue.c */,
+				98F145342667D847004018E3 /* RtpVideoQueue.c */,
 				98AB2E1A1CAD423B0089BB98 /* AudioStream.c */,
 				98AB2E1B1CAD423B0089BB98 /* ByteBuffer.c */,
 				98AB2E1C1CAD423B0089BB98 /* ByteBuffer.h */,
@@ -288,8 +290,6 @@
 				98AB2E331CAD423B0089BB98 /* PlatformSockets.c */,
 				98AB2E341CAD423B0089BB98 /* PlatformSockets.h */,
 				98AB2E351CAD423B0089BB98 /* PlatformThreads.h */,
-				98AB2E361CAD423B0089BB98 /* RtpReorderQueue.c */,
-				98AB2E371CAD423B0089BB98 /* RtpReorderQueue.h */,
 				98AB2E381CAD423B0089BB98 /* Rtsp.h */,
 				98AB2E391CAD423B0089BB98 /* RtspConnection.c */,
 				98AB2E3A1CAD423B0089BB98 /* RtspParser.c */,
@@ -398,7 +398,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FB1A67F821324F4900507771 /* rs.c in Sources */,
-				FB1A67F921324F4900507771 /* RtpFecQueue.c in Sources */,
+				98F145362667D847004018E3 /* RtpAudioQueue.c in Sources */,
 				FB1A67FA21324F4900507771 /* AudioStream.c in Sources */,
 				FB1A67FB21324F4900507771 /* ByteBuffer.c in Sources */,
 				FB1A67FC21324F4900507771 /* Connection.c in Sources */,
@@ -410,10 +410,10 @@
 				FB1A680121324F4900507771 /* Misc.c in Sources */,
 				FB1A680221324F4900507771 /* Platform.c in Sources */,
 				FB1A680321324F4900507771 /* PlatformSockets.c in Sources */,
-				FB1A680421324F4900507771 /* RtpReorderQueue.c in Sources */,
 				FB1A680521324F4900507771 /* RtspConnection.c in Sources */,
 				FB1A680621324F4900507771 /* RtspParser.c in Sources */,
 				FB1A680721324F4900507771 /* SdpGenerator.c in Sources */,
+				98F145382667D847004018E3 /* RtpVideoQueue.c in Sources */,
 				FB1A680821324F4900507771 /* VideoDepacketizer.c in Sources */,
 				FB1A680921324F4900507771 /* VideoStream.c in Sources */,
 				98B8C2B7262BC1220027F659 /* PlatformCrypto.c in Sources */,
@@ -435,6 +435,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				98C1FC142184124C0023FDDF /* SimpleStun.c in Sources */,
+				98F145352667D847004018E3 /* RtpAudioQueue.c in Sources */,
 				98AB2E401CAD425A0089BB98 /* AudioStream.c in Sources */,
 				98AB2E411CAD425A0089BB98 /* ByteBuffer.c in Sources */,
 				98AB2E421CAD425A0089BB98 /* Connection.c in Sources */,
@@ -446,12 +447,11 @@
 				98AB2E471CAD425A0089BB98 /* Misc.c in Sources */,
 				98AB2E481CAD425A0089BB98 /* Platform.c in Sources */,
 				98AB2E491CAD425A0089BB98 /* PlatformSockets.c in Sources */,
-				98AB2E4A1CAD425A0089BB98 /* RtpReorderQueue.c in Sources */,
 				98AB2E4B1CAD425A0089BB98 /* RtspConnection.c in Sources */,
 				98AB2E4C1CAD425A0089BB98 /* RtspParser.c in Sources */,
 				98AB2E4D1CAD425A0089BB98 /* SdpGenerator.c in Sources */,
+				98F145372667D847004018E3 /* RtpVideoQueue.c in Sources */,
 				98AB2E4E1CAD425A0089BB98 /* VideoDepacketizer.c in Sources */,
-				9857AEEA1EBE85A20084F99E /* RtpFecQueue.c in Sources */,
 				98AB2E4F1CAD425A0089BB98 /* VideoStream.c in Sources */,
 				98B8C2B6262BC1220027F659 /* PlatformCrypto.c in Sources */,
 				98AB2E501CAD427A0089BB98 /* callbacks.c in Sources */,
