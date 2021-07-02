@@ -78,17 +78,21 @@
     }
     
     // resumeApp and launchApp handle calling launchFailed
+    NSString* sessionUrl;
     if ([serverState hasSuffix:@"_SERVER_BUSY"]) {
         // App already running, resume it
-        if (![self resumeApp:hMan]) {
+        if (![self resumeApp:hMan receiveSessionUrl:&sessionUrl]) {
             return;
         }
     } else {
         // Start app
-        if (![self launchApp:hMan]) {
+        if (![self launchApp:hMan receiveSessionUrl:&sessionUrl]) {
             return;
         }
     }
+    
+    // Populate RTSP session URL from launch/resume response
+    _config.rtspSessionUrl = sessionUrl;
     
     // Populate the config's version fields from serverinfo
     _config.appVersion = appversion;
@@ -108,7 +112,7 @@
     [_connection terminate];
 }
 
-- (BOOL) launchApp:(HttpManager*)hMan {
+- (BOOL) launchApp:(HttpManager*)hMan receiveSessionUrl:(NSString**)sessionUrl {
     HttpResponse* launchResp = [[HttpResponse alloc] init];
     [hMan executeRequestSynchronously:[HttpRequest requestForResponse:launchResp withUrlRequest:[hMan newLaunchRequest:_config]]];
     NSString *gameSession = [launchResp getStringTag:@"gamesession"];
@@ -122,10 +126,11 @@
         return FALSE;
     }
     
+    *sessionUrl = [launchResp getStringTag:@"sessionUrl0"];
     return TRUE;
 }
 
-- (BOOL) resumeApp:(HttpManager*)hMan {
+- (BOOL) resumeApp:(HttpManager*)hMan receiveSessionUrl:(NSString**)sessionUrl {
     HttpResponse* resumeResp = [[HttpResponse alloc] init];
     [hMan executeRequestSynchronously:[HttpRequest requestForResponse:resumeResp withUrlRequest:[hMan newResumeRequest:_config]]];
     NSString* resume = [resumeResp getStringTag:@"resume"];
@@ -139,6 +144,7 @@
         return FALSE;
     }
     
+    *sessionUrl = [resumeResp getStringTag:@"sessionUrl0"];
     return TRUE;
 }
 

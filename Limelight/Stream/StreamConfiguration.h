@@ -13,6 +13,7 @@
 @property NSString* gfeVersion;
 @property NSString* appID;
 @property NSString* appName;
+@property NSString* rtspSessionUrl;
 @property int width;
 @property int height;
 @property int frameRate;
