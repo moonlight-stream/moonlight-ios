@@ -115,27 +115,6 @@
     }
 }
 
-- (Boolean)isNalReferencePicture:(unsigned char)nalType
-{
-    if (videoFormat & VIDEO_FORMAT_MASK_H264) {
-        return nalType == 0x65;
-    }
-    else {
-        // HEVC has several types of reference NALU types
-        switch (nalType) {
-            case 0x20:
-            case 0x22:
-            case 0x24:
-            case 0x26:
-            case 0x28:
-            case 0x2A:
-                return true;
-            default:
-                return false;
-        }
-    }
-}
-
 - (void)updateBufferForRange:(CMBlockBufferRef)existingBuffer data:(unsigned char *)data offset:(int)offset length:(int)nalLength
 {
     OSStatus status;
@@ -203,9 +182,8 @@
 }
 
 // This function must free data for bufferType == BUFFER_TYPE_PICDATA
-- (int)submitDecodeBuffer:(unsigned char *)data length:(int)length bufferType:(int)bufferType pts:(unsigned int)pts
+- (int)submitDecodeBuffer:(unsigned char *)data length:(int)length bufferType:(int)bufferType frameType:(int)frameType pts:(unsigned int)pts
 {
-    unsigned char nalType = data[FRAME_START_PREFIX_SIZE];
     OSStatus status;
     
     if (bufferType != BUFFER_TYPE_PICDATA) {
@@ -355,7 +333,7 @@
     CFDictionarySetValue(dict, kCMSampleAttachmentKey_DisplayImmediately, kCFBooleanTrue);
     CFDictionarySetValue(dict, kCMSampleAttachmentKey_IsDependedOnByOthers, kCFBooleanTrue);
     
-    if (![self isNalReferencePicture:nalType]) {
+    if (frameType == FRAME_TYPE_PFRAME) {
         // P-frame
         CFDictionarySetValue(dict, kCMSampleAttachmentKey_NotSync, kCFBooleanTrue);
         CFDictionarySetValue(dict, kCMSampleAttachmentKey_DependsOnOthers, kCFBooleanTrue);
@@ -370,7 +348,7 @@
         // Enqueue the next frame
         [self->displayLayer enqueueSampleBuffer:sampleBuffer];
         
-        if ([self isNalReferencePicture:nalType]) {
+        if (frameType == FRAME_TYPE_IDR) {
             // Ensure the layer is visible now
             self->displayLayer.hidden = NO;
             

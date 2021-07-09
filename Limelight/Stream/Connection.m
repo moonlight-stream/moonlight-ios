@@ -146,6 +146,7 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit)
             ret = [renderer submitDecodeBuffer:(unsigned char*)entry->data
                                         length:entry->length
                                     bufferType:entry->bufferType
+                                     frameType:decodeUnit->frameType
                                            pts:decodeUnit->presentationTimeMs];
             if (ret != DR_OK) {
                 free(data);
@@ -164,6 +165,7 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit)
     return [renderer submitDecodeBuffer:data
                                  length:offset
                              bufferType:BUFFER_TYPE_PICDATA
+                              frameType:decodeUnit->frameType
                                     pts:decodeUnit->presentationTimeMs];
 }
 
