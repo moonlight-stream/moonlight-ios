@@ -16,6 +16,7 @@
 @property (nonatomic, retain) NSNumber * framerate;
 @property (nonatomic, retain) NSNumber * height;
 @property (nonatomic, retain) NSNumber * width;
+@property (nonatomic, retain) NSNumber * audioConfig;
 @property (nonatomic, retain) NSNumber * onscreenControls;
 @property (nonatomic, retain) NSString * uniqueId;
 @property (nonatomic) BOOL useHevc;

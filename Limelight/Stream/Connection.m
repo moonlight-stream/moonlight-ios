@@ -229,9 +229,7 @@ int ArInit(int audioConfiguration, POPUS_MULTISTREAM_CONFIGURATION originalOpusC
     [audioSession setPreferredIOBufferDuration:(opusConfig.samplesPerFrame / (opusConfig.sampleRate / 1000)) / 1000.0
                                          error:&audioSessionError];
     [audioSession setActive: YES error: &audioSessionError];
-    
-    // FIXME: Calling this breaks surround audio for some reason
-    //[audioSession setPreferredOutputNumberOfChannels:opusConfig->channelCount error:&audioSessionError];
+    [audioSession setPreferredOutputNumberOfChannels:opusConfig.channelCount error:&audioSessionError];
     
     OSStatus status;
     
