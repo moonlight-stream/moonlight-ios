@@ -92,6 +92,28 @@
 		</dict>
 		<dict>
 			<key>Type</key>
+			<string>PSMultiValueSpecifier</string>
+			<key>Title</key>
+			<string>Audio Configuration</string>
+			<key>Key</key>
+			<string>audioConfig</string>
+			<key>DefaultValue</key>
+			<string>2</string>
+			<key>Titles</key>
+			<array>
+				<string>Stereo</string>
+				<string>5.1</string>
+				<string>7.1</string>
+			</array>
+			<key>Values</key>
+			<array>
+				<string>2</string>
+				<string>6</string>
+				<string>8</string>
+			</array>
+		</dict>
+		<dict>
+			<key>Type</key>
 			<string>PSGroupSpecifier</string>
 			<key>Title</key>
 			<string>Host Options</string>

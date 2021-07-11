@@ -34,6 +34,8 @@
     assert([self.bitrate intValue] != 0);
     self.framerate = [NSNumber numberWithInteger:[[NSUserDefaults standardUserDefaults] integerForKey:@"framerate"]];
     assert([self.framerate intValue] != 0);
+    self.audioConfig = [NSNumber numberWithInteger:[[NSUserDefaults standardUserDefaults] integerForKey:@"audioConfig"]];
+    assert([self.audioConfig intValue] != 0);
     self.useHevc = [[NSUserDefaults standardUserDefaults] boolForKey:@"useHevc"];
     self.useFramePacing = [[NSUserDefaults standardUserDefaults] integerForKey:@"useFramePacing"] != 0;
     self.playAudioOnPC = [[NSUserDefaults standardUserDefaults] boolForKey:@"audioOnPC"];
@@ -66,6 +68,7 @@
     self.framerate = settings.framerate;
     self.height = settings.height;
     self.width = settings.width;
+    self.audioConfig = settings.audioConfig;
     self.useHevc = settings.useHevc;
     self.useFramePacing = settings.useFramePacing;
     self.playAudioOnPC = settings.playAudioOnPC;
