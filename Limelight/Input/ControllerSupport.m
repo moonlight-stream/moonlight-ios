@@ -432,19 +432,6 @@ static const double MOUSE_SPEED_DIVISOR = 2.5;
             };
         }
     }
-    
-    // TODO: Confirm scroll direction
-    mouse.mouseInput.scroll.yAxis.valueChangedHandler = ^(GCControllerAxisInput * _Nonnull axis, float value) {
-        self->accumulatedScrollY += -value;
-        
-        short truncatedScrollY = (short)self->accumulatedScrollY;
-        
-        if (truncatedScrollY != 0) {
-            LiSendHighResScrollEvent(truncatedScrollY);
-            
-            self->accumulatedScrollY -= truncatedScrollY;
-        }
-    };
 }
 
 -(void) updateAutoOnScreenControlMode

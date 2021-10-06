@@ -449,13 +449,6 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 }
 
 - (void)mouseWheelMoved:(UIPanGestureRecognizer *)gesture {
-    if (@available(iOS 14.0, *)) {
-        if ([GCMouse current] != nil) {
-            // We'll handle this with GCMouse. Do nothing here.
-            return;
-        }
-    }
-    
     switch (gesture.state) {
         case UIGestureRecognizerStateBegan:
         case UIGestureRecognizerStateChanged:
