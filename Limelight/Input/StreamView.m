@@ -28,6 +28,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     NSInteger lastMouseButtonMask;
     float lastMouseX;
     float lastMouseY;
+    CGPoint lastScrollTranslation;
     
     // Citrix X1 mouse support
     X1Mouse* x1mouse;
@@ -91,11 +92,17 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     if (@available(iOS 13.4, *)) {
         [self addInteraction:[[UIPointerInteraction alloc] initWithDelegate:self]];
         
-        UIPanGestureRecognizer *mouseWheelRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(mouseWheelMoved:)];
-        mouseWheelRecognizer.maximumNumberOfTouches = 0;
-        mouseWheelRecognizer.allowedScrollTypesMask = UIScrollTypeMaskAll;
-        mouseWheelRecognizer.allowedTouchTypes = @[@(UITouchTypeIndirectPointer)];
-        [self addGestureRecognizer:mouseWheelRecognizer];
+        UIPanGestureRecognizer *discreteMouseWheelRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(mouseWheelMovedDiscrete:)];
+        discreteMouseWheelRecognizer.maximumNumberOfTouches = 0;
+        discreteMouseWheelRecognizer.allowedScrollTypesMask = UIScrollTypeMaskDiscrete;
+        discreteMouseWheelRecognizer.allowedTouchTypes = @[@(UITouchTypeIndirectPointer)];
+        [self addGestureRecognizer:discreteMouseWheelRecognizer];
+        
+        UIPanGestureRecognizer *continuousMouseWheelRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(mouseWheelMovedContinuous:)];
+        continuousMouseWheelRecognizer.maximumNumberOfTouches = 0;
+        continuousMouseWheelRecognizer.allowedScrollTypesMask = UIScrollTypeMaskContinuous;
+        continuousMouseWheelRecognizer.allowedTouchTypes = @[@(UITouchTypeIndirectPointer)];
+        [self addGestureRecognizer:continuousMouseWheelRecognizer];
     }
 #endif
     
@@ -448,22 +455,46 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     return [UIPointerStyle hiddenPointerStyle];
 }
 
-- (void)mouseWheelMoved:(UIPanGestureRecognizer *)gesture {
+- (void)mouseWheelMovedContinuous:(UIPanGestureRecognizer *)gesture {
     switch (gesture.state) {
         case UIGestureRecognizerStateBegan:
         case UIGestureRecognizerStateChanged:
         case UIGestureRecognizerStateEnded:
             break;
-            
+        
         default:
             // Ignore recognition failure and other states
             return;
     }
-
-    CGPoint velocity = [gesture velocityInView:self];
-    if ((short)velocity.y != 0) {
-        LiSendHighResScrollEvent((short)velocity.y);
+    
+    short velocityY = [gesture velocityInView:self].y;
+    if (velocityY != 0) {
+        LiSendHighResScrollEvent(velocityY);
     }
+}
+
+- (void)mouseWheelMovedDiscrete:(UIPanGestureRecognizer *)gesture {
+    switch (gesture.state) {
+        case UIGestureRecognizerStateBegan:
+        case UIGestureRecognizerStateChanged:
+            break;
+        
+        case UIGestureRecognizerStateEnded:
+        default:
+            // Ignore recognition failure and other states
+            lastScrollTranslation = CGPointMake(0, 0);
+            return;
+    }
+    
+    // Using velocityInView is 0 for discrete scroll events
+    // when scrolling very slowly, but translationInView does work.
+    CGPoint currentScrollTranslation = [gesture translationInView:self];
+    short translationDeltaY = currentScrollTranslation.y - lastScrollTranslation.y;
+    if (translationDeltaY != 0) {
+        LiSendScrollEvent(translationDeltaY > 0 ? 1 : -1);
+    }
+    
+    lastScrollTranslation = currentScrollTranslation;
 }
 
 #endif
