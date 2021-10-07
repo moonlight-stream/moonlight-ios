@@ -459,17 +459,20 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     switch (gesture.state) {
         case UIGestureRecognizerStateBegan:
         case UIGestureRecognizerStateChanged:
-        case UIGestureRecognizerStateEnded:
             break;
         
+        case UIGestureRecognizerStateEnded:
         default:
             // Ignore recognition failure and other states
+            lastScrollTranslation = CGPointMake(0, 0);
             return;
     }
     
-    short velocityY = [gesture velocityInView:self].y;
-    if (velocityY != 0) {
-        LiSendHighResScrollEvent(velocityY);
+    CGPoint currentScrollTranslation = [gesture translationInView:self];
+    short translationDeltaY = ((currentScrollTranslation.y - lastScrollTranslation.y) / self.bounds.size.height) * 120; // WHEEL_DELTA
+    if (translationDeltaY != 0) {
+        LiSendHighResScrollEvent(translationDeltaY);
+        lastScrollTranslation = currentScrollTranslation;
     }
 }
 
