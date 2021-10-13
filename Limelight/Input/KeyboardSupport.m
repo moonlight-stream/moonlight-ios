@@ -21,8 +21,11 @@
     if (key.modifierFlags & UIKeyModifierAlternate) {
         modifierFlags |= MODIFIER_ALT;
     }
-    if (key.modifierFlags & (UIKeyModifierControl | UIKeyModifierCommand)) {
+    if (key.modifierFlags & UIKeyModifierControl) {
         modifierFlags |= MODIFIER_CTRL;
+    }
+    if (key.modifierFlags & UIKeyModifierCommand) {
+        modifierFlags |= MODIFIER_META;
     }
     
     // This converts UIKeyboardHIDUsage values to Win32 VK_* values
@@ -189,6 +192,8 @@
                 keyCode = 0xF8;
                 break;
             case UIKeyboardHIDUsageKeyboardLeftGUI:
+                keyCode = 0x5B;
+                break;
             case UIKeyboardHIDUsageKeyboardLeftControl:
                 keyCode = 0xA2;
                 break;
@@ -199,6 +204,8 @@
                 keyCode = 0xA4;
                 break;
             case UIKeyboardHIDUsageKeyboardRightGUI:
+                keyCode = 0x5C;
+                break;
             case UIKeyboardHIDUsageKeyboardRightControl:
                 keyCode = 0xA3;
                 break;
@@ -232,9 +239,11 @@
         case UIKeyModifierShift:
             [KeyboardSupport addShiftModifier:&event];
             break;
-        case UIKeyModifierCommand:
         case UIKeyModifierControl:
             [KeyboardSupport addControlModifier:&event];
+            break;
+        case UIKeyModifierCommand:
+            [KeyboardSupport addMetaModifier:&event];
             break;
         case UIKeyModifierAlternate:
             [KeyboardSupport addAltModifier:&event];
@@ -391,6 +400,11 @@
 + (void) addControlModifier:(struct KeyEvent*)event {
     event->modifier = MODIFIER_CTRL;
     event->modifierKeycode = 0x11;
+}
+
++ (void) addMetaModifier:(struct KeyEvent*)event {
+    event->modifier = MODIFIER_META;
+    event->modifierKeycode = 0x5B;
 }
 
 + (void) addAltModifier:(struct KeyEvent*)event {
