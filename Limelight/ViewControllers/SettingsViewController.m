@@ -163,14 +163,13 @@ static const int bitrateTable[] = {
         [self.framerateSelector removeSegmentAtIndex:2 animated:NO];
     }
     
-    bool enableHdr = false;
     if (@available(iOS 10.3, tvOS 10.3, *)){
-        [self.hdrSelector setSelectedSegmentIndex:currentSettings.enableHdr ? 1 : 0];
+        
     }
     else{
         [self.hdrSelector removeAllSegments];
         [self.hdrSelector insertSegmentWithTitle:@"Requires iOS 11.3 or later" atIndex:0 animated:NO];
-        [self.hdrSelector setEnabled:NO]
+        [self.hdrSelector setEnabled:NO];
     }
     
     // Only show the 4K option for "recent" devices. We'll judge that by whether
@@ -190,17 +189,24 @@ static const int bitrateTable[] = {
     if (@available(iOS 11.3, tvOS 11.3, *)) {
         if (VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC)) {
             [self.hevcSelector setSelectedSegmentIndex:currentSettings.useHevc ? 1 : 0];
+            [self.hdrSelector setSelectedSegmentIndex:currentSettings.enableHdr ? 1 : 0];
         }
         else {
             [self.hevcSelector removeAllSegments];
             [self.hevcSelector insertSegmentWithTitle:@"Unsupported on this device" atIndex:0 animated:NO];
             [self.hevcSelector setEnabled:NO];
+            [self.hdrSelector removeAllSegments];
+            [self.hdrSelector insertSegmentWithTitle:@"Unsupported on this device" atIndex:0 animated:NO];
+            [self.hdrSelector setEnabled:NO];
         }
     }
     else {
         [self.hevcSelector removeAllSegments];
         [self.hevcSelector insertSegmentWithTitle:@"Requires iOS 11.3 or later" atIndex:0 animated:NO];
         [self.hevcSelector setEnabled:NO];
+        [self.hdrSelector removeAllSegments];
+        [self.hdrSelector insertSegmentWithTitle:@"Requires iOS 11.3 or later" atIndex:0 animated:NO];
+        [self.hdrSelector setEnabled:NO];
     }
     
     [self.touchModeSelector setSelectedSegmentIndex:currentSettings.absoluteTouchMode ? 1 : 0];
