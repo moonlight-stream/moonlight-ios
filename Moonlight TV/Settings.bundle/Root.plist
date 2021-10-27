@@ -47,11 +47,15 @@
 			<array>
 				<string>30</string>
 				<string>60</string>
+				<string>90</string>
+				<string>120</string>
 			</array>
 			<key>Titles</key>
 			<array>
 				<string>30 FPS</string>
 				<string>60 FPS</string>
+				<string>90 FPS</string>
+				<string>120 FPS</string>
 			</array>
 		</dict>
 		<dict>
@@ -72,6 +76,10 @@
 				<string>10 Mbps</string>
 				<string>20 Mbps</string>
 				<string>25 Mbps</string>
+				<string>30 Mbps</string>
+				<string>35 Mbps</string>
+				<string>40 Mbps</string>
+				<string>45 Mbps</string>
 				<string>50 Mbps</string>
 				<string>100 Mbps</string>
 				<string>150 Mbps</string>
@@ -85,6 +93,10 @@
 				<string>10000</string>
 				<string>20000</string>
 				<string>25000</string>
+				<string>30000</string>
+				<string>35000</string>
+				<string>40000</string>
+				<string>45000</string>
 				<string>50000</string>
 				<string>100000</string>
 				<string>150000</string>

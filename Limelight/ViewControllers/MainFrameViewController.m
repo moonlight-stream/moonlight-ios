@@ -632,7 +632,7 @@ static NSMutableSet* hostList;
     _streamConfig.gamepadMask = [ControllerSupport getConnectedGamepadMask:_streamConfig];
 
     int numberOfChannels = [streamSettings.audioConfig intValue];
-    Log(LOG_I, @"Number of audio channels %d", numberOfChannels);
+    Log(LOG_I, @"Number of channels %d", numberOfChannels);
     if (numberOfChannels >= 8) {
         _streamConfig.audioConfiguration = AUDIO_CONFIGURATION_71_SURROUND;
     }
