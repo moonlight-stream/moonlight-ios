@@ -28,6 +28,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     NSInteger lastMouseButtonMask;
     float lastMouseX;
     float lastMouseY;
+    CGPoint lastScrollTranslation;
     
     // Citrix X1 mouse support
     X1Mouse* x1mouse;
@@ -52,7 +53,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
     
     keyInputField = [[UITextField alloc] initWithFrame:CGRectZero];
-    [keyInputField setKeyboardType:UIKeyboardTypeASCIICapable];
+    [keyInputField setKeyboardType:UIKeyboardTypeDefault];
     [keyInputField setAutocorrectionType:UITextAutocorrectionTypeNo];
     [keyInputField setAutocapitalizationType:UITextAutocapitalizationTypeNone];
     [keyInputField setSpellCheckingType:UITextSpellCheckingTypeNo];
@@ -91,11 +92,17 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     if (@available(iOS 13.4, *)) {
         [self addInteraction:[[UIPointerInteraction alloc] initWithDelegate:self]];
         
-        UIPanGestureRecognizer *mouseWheelRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(mouseWheelMoved:)];
-        mouseWheelRecognizer.maximumNumberOfTouches = 0;
-        mouseWheelRecognizer.allowedScrollTypesMask = UIScrollTypeMaskAll;
-        mouseWheelRecognizer.allowedTouchTypes = @[@(UITouchTypeIndirectPointer)];
-        [self addGestureRecognizer:mouseWheelRecognizer];
+        UIPanGestureRecognizer *discreteMouseWheelRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(mouseWheelMovedDiscrete:)];
+        discreteMouseWheelRecognizer.maximumNumberOfTouches = 0;
+        discreteMouseWheelRecognizer.allowedScrollTypesMask = UIScrollTypeMaskDiscrete;
+        discreteMouseWheelRecognizer.allowedTouchTypes = @[@(UITouchTypeIndirectPointer)];
+        [self addGestureRecognizer:discreteMouseWheelRecognizer];
+        
+        UIPanGestureRecognizer *continuousMouseWheelRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(mouseWheelMovedContinuous:)];
+        continuousMouseWheelRecognizer.maximumNumberOfTouches = 0;
+        continuousMouseWheelRecognizer.allowedScrollTypesMask = UIScrollTypeMaskContinuous;
+        continuousMouseWheelRecognizer.allowedTouchTypes = @[@(UITouchTypeIndirectPointer)];
+        [self addGestureRecognizer:continuousMouseWheelRecognizer];
     }
 #endif
     
@@ -448,29 +455,49 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     return [UIPointerStyle hiddenPointerStyle];
 }
 
-- (void)mouseWheelMoved:(UIPanGestureRecognizer *)gesture {
-    if (@available(iOS 14.0, *)) {
-        if ([GCMouse current] != nil) {
-            // We'll handle this with GCMouse. Do nothing here.
-            return;
-        }
-    }
-    
+- (void)mouseWheelMovedContinuous:(UIPanGestureRecognizer *)gesture {
     switch (gesture.state) {
         case UIGestureRecognizerStateBegan:
         case UIGestureRecognizerStateChanged:
-        case UIGestureRecognizerStateEnded:
             break;
-            
+        
+        case UIGestureRecognizerStateEnded:
         default:
             // Ignore recognition failure and other states
+            lastScrollTranslation = CGPointMake(0, 0);
             return;
     }
-
-    CGPoint velocity = [gesture velocityInView:self];
-    if ((short)velocity.y != 0) {
-        LiSendHighResScrollEvent((short)velocity.y);
+    
+    CGPoint currentScrollTranslation = [gesture translationInView:self];
+    short translationDeltaY = ((currentScrollTranslation.y - lastScrollTranslation.y) / self.bounds.size.height) * 120; // WHEEL_DELTA
+    if (translationDeltaY != 0) {
+        LiSendHighResScrollEvent(translationDeltaY);
+        lastScrollTranslation = currentScrollTranslation;
     }
+}
+
+- (void)mouseWheelMovedDiscrete:(UIPanGestureRecognizer *)gesture {
+    switch (gesture.state) {
+        case UIGestureRecognizerStateBegan:
+        case UIGestureRecognizerStateChanged:
+            break;
+        
+        case UIGestureRecognizerStateEnded:
+        default:
+            // Ignore recognition failure and other states
+            lastScrollTranslation = CGPointMake(0, 0);
+            return;
+    }
+    
+    // Using velocityInView is 0 for discrete scroll events
+    // when scrolling very slowly, but translationInView does work.
+    CGPoint currentScrollTranslation = [gesture translationInView:self];
+    short translationDeltaY = currentScrollTranslation.y - lastScrollTranslation.y;
+    if (translationDeltaY != 0) {
+        LiSendScrollEvent(translationDeltaY > 0 ? 1 : -1);
+    }
+    
+    lastScrollTranslation = currentScrollTranslation;
 }
 
 #endif
@@ -503,13 +530,24 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
             LiSendKeyboardEvent(0x08, KEY_ACTION_UP, 0);
         } else {
             // Character 0 will be our known sentinel value
+            
+            // Check if any characters exist which can't be represented in a basic key event
             for (int i = 1; i < [inputText length]; i++) {
                 struct KeyEvent event = [KeyboardSupport translateKeyEvent:[inputText characterAtIndex:i] withModifierFlags:0];
                 if (event.keycode == 0) {
-                    // If we don't know the code, don't send anything.
-                    Log(LOG_W, @"Unknown key code: [%c]", [inputText characterAtIndex:i]);
-                    continue;
+                    // We found an unknown key, so send the entire string as UTF-8
+                    const char* utf8String = [inputText UTF8String];
+                    
+                    // Skip the first character which is our sentinel
+                    LiSendUtf8TextEvent(utf8String + 1, (int)strlen(utf8String) - 1);
+                    return;
                 }
+            }
+            
+            // We didn't find any unknown characters, so send them all as basic key events
+            for (int i = 1; i < [inputText length]; i++) {
+                struct KeyEvent event = [KeyboardSupport translateKeyEvent:[inputText characterAtIndex:i] withModifierFlags:0];
+                assert(event.keycode != 0);
                 [self sendLowLevelEvent:event];
             }
         }

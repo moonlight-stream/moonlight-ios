@@ -3,4 +3,4 @@
 	url = https://github.com/moonlight-stream/moonlight-common-c.git
 [submodule "X1Kit"]
 	path = X1Kit
-	url = https://github.com/fizzyade/X1Kit.git
+	url = https://github.com/cgutman/X1Kit.git
