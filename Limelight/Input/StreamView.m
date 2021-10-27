@@ -53,7 +53,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
     
     keyInputField = [[UITextField alloc] initWithFrame:CGRectZero];
-    [keyInputField setKeyboardType:UIKeyboardTypeDefault];
+    [keyInputField setKeyboardType:UIKeyboardTypeASCIICapable];
     [keyInputField setAutocorrectionType:UITextAutocorrectionTypeNo];
     [keyInputField setAutocapitalizationType:UITextAutocapitalizationTypeNone];
     [keyInputField setSpellCheckingType:UITextSpellCheckingTypeNo];
@@ -530,24 +530,13 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
             LiSendKeyboardEvent(0x08, KEY_ACTION_UP, 0);
         } else {
             // Character 0 will be our known sentinel value
-            
-            // Check if any characters exist which can't be represented in a basic key event
             for (int i = 1; i < [inputText length]; i++) {
                 struct KeyEvent event = [KeyboardSupport translateKeyEvent:[inputText characterAtIndex:i] withModifierFlags:0];
                 if (event.keycode == 0) {
-                    // We found an unknown key, so send the entire string as UTF-8
-                    const char* utf8String = [inputText UTF8String];
-                    
-                    // Skip the first character which is our sentinel
-                    LiSendUtf8TextEvent(utf8String + 1, (int)strlen(utf8String) - 1);
-                    return;
+                    // If we don't know the code, don't send anything.
+                    Log(LOG_W, @"Unknown key code: [%c]", [inputText characterAtIndex:i]);
+                    continue;
                 }
-            }
-            
-            // We didn't find any unknown characters, so send them all as basic key events
-            for (int i = 1; i < [inputText length]; i++) {
-                struct KeyEvent event = [KeyboardSupport translateKeyEvent:[inputText characterAtIndex:i] withModifierFlags:0];
-                assert(event.keycode != 0);
                 [self sendLowLevelEvent:event];
             }
         }
