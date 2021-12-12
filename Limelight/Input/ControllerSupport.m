@@ -439,7 +439,7 @@ static const double MOUSE_SPEED_DIVISOR = 2.5;
     // GCMouse for mice, so we will have to just use it and hope for the best.
 #if TARGET_OS_TV
     mouse.mouseInput.scroll.yAxis.valueChangedHandler = ^(GCControllerAxisInput * _Nonnull axis, float value) {
-        self->accumulatedScrollY += -value;
+        self->accumulatedScrollY += value;
         
         short truncatedScrollY = (short)self->accumulatedScrollY;
         
