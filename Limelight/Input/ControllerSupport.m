@@ -444,7 +444,7 @@ static const double MOUSE_SPEED_DIVISOR = 2.5;
         short truncatedScrollY = (short)self->accumulatedScrollY;
         
         if (truncatedScrollY != 0) {
-            LiSendHighResScrollEvent(truncatedScrollY);
+            LiSendHighResScrollEvent(truncatedScrollY * 20);
             
             self->accumulatedScrollY -= truncatedScrollY;
         }
