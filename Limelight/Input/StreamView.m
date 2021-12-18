@@ -471,7 +471,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     CGPoint currentScrollTranslation = [gesture translationInView:self];
     short translationDeltaY = ((currentScrollTranslation.y - lastScrollTranslation.y) / self.bounds.size.height) * 120; // WHEEL_DELTA
     if (translationDeltaY != 0) {
-        LiSendHighResScrollEvent(translationDeltaY);
+        LiSendHighResScrollEvent(translationDeltaY * 20);
         lastScrollTranslation = currentScrollTranslation;
     }
 }

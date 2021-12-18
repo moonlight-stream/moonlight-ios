@@ -432,6 +432,24 @@ static const double MOUSE_SPEED_DIVISOR = 2.5;
             };
         }
     }
+    
+    // We use UIPanGestureRecognizer on iPadOS because it allows us to distinguish
+    // between discrete and continuous scroll events and also works around a bug
+    // in iPadOS 15 where discrete scroll events are dropped. tvOS only supports
+    // GCMouse for mice, so we will have to just use it and hope for the best.
+#if TARGET_OS_TV
+    mouse.mouseInput.scroll.yAxis.valueChangedHandler = ^(GCControllerAxisInput * _Nonnull axis, float value) {
+        self->accumulatedScrollY += value;
+        
+        short truncatedScrollY = (short)self->accumulatedScrollY;
+        
+        if (truncatedScrollY != 0) {
+            LiSendHighResScrollEvent(truncatedScrollY * 20);
+            
+            self->accumulatedScrollY -= truncatedScrollY;
+        }
+    };
+#endif
 }
 
 -(void) updateAutoOnScreenControlMode

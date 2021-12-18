@@ -58,15 +58,23 @@ static const int REFERENCE_HEIGHT = 720;
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-    UITouch *touch = [[event allTouches] anyObject];
-    originalLocation = touchLocation = [touch locationInView:view];
     touchMoved = false;
-    if ([[event allTouches] count] == 1 && !isDragging) {
-        dragTimer = [NSTimer scheduledTimerWithTimeInterval:0.650
-                                                 target:self
-                                               selector:@selector(onDragStart:)
-                                               userInfo:nil
-                                                repeats:NO];
+    if ([[event allTouches] count] == 1) {
+        UITouch *touch = [[event allTouches] anyObject];
+        originalLocation = touchLocation = [touch locationInView:view];
+        if (!isDragging) {
+            dragTimer = [NSTimer scheduledTimerWithTimeInterval:0.650
+                                                     target:self
+                                                   selector:@selector(onDragStart:)
+                                                   userInfo:nil
+                                                    repeats:NO];
+        }
+    }
+    else if ([[event allTouches] count] == 2) {
+        CGPoint firstLocation = [[[[event allTouches] allObjects] objectAtIndex:0] locationInView:view];
+        CGPoint secondLocation = [[[[event allTouches] allObjects] objectAtIndex:1] locationInView:view];
+        
+        originalLocation = touchLocation = CGPointMake((firstLocation.x + secondLocation.x) / 2, (firstLocation.y + secondLocation.y) / 2);
     }
 }
 
@@ -98,7 +106,7 @@ static const int REFERENCE_HEIGHT = 720;
         
         CGPoint avgLocation = CGPointMake((firstLocation.x + secondLocation.x) / 2, (firstLocation.y + secondLocation.y) / 2);
         if (touchLocation.y != avgLocation.y) {
-            LiSendHighResScrollEvent(avgLocation.y - touchLocation.y);
+            LiSendHighResScrollEvent((avgLocation.y - touchLocation.y) * 10);
         }
 
         // If we've moved far enough to confirm this wasn't just human/machine error,
