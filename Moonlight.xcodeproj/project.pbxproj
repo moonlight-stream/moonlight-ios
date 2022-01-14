@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		693B3A9B218638CD00982F7B /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 693B3A9A218638CD00982F7B /* Settings.bundle */; };
+		98181BE92791277400E43572 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98181BE82791275D00E43572 /* libSDL2.a */; };
+		98181BEB2791278F00E43572 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98181BEA2791278300E43572 /* libSDL2.a */; };
+		98181BED2791281100E43572 /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 98181BEC2791281100E43572 /* CoreMotion.framework */; };
 		9819CC14254F107A008A7C8E /* RelativeTouchHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 9819CC13254F107A008A7C8E /* RelativeTouchHandler.m */; };
 		9819CC1D254F1730008A7C8E /* RelativeTouchHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 9819CC13254F107A008A7C8E /* RelativeTouchHandler.m */; };
 		9819CC22254F180F008A7C8E /* AbsoluteTouchHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 9819CC21254F180F008A7C8E /* AbsoluteTouchHandler.m */; };
@@ -163,6 +166,9 @@
 		693B3A9A218638CD00982F7B /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		9803CCAB254F9EAF00EE185E /* ConnectionCallbacks.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ConnectionCallbacks.h; sourceTree = "<group>"; };
 		98132E8C20BC9A62007A053F /* Moonlight v1.1.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Moonlight v1.1.xcdatamodel"; sourceTree = "<group>"; };
+		98181BE82791275D00E43572 /* libSDL2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL2.a; path = libs/SDL2/lib/iOS/libSDL2.a; sourceTree = "<group>"; };
+		98181BEA2791278300E43572 /* libSDL2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL2.a; path = libs/SDL2/lib/tvOS/libSDL2.a; sourceTree = "<group>"; };
+		98181BEC2791281100E43572 /* CoreMotion.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMotion.framework; path = System/Library/Frameworks/CoreMotion.framework; sourceTree = SDKROOT; };
 		9819CC12254F107A008A7C8E /* RelativeTouchHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RelativeTouchHandler.h; sourceTree = "<group>"; };
 		9819CC13254F107A008A7C8E /* RelativeTouchHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RelativeTouchHandler.m; sourceTree = "<group>"; };
 		9819CC20254F180F008A7C8E /* AbsoluteTouchHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AbsoluteTouchHandler.h; sourceTree = "<group>"; };
@@ -382,6 +388,7 @@
 				9865DC3C2132922E0005B9B9 /* GameController.framework in Frameworks */,
 				FB1A67EA21324DF300507771 /* libxml2.tbd in Frameworks */,
 				FB1A67E821324DE300507771 /* libopus.a in Frameworks */,
+				98181BEB2791278F00E43572 /* libSDL2.a in Frameworks */,
 				FB1A67E621324DD600507771 /* libcrypto.a in Frameworks */,
 				FB1A67E721324DD600507771 /* libssl.a in Frameworks */,
 				FB1A67E521324A1F00507771 /* CoreData.framework in Frameworks */,
@@ -399,9 +406,11 @@
 				FB8946EC19F6AFE400339C8A /* libssl.a in Frameworks */,
 				FB290CF419B2C406004C83CF /* CoreGraphics.framework in Frameworks */,
 				FB290CF819B2C406004C83CF /* CoreData.framework in Frameworks */,
+				98181BED2791281100E43572 /* CoreMotion.framework in Frameworks */,
 				FB290CF619B2C406004C83CF /* UIKit.framework in Frameworks */,
 				FB290CF219B2C406004C83CF /* Foundation.framework in Frameworks */,
 				FB4679011A57048000377732 /* CoreFoundation.framework in Frameworks */,
+				98181BE92791277400E43572 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -461,6 +470,9 @@
 		FB290CF019B2C406004C83CF /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				98181BEC2791281100E43572 /* CoreMotion.framework */,
+				98181BE82791275D00E43572 /* libSDL2.a */,
+				98181BEA2791278300E43572 /* libSDL2.a */,
 				9865DC3B2132922E0005B9B9 /* GameController.framework */,
 				FB1A67E921324DF300507771 /* libxml2.tbd */,
 				FB1A67E421324A1F00507771 /* CoreData.framework */,
@@ -1130,6 +1142,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/libs/openssl/lib/tvOS",
 					"$(PROJECT_DIR)/libs/opus/lib/tvOS",
+					"$(PROJECT_DIR)/libs/SDL2/lib/tvOS",
 				);
 				MARKETING_VERSION = 7.1.3;
 				MTL_ENABLE_DEBUG_INFO = YES;
@@ -1175,6 +1188,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/libs/openssl/lib/tvOS",
 					"$(PROJECT_DIR)/libs/opus/lib/tvOS",
+					"$(PROJECT_DIR)/libs/SDL2/lib/tvOS",
 				);
 				MARKETING_VERSION = 7.1.3;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -1322,6 +1336,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/libs/opus/lib/iOS",
 					"$(PROJECT_DIR)/libs/openssl/lib/iOS",
+					"$(PROJECT_DIR)/libs/SDL2/lib/iOS",
 				);
 				MARKETING_VERSION = 7.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.$(PRODUCT_NAME:rfc1034identifier)";
@@ -1361,6 +1376,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/libs/opus/lib/iOS",
 					"$(PROJECT_DIR)/libs/openssl/lib/iOS",
+					"$(PROJECT_DIR)/libs/SDL2/lib/iOS",
 				);
 				MARKETING_VERSION = 7.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.$(PRODUCT_NAME:rfc1034identifier)";
