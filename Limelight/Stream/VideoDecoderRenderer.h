@@ -14,9 +14,9 @@
 
 - (id)initWithView:(UIView*)view callbacks:(id<ConnectionCallbacks>)callbacks;
 
-- (void)setupWithVideoFormat:(int)videoFormat refreshRate:(int)refreshRate;
-
-- (void)cleanup;
+- (void)setupWithVideoFormat:(int)videoFormat frameRate:(int)frameRate;
+- (void)start;
+- (void)stop;
 
 - (void)updateBufferForRange:(CMBlockBufferRef)existingBuffer data:(unsigned char *)data offset:(int)offset length:(int)nalLength;
 

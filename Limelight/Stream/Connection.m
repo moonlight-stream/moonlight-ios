@@ -47,7 +47,7 @@ static VideoDecoderRenderer* renderer;
 
 int DrDecoderSetup(int videoFormat, int width, int height, int redrawRate, void* context, int drFlags)
 {
-    [renderer setupWithVideoFormat:videoFormat refreshRate:redrawRate];
+    [renderer setupWithVideoFormat:videoFormat frameRate:redrawRate];
     lastFrameNumber = 0;
     activeVideoFormat = videoFormat;
     memset(&currentVideoStats, 0, sizeof(currentVideoStats));
@@ -55,9 +55,14 @@ int DrDecoderSetup(int videoFormat, int width, int height, int redrawRate, void*
     return 0;
 }
 
-void DrCleanup(void)
+void DrStart(void)
 {
-    [renderer cleanup];
+    [renderer start];
+}
+
+void DrStop(void)
+{
+    [renderer stop];
 }
 
 -(BOOL) getVideoStats:(video_stats_t*)stats
@@ -420,8 +425,8 @@ void ClConnectionStatusUpdate(int status)
 
     LiInitializeVideoCallbacks(&_drCallbacks);
     _drCallbacks.setup = DrDecoderSetup;
-    _drCallbacks.cleanup = DrCleanup;
-    _drCallbacks.submitDecodeUnit = DrSubmitDecodeUnit;
+    _drCallbacks.start = DrStart;
+    _drCallbacks.stop = DrStop;
 
     // RFI doesn't work properly with HEVC on iOS 11 with an iPhone SE (at least)
     // It doesnt work on macOS either, tested with Network Link Conditioner.
@@ -431,7 +436,7 @@ void ClConnectionStatusUpdate(int status)
 #if !TARGET_OS_TV
                                 CAPABILITY_REFERENCE_FRAME_INVALIDATION_AVC |
 #endif
-                                CAPABILITY_DIRECT_SUBMIT;
+                                CAPABILITY_PULL_RENDERER;
 
     LiInitializeAudioCallbacks(&_arCallbacks);
     _arCallbacks.init = ArInit;

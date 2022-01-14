@@ -18,6 +18,7 @@
     AVSampleBufferDisplayLayer* displayLayer;
     Boolean waitingForSps, waitingForPps, waitingForVps;
     int videoFormat;
+    int frameRate;
     
     NSData *spsData, *ppsData, *vpsData;
     CMVideoFormatDescriptionRef formatDesc;
@@ -74,30 +75,37 @@
     return self;
 }
 
-- (void)setupWithVideoFormat:(int)videoFormat refreshRate:(int)refreshRate
+- (void)setupWithVideoFormat:(int)videoFormat frameRate:(int)frameRate
 {
     self->videoFormat = videoFormat;
-    
-    if (refreshRate > 60) {
-        // HACK: We seem to just get 60 Hz screen updates even with a 120 FPS stream if
-        // we don't set preferredFramesPerSecond somewhere. Since we're a UIKit view, we
-        // have to use CADisplayLink for that. See https://github.com/moonlight-stream/moonlight-ios/issues/372
-        _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkCallback:)];
-        if (@available(iOS 10.0, tvOS 10.0, *)) {
-            _displayLink.preferredFramesPerSecond = refreshRate;
-        }
-        [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
-    }
-}
-                     
-- (void)displayLinkCallback:(CADisplayLink *)sender
-{
-    // No-op - rendering done in submitDecodeBuffer
+    self->frameRate = frameRate;
 }
 
-- (void)cleanup
+- (void)start
+{
+    _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkCallback:)];
+    if (@available(iOS 10.0, tvOS 10.0, *)) {
+        _displayLink.preferredFramesPerSecond = self->frameRate;
+    }
+    [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+}
+
+- (void)stop
 {
     [_displayLink invalidate];
+}
+
+// TODO: Refactor this
+int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
+
+- (void)displayLinkCallback:(CADisplayLink *)sender
+{
+    VIDEO_FRAME_HANDLE handle;
+    PDECODE_UNIT du;
+    
+    while (LiPollNextVideoFrame(&handle, &du)) {
+        LiCompleteVideoFrame(handle, DrSubmitDecodeUnit(du));
+    }
 }
 
 #define FRAME_START_PREFIX_SIZE 4
@@ -343,23 +351,20 @@
         CFDictionarySetValue(dict, kCMSampleAttachmentKey_DependsOnOthers, kCFBooleanFalse);
     }
 
-    // Enqueue video samples on the main thread
-    dispatch_async(dispatch_get_main_queue(), ^{
-        // Enqueue the next frame
-        [self->displayLayer enqueueSampleBuffer:sampleBuffer];
+    // Enqueue the next frame
+    [self->displayLayer enqueueSampleBuffer:sampleBuffer];
+    
+    if (frameType == FRAME_TYPE_IDR) {
+        // Ensure the layer is visible now
+        self->displayLayer.hidden = NO;
         
-        if (frameType == FRAME_TYPE_IDR) {
-            // Ensure the layer is visible now
-            self->displayLayer.hidden = NO;
-            
-            // Tell our parent VC to hide the progress indicator
-            [self->_callbacks videoContentShown];
-        }
-        
-        // Dereference the buffers
-        CFRelease(blockBuffer);
-        CFRelease(sampleBuffer);
-    });
+        // Tell our parent VC to hide the progress indicator
+        [self->_callbacks videoContentShown];
+    }
+    
+    // Dereference the buffers
+    CFRelease(blockBuffer);
+    CFRelease(sampleBuffer);
     
     return DR_OK;
 }
