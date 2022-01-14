@@ -78,21 +78,31 @@
 {
     self->videoFormat = videoFormat;
     
-    if (refreshRate > 60) {
-        // HACK: We seem to just get 60 Hz screen updates even with a 120 FPS stream if
-        // we don't set preferredFramesPerSecond somewhere. Since we're a UIKit view, we
-        // have to use CADisplayLink for that. See https://github.com/moonlight-stream/moonlight-ios/issues/372
-        _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkCallback:)];
-        if (@available(iOS 10.0, tvOS 10.0, *)) {
-            _displayLink.preferredFramesPerSecond = refreshRate;
-        }
-        [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+    _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkCallback:)];
+    if (@available(iOS 10.0, tvOS 10.0, *)) {
+        _displayLink.preferredFramesPerSecond = refreshRate;
     }
+    [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
 }
                      
+int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
+
 - (void)displayLinkCallback:(CADisplayLink *)sender
 {
-    // No-op - rendering done in submitDecodeBuffer
+    VIDEO_FRAME_HANDLE handle;
+    PDECODE_UNIT du;
+    
+    while (LiPollNextVideoFrame(&handle, &du)) {
+        LiCompleteVideoFrame(handle, DrSubmitDecodeUnit(du));
+        
+#if 0
+        // Always keep one pending frame smooth out gaps due to
+        // network jitter at the cost of 1 frame of latency
+        if (LiGetPendingVideoFrames() == 1) {
+            break;
+        }
+#endif
+    }
 }
 
 - (void)cleanup
@@ -343,23 +353,20 @@
         CFDictionarySetValue(dict, kCMSampleAttachmentKey_DependsOnOthers, kCFBooleanFalse);
     }
 
-    // Enqueue video samples on the main thread
-    dispatch_async(dispatch_get_main_queue(), ^{
-        // Enqueue the next frame
-        [self->displayLayer enqueueSampleBuffer:sampleBuffer];
+    // Enqueue the next frame
+    [self->displayLayer enqueueSampleBuffer:sampleBuffer];
+    
+    if (frameType == FRAME_TYPE_IDR) {
+        // Ensure the layer is visible now
+        self->displayLayer.hidden = NO;
         
-        if (frameType == FRAME_TYPE_IDR) {
-            // Ensure the layer is visible now
-            self->displayLayer.hidden = NO;
-            
-            // Tell our parent VC to hide the progress indicator
-            [self->_callbacks videoContentShown];
-        }
-        
-        // Dereference the buffers
-        CFRelease(blockBuffer);
-        CFRelease(sampleBuffer);
-    });
+        // Tell our parent VC to hide the progress indicator
+        [self->_callbacks videoContentShown];
+    }
+    
+    // Dereference the buffers
+    CFRelease(blockBuffer);
+    CFRelease(sampleBuffer);
     
     return DR_OK;
 }
