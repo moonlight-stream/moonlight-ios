@@ -171,23 +171,23 @@ int ArInit(int audioConfiguration, POPUS_MULTISTREAM_CONFIGURATION opusConfig, v
     want.freq = opusConfig->sampleRate;
     want.format = AUDIO_S16;
     want.channels = opusConfig->channelCount;
-
-    // This is supposed to be a power of 2, but our
-    // frames contain a non-power of 2 number of samples,
-    // so the slop would require buffering another full frame.
-    // Specifying non-Po2 seems to work for our supported platforms.
     want.samples = opusConfig->samplesPerFrame;
 
     audioDevice = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
     if (audioDevice == 0) {
         Log(LOG_E, @"Failed to open audio device: %s\n", SDL_GetError());
-        SDL_QuitSubSystem(SDL_INIT_AUDIO);
+        ArCleanup();
         return -1;
     }
     
     audioConfig = *opusConfig;
     audioFrameSize = opusConfig->samplesPerFrame * sizeof(short) * opusConfig->channelCount;
     audioBuffer = SDL_malloc(audioFrameSize);
+    if (audioBuffer == NULL) {
+        Log(LOG_E, @"Failed to allocate audio frame buffer");
+        ArCleanup();
+        return -1;
+    }
     
     opusDecoder = opus_multistream_decoder_create(opusConfig->sampleRate,
                                                   opusConfig->channelCount,
@@ -195,6 +195,11 @@ int ArInit(int audioConfiguration, POPUS_MULTISTREAM_CONFIGURATION opusConfig, v
                                                   opusConfig->coupledStreams,
                                                   opusConfig->mapping,
                                                   &err);
+    if (opusDecoder == NULL) {
+        Log(LOG_E, @"Failed to create Opus decoder");
+        ArCleanup();
+        return -1;
+    }
     
     // Start playback
     SDL_PauseAudioDevice(audioDevice, 0);
