@@ -633,7 +633,7 @@ static NSMutableSet* hostList;
     
 
     // Probe for supported channel configurations
-    long outputChannels = [AVAudioSession sharedInstance].maximumOutputNumberOfChannels;
+    long outputChannels = [AVAudioSession sharedInstance].outputNumberOfChannels;
     Log(LOG_I, @"Audio device supports %d channels", outputChannels);
     if (outputChannels >= 8) {
         _streamConfig.audioConfiguration = AUDIO_CONFIGURATION_71_SURROUND;
