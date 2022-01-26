@@ -631,8 +631,19 @@ static NSMutableSet* hostList;
     _streamConfig.multiController = streamSettings.multiController;
     _streamConfig.gamepadMask = [ControllerSupport getConnectedGamepadMask:_streamConfig];
     
+    // Probe for supported channel configurations.
+    // First try to switch audio route to max output channels is possible
+    AVAudioSession *audio_instance = [AVAudioSession sharedInstance];
+    long maxOutputChannels = audio_instance.maximumOutputNumberOfChannels;
+    Log(LOG_I, @"Audio device supports %d channels", maxOutputChannels);
+    
+    bool sucsess = [audio_instance setPreferredOutputNumberOfChannels:maxOutputChannels error:nil];
+    if (sucsess && [audio_instance outputNumberOfChannels] == maxOutputChannels){
+        Log(LOG_I, @"Switched audio device to %d channels", maxOutputChannels);
+    } else {
+        Log(LOG_I, @"Failed to switch audio device to %d channels", maxOutputChannels);
+    }
 
-    // Probe for supported channel configurations
     long outputChannels = [AVAudioSession sharedInstance].outputNumberOfChannels;
     Log(LOG_I, @"Audio device supports %d channels", outputChannels);
     if (outputChannels >= 8) {
