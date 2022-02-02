@@ -437,7 +437,6 @@ void ClConnectionStatusUpdate(int status)
                                 CAPABILITY_REFERENCE_FRAME_INVALIDATION_AVC |
 #endif
                                 CAPABILITY_PULL_RENDERER;
-
     LiInitializeAudioCallbacks(&_arCallbacks);
     _arCallbacks.init = ArInit;
     _arCallbacks.cleanup = ArCleanup;

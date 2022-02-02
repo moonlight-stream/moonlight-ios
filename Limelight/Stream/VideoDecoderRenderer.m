@@ -24,6 +24,7 @@
     CMVideoFormatDescriptionRef formatDesc;
     
     CADisplayLink* _displayLink;
+    BOOL framePacing;
 }
 
 - (void)reinitializeDisplayLayer
@@ -63,12 +64,13 @@
     }
 }
 
-- (id)initWithView:(StreamView*)view callbacks:(id<ConnectionCallbacks>)callbacks
+- (id)initWithView:(StreamView*)view callbacks:(id<ConnectionCallbacks>)callbacks useFramePacing:(BOOL)useFramePacing
 {
     self = [super init];
     
     _view = view;
     _callbacks = callbacks;
+    framePacing = useFramePacing;
     
     [self reinitializeDisplayLayer];
     
@@ -90,12 +92,6 @@
     [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
 }
 
-- (void)stop
-{
-    [_displayLink invalidate];
-}
-
-// TODO: Refactor this
 int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
 
 - (void)displayLinkCallback:(CADisplayLink *)sender
@@ -105,7 +101,20 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
     
     while (LiPollNextVideoFrame(&handle, &du)) {
         LiCompleteVideoFrame(handle, DrSubmitDecodeUnit(du));
+        
+        if (framePacing){
+            // Always keep one pending frame smooth out gaps due to
+            // network jitter at the cost of 1 frame of latency
+            if (LiGetPendingVideoFrames() == 1) {
+                break;
+            }
+        }
     }
+}
+
+- (void)stop
+{
+    [_displayLink invalidate];
 }
 
 #define FRAME_START_PREFIX_SIZE 4
@@ -350,14 +359,14 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
         CFDictionarySetValue(dict, kCMSampleAttachmentKey_NotSync, kCFBooleanFalse);
         CFDictionarySetValue(dict, kCMSampleAttachmentKey_DependsOnOthers, kCFBooleanFalse);
     }
-
+    
     // Enqueue the next frame
     [self->displayLayer enqueueSampleBuffer:sampleBuffer];
     
     if (frameType == FRAME_TYPE_IDR) {
         // Ensure the layer is visible now
         self->displayLayer.hidden = NO;
-        
+
         // Tell our parent VC to hide the progress indicator
         [self->_callbacks videoContentShown];
     }
@@ -365,7 +374,7 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
     // Dereference the buffers
     CFRelease(blockBuffer);
     CFRelease(sampleBuffer);
-    
+
     return DR_OK;
 }
 
