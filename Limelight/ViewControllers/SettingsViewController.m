@@ -48,6 +48,11 @@ static const int bitrateTable[] = {
     150000,
 };
 
+const int RESOLUTION_TABLE_SIZE = 5;
+const int RESOLUTION_TABLE_CUSTOM_INDEX = RESOLUTION_TABLE_SIZE - 1;
+const int RESOLUTION_TABLE_DEFAULT_INDEX = 1;
+CGSize resolutionTable[RESOLUTION_TABLE_SIZE];
+
 -(int)getSliderValueForBitrate:(NSInteger)bitrate {
     int i;
     
@@ -121,7 +126,13 @@ static const int bitrateTable[] = {
     
     // Ensure we pick a bitrate that falls exactly onto a slider notch
     _bitrate = bitrateTable[[self getSliderValueForBitrate:[currentSettings.bitrate intValue]]];
-    
+
+    resolutionTable[0] = CGSizeMake(640, 360);
+    resolutionTable[1] = CGSizeMake(1280, 720);
+    resolutionTable[2] = CGSizeMake(1920, 1080);
+    resolutionTable[3] = CGSizeMake(3840, 2160);
+    resolutionTable[4] = CGSizeMake([currentSettings.width integerValue], [currentSettings.height integerValue]); // custom initial value
+
     NSInteger framerate;
     switch ([currentSettings.framerate integerValue]) {
         case 30:
@@ -135,29 +146,15 @@ static const int bitrateTable[] = {
             framerate = 2;
             break;
     }
-    NSInteger resolution;
-    switch ([currentSettings.height integerValue]) {
-        case 360:
-            resolution = 0;
-            break;
-        default:
-        case 720:
-            resolution = 1;
-            break;
-        case 1080:
-            resolution = 2;
-            break;
-        case 2160:
-            resolution = 4;
-            break;
-    }
-    // because switch case doesn't work with "expression"
-    if ([currentSettings.height integerValue] == [self getMainScreenHeight]) {
-        resolution = 3;
-    }
 
-    NSString *newTitle = [NSString stringWithFormat:@"%dx%d", (int) self.getMainScreenWidth, (int) self.getMainScreenHeight];
-    [self.resolutionSelector setTitle:newTitle forSegmentAtIndex:3];
+    NSInteger resolution = RESOLUTION_TABLE_DEFAULT_INDEX;
+    for (int i = 0; i < RESOLUTION_TABLE_SIZE; i++) {
+        if ((int) resolutionTable[i].height == [currentSettings.height intValue]
+            && (int) resolutionTable[i].width == [currentSettings.width intValue]) {
+            resolution = i;
+            break;
+        }
+    }
 
     // Only show the 120 FPS option if we have a > 60-ish Hz display
     bool enable120Fps = false;
@@ -174,13 +171,15 @@ static const int bitrateTable[] = {
     // they support HEVC decoding (A9 or later).
     if (@available(iOS 11.0, tvOS 11.0, *)) {
         if (!VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC)) {
-            [self.resolutionSelector removeSegmentAtIndex:4 animated:NO];
+            [self.resolutionSelector removeSegmentAtIndex:3 animated:NO];
+            if (resolution >= 3) resolution--;
         }
     }
     else {
-        [self.resolutionSelector removeSegmentAtIndex:4 animated:NO];
+        [self.resolutionSelector removeSegmentAtIndex:3 animated:NO];
+        if (resolution >= 3) resolution--;
     }
-    
+
     // Disable the HEVC selector if HEVC is not supported by the hardware
     // or the version of iOS. See comment in Connection.m for reasoning behind
     // the iOS 11.3 check.
@@ -209,9 +208,9 @@ static const int bitrateTable[] = {
     [self.audioOnPCSelector setSelectedSegmentIndex:currentSettings.playAudioOnPC ? 1 : 0];
     NSInteger onscreenControls = [currentSettings.onscreenControls integerValue];
     [self.resolutionSelector setSelectedSegmentIndex:resolution];
-    [self.resolutionSelector addTarget:self action:@selector(newResolutionFpsChosen) forControlEvents:UIControlEventValueChanged];
+    [self.resolutionSelector addTarget:self action:@selector(newResolutionChosen) forControlEvents:UIControlEventValueChanged];
     [self.framerateSelector setSelectedSegmentIndex:framerate];
-    [self.framerateSelector addTarget:self action:@selector(newResolutionFpsChosen) forControlEvents:UIControlEventValueChanged];
+    [self.framerateSelector addTarget:self action:@selector(updateBitrate) forControlEvents:UIControlEventValueChanged];
     [self.onscreenControlSelector setSelectedSegmentIndex:onscreenControls];
     [self.onscreenControlSelector setEnabled:!currentSettings.absoluteTouchMode];
     [self.bitrateSlider setMinimumValue:0];
@@ -219,6 +218,7 @@ static const int bitrateTable[] = {
     [self.bitrateSlider setValue:[self getSliderValueForBitrate:_bitrate] animated:YES];
     [self.bitrateSlider addTarget:self action:@selector(bitrateSliderMoved) forControlEvents:UIControlEventValueChanged];
     [self updateBitrateText];
+    [self updateCustomResolutionText];
 }
 
 - (void) touchModeChanged {
@@ -226,7 +226,7 @@ static const int bitrateTable[] = {
     [self.onscreenControlSelector setEnabled:[self.touchModeSelector selectedSegmentIndex] == 0];
 }
 
-- (void) newResolutionFpsChosen {
+- (void) updateBitrate {
     NSInteger fps = [self getChosenFrameRate];
     NSInteger width = [self getChosenStreamWidth];
     NSInteger height = [self getChosenStreamHeight];
@@ -265,6 +265,63 @@ static const int bitrateTable[] = {
     [self updateBitrateText];
 }
 
+- (void) newResolutionChosen {
+    BOOL lastSegmentSelected = [self.resolutionSelector selectedSegmentIndex] + 1 == [self.resolutionSelector numberOfSegments];
+    if (lastSegmentSelected) {
+        [self promptCustomResolutionDialog];
+    }
+    [self updateBitrate];
+}
+
+- (void) promptCustomResolutionDialog {
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle: @"Custom resolution" message: @"Choose a custom width and height" preferredStyle:UIAlertControllerStyleAlert];
+
+    [alertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {
+        textField.placeholder = @"width ex: 1920";
+        textField.clearButtonMode = UITextFieldViewModeAlways;
+        textField.borderStyle = UITextBorderStyleRoundedRect;
+        textField.keyboardType = UIKeyboardTypeNumberPad;
+        textField.text = [NSString stringWithFormat:@"%d", (int) resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX].width];
+    }];
+
+    [alertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {
+        textField.placeholder = @"height ex: 1080";
+        textField.clearButtonMode = UITextFieldViewModeAlways;
+        textField.borderStyle = UITextBorderStyleRoundedRect;
+        textField.keyboardType = UIKeyboardTypeNumberPad;
+        textField.text = [NSString stringWithFormat:@"%d", (int) resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX].height];
+    }];
+
+    [alertController addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        NSArray * textfields = alertController.textFields;
+        UITextField *widthField = textfields[0];
+        UITextField *heightField = textfields[1];
+
+        resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX] = CGSizeMake(
+            [widthField.text integerValue],
+            [heightField.text integerValue]
+        );
+        [self updateBitrate];
+        [self updateCustomResolutionText];
+    }]];
+
+    [alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+        [self.resolutionSelector setSelectedSegmentIndex:RESOLUTION_TABLE_DEFAULT_INDEX];
+        [self updateBitrate];
+    }]];
+
+    [self presentViewController:alertController animated:YES completion:nil];
+}
+
+- (void) updateCustomResolutionText {
+    BOOL customResolutionEqualsDefaultResolution = resolutionTable[RESOLUTION_TABLE_DEFAULT_INDEX].width == resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX].width && resolutionTable[RESOLUTION_TABLE_DEFAULT_INDEX].height == resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX].height;
+    
+    if (!customResolutionEqualsDefaultResolution) {
+        NSString *newTitle = [NSString stringWithFormat:@"Custom %dx%d", (int) resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX].width, (int) resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX].height];
+        [self.resolutionSelector setTitle:newTitle forSegmentAtIndex:[self.resolutionSelector numberOfSegments] - 1];
+    }
+}
+
 - (void) bitrateSliderMoved {
     assert(self.bitrateSlider.value < (sizeof(bitrateTable) / sizeof(*bitrateTable)));
     _bitrate = bitrateTable[(int)self.bitrateSlider.value];
@@ -289,54 +346,24 @@ static const int bitrateTable[] = {
     }
 }
 
-- (UIEdgeInsets) getSafeAreaInsets {
-    if (@available(iOS 11.0, *)) {
-        return UIApplication.sharedApplication.keyWindow.safeAreaInsets;
-    } else {
-        // todo: find a way to calculate the safe area for previous version
-        return UIEdgeInsetsMake(0, 0, 0, 0);
-    }
-}
-
-- (NSInteger) getMainScreenHeight {
-    CGFloat scale = UIScreen.mainScreen.scale;
-    UIEdgeInsets insets = [self getSafeAreaInsets];
-    CGFloat top = insets.top;
-    CGFloat bottom = insets.bottom;
-    CGFloat height = UIScreen.mainScreen.bounds.size.height;
-
-    return scale * (height - top - bottom);
-}
-
-- (NSInteger) getMainScreenWidth {
-    CGFloat scale = UIScreen.mainScreen.scale;
-    UIEdgeInsets insets = [self getSafeAreaInsets];
-    CGFloat left = insets.left;
-    CGFloat right = insets.right;
-    CGFloat width = UIScreen.mainScreen.bounds.size.width;
-
-    return scale * (width - left - right);
-}
-
 - (NSInteger) getChosenStreamHeight {
-    const int mainScreenHeight = (int)[self getMainScreenHeight];
-    const int resolutionTable[] = { 360, 720, 1080, mainScreenHeight, 2160 };
+    // because the 4k resolution can be removed
+    BOOL lastSegmentSelected = [self.resolutionSelector selectedSegmentIndex] + 1 == [self.resolutionSelector numberOfSegments];
+    if (lastSegmentSelected) {
+        return resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX].height;
+    }
 
-    return resolutionTable[[self.resolutionSelector selectedSegmentIndex]];
+    return resolutionTable[[self.resolutionSelector selectedSegmentIndex]].height;
 }
 
 - (NSInteger) getChosenStreamWidth {
-    const NSInteger choosenHeight = [self getChosenStreamHeight];
-    switch (choosenHeight) {
-        case 360:
-        case 720:
-        case 1080:
-        case 2160:
-            // Assumes fixed 16:9 aspect ratio
-            return choosenHeight * 16 / 9;
-        default:
-            return [self getMainScreenWidth];
+    // because the 4k resolution can be removed
+    BOOL lastSegmentSelected = [self.resolutionSelector selectedSegmentIndex] + 1 == [self.resolutionSelector numberOfSegments];
+    if (lastSegmentSelected) {
+        return resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX].width;
     }
+
+    return resolutionTable[[self.resolutionSelector selectedSegmentIndex]].width;
 }
 
 - (void) saveSettings {
