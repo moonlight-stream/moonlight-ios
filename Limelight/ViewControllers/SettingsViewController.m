@@ -318,6 +318,7 @@ CGSize resolutionTable[RESOLUTION_TABLE_SIZE];
     if (!customResolutionEqualsDefaultResolution) {
         NSString *newTitle = [NSString stringWithFormat:@"Custom %dx%d", (int) resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX].width, (int) resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX].height];
         [self.resolutionSelector setTitle:newTitle forSegmentAtIndex:[self.resolutionSelector numberOfSegments] - 1];
+        self.resolutionSelector.apportionsSegmentWidthsByContent = YES; // to update the width
     }
 }
 
