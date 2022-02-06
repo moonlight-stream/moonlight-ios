@@ -35,7 +35,7 @@
     self.framerate = [NSNumber numberWithInteger:[[NSUserDefaults standardUserDefaults] integerForKey:@"framerate"]];
     assert([self.framerate intValue] != 0);
     self.useHevc = [[NSUserDefaults standardUserDefaults] boolForKey:@"useHevc"];
-    self.useFramePacing = [[NSUserDefaults standardUserDefaults] boolForKey:@"useFramePacing"];
+    self.useFramePacing = [[NSUserDefaults standardUserDefaults] integerForKey:@"useFramePacing"] != 0;
     self.playAudioOnPC = [[NSUserDefaults standardUserDefaults] boolForKey:@"audioOnPC"];
     self.enableHdr = [[NSUserDefaults standardUserDefaults] boolForKey:@"enableHdr"];
     self.optimizeGames = [[NSUserDefaults standardUserDefaults] boolForKey:@"optimizeGames"];
