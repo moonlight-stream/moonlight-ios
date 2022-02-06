@@ -14,6 +14,7 @@
 @implementation VideoDecoderRenderer {
     StreamView* _view;
     id<ConnectionCallbacks> _callbacks;
+    float _streamAspectRatio;
     
     AVSampleBufferDisplayLayer* displayLayer;
     Boolean waitingForSps, waitingForPps, waitingForVps;
@@ -31,12 +32,23 @@
     CALayer *oldLayer = displayLayer;
     
     displayLayer = [[AVSampleBufferDisplayLayer alloc] init];
-    displayLayer.bounds = _view.bounds;
     displayLayer.backgroundColor = [UIColor blackColor].CGColor;
     
+    // Ensure the AVSampleBufferDisplayLayer is sized to preserve the aspect ratio
+    // of the video stream. We used to use AVLayerVideoGravityResizeAspect, but that
+    // respects the PAR encoded in the SPS which causes our computed video-relative
+    // touch location to be wrong in StreamView if the aspect ratio of the host
+    // desktop doesn't match the aspect ratio of the stream.
+    CGSize videoSize;
+    if (_view.bounds.size.width > _view.bounds.size.height * _streamAspectRatio) {
+        videoSize = CGSizeMake(_view.bounds.size.height * _streamAspectRatio, _view.bounds.size.height);
+    } else {
+        videoSize = CGSizeMake(_view.bounds.size.width, _view.bounds.size.width / _streamAspectRatio);
+    }
     displayLayer.position = CGPointMake(CGRectGetMidX(_view.bounds), CGRectGetMidY(_view.bounds));
-    displayLayer.videoGravity = AVLayerVideoGravityResizeAspect;
-    
+    displayLayer.bounds = CGRectMake(0, 0, videoSize.width, videoSize.height);
+    displayLayer.videoGravity = AVLayerVideoGravityResize;
+
     // Hide the layer until we get an IDR frame. This ensures we
     // can see the loading progress label as the stream is starting.
     displayLayer.hidden = YES;
@@ -63,12 +75,13 @@
     }
 }
 
-- (id)initWithView:(StreamView*)view callbacks:(id<ConnectionCallbacks>)callbacks
+- (id)initWithView:(StreamView*)view callbacks:(id<ConnectionCallbacks>)callbacks streamAspectRatio:(float)aspectRatio
 {
     self = [super init];
     
     _view = view;
     _callbacks = callbacks;
+    _streamAspectRatio = aspectRatio;
     
     [self reinitializeDisplayLayer];
     
