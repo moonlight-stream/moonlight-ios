@@ -311,6 +311,7 @@ static const int bitrateTable[] = {
                            framerate:framerate
                               height:height
                                width:width
+                         audioConfig:2 // Stereo
                     onscreenControls:onscreenControls
                        optimizeGames:optimizeGames
                      multiController:multiController
