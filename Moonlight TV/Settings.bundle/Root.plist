@@ -102,8 +102,8 @@
 			<key>Titles</key>
 			<array>
 				<string>Stereo</string>
-				<string>5.1</string>
-				<string>7.1</string>
+				<string>LPCM 5.1</string>
+				<string>LPCM 7.1</string>
 			</array>
 			<key>Values</key>
 			<array>
