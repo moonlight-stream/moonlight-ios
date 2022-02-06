@@ -22,6 +22,7 @@
                  multiController:(BOOL)multiController
                        audioOnPC:(BOOL)audioOnPC
                          useHevc:(BOOL)useHevc
+                  useFramePacing:(BOOL)useFramePacing
                        enableHdr:(BOOL)enableHdr
                   btMouseSupport:(BOOL)btMouseSupport
                absoluteTouchMode:(BOOL)absoluteTouchMode

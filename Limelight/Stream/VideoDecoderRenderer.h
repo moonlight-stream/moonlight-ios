@@ -12,7 +12,7 @@
 
 @interface VideoDecoderRenderer : NSObject
 
-- (id)initWithView:(UIView*)view callbacks:(id<ConnectionCallbacks>)callbacks streamAspectRatio:(float)aspectRatio;
+- (id)initWithView:(UIView*)view callbacks:(id<ConnectionCallbacks>)callbacks streamAspectRatio:(float)aspectRatio useFramePacing:(BOOL)useFramePacing;
 
 - (void)setupWithVideoFormat:(int)videoFormat frameRate:(int)frameRate;
 - (void)start;
