@@ -184,7 +184,7 @@
 			<key>Type</key>
 			<string>PSMultiValueSpecifier</string>
 			<key>Title</key>
-			<string>Frame Pacing</string>
+			<string>Frame Pacing Preference</string>
 			<key>Key</key>
 			<string>useFramePacing</string>
 			<key>DefaultValue</key>
@@ -196,8 +196,8 @@
 			</array>
 			<key>Titles</key>
 			<array>
-				<string>Prioritize Latency</string>
-				<string>Prioritize Smoothness</string>
+				<string>Lowest Latency</string>
+				<string>Smoothest Video</string>
 			</array>
 		</dict>
 		<dict>
