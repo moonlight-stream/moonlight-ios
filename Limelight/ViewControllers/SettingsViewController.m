@@ -146,10 +146,17 @@ static const int bitrateTable[] = {
             resolution = 2;
             break;
         case 2160:
-            resolution = 3;
+            resolution = 4;
             break;
     }
-    
+    // because switch case doesn't work with "expression"
+    if ([currentSettings.height integerValue] == [self getMainScreenHeight]) {
+        resolution = 3;
+    }
+
+    NSString *newTitle = [NSString stringWithFormat:@"%dx%d", (int) self.getMainScreenWidth, (int) self.getMainScreenHeight];
+    [self.resolutionSelector setTitle:newTitle forSegmentAtIndex:3];
+
     // Only show the 120 FPS option if we have a > 60-ish Hz display
     bool enable120Fps = false;
     if (@available(iOS 10.3, tvOS 10.3, *)) {
@@ -165,11 +172,11 @@ static const int bitrateTable[] = {
     // they support HEVC decoding (A9 or later).
     if (@available(iOS 11.0, tvOS 11.0, *)) {
         if (!VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC)) {
-            [self.resolutionSelector removeSegmentAtIndex:3 animated:NO];
+            [self.resolutionSelector removeSegmentAtIndex:4 animated:NO];
         }
     }
     else {
-        [self.resolutionSelector removeSegmentAtIndex:3 animated:NO];
+        [self.resolutionSelector removeSegmentAtIndex:4 animated:NO];
     }
     
     // Disable the HEVC selector if HEVC is not supported by the hardware
@@ -281,14 +288,54 @@ static const int bitrateTable[] = {
     }
 }
 
+- (UIEdgeInsets) getSafeAreaInsets {
+    if (@available(iOS 11.0, *)) {
+        return UIApplication.sharedApplication.keyWindow.safeAreaInsets;
+    } else {
+        // todo: find a way to calculate the safe area for previous version
+        return UIEdgeInsetsMake(0, 0, 0, 0);
+    }
+}
+
+- (NSInteger) getMainScreenHeight {
+    CGFloat scale = UIScreen.mainScreen.scale;
+    UIEdgeInsets insets = [self getSafeAreaInsets];
+    CGFloat top = insets.top;
+    CGFloat bottom = insets.bottom;
+    CGFloat height = UIScreen.mainScreen.bounds.size.height;
+
+    return scale * (height - top - bottom);
+}
+
+- (NSInteger) getMainScreenWidth {
+    CGFloat scale = UIScreen.mainScreen.scale;
+    UIEdgeInsets insets = [self getSafeAreaInsets];
+    CGFloat left = insets.left;
+    CGFloat right = insets.right;
+    CGFloat width = UIScreen.mainScreen.bounds.size.width;
+
+    return scale * (width - left - right);
+}
+
 - (NSInteger) getChosenStreamHeight {
-    const int resolutionTable[] = { 360, 720, 1080, 2160 };
+    const int mainScreenHeight = (int)[self getMainScreenHeight];
+    const int resolutionTable[] = { 360, 720, 1080, mainScreenHeight, 2160 };
+
     return resolutionTable[[self.resolutionSelector selectedSegmentIndex]];
 }
 
 - (NSInteger) getChosenStreamWidth {
-    // Assumes fixed 16:9 aspect ratio
-    return ([self getChosenStreamHeight] * 16) / 9;
+    const NSInteger choosenHeight = [self getChosenStreamHeight];
+    switch (choosenHeight) {
+        case 360:
+        case 720:
+        case 1080:
+        case 2160:
+            // Assumes fixed 16:9 aspect ratio
+            return choosenHeight * 16 / 9;
+        default:
+            return [self getMainScreenWidth];
+    }
 }
 
 - (void) saveSettings {
