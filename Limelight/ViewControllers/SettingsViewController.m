@@ -14,6 +14,7 @@
 
 @implementation SettingsViewController {
     NSInteger _bitrate;
+    NSInteger _lastSelectedResolutionIndex;
 }
 
 @dynamic overrideUserInterfaceStyle;
@@ -50,7 +51,6 @@ static const int bitrateTable[] = {
 
 const int RESOLUTION_TABLE_SIZE = 5;
 const int RESOLUTION_TABLE_CUSTOM_INDEX = RESOLUTION_TABLE_SIZE - 1;
-const int RESOLUTION_TABLE_DEFAULT_INDEX = 1;
 CGSize resolutionTable[RESOLUTION_TABLE_SIZE];
 
 -(int)getSliderValueForBitrate:(NSInteger)bitrate {
@@ -111,6 +111,20 @@ CGSize resolutionTable[RESOLUTION_TABLE_SIZE];
     }
 }
 
+BOOL isCustomResolution(CGSize res) {
+    if (res.width == 0 && res.height == 0) {
+        return NO;
+    }
+    
+    for (int i = 0; i < RESOLUTION_TABLE_CUSTOM_INDEX; i++) {
+        if (res.width == resolutionTable[i].width && res.height == resolutionTable[i].height) {
+            return NO;
+        }
+    }
+    
+    return YES;
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
 
@@ -130,6 +144,11 @@ CGSize resolutionTable[RESOLUTION_TABLE_SIZE];
     resolutionTable[2] = CGSizeMake(1920, 1080);
     resolutionTable[3] = CGSizeMake(3840, 2160);
     resolutionTable[4] = CGSizeMake([currentSettings.width integerValue], [currentSettings.height integerValue]); // custom initial value
+    
+    // Don't populate the custom entry unless we have a custom resolution
+    if (!isCustomResolution(resolutionTable[4])) {
+        resolutionTable[4] = CGSizeMake(0, 0);
+    }
 
     NSInteger framerate;
     switch ([currentSettings.framerate integerValue]) {
@@ -145,7 +164,7 @@ CGSize resolutionTable[RESOLUTION_TABLE_SIZE];
             break;
     }
 
-    NSInteger resolution = RESOLUTION_TABLE_DEFAULT_INDEX;
+    NSInteger resolution = 1;
     for (int i = 0; i < RESOLUTION_TABLE_SIZE; i++) {
         if ((int) resolutionTable[i].height == [currentSettings.height intValue]
             && (int) resolutionTable[i].width == [currentSettings.width intValue]) {
@@ -206,6 +225,7 @@ CGSize resolutionTable[RESOLUTION_TABLE_SIZE];
     [self.multiControllerSelector setSelectedSegmentIndex:currentSettings.multiController ? 1 : 0];
     [self.audioOnPCSelector setSelectedSegmentIndex:currentSettings.playAudioOnPC ? 1 : 0];
     NSInteger onscreenControls = [currentSettings.onscreenControls integerValue];
+    _lastSelectedResolutionIndex = resolution;
     [self.resolutionSelector setSelectedSegmentIndex:resolution];
     [self.resolutionSelector addTarget:self action:@selector(newResolutionChosen) forControlEvents:UIControlEventValueChanged];
     [self.framerateSelector setSelectedSegmentIndex:framerate];
@@ -269,53 +289,72 @@ CGSize resolutionTable[RESOLUTION_TABLE_SIZE];
     if (lastSegmentSelected) {
         [self promptCustomResolutionDialog];
     }
-    [self updateBitrate];
+    else {
+        [self updateBitrate];
+        _lastSelectedResolutionIndex = [self.resolutionSelector selectedSegmentIndex];
+    }
 }
 
 - (void) promptCustomResolutionDialog {
-    UIAlertController *alertController = [UIAlertController alertControllerWithTitle: @"Custom resolution" message: @"Choose a custom width and height" preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle: @"Custom resolution" message: @"Custom resolutions are not officially supported by GeForce Experience, so it will not set your host display resolution. You will need to set it manually while in game.\n\nResolutions that are not supported by your client or host PC may cause streaming errors." preferredStyle:UIAlertControllerStyleAlert];
 
     [alertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-        textField.placeholder = @"width ex: 1920";
+        textField.placeholder = @"Video Width";
         textField.clearButtonMode = UITextFieldViewModeAlways;
         textField.borderStyle = UITextBorderStyleRoundedRect;
         textField.keyboardType = UIKeyboardTypeNumberPad;
-        textField.text = [NSString stringWithFormat:@"%d", (int) resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX].width];
+        
+        if (resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX].width == 0) {
+            textField.text = @"";
+        }
+        else {
+            textField.text = [NSString stringWithFormat:@"%d", (int) resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX].width];
+        }
     }];
 
     [alertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-        textField.placeholder = @"height ex: 1080";
+        textField.placeholder = @"Video Height";
         textField.clearButtonMode = UITextFieldViewModeAlways;
         textField.borderStyle = UITextBorderStyleRoundedRect;
         textField.keyboardType = UIKeyboardTypeNumberPad;
-        textField.text = [NSString stringWithFormat:@"%d", (int) resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX].height];
+        
+        if (resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX].height == 0) {
+            textField.text = @"";
+        }
+        else {
+            textField.text = [NSString stringWithFormat:@"%d", (int) resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX].height];
+        }
     }];
 
     [alertController addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
         NSArray * textfields = alertController.textFields;
         UITextField *widthField = textfields[0];
         UITextField *heightField = textfields[1];
+        
+        long width = [widthField.text integerValue];
+        long height = [heightField.text integerValue];
+        if (width <= 0 || height <= 0) {
+            // Restore the previous selection
+            [self.resolutionSelector setSelectedSegmentIndex:self->_lastSelectedResolutionIndex];
+            return;
+        }
 
-        resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX] = CGSizeMake(
-            [widthField.text integerValue],
-            [heightField.text integerValue]
-        );
+        resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX] = CGSizeMake(width, height);
         [self updateBitrate];
         [self updateCustomResolutionText];
+        self->_lastSelectedResolutionIndex = [self.resolutionSelector selectedSegmentIndex];
     }]];
 
     [alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
-        [self.resolutionSelector setSelectedSegmentIndex:RESOLUTION_TABLE_DEFAULT_INDEX];
-        [self updateBitrate];
+        // Restore the previous selection
+        [self.resolutionSelector setSelectedSegmentIndex:self->_lastSelectedResolutionIndex];
     }]];
 
     [self presentViewController:alertController animated:YES completion:nil];
 }
 
 - (void) updateCustomResolutionText {
-    BOOL customResolutionEqualsDefaultResolution = resolutionTable[RESOLUTION_TABLE_DEFAULT_INDEX].width == resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX].width && resolutionTable[RESOLUTION_TABLE_DEFAULT_INDEX].height == resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX].height;
-    
-    if (!customResolutionEqualsDefaultResolution) {
+    if (isCustomResolution(resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX])) {
         NSString *newTitle = [NSString stringWithFormat:@"Custom %dx%d", (int) resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX].width, (int) resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX].height];
         [self.resolutionSelector setTitle:newTitle forSegmentAtIndex:[self.resolutionSelector numberOfSegments] - 1];
         self.resolutionSelector.apportionsSegmentWidthsByContent = YES; // to update the width
