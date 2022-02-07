@@ -351,6 +351,10 @@ BOOL isCustomResolution(CGSize res) {
         // Cap to maximum valid dimensions
         width = MIN(width, maxResolutionDimension);
         height = MIN(height, maxResolutionDimension);
+        
+        // Cap to minimum valid dimensions
+        width = MAX(width, 256);
+        height = MAX(height, 256);
 
         resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX] = CGSizeMake(width, height);
         [self updateBitrate];
