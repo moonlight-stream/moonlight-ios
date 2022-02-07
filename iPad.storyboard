@@ -58,7 +58,7 @@
                         <viewControllerLayoutGuide type="top" id="ef6-uF-5Hh"/>
                         <viewControllerLayoutGuide type="bottom" id="XvO-F3-j4u"/>
                     </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="WRy-3f-gEP">
+                    <view key="view" contentMode="scaleToFill" id="WRy-3f-gEP" customClass="UIScrollView">
                         <rect key="frame" x="0.0" y="0.0" width="1194" height="834"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
@@ -285,6 +285,7 @@
                         <outlet property="onscreenControlSelector" destination="qSU-wh-tqA" id="j8d-fB-Z2c"/>
                         <outlet property="optimizeSettingsSelector" destination="nCO-OT-dV1" id="FB0-Rt-C44"/>
                         <outlet property="resolutionSelector" destination="ckc-Dm-8ex" id="rl6-rx-wd3"/>
+                        <outlet property="scrollView" destination="WRy-3f-gEP" id="V8B-oF-27B"/>
                         <outlet property="statsOverlaySelector" destination="NLH-qN-qCo" id="EF8-JF-O3S"/>
                         <outlet property="touchModeSelector" destination="e4G-id-vjI" id="Cwh-fO-Pou"/>
                     </connections>
