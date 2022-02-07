@@ -296,7 +296,7 @@ BOOL isCustomResolution(CGSize res) {
 }
 
 - (void) promptCustomResolutionDialog {
-    UIAlertController *alertController = [UIAlertController alertControllerWithTitle: @"Custom resolution" message: @"Custom resolutions are not officially supported by GeForce Experience, so it will not set your host display resolution. You will need to set it manually while in game.\n\nResolutions that are not supported by your client or host PC may cause streaming errors." preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Enter Custom Resolution" message:nil preferredStyle:UIAlertControllerStyleAlert];
 
     [alertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {
         textField.placeholder = @"Video Width";
@@ -338,11 +338,28 @@ BOOL isCustomResolution(CGSize res) {
             [self.resolutionSelector setSelectedSegmentIndex:self->_lastSelectedResolutionIndex];
             return;
         }
+        
+        // H.264 maximum
+        int maxResolutionDimension = 4096;
+        if (@available(iOS 11.0, tvOS 11.0, *)) {
+            if (VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC)) {
+                // HEVC maximum
+                maxResolutionDimension = 8192;
+            }
+        }
+        
+        // Cap to maximum valid dimensions
+        width = MIN(width, maxResolutionDimension);
+        height = MIN(height, maxResolutionDimension);
 
         resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX] = CGSizeMake(width, height);
         [self updateBitrate];
         [self updateCustomResolutionText];
         self->_lastSelectedResolutionIndex = [self.resolutionSelector selectedSegmentIndex];
+        
+        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Custom Resolution Selected" message: @"Custom resolutions are not officially supported by GeForce Experience, so it will not set your host display resolution. You will need to set it manually while in game.\n\nResolutions that are not supported by your client or host PC may cause streaming errors." preferredStyle:UIAlertControllerStyleAlert];
+        [alertController addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
+        [self presentViewController:alertController animated:YES completion:nil];
     }]];
 
     [alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
