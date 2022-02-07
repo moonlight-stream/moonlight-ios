@@ -631,9 +631,13 @@ static NSMutableSet* hostList;
     // multiController must be set before calling getConnectedGamepadMask
     _streamConfig.multiController = streamSettings.multiController;
     _streamConfig.gamepadMask = [ControllerSupport getConnectedGamepadMask:_streamConfig];
-
-    int numberOfChannels = [streamSettings.audioConfig intValue];
-    Log(LOG_I, @"Number of audio channels %d", numberOfChannels);
+        
+    // Probe for supported channel configurations
+    int physicalOutputChannels = (int)[AVAudioSession sharedInstance].maximumOutputNumberOfChannels;
+    Log(LOG_I, @"Audio device supports %d channels", physicalOutputChannels);
+    
+    int numberOfChannels = MIN([streamSettings.audioConfig intValue], physicalOutputChannels);
+    Log(LOG_I, @"Selected number of audio channels %d", numberOfChannels);
     if (numberOfChannels >= 8) {
         _streamConfig.audioConfiguration = AUDIO_CONFIGURATION_71_SURROUND;
     }
