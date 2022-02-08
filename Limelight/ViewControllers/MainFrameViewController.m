@@ -648,14 +648,13 @@ static NSMutableSet* hostList;
         _streamConfig.audioConfiguration = AUDIO_CONFIGURATION_STEREO;
     }
     
-    // HDR requires HDR10 game, HDR10 display, and HEVC Main10 decoder on the client.
+    // HDR requires HDR10 display and HEVC Main10 decoder on the client.
     // It additionally requires an HEVC Main10 encoder on the server (GTX 1000+).
     //
     // It should also be a user preference, since some games may require higher peak
     // brightness than the iOS device can support to look correct in HDR mode.
     if (@available(iOS 11.3, tvOS 11.2, *)) {
         _streamConfig.enableHdr =
-            app.hdrSupported && // App supported
             (app.host.serverCodecModeSupport & 0x200) != 0 && // HEVC Main10 encoding on host PC GPU
             VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC) && // Decoder supported
             (AVPlayer.availableHDRModes & AVPlayerHDRModeHDR10) != 0 && // Display supported
