@@ -99,7 +99,10 @@
 - (void)start
 {
     _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkCallback:)];
-    if (@available(iOS 10.0, tvOS 10.0, *)) {
+    if (@available(iOS 15.0, tvOS 15.0, *)) {
+        _displayLink.preferredFrameRateRange = CAFrameRateRangeMake(self->frameRate, self->frameRate, self->frameRate);
+    }
+    else if (@available(iOS 10.0, tvOS 10.0, *)) {
         _displayLink.preferredFramesPerSecond = self->frameRate;
     }
     [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
@@ -116,11 +119,19 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
     while (LiPollNextVideoFrame(&handle, &du)) {
         LiCompleteVideoFrame(handle, DrSubmitDecodeUnit(du));
         
-        if (framePacing){
-            // Always keep one pending frame smooth out gaps due to
-            // network jitter at the cost of 1 frame of latency
-            if (LiGetPendingVideoFrames() == 1) {
-                break;
+        if (framePacing) {
+            // Calculate the actual display refresh rate
+            double displayRefreshRate = 1 / (_displayLink.targetTimestamp - _displayLink.timestamp);
+            
+            // Only pace frames if the display refresh rate is >= 90% of our stream frame rate.
+            // Battery saver, accessibility settings, or device thermals can cause the actual
+            // refresh rate of the display to drop below the physical maximum.
+            if (displayRefreshRate >= frameRate * 0.9f) {
+                // Keep one pending frame to smooth out gaps due to
+                // network jitter at the cost of 1 frame of latency
+                if (LiGetPendingVideoFrames() == 1) {
+                    break;
+                }
             }
         }
     }
