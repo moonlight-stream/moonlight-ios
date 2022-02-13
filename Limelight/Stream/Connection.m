@@ -302,6 +302,11 @@ void ClConnectionStatusUpdate(int status)
     [_callbacks connectionStatusUpdate:status];
 }
 
+void ClSetHdrMode(bool enabled)
+{
+    [_callbacks setHdrMode:enabled];
+}
+
 -(void) terminate
 {
     // Interrupt any action blocking LiStartConnection(). This is
@@ -453,6 +458,7 @@ void ClConnectionStatusUpdate(int status)
     _clCallbacks.logMessage = ClLogMessage;
     _clCallbacks.rumble = ClRumble;
     _clCallbacks.connectionStatusUpdate = ClConnectionStatusUpdate;
+    _clCallbacks.setHdrMode = ClSetHdrMode;
 
     return self;
 }

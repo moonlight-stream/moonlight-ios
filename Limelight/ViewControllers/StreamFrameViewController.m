@@ -18,6 +18,18 @@
 #include <arpa/inet.h>
 #include <Limelight.h>
 
+#if TARGET_OS_TV
+#import <AVFoundation/AVDisplayCriteria.h>
+#import <AVKit/AVDisplayManager.h>
+#import <AVKit/UIWindow.h>
+#endif
+
+@interface AVDisplayCriteria()
+@property(readonly) int videoDynamicRange;
+@property(readonly, nonatomic) float refreshRate;
+- (id)initWithRefreshRate:(float)arg1 videoDynamicRange:(int)arg2;
+@end
+
 @implementation StreamFrameViewController {
     ControllerSupport *_controllerSupport;
     StreamManager *_streamMan;
@@ -294,6 +306,9 @@
 }
 
 - (void) returnToMainFrame {
+    // Reset display mode back to default
+    [self updatePreferredDisplayMode:NO];
+    
     [_statsUpdateTimer invalidate];
     _statsUpdateTimer = nil;
     
@@ -529,6 +544,42 @@
                 }
                 break;
         }
+    });
+}
+
+- (void) updatePreferredDisplayMode:(BOOL)streamActive {
+#if TARGET_OS_TV
+    if (@available(tvOS 11.2, *)) {
+        UIWindow* window = [[[UIApplication sharedApplication] delegate] window];
+        AVDisplayManager* displayManager = [window avDisplayManager];
+        
+        // This logic comes from Kodi and MrMC
+        if (streamActive) {
+            int dynamicRange;
+            
+            if (LiGetCurrentHostDisplayHdrMode()) {
+                dynamicRange = 2; // HDR10
+            }
+            else {
+                dynamicRange = 0; // SDR
+            }
+            
+            AVDisplayCriteria* displayCriteria = [[AVDisplayCriteria alloc] initWithRefreshRate:[_settings.framerate floatValue]
+                                                                              videoDynamicRange:dynamicRange];
+            displayManager.preferredDisplayCriteria = displayCriteria;
+        }
+        else {
+            // Switch back to the default display mode
+            displayManager.preferredDisplayCriteria = nil;
+        }
+    }
+#endif
+}
+
+- (void) setHdrMode:(bool)enabled {
+    Log(LOG_I, @"HDR is now: %s", enabled ? "active" : "inactive");
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self updatePreferredDisplayMode:YES];
     });
 }
 

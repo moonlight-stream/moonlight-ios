@@ -16,6 +16,7 @@
 - (void) launchFailed:(NSString*)message;
 - (void) rumble:(unsigned short)controllerNumber lowFreqMotor:(unsigned short)lowFreqMotor highFreqMotor:(unsigned short)highFreqMotor;
 - (void) connectionStatusUpdate:(int)status;
+- (void) setHdrMode:(bool)enabled;
 - (void) videoContentShown;
 
 @end

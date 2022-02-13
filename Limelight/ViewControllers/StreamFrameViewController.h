@@ -21,4 +21,6 @@
 #endif
 @property (nonatomic) StreamConfiguration* streamConfig;
 
+-(void)updatePreferredDisplayMode:(BOOL)streamActive;
+
 @end

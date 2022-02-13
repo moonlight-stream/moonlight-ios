@@ -29,6 +29,7 @@
 		9896219A23D56E8100211983 /* X1Kit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9896219623D15C7000211983 /* X1Kit.swift */; };
 		9897B6A1221260EF00966419 /* Controller.m in Sources */ = {isa = PBXBuildFile; fileRef = 9897B6A0221260EF00966419 /* Controller.m */; };
 		9897B6A62212732C00966419 /* Controller.m in Sources */ = {isa = PBXBuildFile; fileRef = 9897B6A0221260EF00966419 /* Controller.m */; };
+		98B9CE6D27B2144B00B473C4 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 98B9CE6C27B2144B00B473C4 /* AVKit.framework */; };
 		98CFB82F1CAD481B0048EF74 /* libmoonlight-common.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98AB2E841CAD46840089BB98 /* libmoonlight-common.a */; };
 		98D5856D1C0EA79600F6CC00 /* TemporaryHost.m in Sources */ = {isa = PBXBuildFile; fileRef = 98D5856C1C0EA79600F6CC00 /* TemporaryHost.m */; };
 		98D585701C0ED0E800F6CC00 /* TemporarySettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 98D5856F1C0ED0E800F6CC00 /* TemporarySettings.m */; };
@@ -189,6 +190,7 @@
 		9897B6A0221260EF00966419 /* Controller.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Controller.m; sourceTree = "<group>"; };
 		9897B6A32212610800966419 /* Controller.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Controller.h; sourceTree = "<group>"; };
 		98AB2E7F1CAD46830089BB98 /* moonlight-common.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "moonlight-common.xcodeproj"; path = "moonlight-common/moonlight-common.xcodeproj"; sourceTree = "<group>"; };
+		98B9CE6C27B2144B00B473C4 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS15.2.sdk/System/Library/Frameworks/AVKit.framework; sourceTree = DEVELOPER_DIR; };
 		98D5856B1C0EA79600F6CC00 /* TemporaryHost.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TemporaryHost.h; path = Database/TemporaryHost.h; sourceTree = "<group>"; };
 		98D5856C1C0EA79600F6CC00 /* TemporaryHost.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TemporaryHost.m; path = Database/TemporaryHost.m; sourceTree = "<group>"; };
 		98D5856E1C0ED0E800F6CC00 /* TemporarySettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TemporarySettings.h; path = Database/TemporarySettings.h; sourceTree = "<group>"; };
@@ -393,6 +395,7 @@
 				FB1A67E621324DD600507771 /* libcrypto.a in Frameworks */,
 				FB1A67E721324DD600507771 /* libssl.a in Frameworks */,
 				FB1A67E521324A1F00507771 /* CoreData.framework in Frameworks */,
+				98B9CE6D27B2144B00B473C4 /* AVKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -471,6 +474,7 @@
 		FB290CF019B2C406004C83CF /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				98B9CE6C27B2144B00B473C4 /* AVKit.framework */,
 				98181BEC2791281100E43572 /* CoreMotion.framework */,
 				98181BE82791275D00E43572 /* libSDL2.a */,
 				98181BEA2791278300E43572 /* libSDL2.a */,
