@@ -220,6 +220,9 @@ BOOL isCustomResolution(CGSize res) {
         else {
             [self.hdrSelector setSelectedSegmentIndex:currentSettings.enableHdr ? 1 : 0];
             [self.hdrSelector addTarget:self action:@selector(hdrStateChanged) forControlEvents:UIControlEventValueChanged];
+            
+            // Manually trigger the hdrStateChanged callback to set the HEVC selector appropriately
+            [self hdrStateChanged];
         }
     }
     else {
