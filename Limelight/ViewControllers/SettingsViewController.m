@@ -11,6 +11,7 @@
 #import "DataManager.h"
 
 #import <VideoToolbox/VideoToolbox.h>
+#import <AVFoundation/AVFoundation.h>
 
 @implementation SettingsViewController {
     NSInteger _bitrate;
@@ -209,11 +210,25 @@ BOOL isCustomResolution(CGSize res) {
             [self.hevcSelector insertSegmentWithTitle:@"Unsupported on this device" atIndex:0 animated:NO];
             [self.hevcSelector setEnabled:NO];
         }
+        
+        // Disable HDR selector if HDR is not supported by the display
+        if (!VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC) || !(AVPlayer.availableHDRModes & AVPlayerHDRModeHDR10)) {
+            [self.hdrSelector removeAllSegments];
+            [self.hdrSelector insertSegmentWithTitle:@"Unsupported on this device" atIndex:0 animated:NO];
+            [self.hdrSelector setEnabled:NO];
+        }
+        else {
+            [self.hdrSelector addTarget:self action:@selector(hdrStateChanged) forControlEvents:UIControlEventValueChanged];
+        }
     }
     else {
         [self.hevcSelector removeAllSegments];
         [self.hevcSelector insertSegmentWithTitle:@"Requires iOS 11.3 or later" atIndex:0 animated:NO];
         [self.hevcSelector setEnabled:NO];
+        
+        [self.hdrSelector removeAllSegments];
+        [self.hdrSelector insertSegmentWithTitle:@"Requires iOS 11.3 or later" atIndex:0 animated:NO];
+        [self.hdrSelector setEnabled:NO];
     }
     
     [self.touchModeSelector setSelectedSegmentIndex:currentSettings.absoluteTouchMode ? 1 : 0];
@@ -292,6 +307,16 @@ BOOL isCustomResolution(CGSize res) {
     else {
         [self updateBitrate];
         _lastSelectedResolutionIndex = [self.resolutionSelector selectedSegmentIndex];
+    }
+}
+
+- (void) hdrStateChanged {
+    if ([self.hdrSelector selectedSegmentIndex] == 1) {
+        [self.hevcSelector setSelectedSegmentIndex:1];
+        [self.hevcSelector setEnabled:NO];
+    }
+    else {
+        [self.hevcSelector setEnabled:YES];
     }
 }
 
@@ -440,6 +465,7 @@ BOOL isCustomResolution(CGSize res) {
     BOOL useFramePacing = [self.framePacingSelector selectedSegmentIndex] == 1;
     BOOL absoluteTouchMode = [self.touchModeSelector selectedSegmentIndex] == 1;
     BOOL statsOverlay = [self.statsOverlaySelector selectedSegmentIndex] == 1;
+    BOOL enableHdr = [self.hdrSelector selectedSegmentIndex] == 1;
     [dataMan saveSettingsWithBitrate:_bitrate
                            framerate:framerate
                               height:height
@@ -451,7 +477,7 @@ BOOL isCustomResolution(CGSize res) {
                            audioOnPC:audioOnPC
                              useHevc:useHevc
                             useFramePacing:useFramePacing
-                           enableHdr:NO
+                           enableHdr:enableHdr
                       btMouseSupport:btMouseSupport
                    absoluteTouchMode:absoluteTouchMode
                         statsOverlay:statsOverlay];
