@@ -218,6 +218,7 @@ BOOL isCustomResolution(CGSize res) {
             [self.hdrSelector setEnabled:NO];
         }
         else {
+            [self.hdrSelector setSelectedSegmentIndex:currentSettings.enableHdr ? 1 : 0];
             [self.hdrSelector addTarget:self action:@selector(hdrStateChanged) forControlEvents:UIControlEventValueChanged];
         }
     }
