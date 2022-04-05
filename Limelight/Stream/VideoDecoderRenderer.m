@@ -10,11 +10,22 @@
 #import "StreamView.h"
 
 #include "Limelight.h"
+#include "PlatformThreads.h"
+#include "LinkedBlockingQueue.h"
+
+typedef struct _QUEUED_FRAME_UNIT {
+    int frameType;
+    CMBlockBufferRef blockBuffer;
+    CMSampleBufferRef sampleBuffer;
+    LINKED_BLOCKING_QUEUE_ENTRY entry;
+} QUEUED_FRAME_UNIT, *PQUEUED_FRAME_UNIT;
 
 @implementation VideoDecoderRenderer {
     StreamView* _view;
     id<ConnectionCallbacks> _callbacks;
     float _streamAspectRatio;
+    LINKED_BLOCKING_QUEUE _renderQueue;
+    PLT_THREAD _renderThread;
     
     AVSampleBufferDisplayLayer* displayLayer;
     Boolean waitingForSps, waitingForPps, waitingForVps;
@@ -85,6 +96,9 @@
     _streamAspectRatio = aspectRatio;
     framePacing = useFramePacing;
     
+    LbqInitializeLinkedBlockingQueue(&_renderQueue, 15);
+    PltCreateThread("VideoRenderer", renderThreadProc, (__bridge void*)self, &_renderThread);
+    
     [self reinitializeDisplayLayer];
     
     return self;
@@ -110,36 +124,104 @@
 
 // TODO: Refactor this
 int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
+void renderThreadProc(void*);
+
+void renderThreadProc(void* context) {
+    VIDEO_FRAME_HANDLE handle;
+    PDECODE_UNIT du;
+
+    VideoDecoderRenderer * renderer = (__bridge VideoDecoderRenderer *) context;
+    while(!PltIsThreadInterrupted(&renderer->_renderThread)){
+        if (LiWaitForNextVideoFrame(&handle, &du)){
+            LiCompleteVideoFrame(handle, DrSubmitDecodeUnit(du));
+        }
+    }
+}
 
 - (void)displayLinkCallback:(CADisplayLink *)sender
 {
-    VIDEO_FRAME_HANDLE handle;
-    PDECODE_UNIT du;
+    PQUEUED_FRAME_UNIT frameUnit;
+    int buffer = 0;
     
-    while (LiPollNextVideoFrame(&handle, &du)) {
-        LiCompleteVideoFrame(handle, DrSubmitDecodeUnit(du));
+    if (framePacing) {
+        // Calculate the actual display refresh rate
+        double displayRefreshRate = 1 / (_displayLink.targetTimestamp - _displayLink.timestamp);
         
-        if (framePacing) {
-            // Calculate the actual display refresh rate
-            double displayRefreshRate = 1 / (_displayLink.targetTimestamp - _displayLink.timestamp);
-            
-            // Only pace frames if the display refresh rate is >= 90% of our stream frame rate.
-            // Battery saver, accessibility settings, or device thermals can cause the actual
-            // refresh rate of the display to drop below the physical maximum.
-            if (displayRefreshRate >= frameRate * 0.9f) {
-                // Keep one pending frame to smooth out gaps due to
-                // network jitter at the cost of 1 frame of latency
-                if (LiGetPendingVideoFrames() == 1) {
-                    break;
-                }
-            }
+        // Only pace frames if the display refresh rate is >= 90% of our stream frame rate.
+        // Battery saver, accessibility settings, or device thermals can cause the actual
+        // refresh rate of the display to drop below the physical maximum.
+        if (displayRefreshRate >= frameRate * 0.9f) {
+            // Keep one pending frame to smooth out gaps due to
+            // network jitter at the cost of 1 frame of latency
+            buffer = 1;
         }
     }
+    
+    int err = LbqPollQueueElement(&_renderQueue, (void**)&frameUnit);
+    if (err != LBQ_SUCCESS){
+        return;
+    }
+    
+    while (LbqGetItemCount(&_renderQueue) > buffer) {
+        // do not display and then get next
+        [self presentFrame:frameUnit display:false];
+        LbqPollQueueElement(&_renderQueue, (void**)&frameUnit);
+    }
+    [self presentFrame:frameUnit display:true];
+}
+
+-(void) presentFrame:(PQUEUED_FRAME_UNIT) frameUnit display:(BOOL)display{
+    if (frameUnit->frameType == FRAME_TYPE_IDR) {
+        // Ensure the layer is visible now
+        self->displayLayer.hidden = NO;
+        
+        // Tell our parent VC to hide the progress indicator
+        [self->_callbacks videoContentShown];
+    }
+    
+    CFArrayRef attachments = CMSampleBufferGetSampleAttachmentsArray(frameUnit->sampleBuffer, YES);
+    CFMutableDictionaryRef dict = (CFMutableDictionaryRef)CFArrayGetValueAtIndex(attachments, 0);
+    
+    CFDictionarySetValue(dict, kCMSampleAttachmentKey_DisplayImmediately, kCFBooleanTrue);
+    if (!display){
+        CFDictionarySetValue(dict, kCMSampleAttachmentKey_DoNotDisplay, kCFBooleanTrue);
+    }
+    CFDictionarySetValue(dict, kCMSampleAttachmentKey_IsDependedOnByOthers, kCFBooleanTrue);
+    
+    if (frameUnit->frameType == FRAME_TYPE_PFRAME) {
+        // P-frame
+        CFDictionarySetValue(dict, kCMSampleAttachmentKey_NotSync, kCFBooleanTrue);
+        CFDictionarySetValue(dict, kCMSampleAttachmentKey_DependsOnOthers, kCFBooleanTrue);
+    } else {
+        // I-frame
+        CFDictionarySetValue(dict, kCMSampleAttachmentKey_NotSync, kCFBooleanFalse);
+        CFDictionarySetValue(dict, kCMSampleAttachmentKey_DependsOnOthers, kCFBooleanFalse);
+    }
+    
+    [self->displayLayer enqueueSampleBuffer:frameUnit->sampleBuffer];
+    CFRelease(frameUnit->blockBuffer);
+    CFRelease(frameUnit->sampleBuffer);
+    free(frameUnit);
 }
 
 - (void)stop
 {
     [_displayLink invalidate];
+    PltInterruptThread(&_renderThread);
+    PltJoinThread(&_renderThread);
+    PltCloseThread(&_renderThread);
+    LbqSignalQueueShutdown(&_renderQueue);
+    freeRenderQueueList(LbqDestroyLinkedBlockingQueue(&_renderQueue));
+}
+
+void freeRenderQueueList(PLINKED_BLOCKING_QUEUE_ENTRY entry) {
+    PLINKED_BLOCKING_QUEUE_ENTRY nextEntry;
+
+    while (entry != NULL) {
+        nextEntry = entry->flink;
+        free(entry->data);
+        entry = nextEntry;
+    }
 }
 
 #define FRAME_START_PREFIX_SIZE 4
@@ -350,7 +432,6 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
     }
     
     // From now on, CMBlockBuffer owns the data pointer and will free it when it's dereferenced
-    
     CMSampleBufferRef sampleBuffer;
     
     status = CMSampleBufferCreate(kCFAllocatorDefault,
@@ -365,36 +446,12 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
         return DR_NEED_IDR;
     }
     
-    CFArrayRef attachments = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, YES);
-    CFMutableDictionaryRef dict = (CFMutableDictionaryRef)CFArrayGetValueAtIndex(attachments, 0);
-    
-    CFDictionarySetValue(dict, kCMSampleAttachmentKey_DisplayImmediately, kCFBooleanTrue);
-    CFDictionarySetValue(dict, kCMSampleAttachmentKey_IsDependedOnByOthers, kCFBooleanTrue);
-    
-    if (frameType == FRAME_TYPE_PFRAME) {
-        // P-frame
-        CFDictionarySetValue(dict, kCMSampleAttachmentKey_NotSync, kCFBooleanTrue);
-        CFDictionarySetValue(dict, kCMSampleAttachmentKey_DependsOnOthers, kCFBooleanTrue);
-    } else {
-        // I-frame
-        CFDictionarySetValue(dict, kCMSampleAttachmentKey_NotSync, kCFBooleanFalse);
-        CFDictionarySetValue(dict, kCMSampleAttachmentKey_DependsOnOthers, kCFBooleanFalse);
-    }
-
-    // Enqueue the next frame
-    [self->displayLayer enqueueSampleBuffer:sampleBuffer];
-    
-    if (frameType == FRAME_TYPE_IDR) {
-        // Ensure the layer is visible now
-        self->displayLayer.hidden = NO;
-        
-        // Tell our parent VC to hide the progress indicator
-        [self->_callbacks videoContentShown];
-    }
-    
-    // Dereference the buffers
-    CFRelease(blockBuffer);
-    CFRelease(sampleBuffer);
+    PQUEUED_FRAME_UNIT frameUnit;
+    frameUnit = (PQUEUED_FRAME_UNIT)malloc(sizeof(*frameUnit));
+    frameUnit->frameType = frameType;
+    frameUnit->blockBuffer = blockBuffer;
+    frameUnit->sampleBuffer = sampleBuffer;
+    LbqOfferQueueItem(&_renderQueue, (void*) frameUnit, &frameUnit->entry);
     
     return DR_OK;
 }
