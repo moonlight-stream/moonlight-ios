@@ -109,32 +109,37 @@
 }
 
 // TODO: Refactor this
-int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
+int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit, BOOL display);
 
 - (void)displayLinkCallback:(CADisplayLink *)sender
 {
     VIDEO_FRAME_HANDLE handle;
     PDECODE_UNIT du;
+    int buffer = 0;
     
-    while (LiPollNextVideoFrame(&handle, &du)) {
-        LiCompleteVideoFrame(handle, DrSubmitDecodeUnit(du));
+    if (framePacing) {
+        // Calculate the actual display refresh rate
+        double displayRefreshRate = 1 / (_displayLink.targetTimestamp - _displayLink.timestamp);
         
-        if (framePacing) {
-            // Calculate the actual display refresh rate
-            double displayRefreshRate = 1 / (_displayLink.targetTimestamp - _displayLink.timestamp);
-            
-            // Only pace frames if the display refresh rate is >= 90% of our stream frame rate.
-            // Battery saver, accessibility settings, or device thermals can cause the actual
-            // refresh rate of the display to drop below the physical maximum.
-            if (displayRefreshRate >= frameRate * 0.9f) {
-                // Keep one pending frame to smooth out gaps due to
-                // network jitter at the cost of 1 frame of latency
-                if (LiGetPendingVideoFrames() == 1) {
-                    break;
-                }
-            }
+        // Only pace frames if the display refresh rate is >= 90% of our stream frame rate.
+        // Battery saver, accessibility settings, or device thermals can cause the actual
+        // refresh rate of the display to drop below the physical maximum.
+        if (displayRefreshRate >= frameRate * 0.9f) {
+            // Keep one pending frame to smooth out gaps due to
+            // network jitter at the cost of 1 frame of latency
+            buffer = 1;
         }
     }
+    
+    if (!LiPollNextVideoFrame(&handle, &du)){
+        return;
+    }
+    
+    while (LiGetPendingVideoFrames() > buffer) {
+        LiCompleteVideoFrame(handle, DrSubmitDecodeUnit(du, false));
+        LiPollNextVideoFrame(&handle, &du);
+    }
+    LiCompleteVideoFrame(handle, DrSubmitDecodeUnit(du, true));
 }
 
 - (void)stop
@@ -224,7 +229,7 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
 }
 
 // This function must free data for bufferType == BUFFER_TYPE_PICDATA
-- (int)submitDecodeBuffer:(unsigned char *)data length:(int)length bufferType:(int)bufferType frameType:(int)frameType pts:(unsigned int)pts
+- (int)submitDecodeBuffer:(unsigned char *)data length:(int)length bufferType:(int)bufferType frameType:(int)frameType pts:(unsigned int)pts display:(BOOL)display
 {
     OSStatus status;
     
@@ -379,6 +384,10 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
         // I-frame
         CFDictionarySetValue(dict, kCMSampleAttachmentKey_NotSync, kCFBooleanFalse);
         CFDictionarySetValue(dict, kCMSampleAttachmentKey_DependsOnOthers, kCFBooleanFalse);
+    }
+    
+    if (!display){
+        CFDictionarySetValue(dict, kCMSampleAttachmentKey_DoNotDisplay, kCFBooleanTrue);
     }
 
     // Enqueue the next frame

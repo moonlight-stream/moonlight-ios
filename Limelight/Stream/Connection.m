@@ -95,7 +95,7 @@ void DrStop(void)
     }
 }
 
-int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit)
+int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit, BOOL display)
 {
     int offset = 0;
     int ret;
@@ -140,7 +140,8 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit)
                                         length:entry->length
                                     bufferType:entry->bufferType
                                      frameType:decodeUnit->frameType
-                                           pts:decodeUnit->presentationTimeMs];
+                                           pts:decodeUnit->presentationTimeMs
+                                       display: display];
             if (ret != DR_OK) {
                 free(data);
                 return ret;
@@ -159,7 +160,8 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit)
                                  length:offset
                              bufferType:BUFFER_TYPE_PICDATA
                               frameType:decodeUnit->frameType
-                                    pts:decodeUnit->presentationTimeMs];
+                                    pts:decodeUnit->presentationTimeMs
+                                display: display];
 }
 
 int ArInit(int audioConfiguration, POPUS_MULTISTREAM_CONFIGURATION opusConfig, void* context, int flags)
