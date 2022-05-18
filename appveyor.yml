@@ -2,7 +2,7 @@ version: 0.0.0.{build}
 
 clone_depth: 1
 
-image: macOS-BigSur
+image: macOS-Monterey
 
 before_build:
   - 'git submodule update --init --recursive'
