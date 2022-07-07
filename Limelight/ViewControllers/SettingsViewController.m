@@ -242,6 +242,7 @@ BOOL isCustomResolution(CGSize res) {
     [self.optimizeSettingsSelector setSelectedSegmentIndex:currentSettings.optimizeGames ? 1 : 0];
     [self.framePacingSelector setSelectedSegmentIndex:currentSettings.useFramePacing ? 1 : 0];
     [self.multiControllerSelector setSelectedSegmentIndex:currentSettings.multiController ? 1 : 0];
+    [self.swapABXYButtonsSelector setSelectedSegmentIndex:currentSettings.swapABXYButtons ? 1 : 0];
     [self.audioOnPCSelector setSelectedSegmentIndex:currentSettings.playAudioOnPC ? 1 : 0];
     NSInteger onscreenControls = [currentSettings.onscreenControls integerValue];
     _lastSelectedResolutionIndex = resolution;
@@ -463,6 +464,7 @@ BOOL isCustomResolution(CGSize res) {
     NSInteger onscreenControls = [self.onscreenControlSelector selectedSegmentIndex];
     BOOL optimizeGames = [self.optimizeSettingsSelector selectedSegmentIndex] == 1;
     BOOL multiController = [self.multiControllerSelector selectedSegmentIndex] == 1;
+    BOOL swapABXYButtons = [self.swapABXYButtonsSelector selectedSegmentIndex] == 1;
     BOOL audioOnPC = [self.audioOnPCSelector selectedSegmentIndex] == 1;
     BOOL useHevc = [self.hevcSelector selectedSegmentIndex] == 1;
     BOOL btMouseSupport = [self.btMouseSelector selectedSegmentIndex] == 1;
@@ -478,6 +480,7 @@ BOOL isCustomResolution(CGSize res) {
                     onscreenControls:onscreenControls
                        optimizeGames:optimizeGames
                      multiController:multiController
+                     swapABXYButtons:swapABXYButtons
                            audioOnPC:audioOnPC
                              useHevc:useHevc
                             useFramePacing:useFramePacing

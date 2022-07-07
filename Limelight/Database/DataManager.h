@@ -21,6 +21,7 @@
                 onscreenControls:(NSInteger)onscreenControls
                    optimizeGames:(BOOL)optimizeGames
                  multiController:(BOOL)multiController
+                 swapABXYButtons:(BOOL)swapABXYButtons
                        audioOnPC:(BOOL)audioOnPC
                          useHevc:(BOOL)useHevc
                   useFramePacing:(BOOL)useFramePacing

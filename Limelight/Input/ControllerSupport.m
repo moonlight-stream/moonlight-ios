@@ -47,6 +47,7 @@ static const double MOUSE_SPEED_DIVISOR = 2.5;
     bool _oscEnabled;
     char _controllerNumbers;
     bool _multiController;
+    bool _swapABXYButtons;
 }
 
 // UPDATE_BUTTON_FLAG(controller, flag, pressed)
@@ -302,10 +303,18 @@ static const double MOUSE_SPEED_DIVISOR = 2.5;
                 short rightStickX, rightStickY;
                 unsigned char leftTrigger, rightTrigger;
                 
-                UPDATE_BUTTON_FLAG(limeController, A_FLAG, gamepad.buttonA.pressed);
-                UPDATE_BUTTON_FLAG(limeController, B_FLAG, gamepad.buttonB.pressed);
-                UPDATE_BUTTON_FLAG(limeController, X_FLAG, gamepad.buttonX.pressed);
-                UPDATE_BUTTON_FLAG(limeController, Y_FLAG, gamepad.buttonY.pressed);
+                if (_swapABXYButtons) {
+                    UPDATE_BUTTON_FLAG(limeController, B_FLAG, gamepad.buttonA.pressed);
+                    UPDATE_BUTTON_FLAG(limeController, A_FLAG, gamepad.buttonB.pressed);
+                    UPDATE_BUTTON_FLAG(limeController, Y_FLAG, gamepad.buttonX.pressed);
+                    UPDATE_BUTTON_FLAG(limeController, X_FLAG, gamepad.buttonY.pressed);
+                }
+                else {
+                    UPDATE_BUTTON_FLAG(limeController, A_FLAG, gamepad.buttonA.pressed);
+                    UPDATE_BUTTON_FLAG(limeController, B_FLAG, gamepad.buttonB.pressed);
+                    UPDATE_BUTTON_FLAG(limeController, X_FLAG, gamepad.buttonX.pressed);
+                    UPDATE_BUTTON_FLAG(limeController, Y_FLAG, gamepad.buttonY.pressed);
+                }
                 
                 UPDATE_BUTTON_FLAG(limeController, UP_FLAG, gamepad.dpad.up.pressed);
                 UPDATE_BUTTON_FLAG(limeController, DOWN_FLAG, gamepad.dpad.down.pressed);
@@ -361,10 +370,18 @@ static const double MOUSE_SPEED_DIVISOR = 2.5;
         else if (controller.gamepad != NULL) {
             controller.gamepad.valueChangedHandler = ^(GCGamepad *gamepad, GCControllerElement *element) {
                 Controller* limeController = [self->_controllers objectForKey:[NSNumber numberWithInteger:gamepad.controller.playerIndex]];
-                UPDATE_BUTTON_FLAG(limeController, A_FLAG, gamepad.buttonA.pressed);
-                UPDATE_BUTTON_FLAG(limeController, B_FLAG, gamepad.buttonB.pressed);
-                UPDATE_BUTTON_FLAG(limeController, X_FLAG, gamepad.buttonX.pressed);
-                UPDATE_BUTTON_FLAG(limeController, Y_FLAG, gamepad.buttonY.pressed);
+                if (_swapABXYButtons) {
+                    UPDATE_BUTTON_FLAG(limeController, B_FLAG, gamepad.buttonA.pressed);
+                    UPDATE_BUTTON_FLAG(limeController, A_FLAG, gamepad.buttonB.pressed);
+                    UPDATE_BUTTON_FLAG(limeController, Y_FLAG, gamepad.buttonX.pressed);
+                    UPDATE_BUTTON_FLAG(limeController, X_FLAG, gamepad.buttonY.pressed);
+                }
+                else {
+                    UPDATE_BUTTON_FLAG(limeController, A_FLAG, gamepad.buttonA.pressed);
+                    UPDATE_BUTTON_FLAG(limeController, B_FLAG, gamepad.buttonB.pressed);
+                    UPDATE_BUTTON_FLAG(limeController, X_FLAG, gamepad.buttonX.pressed);
+                    UPDATE_BUTTON_FLAG(limeController, Y_FLAG, gamepad.buttonY.pressed);
+                }
                 
                 UPDATE_BUTTON_FLAG(limeController, UP_FLAG, gamepad.dpad.up.pressed);
                 UPDATE_BUTTON_FLAG(limeController, DOWN_FLAG, gamepad.dpad.down.pressed);
@@ -623,6 +640,7 @@ static const double MOUSE_SPEED_DIVISOR = 2.5;
     _controllers = [[NSMutableDictionary alloc] init];
     _controllerNumbers = 0;
     _multiController = streamConfig.multiController;
+    _swapABXYButtons = streamConfig.swapABXYButtons;
     _presenceDelegate = delegate;
 
     _player0osc = [[Controller alloc] init];

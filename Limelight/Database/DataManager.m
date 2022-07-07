@@ -60,6 +60,7 @@
                 onscreenControls:(NSInteger)onscreenControls
                    optimizeGames:(BOOL)optimizeGames
                  multiController:(BOOL)multiController
+                 swapABXYButtons:(BOOL)swapABXYButtons
                        audioOnPC:(BOOL)audioOnPC
                          useHevc:(BOOL)useHevc
                   useFramePacing:(BOOL)useFramePacing
@@ -78,6 +79,7 @@
         settingsToSave.onscreenControls = [NSNumber numberWithInteger:onscreenControls];
         settingsToSave.optimizeGames = optimizeGames;
         settingsToSave.multiController = multiController;
+        settingsToSave.swapABXYButtons = swapABXYButtons;
         settingsToSave.playAudioOnPC = audioOnPC;
         settingsToSave.useHevc = useHevc;
         settingsToSave.useFramePacing = useFramePacing;

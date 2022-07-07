@@ -18,6 +18,7 @@
 @property (strong, nonatomic) IBOutlet UISegmentedControl *onscreenControlSelector;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *optimizeSettingsSelector;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *multiControllerSelector;
+@property (strong, nonatomic) IBOutlet UISegmentedControl *swapABXYButtonsSelector;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *audioOnPCSelector;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *hevcSelector;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *hdrSelector;
