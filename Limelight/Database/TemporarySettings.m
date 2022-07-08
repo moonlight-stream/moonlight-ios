@@ -42,7 +42,7 @@
     self.enableHdr = [[NSUserDefaults standardUserDefaults] boolForKey:@"enableHdr"];
     self.optimizeGames = [[NSUserDefaults standardUserDefaults] boolForKey:@"optimizeGames"];
     self.multiController = [[NSUserDefaults standardUserDefaults] boolForKey:@"multipleControllers"];
-    self.swapABXYButtons = = [[NSUserDefaults standardUserDefaults] boolForKey:@"swapABXYButtons"];
+    self.swapABXYButtons = [[NSUserDefaults standardUserDefaults] boolForKey:@"swapABXYButtons"];
     self.btMouseSupport = [[NSUserDefaults standardUserDefaults] boolForKey:@"btMouseSupport"];
     self.statsOverlay = [[NSUserDefaults standardUserDefaults] boolForKey:@"statsOverlay"];
     
