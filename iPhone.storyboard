@@ -342,6 +342,7 @@
                         <outlet property="resolutionSelector" destination="PCM-t4-Sha" id="t60-W2-wkV"/>
                         <outlet property="scrollView" destination="iNk-qF-gIr" id="h7U-Xp-ULQ"/>
                         <outlet property="statsOverlaySelector" destination="rdz-eg-2oR" id="nus-Zq-nwm"/>
+                        <outlet property="touchModeSelector" destination="2lg-HW-tku" id="HrP-Pz-jQp"/>
                         <outlet property="swapABXYButtonsSelector" destination="P8R-nu-8Ln" id="anv-Y8-0Mi"/>
                     </connections>
                 </viewController>
