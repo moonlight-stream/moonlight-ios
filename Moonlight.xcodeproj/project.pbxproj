@@ -180,6 +180,7 @@
 		9827E7A7251436EA00F25707 /* HapticContext.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HapticContext.h; sourceTree = "<group>"; };
 		9832D1341BBCD5C50036EF48 /* TemporaryApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TemporaryApp.h; path = Database/TemporaryApp.h; sourceTree = "<group>"; };
 		9832D1351BBCD5C50036EF48 /* TemporaryApp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TemporaryApp.m; path = Database/TemporaryApp.m; sourceTree = "<group>"; };
+		984CD023288A310D0097D2D4 /* Moonlight v1.8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Moonlight v1.8.xcdatamodel"; sourceTree = "<group>"; };
 		98517B1B21CE0A9000481377 /* Moonlight v1.3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Moonlight v1.3.xcdatamodel"; sourceTree = "<group>"; };
 		98608BDD22DC0C2C000E5672 /* Moonlight v1.4.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Moonlight v1.4.xcdatamodel"; sourceTree = "<group>"; };
 		9865DC3B2132922E0005B9B9 /* GameController.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameController.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS11.4.sdk/System/Library/Frameworks/GameController.framework; sourceTree = DEVELOPER_DIR; };
@@ -1433,6 +1434,7 @@
 		FB290D0519B2C406004C83CF /* Limelight.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				984CD023288A310D0097D2D4 /* Moonlight v1.8.xcdatamodel */,
 				566E9D2B2770B23A00EF7BFE /* Moonlight v1.7.xcdatamodel */,
 				9819CC25254F2734008A7C8E /* Moonlight v1.6.xcdatamodel */,
 				98783FEA242EAC5D00F00EF4 /* Moonlight v1.5.xcdatamodel */,
@@ -1446,7 +1448,7 @@
 				FB4678F21A51BDCB00377732 /* Limelight 0.3.0.xcdatamodel */,
 				FB290D0619B2C406004C83CF /* Limelight.xcdatamodel */,
 			);
-			currentVersion = 566E9D2B2770B23A00EF7BFE /* Moonlight v1.7.xcdatamodel */;
+			currentVersion = 984CD023288A310D0097D2D4 /* Moonlight v1.8.xcdatamodel */;
 			path = Limelight.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

@@ -303,7 +303,7 @@ static const double MOUSE_SPEED_DIVISOR = 2.5;
                 short rightStickX, rightStickY;
                 unsigned char leftTrigger, rightTrigger;
                 
-                if (_swapABXYButtons) {
+                if (self->_swapABXYButtons) {
                     UPDATE_BUTTON_FLAG(limeController, B_FLAG, gamepad.buttonA.pressed);
                     UPDATE_BUTTON_FLAG(limeController, A_FLAG, gamepad.buttonB.pressed);
                     UPDATE_BUTTON_FLAG(limeController, Y_FLAG, gamepad.buttonX.pressed);
@@ -370,7 +370,7 @@ static const double MOUSE_SPEED_DIVISOR = 2.5;
         else if (controller.gamepad != NULL) {
             controller.gamepad.valueChangedHandler = ^(GCGamepad *gamepad, GCControllerElement *element) {
                 Controller* limeController = [self->_controllers objectForKey:[NSNumber numberWithInteger:gamepad.controller.playerIndex]];
-                if (_swapABXYButtons) {
+                if (self->_swapABXYButtons) {
                     UPDATE_BUTTON_FLAG(limeController, B_FLAG, gamepad.buttonA.pressed);
                     UPDATE_BUTTON_FLAG(limeController, A_FLAG, gamepad.buttonB.pressed);
                     UPDATE_BUTTON_FLAG(limeController, Y_FLAG, gamepad.buttonX.pressed);
