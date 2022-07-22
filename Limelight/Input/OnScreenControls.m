@@ -68,6 +68,7 @@
     ControllerSupport *_controllerSupport;
     Controller *_controller;
     NSMutableArray* _deadTouches;
+    BOOL _swapABXY;
 }
 
 static const float EDGE_WIDTH = .05;
@@ -111,12 +112,13 @@ static float L2_Y;
 static float L3_X;
 static float L3_Y;
 
-- (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport {
+- (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport streamConfig:(StreamConfiguration*)streamConfig {
     self = [self init];
     _view = view;
     _controllerSupport = controllerSupport;
     _controller = [controllerSupport getOscController];
     _deadTouches = [[NSMutableArray alloc] init];
+    _swapABXY = streamConfig.swapABXYButtons;
     
     _iPad = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad);
     _controlArea = CGRectMake(0, 0, _view.frame.size.width, _view.frame.size.height);
@@ -372,27 +374,33 @@ static float L3_Y;
 }
 
 - (void) drawButtons {
-    // create A button
     UIImage* aButtonImage = [UIImage imageNamed:@"AButton"];
+    UIImage* bButtonImage = [UIImage imageNamed:@"BButton"];
+    UIImage* xButtonImage = [UIImage imageNamed:@"XButton"];
+    UIImage* yButtonImage = [UIImage imageNamed:@"YButton"];
+    
+    CGRect aButtonFrame = CGRectMake(BUTTON_CENTER_X - aButtonImage.size.width / 2, BUTTON_CENTER_Y + BUTTON_DIST, aButtonImage.size.width, aButtonImage.size.height);
+    CGRect bButtonFrame = CGRectMake(BUTTON_CENTER_X + BUTTON_DIST, BUTTON_CENTER_Y - bButtonImage.size.height / 2, bButtonImage.size.width, bButtonImage.size.height);
+    CGRect xButtonFrame = CGRectMake(BUTTON_CENTER_X - BUTTON_DIST - xButtonImage.size.width, BUTTON_CENTER_Y - xButtonImage.size.height/ 2, xButtonImage.size.width, xButtonImage.size.height);
+    CGRect yButtonFrame = CGRectMake(BUTTON_CENTER_X - yButtonImage.size.width / 2, BUTTON_CENTER_Y - BUTTON_DIST - yButtonImage.size.height, yButtonImage.size.width, yButtonImage.size.height);
+    
+    // create A button
     _aButton.contents = (id) aButtonImage.CGImage;
-    _aButton.frame = CGRectMake(BUTTON_CENTER_X - aButtonImage.size.width / 2, BUTTON_CENTER_Y + BUTTON_DIST, aButtonImage.size.width, aButtonImage.size.height);
+    _aButton.frame = _swapABXY ? bButtonFrame : aButtonFrame;
     [_view.layer addSublayer:_aButton];
     
     // create B button
-    UIImage* bButtonImage = [UIImage imageNamed:@"BButton"];
-    _bButton.frame = CGRectMake(BUTTON_CENTER_X + BUTTON_DIST, BUTTON_CENTER_Y - bButtonImage.size.height / 2, bButtonImage.size.width, bButtonImage.size.height);
+    _bButton.frame = _swapABXY ? aButtonFrame : bButtonFrame;
     _bButton.contents = (id) bButtonImage.CGImage;
     [_view.layer addSublayer:_bButton];
     
     // create X Button
-    UIImage* xButtonImage = [UIImage imageNamed:@"XButton"];
-    _xButton.frame = CGRectMake(BUTTON_CENTER_X - BUTTON_DIST - xButtonImage.size.width, BUTTON_CENTER_Y - xButtonImage.size.height/ 2, xButtonImage.size.width, xButtonImage.size.height);
+    _xButton.frame = _swapABXY ? yButtonFrame : xButtonFrame;
     _xButton.contents = (id) xButtonImage.CGImage;
     [_view.layer addSublayer:_xButton];
     
     // create Y Button
-    UIImage* yButtonImage = [UIImage imageNamed:@"YButton"];
-    _yButton.frame = CGRectMake(BUTTON_CENTER_X - yButtonImage.size.width / 2, BUTTON_CENTER_Y - BUTTON_DIST - yButtonImage.size.height, yButtonImage.size.width, yButtonImage.size.height);
+    _yButton.frame = _swapABXY ? xButtonFrame : yButtonFrame;
     _yButton.contents = (id) yButtonImage.CGImage;
     [_view.layer addSublayer:_yButton];
     

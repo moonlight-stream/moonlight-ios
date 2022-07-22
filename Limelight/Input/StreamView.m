@@ -71,7 +71,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         self->touchHandler = [[RelativeTouchHandler alloc] initWithView:self];
     }
     
-    onScreenControls = [[OnScreenControls alloc] initWithView:self controllerSup:controllerSupport];
+    onScreenControls = [[OnScreenControls alloc] initWithView:self controllerSup:controllerSupport streamConfig:streamConfig];
     OnScreenControlsLevel level = (OnScreenControlsLevel)[settings.onscreenControls integerValue];
     if (settings.absoluteTouchMode) {
         Log(LOG_I, @"On-screen controls disabled in absolute touch mode");

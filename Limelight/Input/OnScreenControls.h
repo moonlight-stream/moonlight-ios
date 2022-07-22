@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 
 @class ControllerSupport;
+@class StreamConfiguration;
 
 @interface OnScreenControls : NSObject
 
@@ -24,7 +25,7 @@ typedef NS_ENUM(NSInteger, OnScreenControlsLevel) {
     OnScreenControlsLevelAutoGCExtendedGamepadWithStickButtons
 };
 
-- (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport;
+- (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport streamConfig:(StreamConfiguration*)streamConfig;
 - (BOOL) handleTouchDownEvent:(NSSet*)touches;
 - (BOOL) handleTouchUpEvent:(NSSet*)touches;
 - (BOOL) handleTouchMovedEvent:(NSSet*)touches;
