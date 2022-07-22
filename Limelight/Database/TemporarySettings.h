@@ -22,6 +22,7 @@
 @property (nonatomic) BOOL useHevc;
 @property (nonatomic) BOOL useFramePacing;
 @property (nonatomic) BOOL multiController;
+@property (nonatomic) BOOL swapABXYButtons;
 @property (nonatomic) BOOL playAudioOnPC;
 @property (nonatomic) BOOL optimizeGames;
 @property (nonatomic) BOOL enableHdr;

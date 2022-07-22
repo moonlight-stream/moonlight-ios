@@ -23,6 +23,7 @@
 @property int gamepadMask;
 @property BOOL optimizeGameSettings;
 @property BOOL playAudioOnPC;
+@property BOOL swapABXYButtons;
 @property int audioConfiguration;
 @property BOOL enableHdr;
 @property BOOL multiController;
