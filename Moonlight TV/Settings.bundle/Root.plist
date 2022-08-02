@@ -186,7 +186,7 @@
 			<key>Title</key>
 			<string>Use HEVC Codec</string>
 			<key>Key</key>
-			<string>useHevc</string>
+			<string>useHevc2</string>
 			<key>DefaultValue</key>
 			<true/>
 		</dict>

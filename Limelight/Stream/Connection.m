@@ -414,9 +414,7 @@ void ClSetHdrMode(bool enabled)
     // As a result, we will only use HEVC on iOS 11.3 or later.
     if (@available(iOS 11.3, tvOS 11.3, *)) {
         _streamConfig.supportsHevc =
-#if !TARGET_OS_TV
             config.allowHevc &&
-#endif
             VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC);
     }
     
