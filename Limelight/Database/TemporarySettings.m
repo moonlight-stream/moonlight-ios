@@ -60,6 +60,10 @@
             self.height = [NSNumber numberWithInteger:2160];
             self.width = [NSNumber numberWithInteger:3840];
             break;
+        case 3:
+            self.height = [NSNumber numberWithInteger:1440];
+            self.width = [NSNumber numberWithInteger:2560];
+            break;
         default:
             abort();
     }
