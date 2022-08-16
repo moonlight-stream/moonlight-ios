@@ -25,12 +25,14 @@
 			<array>
 				<string>0</string>
 				<string>1</string>
+				<string>3</string>
 				<string>2</string>
 			</array>
 			<key>Titles</key>
 			<array>
 				<string>720p</string>
 				<string>1080p</string>
+				<string>1440p</string>
 				<string>4K</string>
 			</array>
 		</dict>
