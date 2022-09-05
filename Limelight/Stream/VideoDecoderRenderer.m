@@ -142,7 +142,6 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
     [_displayLink invalidate];
 }
 
-#define FRAME_START_PREFIX_SIZE 4
 #define NALU_START_PREFIX_SIZE 3
 #define NAL_LENGTH_PREFIX_SIZE 4
 
@@ -162,19 +161,32 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
     OSStatus status;
     size_t oldOffset = CMBlockBufferGetDataLength(existingBuffer);
     
-    // If we're at index 1 (first NALU in frame), enqueue this buffer to the memory block
+    // If we're the first NALU in frame, enqueue this buffer to the memory block
     // so it can handle freeing it when the block buffer is destroyed
-    if (offset == 1) {
+    if (offset == 0 || offset == 1) {
         int dataLength = nalLength - NALU_START_PREFIX_SIZE;
+        
+        // If we get here with offset 0, this is a 3 byte Annex B prefix. This means
+        // we don't have enough space to do an in-place Annex B -> AVCC fixup.
+        // To allow the in-place fixup to work, prepend a 1 byte buffer.
+        if (offset == 0) {
+            status = CMBlockBufferAppendMemoryBlock(existingBuffer, NULL, 1,
+                                                    kCFAllocatorDefault,
+                                                    NULL, 0, 1, 0);
+            if (status != noErr) {
+                Log(LOG_E, @"CMBlockBufferAppendMemoryBlock failed: %d", (int)status);
+                return;
+            }
+        }
         
         // Pass the real buffer pointer directly (no offset)
         // This will give it to the block buffer to free when it's released.
         // All further calls to CMBlockBufferAppendMemoryBlock will do so
         // at an offset and will not be asking the buffer to be freed.
         status = CMBlockBufferAppendMemoryBlock(existingBuffer, data,
-                                                nalLength + 1, // Add 1 for the offset we decremented
+                                                nalLength + offset,
                                                 kCFAllocatorDefault,
-                                                NULL, 0, nalLength + 1, 0);
+                                                NULL, 0, nalLength + offset, 0);
         if (status != noErr) {
             Log(LOG_E, @"CMBlockBufferReplaceDataBytes failed: %d", (int)status);
             return;
@@ -229,9 +241,11 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
     OSStatus status;
     
     if (bufferType != BUFFER_TYPE_PICDATA) {
+        int startLen = data[2] == 0x01 ? 3 : 4;
+        
         if (bufferType == BUFFER_TYPE_VPS) {
             Log(LOG_I, @"Got VPS");
-            vpsData = [NSData dataWithBytes:&data[FRAME_START_PREFIX_SIZE] length:length - FRAME_START_PREFIX_SIZE];
+            vpsData = [NSData dataWithBytes:&data[startLen] length:length - startLen];
             waitingForVps = false;
             
             // We got a new VPS so wait for a new SPS to match it
@@ -239,14 +253,14 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
         }
         else if (bufferType == BUFFER_TYPE_SPS) {
             Log(LOG_I, @"Got SPS");
-            spsData = [NSData dataWithBytes:&data[FRAME_START_PREFIX_SIZE] length:length - FRAME_START_PREFIX_SIZE];
+            spsData = [NSData dataWithBytes:&data[startLen] length:length - startLen];
             waitingForSps = false;
             
             // We got a new SPS so wait for a new PPS to match it
             waitingForPps = true;
         } else if (bufferType == BUFFER_TYPE_PPS) {
             Log(LOG_I, @"Got PPS");
-            ppsData = [NSData dataWithBytes:&data[FRAME_START_PREFIX_SIZE] length:length - FRAME_START_PREFIX_SIZE];
+            ppsData = [NSData dataWithBytes:&data[startLen] length:length - startLen];
             waitingForPps = false;
         }
         
@@ -331,7 +345,7 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
     }
     
     int lastOffset = -1;
-    for (int i = 0; i < length - FRAME_START_PREFIX_SIZE; i++) {
+    for (int i = 0; i < length - NALU_START_PREFIX_SIZE; i++) {
         // Search for a NALU
         if (data[i] == 0 && data[i+1] == 0 && data[i+2] == 1) {
             // It's the start of a new NALU
