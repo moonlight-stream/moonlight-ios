@@ -89,7 +89,12 @@ void DrStop(void)
         case VIDEO_FORMAT_H265:
             return @"HEVC";
         case VIDEO_FORMAT_H265_MAIN10:
-            return @"HEVC Main 10";
+            if (LiGetCurrentHostDisplayHdrMode()) {
+                return @"HEVC Main 10 HDR";
+            }
+            else {
+                return @"HEVC Main 10 SDR";
+            }
         default:
             return @"UNKNOWN";
     }
