@@ -156,82 +156,37 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
     }
 }
 
-- (void)updateBufferForRange:(CMBlockBufferRef)existingBuffer data:(unsigned char *)data offset:(int)offset length:(int)nalLength
+- (void)updateBufferForRange:(CMBlockBufferRef)frameBuffer dataBlock:(CMBlockBufferRef)dataBuffer offset:(int)offset length:(int)nalLength
 {
     OSStatus status;
-    size_t oldOffset = CMBlockBufferGetDataLength(existingBuffer);
+    size_t oldOffset = CMBlockBufferGetDataLength(frameBuffer);
     
-    // If we're the first NALU in frame, enqueue this buffer to the memory block
-    // so it can handle freeing it when the block buffer is destroyed
-    if (offset == 0 || offset == 1) {
-        int dataLength = nalLength - NALU_START_PREFIX_SIZE;
-        
-        // If we get here with offset 0, this is a 3 byte Annex B prefix. This means
-        // we don't have enough space to do an in-place Annex B -> AVCC fixup.
-        // To allow the in-place fixup to work, prepend a 1 byte buffer.
-        if (offset == 0) {
-            status = CMBlockBufferAppendMemoryBlock(existingBuffer, NULL, 1,
-                                                    kCFAllocatorDefault,
-                                                    NULL, 0, 1, 0);
-            if (status != noErr) {
-                Log(LOG_E, @"CMBlockBufferAppendMemoryBlock failed: %d", (int)status);
-                return;
-            }
-        }
-        
-        // Pass the real buffer pointer directly (no offset)
-        // This will give it to the block buffer to free when it's released.
-        // All further calls to CMBlockBufferAppendMemoryBlock will do so
-        // at an offset and will not be asking the buffer to be freed.
-        status = CMBlockBufferAppendMemoryBlock(existingBuffer, data,
-                                                nalLength + offset,
-                                                kCFAllocatorDefault,
-                                                NULL, 0, nalLength + offset, 0);
-        if (status != noErr) {
-            Log(LOG_E, @"CMBlockBufferReplaceDataBytes failed: %d", (int)status);
-            return;
-        }
-        
-        // Write the length prefix to existing buffer
-        const uint8_t lengthBytes[] = {(uint8_t)(dataLength >> 24), (uint8_t)(dataLength >> 16),
-            (uint8_t)(dataLength >> 8), (uint8_t)dataLength};
-        status = CMBlockBufferReplaceDataBytes(lengthBytes, existingBuffer,
-                                               oldOffset, NAL_LENGTH_PREFIX_SIZE);
-        if (status != noErr) {
-            Log(LOG_E, @"CMBlockBufferReplaceDataBytes failed: %d", (int)status);
-            return;
-        }
-    } else {
-        // Append a 4 byte buffer to this block for the length prefix
-        status = CMBlockBufferAppendMemoryBlock(existingBuffer, NULL,
-                                                NAL_LENGTH_PREFIX_SIZE,
-                                                kCFAllocatorDefault, NULL, 0,
-                                                NAL_LENGTH_PREFIX_SIZE, 0);
-        if (status != noErr) {
-            Log(LOG_E, @"CMBlockBufferAppendMemoryBlock failed: %d", (int)status);
-            return;
-        }
-        
-        // Write the length prefix to the new buffer
-        int dataLength = nalLength - NALU_START_PREFIX_SIZE;
-        const uint8_t lengthBytes[] = {(uint8_t)(dataLength >> 24), (uint8_t)(dataLength >> 16),
-            (uint8_t)(dataLength >> 8), (uint8_t)dataLength};
-        status = CMBlockBufferReplaceDataBytes(lengthBytes, existingBuffer,
-                                               oldOffset, NAL_LENGTH_PREFIX_SIZE);
-        if (status != noErr) {
-            Log(LOG_E, @"CMBlockBufferReplaceDataBytes failed: %d", (int)status);
-            return;
-        }
-        
-        // Attach the buffer by reference to the block buffer
-        status = CMBlockBufferAppendMemoryBlock(existingBuffer, &data[offset+NALU_START_PREFIX_SIZE],
-                                                dataLength,
-                                                kCFAllocatorNull, // Don't deallocate data on free
-                                                NULL, 0, dataLength, 0);
-        if (status != noErr) {
-            Log(LOG_E, @"CMBlockBufferReplaceDataBytes failed: %d", (int)status);
-            return;
-        }
+    // Append a 4 byte buffer to the frame block for the length prefix
+    status = CMBlockBufferAppendMemoryBlock(frameBuffer, NULL,
+                                            NAL_LENGTH_PREFIX_SIZE,
+                                            kCFAllocatorDefault, NULL, 0,
+                                            NAL_LENGTH_PREFIX_SIZE, 0);
+    if (status != noErr) {
+        Log(LOG_E, @"CMBlockBufferAppendMemoryBlock failed: %d", (int)status);
+        return;
+    }
+    
+    // Write the length prefix to the new buffer
+    const int dataLength = nalLength - NALU_START_PREFIX_SIZE;
+    const uint8_t lengthBytes[] = {(uint8_t)(dataLength >> 24), (uint8_t)(dataLength >> 16),
+        (uint8_t)(dataLength >> 8), (uint8_t)dataLength};
+    status = CMBlockBufferReplaceDataBytes(lengthBytes, frameBuffer,
+                                           oldOffset, NAL_LENGTH_PREFIX_SIZE);
+    if (status != noErr) {
+        Log(LOG_E, @"CMBlockBufferReplaceDataBytes failed: %d", (int)status);
+        return;
+    }
+    
+    // Attach the data buffer to the frame buffer by reference
+    status = CMBlockBufferAppendBufferReference(frameBuffer, dataBuffer, offset + NALU_START_PREFIX_SIZE, dataLength, 0);
+    if (status != noErr) {
+        Log(LOG_E, @"CMBlockBufferAppendBufferReference failed: %d", (int)status);
+        return;
     }
 }
 
@@ -335,12 +290,22 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
     }
     
     // Now we're decoding actual frame data here
-    CMBlockBufferRef blockBuffer;
+    CMBlockBufferRef frameBlockBuffer;
+    CMBlockBufferRef dataBlockBuffer;
     
-    status = CMBlockBufferCreateEmpty(NULL, 0, 0, &blockBuffer);
+    status = CMBlockBufferCreateWithMemoryBlock(NULL, data, length, kCFAllocatorDefault, NULL, 0, length, 0, &dataBlockBuffer);
+    if (status != noErr) {
+        Log(LOG_E, @"CMBlockBufferCreateWithMemoryBlock failed: %d", (int)status);
+        free(data);
+        return DR_NEED_IDR;
+    }
+    
+    // From now on, CMBlockBuffer owns the data pointer and will free it when it's dereferenced
+    
+    status = CMBlockBufferCreateEmpty(NULL, 0, 0, &frameBlockBuffer);
     if (status != noErr) {
         Log(LOG_E, @"CMBlockBufferCreateEmpty failed: %d", (int)status);
-        free(data);
+        CFRelease(dataBlockBuffer);
         return DR_NEED_IDR;
     }
     
@@ -351,7 +316,7 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
             // It's the start of a new NALU
             if (lastOffset != -1) {
                 // We've seen a start before this so enqueue that NALU
-                [self updateBufferForRange:blockBuffer data:data offset:lastOffset length:i - lastOffset];
+                [self updateBufferForRange:frameBlockBuffer dataBlock:dataBlockBuffer offset:lastOffset length:i - lastOffset];
             }
             
             lastOffset = i;
@@ -360,22 +325,21 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
     
     if (lastOffset != -1) {
         // Enqueue the remaining data
-        [self updateBufferForRange:blockBuffer data:data offset:lastOffset length:length - lastOffset];
+        [self updateBufferForRange:frameBlockBuffer dataBlock:dataBlockBuffer offset:lastOffset length:length - lastOffset];
     }
-    
-    // From now on, CMBlockBuffer owns the data pointer and will free it when it's dereferenced
-    
+        
     CMSampleBufferRef sampleBuffer;
     
     status = CMSampleBufferCreate(kCFAllocatorDefault,
-                                  blockBuffer,
+                                  frameBlockBuffer,
                                   true, NULL,
                                   NULL, formatDesc, 1, 0,
                                   NULL, 0, NULL,
                                   &sampleBuffer);
     if (status != noErr) {
         Log(LOG_E, @"CMSampleBufferCreate failed: %d", (int)status);
-        CFRelease(blockBuffer);
+        CFRelease(dataBlockBuffer);
+        CFRelease(frameBlockBuffer);
         return DR_NEED_IDR;
     }
     
@@ -407,7 +371,8 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
     }
     
     // Dereference the buffers
-    CFRelease(blockBuffer);
+    CFRelease(dataBlockBuffer);
+    CFRelease(frameBlockBuffer);
     CFRelease(sampleBuffer);
     
     return DR_OK;
