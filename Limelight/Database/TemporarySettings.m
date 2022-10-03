@@ -74,7 +74,7 @@
     self.height = settings.height;
     self.width = settings.width;
     self.audioConfig = settings.audioConfig;
-    self.useHevc = settings.useHevc;
+    self.useHevc = settings.useHevc2;
     self.useFramePacing = settings.useFramePacing;
     self.playAudioOnPC = settings.playAudioOnPC;
     self.enableHdr = settings.enableHdr;
