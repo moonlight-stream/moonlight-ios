@@ -435,18 +435,7 @@ void ClSetHdrMode(bool enabled)
     _drCallbacks.setup = DrDecoderSetup;
     _drCallbacks.start = DrStart;
     _drCallbacks.stop = DrStop;
-
-    _drCallbacks.capabilities = CAPABILITY_PULL_RENDERER;
-    
-#if !TARGET_OS_TV
-    // RFI doesn't work properly with HEVC on iOS 11 with an iPhone SE (at least)
-    // It doesnt work on macOS either, tested with Network Link Conditioner.
-    // RFI seems to be broken at all resolutions on the Apple TV 4K (1st gen)
-    // on tvOS 14.5 and above resolutions around 1080p on recent GFE versions.
-    if (config.width * config.height <= 1920 * 1080) {
-        _drCallbacks.capabilities |= CAPABILITY_REFERENCE_FRAME_INVALIDATION_AVC;
-    }
-#endif
+    _drCallbacks.capabilities = CAPABILITY_PULL_RENDERER | CAPABILITY_REFERENCE_FRAME_INVALIDATION_HEVC;
 
     LiInitializeAudioCallbacks(&_arCallbacks);
     _arCallbacks.init = ArInit;
