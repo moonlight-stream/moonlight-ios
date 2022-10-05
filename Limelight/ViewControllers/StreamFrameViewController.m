@@ -431,6 +431,11 @@
                     message = @"Something went wrong on your host PC when starting the stream.\n\nMake sure you don't have any DRM-protected content open on your host PC. You can also try restarting your host PC.\n\nIf the issue persists, try reinstalling your GPU drivers and GeForce Experience.";
                     break;
                     
+                case ML_ERROR_FRAME_CONVERSION:
+                    title = @"Connection Error";
+                    message = @"The host PC reported a fatal video encoding error.\n\nTry disabling HDR mode, changing the streaming resolution, or changing your host PC's display resolution.";
+                    break;
+                    
                 default:
                     title = @"Connection Terminated";
                     message = @"The connection was terminated";
