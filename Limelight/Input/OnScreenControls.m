@@ -11,31 +11,13 @@
 #import "ControllerSupport.h"
 #import "Controller.h"
 #include "Limelight.h"
+#import "OnScreenButtonState.h"
 
 #define UPDATE_BUTTON(x, y) (buttonFlags = \
 (y) ? (buttonFlags | (x)) : (buttonFlags & ~(x)))
 
 @implementation OnScreenControls {
-    CALayer* _aButton;
-    CALayer* _bButton;
-    CALayer* _xButton;
-    CALayer* _yButton;
-    CALayer* _upButton;
-    CALayer* _downButton;
-    CALayer* _leftButton;
-    CALayer* _rightButton;
-    CALayer* _leftStickBackground;
-    CALayer* _leftStick;
-    CALayer* _rightStickBackground;
-    CALayer* _rightStick;
-    CALayer* _startButton;
-    CALayer* _selectButton;
-    CALayer* _r1Button;
-    CALayer* _r2Button;
-    CALayer* _r3Button;
-    CALayer* _l1Button;
-    CALayer* _l2Button;
-    CALayer* _l3Button;
+
     
     UITouch* _aTouch;
     UITouch* _bTouch;
@@ -71,16 +53,39 @@
     BOOL _swapABXY;
 }
 
+@synthesize dPadLayersArray;
+@synthesize onScreenButtonsArray;
+@synthesize D_PAD_CENTER_X;
+@synthesize D_PAD_CENTER_Y;
+@synthesize _leftStickBackground;
+@synthesize _leftStick;
+@synthesize _rightStickBackground;
+@synthesize _rightStick;
+@synthesize _upButton;
+@synthesize _downButton;
+@synthesize _leftButton;
+@synthesize _rightButton;
+@synthesize _aButton;
+@synthesize _bButton;
+@synthesize _xButton;
+@synthesize _yButton;
+@synthesize _startButton;
+@synthesize _selectButton;
+@synthesize _r1Button;
+@synthesize _r2Button;
+@synthesize _r3Button;
+@synthesize _l1Button;
+@synthesize _l2Button;
+@synthesize _l3Button;
+
 static const float EDGE_WIDTH = .05;
 
 //static const float BUTTON_SIZE = 50;
 static const float BUTTON_DIST = 20;
 static float BUTTON_CENTER_X;
 static float BUTTON_CENTER_Y;
-
 static const float D_PAD_DIST = 10;
-static float D_PAD_CENTER_X;
-static float D_PAD_CENTER_Y;
+
 
 static const float DEAD_ZONE_PADDING = 15;
 
@@ -115,10 +120,18 @@ static float L3_Y;
 - (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport streamConfig:(StreamConfiguration*)streamConfig {
     self = [self init];
     _view = view;
-    _controllerSupport = controllerSupport;
+    
+    dPadLayersArray = [[NSMutableArray alloc] init];
+    onScreenButtonsArray = [[NSMutableArray alloc] init];
+    
+    if (controllerSupport) {
+        _controllerSupport = controllerSupport;
+    }
     _controller = [controllerSupport getOscController];
     _deadTouches = [[NSMutableArray alloc] init];
-    _swapABXY = streamConfig.swapABXYButtons;
+    if (streamConfig) {
+        _swapABXY = streamConfig.swapABXYButtons;
+    }
     
     _iPad = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad);
     _controlArea = CGRectMake(0, 0, _view.frame.size.width, _view.frame.size.height);
@@ -154,6 +167,12 @@ static float L3_Y;
     _rightStickBackground = [CALayer layer];
     _leftStick = [CALayer layer];
     _rightStick = [CALayer layer];
+        
+    [self addDPadLayersToArray];    //adds the four individual d-pad buttons to an array
+    
+    [self addOnScreenButtonsToArray];   //adds the on screen buttons to an array. these onscreen buttons are the layers we wish the user to move around on the screen when they're customizing the on screen buttons layout
+
+    [self nameOnScreenButtonLayers];
     
     return self;
 }
@@ -232,6 +251,12 @@ static float L3_Y;
             [self hideSticks];
             [self drawStartSelect];
             [self drawButtons];
+            [self layoutOnScreenButtons];
+            
+            if ([_upButton.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) {   //hide dPad buttons if user is customizing OSC layout, since that that draws its own dPad buttons
+                [self hideDPadButtons];
+            }
+            
             break;
         case OnScreenControlsLevelFull:
             [self setupComplexControls];
@@ -241,7 +266,13 @@ static float L3_Y;
             [self drawBumpers];
             [self drawTriggers];
             [self drawSticks];
+            [self layoutOnScreenButtons];
             [self hideL3R3]; // Full controls don't need these they have the sticks
+            
+            if ([_upButton.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //hide dPad buttons if user is customizing OSC layout, since that that draws its own dPad buttons
+                [self hideDPadButtons];
+            }
+            
             break;
         default:
             Log(LOG_W, @"Unknown on-screen controls level: %d", (int)_level);
@@ -415,7 +446,7 @@ static float L3_Y;
     _rightButton.frame = CGRectMake(D_PAD_CENTER_X + D_PAD_DIST, D_PAD_CENTER_Y - rightButtonImage.size.height / 2, rightButtonImage.size.width, rightButtonImage.size.height);
     _rightButton.contents = (id) rightButtonImage.CGImage;
     [_view.layer addSublayer:_rightButton];
-    
+
     // create Up button
     UIImage* upButtonImage = [UIImage imageNamed:@"UpButton"];
     _upButton.frame = CGRectMake(D_PAD_CENTER_X - upButtonImage.size.width / 2, D_PAD_CENTER_Y - D_PAD_DIST - upButtonImage.size.height, upButtonImage.size.width, upButtonImage.size.height);
@@ -427,6 +458,26 @@ static float L3_Y;
     _leftButton.frame = CGRectMake(D_PAD_CENTER_X - D_PAD_DIST - leftButtonImage.size.width, D_PAD_CENTER_Y - leftButtonImage.size.height / 2, leftButtonImage.size.width, leftButtonImage.size.height);
     _leftButton.contents = (id) leftButtonImage.CGImage;
     [_view.layer addSublayer:_leftButton];
+}
+
+- (void)layoutOnScreenButtons {
+    
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSMutableArray *currentButtonStatesArchivedArray = [[NSMutableArray alloc] init];
+    currentButtonStatesArchivedArray = [userDefaults objectForKey:@"currentButtonStatesDataObjectsArray"];
+    
+    for (NSData *currentButtonStateDataObject in currentButtonStatesArchivedArray) {
+        
+        OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:currentButtonStateDataObject error:nil];
+        
+        for (CALayer *buttonLayer in self.onScreenButtonsArray) {
+            
+            if ([buttonLayer.name isEqualToString:onScreenButtonState.name]) {
+                
+                buttonLayer.position = onScreenButtonState.position;
+            }
+        }
+    }
 }
 
 - (void) drawStartSelect {
@@ -519,6 +570,14 @@ static float L3_Y;
     [_bButton removeFromSuperlayer];
     [_xButton removeFromSuperlayer];
     [_yButton removeFromSuperlayer];
+    [_upButton removeFromSuperlayer];
+    [_downButton removeFromSuperlayer];
+    [_leftButton removeFromSuperlayer];
+    [_rightButton removeFromSuperlayer];
+}
+
+- (void)hideDPadButtons {
+    
     [_upButton removeFromSuperlayer];
     [_downButton removeFromSuperlayer];
     [_leftButton removeFromSuperlayer];
@@ -980,6 +1039,54 @@ static float L3_Y;
     return (touchLocation.x > deadZoneStartX && touchLocation.x < deadZoneEndX
             && touchLocation.y > deadZoneStartY && touchLocation.y < deadZoneEndY);
     
+}
+
+- (void)addDPadLayersToArray {
+    
+    [dPadLayersArray addObject:_upButton];
+    [dPadLayersArray addObject:_rightButton];
+    [dPadLayersArray addObject:_downButton];
+    [dPadLayersArray addObject:_leftButton];
+}
+
+- (void)addOnScreenButtonsToArray {
+    
+    [onScreenButtonsArray addObject:_aButton];
+    [onScreenButtonsArray addObject:_bButton];
+    [onScreenButtonsArray addObject:_xButton];
+    [onScreenButtonsArray addObject:_yButton];
+    [onScreenButtonsArray addObject:_startButton];
+    [onScreenButtonsArray addObject:_selectButton];
+    [onScreenButtonsArray addObject:_r1Button];
+    [onScreenButtonsArray addObject:_r2Button];
+    [onScreenButtonsArray addObject:_r3Button];
+    [onScreenButtonsArray addObject:_l1Button];
+    [onScreenButtonsArray addObject:_l2Button];
+    [onScreenButtonsArray addObject:_l3Button];
+    [onScreenButtonsArray addObject:_upButton];
+    [onScreenButtonsArray addObject:_downButton];
+    [onScreenButtonsArray addObject:_leftButton];
+    [onScreenButtonsArray addObject:_rightButton];
+    [onScreenButtonsArray addObject:_leftStickBackground];
+    [onScreenButtonsArray addObject:_rightStickBackground];
+}
+
+- (void)nameOnScreenButtonLayers {
+    
+    _leftStickBackground.name = @"leftStickBackground";
+    _rightStickBackground.name = @"rightStickBackground";
+    _aButton.name = @"aButton";
+    _bButton.name = @"bButton";
+    _xButton.name = @"xButton";
+    _yButton.name = @"yButton";
+    _startButton.name = @"startButton";
+    _selectButton.name = @"selectButton";
+    _r1Button.name = @"r1Button";
+    _r2Button.name = @"r2Button";
+    _r3Button.name = @"r3Button";
+    _l1Button.name = @"l1Button";
+    _l2Button.name = @"l2Button";
+    _l3Button.name = @"l3Button";
 }
 
 @end

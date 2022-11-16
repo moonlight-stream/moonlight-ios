@@ -12,6 +12,8 @@
 
 #import <VideoToolbox/VideoToolbox.h>
 #import <AVFoundation/AVFoundation.h>
+#import "LayoutOnScreenControlsViewController.h"
+
 
 @implementation SettingsViewController {
     NSInteger _bitrate;
@@ -81,11 +83,12 @@ CGSize resolutionTable[RESOLUTION_TABLE_SIZE];
         // indicators. Ignore any views we don't recognize.
         if (![view isKindOfClass:[UILabel class]] &&
             ![view isKindOfClass:[UISegmentedControl class]] &&
-            ![view isKindOfClass:[UISlider class]]) {
+            ![view isKindOfClass:[UISlider class]] &&
+            ![view isKindOfClass:[UIButton class]]) {
             continue;
         }
         
-        CGFloat currentViewY = view.frame.origin.y + view.frame.size.height;
+        CGFloat currentViewY = view.frame.origin.y;
         if (currentViewY > highestViewY) {
             highestViewY = currentViewY;
         }
@@ -499,7 +502,27 @@ BOOL isCustomResolution(CGSize res) {
 #pragma mark - Navigation
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    
+    if ([[segue identifier] isEqualToString:@"LayoutOnScreenControlsViewControllerSegue"]) {
+        LayoutOnScreenControlsViewController *vc = (LayoutOnScreenControlsViewController *)[segue destinationViewController];
+        vc.onScreenControlSegmentSelected = self.onscreenControlSelector.selectedSegmentIndex;
+    }
 }
 
+- (IBAction)layoutOnScreenControlsTapped:(id)sender {
+    
+    if (self.onscreenControlSelector.selectedSegmentIndex < 2) {
+        
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Wait"
+                                   message:@"Please Select Simple or Full onscreen controller styles to customize button layout"
+                                   preferredStyle:UIAlertControllerStyleAlert];
+
+        UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault
+                                       handler:^(UIAlertAction * action) {}];
+
+        [alert addAction:defaultAction];
+        [self presentViewController:alert animated:YES completion:nil];
+    }
+}
 
 @end

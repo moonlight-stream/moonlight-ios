@@ -25,6 +25,31 @@ typedef NS_ENUM(NSInteger, OnScreenControlsLevel) {
     OnScreenControlsLevelAutoGCExtendedGamepadWithStickButtons
 };
 
+@property CALayer* _aButton;
+@property CALayer* _bButton;
+@property CALayer* _xButton;
+@property CALayer* _yButton;
+@property CALayer* _startButton;
+@property CALayer* _selectButton;
+@property CALayer* _r1Button;
+@property CALayer* _r2Button;
+@property CALayer* _r3Button;
+@property CALayer* _l1Button;
+@property CALayer* _l2Button;
+@property CALayer* _l3Button;
+@property CALayer* _upButton;
+@property CALayer* _downButton;
+@property CALayer* _leftButton;
+@property CALayer* _rightButton;
+@property CALayer* _leftStickBackground;
+@property CALayer* _leftStick;
+@property CALayer* _rightStickBackground;
+@property CALayer* _rightStick;
+@property NSMutableArray *onScreenButtonsArray;
+@property NSMutableArray *dPadLayersArray;
+@property float D_PAD_CENTER_X;
+@property float D_PAD_CENTER_Y;
+
 - (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport streamConfig:(StreamConfiguration*)streamConfig;
 - (BOOL) handleTouchDownEvent:(NSSet*)touches;
 - (BOOL) handleTouchUpEvent:(NSSet*)touches;
@@ -32,5 +57,8 @@ typedef NS_ENUM(NSInteger, OnScreenControlsLevel) {
 - (void) setLevel:(OnScreenControlsLevel)level;
 - (OnScreenControlsLevel) getLevel;
 - (void) show;
+- (void) setupComplexControls;
+- (void) drawButtons;
+- (void)layoutOnScreenButtons;
 
 @end
