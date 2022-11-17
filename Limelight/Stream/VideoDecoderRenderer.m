@@ -6,6 +6,8 @@
 //  Copyright (c) 2014 Moonlight Stream. All rights reserved.
 //
 
+@import VideoToolbox;
+
 #import "VideoDecoderRenderer.h"
 #import "StreamView.h"
 
@@ -23,6 +25,7 @@
     
     NSData *spsData, *ppsData, *vpsData;
     CMVideoFormatDescriptionRef formatDesc;
+    VTDecompressionSessionRef decompressionSession;
     
     CADisplayLink* _displayLink;
     BOOL framePacing;
@@ -74,6 +77,12 @@
         CFRelease(formatDesc);
         formatDesc = nil;
     }
+    
+    if (decompressionSession != nil){
+        VTDecompressionSessionInvalidate(decompressionSession);
+        CFRelease(decompressionSession);
+        decompressionSession = nil;
+    }
 }
 
 - (id)initWithView:(StreamView*)view callbacks:(id<ConnectionCallbacks>)callbacks streamAspectRatio:(float)aspectRatio useFramePacing:(BOOL)useFramePacing
@@ -94,10 +103,7 @@
 {
     self->videoFormat = videoFormat;
     self->frameRate = frameRate;
-}
-
-- (void)start
-{
+    
     _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkCallback:)];
     if (@available(iOS 15.0, tvOS 15.0, *)) {
         _displayLink.preferredFrameRateRange = CAFrameRateRangeMake(self->frameRate, self->frameRate, self->frameRate);
@@ -106,6 +112,26 @@
         _displayLink.preferredFramesPerSecond = self->frameRate;
     }
     [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+
+}
+
+- (void) setupDecompressionSession {
+    if (decompressionSession != NULL){
+        VTDecompressionSessionInvalidate(decompressionSession);
+        CFRelease(decompressionSession);
+        decompressionSession = nil;
+    }
+    
+    int status = VTDecompressionSessionCreate(kCFAllocatorDefault,
+                                             formatDesc,
+                                             nil,
+                                             nil,
+                                             nil,
+                                             &decompressionSession);
+    if (status != noErr) {
+        NSLog(@"Failed to instance VTDecompressionSessionRef, status %d", status);
+    }
+
 }
 
 // TODO: Refactor this
@@ -113,31 +139,10 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
 
 - (void)displayLinkCallback:(CADisplayLink *)sender
 {
-    VIDEO_FRAME_HANDLE handle;
-    PDECODE_UNIT du;
-    
-    while (LiPollNextVideoFrame(&handle, &du)) {
-        LiCompleteVideoFrame(handle, DrSubmitDecodeUnit(du));
-        
-        if (framePacing) {
-            // Calculate the actual display refresh rate
-            double displayRefreshRate = 1 / (_displayLink.targetTimestamp - _displayLink.timestamp);
-            
-            // Only pace frames if the display refresh rate is >= 90% of our stream frame rate.
-            // Battery saver, accessibility settings, or device thermals can cause the actual
-            // refresh rate of the display to drop below the physical maximum.
-            if (displayRefreshRate >= frameRate * 0.9f) {
-                // Keep one pending frame to smooth out gaps due to
-                // network jitter at the cost of 1 frame of latency
-                if (LiGetPendingVideoFrames() == 1) {
-                    break;
-                }
-            }
-        }
-    }
+    // Do Nothing
 }
 
-- (void)stop
+- (void)cleanup
 {
     [_displayLink invalidate];
 }
@@ -262,6 +267,8 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
                     formatDesc = NULL;
                 }
             }
+            
+            [self setupDecompressionSession];
         }
         
         // Data is NOT to be freed here. It's a direct usage of the caller's buffer.
@@ -330,11 +337,12 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
         
     CMSampleBufferRef sampleBuffer;
     
-    status = CMSampleBufferCreate(kCFAllocatorDefault,
+    CMSampleTimingInfo sampleTiming = {kCMTimeInvalid, CMTimeMake(pts, 1000), kCMTimeInvalid};
+    
+    status = CMSampleBufferCreateReady(kCFAllocatorDefault,
                                   frameBlockBuffer,
-                                  true, NULL,
-                                  NULL, formatDesc, 1, 0,
-                                  NULL, 0, NULL,
+                                  formatDesc, 1, 1,
+                                  &sampleTiming, 0, NULL,
                                   &sampleBuffer);
     if (status != noErr) {
         Log(LOG_E, @"CMSampleBufferCreate failed: %d", (int)status);
@@ -342,40 +350,88 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
         CFRelease(frameBlockBuffer);
         return DR_NEED_IDR;
     }
+       
+    OSStatus decodeStatus = [self decodeFrameWithSampleBuffer: sampleBuffer frameType: frameType];
     
-    CFArrayRef attachments = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, YES);
-    CFMutableDictionaryRef dict = (CFMutableDictionaryRef)CFArrayGetValueAtIndex(attachments, 0);
-    
-    CFDictionarySetValue(dict, kCMSampleAttachmentKey_DisplayImmediately, kCFBooleanTrue);
-    CFDictionarySetValue(dict, kCMSampleAttachmentKey_IsDependedOnByOthers, kCFBooleanTrue);
-    
-    if (frameType == FRAME_TYPE_PFRAME) {
-        // P-frame
-        CFDictionarySetValue(dict, kCMSampleAttachmentKey_NotSync, kCFBooleanTrue);
-        CFDictionarySetValue(dict, kCMSampleAttachmentKey_DependsOnOthers, kCFBooleanTrue);
+    if (decodeStatus != noErr){
+        NSLog(@"Failed to decompress frame");
     } else {
-        // I-frame
-        CFDictionarySetValue(dict, kCMSampleAttachmentKey_NotSync, kCFBooleanFalse);
-        CFDictionarySetValue(dict, kCMSampleAttachmentKey_DependsOnOthers, kCFBooleanFalse);
+ 
     }
+    
+    /* Flush in-process frames. */
+    //VTDecompressionSessionFinishDelayedFrames(decompressionSession);
+    
+    /* Block until our callback has been called with the last frame. */
+    //VTDecompressionSessionWaitForAsynchronousFrames(decompressionSession);
 
-    // Enqueue the next frame
-    [self->displayLayer enqueueSampleBuffer:sampleBuffer];
-    
-    if (frameType == FRAME_TYPE_IDR) {
-        // Ensure the layer is visible now
-        self->displayLayer.hidden = NO;
-        
-        // Tell our parent VC to hide the progress indicator
-        [self->_callbacks videoContentShown];
-    }
-    
     // Dereference the buffers
     CFRelease(dataBlockBuffer);
     CFRelease(frameBlockBuffer);
     CFRelease(sampleBuffer);
     
     return DR_OK;
+}
+
+- (OSStatus) decodeFrameWithSampleBuffer:(CMSampleBufferRef)sampleBuffer frameType:(int)frameType{
+    VTDecodeFrameFlags flags = kVTDecodeFrame_EnableAsynchronousDecompression;
+    VTDecodeInfoFlags flagOut = 0;
+    
+    return VTDecompressionSessionDecodeFrameWithOutputHandler(decompressionSession, sampleBuffer, flags, &flagOut, ^(OSStatus status, VTDecodeInfoFlags infoFlags, CVImageBufferRef  _Nullable imageBuffer, CMTime presentationTimestamp, CMTime presentationDuration) {
+        if (status != noErr)
+        {
+            NSError *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
+            NSLog(@"Decompression session error: %@", error);
+        }
+        
+        CMVideoFormatDescriptionRef formatDescriptionRef;
+        
+        OSStatus res = CMVideoFormatDescriptionCreateForImageBuffer(kCFAllocatorDefault, imageBuffer, &formatDescriptionRef);
+        if (res != noErr){
+            NSLog(@"Failed to create video format description from imageBuffer");
+        }
+        
+        CMSampleBufferRef sampleBuffer;
+        CMSampleTimingInfo sampleTiming = {kCMTimeInvalid, presentationTimestamp, kCMTimeInvalid};
+        
+        OSStatus err = CMSampleBufferCreateReadyWithImageBuffer(kCFAllocatorDefault, imageBuffer, formatDescriptionRef, &sampleTiming, &sampleBuffer);
+        
+        if (err != noErr){
+            NSLog(@"Error creating sample buffer for decompressed image buffer %d", (int)err);
+            return;
+        }
+        
+        CFArrayRef attachments = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, YES);
+        CFMutableDictionaryRef dict = (CFMutableDictionaryRef)CFArrayGetValueAtIndex(attachments, 0);
+        
+        CFDictionarySetValue(dict, kCMSampleAttachmentKey_IsDependedOnByOthers, kCFBooleanTrue);
+        
+        if (frameType == FRAME_TYPE_PFRAME) {
+            // P-frame
+            CFDictionarySetValue(dict, kCMSampleAttachmentKey_NotSync, kCFBooleanTrue);
+            CFDictionarySetValue(dict, kCMSampleAttachmentKey_DependsOnOthers, kCFBooleanTrue);
+        } else {
+            // I-frame
+            CFDictionarySetValue(dict, kCMSampleAttachmentKey_NotSync, kCFBooleanFalse);
+            CFDictionarySetValue(dict, kCMSampleAttachmentKey_DependsOnOthers, kCFBooleanFalse);
+        }
+        
+        // Enqueue the next frame
+        [self->displayLayer enqueueSampleBuffer:sampleBuffer];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (frameType == FRAME_TYPE_IDR) {
+                // Ensure the layer is visible now
+                self->displayLayer.hidden = NO;
+                
+                // Tell our parent VC to hide the progress indicator
+                [self->_callbacks videoContentShown];
+            }
+        });
+        
+        CFRelease(sampleBuffer);
+        CFRelease(formatDescriptionRef);
+    });
 }
 
 @end
