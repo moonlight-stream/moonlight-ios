@@ -169,7 +169,7 @@
      
     for (CALayer *buttonLayer in self.onScreenButtonsArray) {
         
-        OnScreenButtonState *onScreenButtonState = [[OnScreenButtonState alloc] initWithButtonName:buttonLayer.name andPosition:buttonLayer.position];
+        OnScreenButtonState *onScreenButtonState = [[OnScreenButtonState alloc] initWithButtonName:buttonLayer.name  isHidden:buttonLayer.isHidden andPosition:buttonLayer.position];
         [currentButtonStatesArray addObject:onScreenButtonState];
     }
     
@@ -181,9 +181,16 @@
         [currentButtonStatesDataObjectsArray addObject: buttonStateDataObject];
     }
     
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    [userDefaults setObject:currentButtonStatesDataObjectsArray forKey:@"currentButtonStatesDataObjectsArray"];
-    [userDefaults synchronize];
+    NSUserDefaults *currentButtonStatesUserDefaults = [NSUserDefaults standardUserDefaults];
+    switch (self._level) {
+        case OnScreenControlsLevelSimple:
+            [currentButtonStatesUserDefaults setObject:currentButtonStatesDataObjectsArray forKey:@"currentButtonStatesDataObjectsArray-Simple"];
+            break;
+        case OnScreenControlsLevelFull:
+            [currentButtonStatesUserDefaults setObject:currentButtonStatesDataObjectsArray forKey:@"currentButtonStatesDataObjectsArray-Full"];
+            break;
+    }
+    [currentButtonStatesUserDefaults synchronize];
 }
 
 - (void)saveButtonStateHistory {
@@ -196,17 +203,31 @@
         [buttonStatesHistoryDataObjectsArray addObject: buttonStateHistoryDataObject];
     }
     
-    NSUserDefaults *buttonStatesUserDefaults = [NSUserDefaults standardUserDefaults];
-    [buttonStatesUserDefaults setObject:buttonStatesHistoryDataObjectsArray forKey:@"buttonStatesHistoryDataObjectsArray"];
-    [buttonStatesUserDefaults synchronize];
+    NSUserDefaults *buttonStatesHistoryUserDefaults = [NSUserDefaults standardUserDefaults];
+    switch (self._level) {
+        case OnScreenControlsLevelSimple:
+            [buttonStatesHistoryUserDefaults setObject:buttonStatesHistoryDataObjectsArray forKey:@"buttonStateHistoryDataObjectsArray-Simple"];
+            break;
+        case OnScreenControlsLevelFull:
+            [buttonStatesHistoryUserDefaults setObject:buttonStatesHistoryDataObjectsArray forKey:@"buttonStateHistoryDataObjectsArray-Full"];
+            break;
+    }
+    [buttonStatesHistoryUserDefaults synchronize];
 }
 
 - (void) populateButtonHistoryStates {
     
     NSMutableArray *buttonStatesHistoryDataObjectsArray = [[NSMutableArray alloc] init];
     
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    buttonStatesHistoryDataObjectsArray = [userDefaults objectForKey:@"buttonStatesHistoryDataObjectsArray"];
+    NSUserDefaults *buttonStatesHistoryUserDefaults = [NSUserDefaults standardUserDefaults];
+    switch (self._level) {
+        case OnScreenControlsLevelSimple:
+            [buttonStatesHistoryUserDefaults setObject:buttonStatesHistoryDataObjectsArray forKey:@"buttonStateHistoryDataObjectsArray-Simple"];
+            break;
+        case OnScreenControlsLevelFull:
+            [buttonStatesHistoryUserDefaults setObject:buttonStatesHistoryDataObjectsArray forKey:@"buttonStateHistoryDataObjectsArray-Full"];
+            break;
+    }
     
     for (NSData *buttonStateHistoryDataObject in buttonStatesHistoryDataObjectsArray) {
         
@@ -219,8 +240,15 @@
     
     NSMutableArray *currentButtonStatesDataObjectsArray = [[NSMutableArray alloc] init];
     
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    currentButtonStatesDataObjectsArray = [userDefaults objectForKey:@"currentButtonStatesDataObjectsArray"];
+    NSUserDefaults *currentButtonStatesUserDefaults = [NSUserDefaults standardUserDefaults];
+    switch (self._level) {
+        case OnScreenControlsLevelSimple:
+            [currentButtonStatesUserDefaults setObject:currentButtonStatesDataObjectsArray forKey:@"currentButtonStatesDataObjectsArray-Simple"];
+            break;
+        case OnScreenControlsLevelFull:
+            [currentButtonStatesUserDefaults setObject:currentButtonStatesDataObjectsArray forKey:@"currentButtonStatesDataObjectsArray-Full"];
+            break;
+    }
     
     for (NSData *currentButtonStateDataObject in currentButtonStatesDataObjectsArray) {
         
@@ -260,7 +288,7 @@
         }
         
         // save button's position in array for use in case user wants to undo the move later
-        OnScreenButtonState *onScreenButtonState = [[OnScreenButtonState alloc] initWithButtonName:layerCurrentlyBeingTouched.name andPosition:layerCurrentlyBeingTouched.position];
+        OnScreenButtonState *onScreenButtonState = [[OnScreenButtonState alloc] initWithButtonName:layerCurrentlyBeingTouched.name isHidden:layerCurrentlyBeingTouched.isHidden andPosition:layerCurrentlyBeingTouched.position];
         [buttonStatesHistoryArray addObject:onScreenButtonState];
         
         [self saveButtonStateHistory];

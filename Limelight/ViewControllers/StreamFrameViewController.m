@@ -83,6 +83,9 @@
     
     [UIApplication sharedApplication].idleTimerDisabled = YES;
     
+    //DELETE ME
+//    [self connectionStarted];
+    
     _settings = [[[DataManager alloc] init] getSettings];
     
     _stageLabel = [[UILabel alloc] init];

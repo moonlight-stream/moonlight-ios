@@ -15,11 +15,12 @@
     return YES;
 }
 
-- (id)initWithButtonName:(NSString*)name andPosition:(CGPoint) position {
-    
+- (id)initWithButtonName:(NSString*)name isHidden:(BOOL)isHidden andPosition:(CGPoint) position {
+
     if ((self = [self init])) {
         
         self.name = name;
+        self.isHidden = isHidden;
         self.position = position;
     }
     
@@ -28,6 +29,7 @@
 
 - (void)encodeWithCoder: (NSCoder*) encoder {
     [encoder encodeObject:self.name forKey:@"name"];
+    [encoder encodeBool:self.isHidden forKey:@"isHidden"];
     [encoder encodeCGPoint:self.position forKey:@"position"];
 }
 
@@ -36,6 +38,7 @@
     if (self = [super init]) {
         
         self.name = [decoder decodeObjectForKey:@"name"];
+        self.isHidden = [decoder decodeBoolForKey:@"isHidden"];
         self.position = [decoder decodeCGPointForKey:@"position"];
     }
     

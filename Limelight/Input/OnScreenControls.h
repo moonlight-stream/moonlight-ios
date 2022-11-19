@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "ControllerSupport.h"
 
 @class ControllerSupport;
 @class StreamConfiguration;
@@ -49,6 +50,7 @@ typedef NS_ENUM(NSInteger, OnScreenControlsLevel) {
 @property NSMutableArray *dPadLayersArray;
 @property float D_PAD_CENTER_X;
 @property float D_PAD_CENTER_Y;
+@property OnScreenControlsLevel _level;
 
 - (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport streamConfig:(StreamConfiguration*)streamConfig;
 - (BOOL) handleTouchDownEvent:(NSSet*)touches;

@@ -8,7 +8,6 @@
 
 #import "OnScreenControls.h"
 #import "StreamView.h"
-#import "ControllerSupport.h"
 #import "Controller.h"
 #include "Limelight.h"
 #import "OnScreenButtonState.h"
@@ -44,7 +43,6 @@
     BOOL _iPad;
     CGRect _controlArea;
     UIView* _view;
-    OnScreenControlsLevel _level;
     BOOL _visible;
     
     ControllerSupport *_controllerSupport;
@@ -77,6 +75,7 @@
 @synthesize _l1Button;
 @synthesize _l2Button;
 @synthesize _l3Button;
+@synthesize _level;
 
 static const float EDGE_WIDTH = .05;
 
@@ -198,7 +197,7 @@ static float L3_Y;
 }
 
 - (void) updateControls {
-    switch (_level) {
+    switch (self._level) {
         case OnScreenControlsLevelOff:
             [self hideButtons];
             [self hideBumpers];
@@ -243,8 +242,13 @@ static float L3_Y;
             [self hideSticks];
             break;
         case OnScreenControlsLevelSimple:
+                        
             [self setupSimpleControls];
-            
+
+            [self setDPadPosition];
+
+            [self setAnalogStickPositions];
+
             [self hideTriggers];
             [self hideL3R3];
             [self hideBumpers];
@@ -259,8 +263,13 @@ static float L3_Y;
             
             break;
         case OnScreenControlsLevelFull:
-            [self setupComplexControls];
             
+            [self setupComplexControls];
+
+            [self setDPadPosition];
+                        
+            [self setAnalogStickPositions];
+
             [self drawButtons];
             [self drawStartSelect];
             [self drawBumpers];
@@ -435,6 +444,8 @@ static float L3_Y;
     _yButton.contents = (id) yButtonImage.CGImage;
     [_view.layer addSublayer:_yButton];
     
+    
+    
     // create Down button
     UIImage* downButtonImage = [UIImage imageNamed:@"DownButton"];
     _downButton.frame = CGRectMake(D_PAD_CENTER_X - downButtonImage.size.width / 2, D_PAD_CENTER_Y + D_PAD_DIST, downButtonImage.size.width, downButtonImage.size.height);
@@ -460,11 +471,77 @@ static float L3_Y;
     [_view.layer addSublayer:_leftButton];
 }
 
+- (void)setDPadPosition {   //if user chooses custom layout for d-Pad position then this will set it
+    
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSMutableArray *currentButtonStatesArchivedArray = [[NSMutableArray alloc] init];
+    
+    switch (self._level) {
+        case OnScreenControlsLevelSimple:
+            currentButtonStatesArchivedArray = [userDefaults objectForKey:@"currentButtonStatesDataObjectsArray-Simple"];
+            break;
+        case OnScreenControlsLevelFull:
+            currentButtonStatesArchivedArray = [userDefaults objectForKey:@"currentButtonStatesDataObjectsArray-Full"];
+            break;
+    }
+    
+    for (NSData *currentButtonStateDataObject in currentButtonStatesArchivedArray) {
+        
+        OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:currentButtonStateDataObject error:nil];
+            
+        if ([onScreenButtonState.name isEqualToString:@"dPadBackground"]) {
+            
+            D_PAD_CENTER_X = onScreenButtonState.position.x;
+            D_PAD_CENTER_Y = onScreenButtonState.position.y;
+        }
+    }
+}
+
+-(void) setAnalogStickPositions {
+    
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSMutableArray *currentButtonStatesArchivedArray = [[NSMutableArray alloc] init];
+    
+    switch (self._level) {
+        case OnScreenControlsLevelSimple:
+            currentButtonStatesArchivedArray = [userDefaults objectForKey:@"currentButtonStatesDataObjectsArray-Simple"];
+            break;
+        case OnScreenControlsLevelFull:
+            currentButtonStatesArchivedArray = [userDefaults objectForKey:@"currentButtonStatesDataObjectsArray-Full"];
+            break;
+    }
+    
+    for (NSData *currentButtonStateDataObject in currentButtonStatesArchivedArray) {
+        
+        OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:currentButtonStateDataObject error:nil];
+        
+        if ([onScreenButtonState.name isEqualToString:@"leftStickBackground"]) {
+            
+            LS_CENTER_X = onScreenButtonState.position.x;
+            LS_CENTER_Y = onScreenButtonState.position.y;
+        }
+        
+        if ([onScreenButtonState.name isEqualToString:@"rightStickBackground"]) {
+            
+            RS_CENTER_X = onScreenButtonState.position.x;
+            RS_CENTER_Y = onScreenButtonState.position.y;
+        }
+    }
+}
+
 - (void)layoutOnScreenButtons {
     
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     NSMutableArray *currentButtonStatesArchivedArray = [[NSMutableArray alloc] init];
-    currentButtonStatesArchivedArray = [userDefaults objectForKey:@"currentButtonStatesDataObjectsArray"];
+
+    switch (self._level) {
+        case OnScreenControlsLevelSimple:
+            currentButtonStatesArchivedArray = [userDefaults objectForKey:@"currentButtonStatesDataObjectsArray-Simple"];
+            break;
+        case OnScreenControlsLevelFull:
+            currentButtonStatesArchivedArray = [userDefaults objectForKey:@"currentButtonStatesDataObjectsArray-Full"];
+            break;
+    }
     
     for (NSData *currentButtonStateDataObject in currentButtonStatesArchivedArray) {
         
@@ -472,9 +549,10 @@ static float L3_Y;
         
         for (CALayer *buttonLayer in self.onScreenButtonsArray) {
             
-            if ([buttonLayer.name isEqualToString:onScreenButtonState.name]) {
+            if ([buttonLayer.name isEqualToString:onScreenButtonState.name] && [buttonLayer.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //if you're on the StreamView, ignore dPad buttons since they've already been placed in the correct place on the screen
                 
                 buttonLayer.position = onScreenButtonState.position;
+                buttonLayer.hidden = onScreenButtonState.isHidden;
             }
         }
     }
@@ -1073,8 +1151,12 @@ static float L3_Y;
 
 - (void)nameOnScreenButtonLayers {
     
+    //this naming convention allows inner analog stick layer to be positioned over its corresponding background layer when user chooses to do a custom layout for OSC
     _leftStickBackground.name = @"leftStickBackground";
+    _leftStick.name = @"leftStickBackground";
     _rightStickBackground.name = @"rightStickBackground";
+    _rightStick.name = @"rightStickBackground";
+    
     _aButton.name = @"aButton";
     _bButton.name = @"bButton";
     _xButton.name = @"xButton";
@@ -1087,6 +1169,12 @@ static float L3_Y;
     _l1Button.name = @"l1Button";
     _l2Button.name = @"l2Button";
     _l3Button.name = @"l3Button";
+    
+    //naming these 'dPadBackground' allows us to hide dPad buttons in game if the user chooses to hide the dPad when laying out OSC
+    _upButton.name = @"dPadBackground";
+    _rightButton.name = @"dPadBackground";
+    _downButton.name = @"dPadBackground";
+    _leftButton.name = @"dPadBackground";
 }
 
 @end
