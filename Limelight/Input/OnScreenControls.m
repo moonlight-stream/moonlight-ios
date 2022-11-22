@@ -167,7 +167,7 @@ static float L3_Y;
     _leftStick = [CALayer layer];
     _rightStick = [CALayer layer];
         
-    [self addDPadLayersToArray];    //adds the four individual d-pad buttons to an array
+    [self addDPadLayersToArray];
     
     [self addOnScreenButtonsToArray];   //adds the on screen buttons to an array. these onscreen buttons are the layers we wish the user to move around on the screen when they're customizing the on screen buttons layout
 

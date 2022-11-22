@@ -394,10 +394,10 @@
                                 </connections>
                             </button>
                             <stackView opaque="NO" contentMode="scaleAspectFill" ambiguous="YES" spacing="70" translatesAutoresizingMaskIntoConstraints="NO" id="bg4-Wl-MSl">
-                                <rect key="frame" x="122" y="5" width="170" height="50"/>
+                                <rect key="frame" x="-9.5" y="5" width="433" height="50"/>
                                 <subviews>
                                     <button opaque="NO" tag="20" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jfa-1m-Wpy">
-                                        <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="50.5" height="50"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="50" id="6HK-zG-wDi"/>
                                             <constraint firstAttribute="width" constant="50" id="QIa-XN-lfm"/>
@@ -412,7 +412,7 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" tag="30" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="aVP-l1-JHT">
-                                        <rect key="frame" x="120" y="0.0" width="50" height="50"/>
+                                        <rect key="frame" x="120.5" y="0.0" width="50" height="50"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="50" id="0TK-3l-8UP"/>
                                             <constraint firstAttribute="height" constant="50" id="dqI-pv-0ws"/>
@@ -422,6 +422,22 @@
                                         <state key="normal" image="arrow.uturn.backward.square" catalog="system">
                                             <preferredSymbolConfiguration key="preferredSymbolConfiguration" configurationType="pointSize" pointSize="64"/>
                                         </state>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lEA-mL-0kc">
+                                        <rect key="frame" x="240.5" y="0.0" width="61" height="50"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="plain" title="Save"/>
+                                        <connections>
+                                            <action selector="saveTapped:" destination="Uax-cc-nDz" eventType="touchUpInside" id="80D-tB-jqx"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ewU-4C-FpK">
+                                        <rect key="frame" x="371.5" y="0.0" width="61.5" height="50"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="plain" title="Load"/>
+                                        <connections>
+                                            <action selector="loadTapped:" destination="Uax-cc-nDz" eventType="touchUpInside" id="bhW-00-A2o"/>
+                                        </connections>
                                     </button>
                                 </subviews>
                             </stackView>
@@ -492,7 +508,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="oNu-Gu-QeM">
-                                <rect key="frame" x="266" y="418" width="37" height="34"/>
+                                <rect key="frame" x="266" y="418" width="37" height="33"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinY="YES" flexibleMaxY="YES"/>
                             </activityIndicatorView>
                         </subviews>

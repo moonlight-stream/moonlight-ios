@@ -56,6 +56,36 @@
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
+- (IBAction)saveTapped:(id)sender {
+    //pop up notification that lets users name profile and either cancel or save
+    UIAlertController * alertController = [UIAlertController alertControllerWithTitle: @"Name Profile"
+                                                                                      message: @"Input controller profile name"
+                                                                                  preferredStyle:UIAlertControllerStyleAlert];
+        [alertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {
+            textField.placeholder = @"name";
+            textField.textColor = [UIColor blueColor];
+            textField.clearButtonMode = UITextFieldViewModeWhileEditing;
+            textField.borderStyle = UITextBorderStyleRoundedRect;
+        }];
+        [alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+            [alertController dismissViewControllerAnimated:NO completion:nil];
+        }]];
+        [alertController addAction:[UIAlertAction actionWithTitle:@"Save" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+            NSArray * textfields = alertController.textFields;
+            UITextField * namefield = textfields[0];
+            NSLog(@"%@",namefield.text);
+            
+            //Let user know this profile is now the selected controller layout
+
+        }]];
+        [self presentViewController:alertController animated:YES completion:nil];
+}
+
+- (IBAction)loadTapped:(id)sender {
+    //load TVC that shows all controller profiles by name
+    
+}
+
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
  
     [layoutOnScreenControls touchesBegan:touches withEvent:event];
