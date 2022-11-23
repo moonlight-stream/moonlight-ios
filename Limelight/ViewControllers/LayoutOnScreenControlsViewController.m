@@ -23,8 +23,8 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
-    layoutOnScreenControls = [[LayoutOnScreenControls alloc] initWithView:self.view controllerSup:nil streamConfig:nil];
-    [layoutOnScreenControls setLevel: onScreenControlSegmentSelected];
+    layoutOnScreenControls = [[LayoutOnScreenControls alloc] initWithView:self.view controllerSup:nil streamConfig:nil oscLevel:onScreenControlSegmentSelected];
+//    [layoutOnScreenContrfols setLevel: onScreenControlSegmentSelected];
     [layoutOnScreenControls show];
     [self addAnalogSticksToBackground];
 }

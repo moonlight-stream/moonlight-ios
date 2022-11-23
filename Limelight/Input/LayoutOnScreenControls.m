@@ -28,13 +28,14 @@
 
 @synthesize _view;
 
-- (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport streamConfig:(StreamConfiguration*)streamConfig {
+- (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport streamConfig:(StreamConfiguration*)streamConfig oscLevel:(int)oscLevel {
     
     _view = view;
     _view.multipleTouchEnabled = false;
   
     self = [super initWithView:view controllerSup:controllerSupport streamConfig:streamConfig];
-
+    self._level = oscLevel;
+    
     [super setupComplexControls];   //get coordinates for button positions
     
     [self drawButtons]; //get button widths
@@ -63,11 +64,10 @@
     if (dPadBackground == nil) {
         
         dPadBackground = [CALayer layer];
-        dPadBackground.name = @"dPadBackground";
+        dPadBackground.name = @"dPadBackgroundForCustomOSC";
         dPadBackground.frame = CGRectMake(self.D_PAD_CENTER_X, self.D_PAD_CENTER_Y
                                           , self._leftButton.frame.size.width * 2.5, self._leftButton.frame.size.height * 3);
         dPadBackground.position = CGPointMake(self.D_PAD_CENTER_X, self.D_PAD_CENTER_Y);
-        dPadBackground.name = @"dPadBackground";
         [self.onScreenButtonsArray addObject:dPadBackground];
         
         [self._view.layer addSublayer:dPadBackground];
@@ -158,7 +158,7 @@
         OnScreenButtonState *onScreenButtonState = [buttonStatesHistoryArray lastObject];
         CALayer *buttonLayer = [self buttonLayerFromName:onScreenButtonState.name];
         buttonLayer.position = onScreenButtonState.position;
-        buttonLayer.hidden = NO;   // user might have thrown button into trash can. in this case undo should move button back to original position and then make it not hidden
+        buttonLayer.hidden = NO;
         [buttonStatesHistoryArray removeLastObject];
         
         [self saveButtonStateHistory];
@@ -222,10 +222,10 @@
     NSUserDefaults *buttonStatesHistoryUserDefaults = [NSUserDefaults standardUserDefaults];
     switch (self._level) {
         case OnScreenControlsLevelSimple:
-            [buttonStatesHistoryUserDefaults setObject:buttonStatesHistoryDataObjectsArray forKey:@"buttonStateHistoryDataObjectsArray-Simple"];
+            buttonStatesHistoryDataObjectsArray = [buttonStatesHistoryUserDefaults objectForKey:@"buttonStateHistoryDataObjectsArray-Simple"];
             break;
         case OnScreenControlsLevelFull:
-            [buttonStatesHistoryUserDefaults setObject:buttonStatesHistoryDataObjectsArray forKey:@"buttonStateHistoryDataObjectsArray-Full"];
+            buttonStatesHistoryDataObjectsArray = [buttonStatesHistoryUserDefaults objectForKey:@"buttonStateHistoryDataObjectsArray-Full"];
             break;
     }
     
@@ -243,10 +243,10 @@
     NSUserDefaults *currentButtonStatesUserDefaults = [NSUserDefaults standardUserDefaults];
     switch (self._level) {
         case OnScreenControlsLevelSimple:
-            [currentButtonStatesUserDefaults setObject:currentButtonStatesDataObjectsArray forKey:@"currentButtonStatesDataObjectsArray-Simple"];
+            currentButtonStatesDataObjectsArray = [currentButtonStatesUserDefaults objectForKey:@"currentButtonStatesDataObjectsArray-Simple"];
             break;
         case OnScreenControlsLevelFull:
-            [currentButtonStatesUserDefaults setObject:currentButtonStatesDataObjectsArray forKey:@"currentButtonStatesDataObjectsArray-Full"];
+            currentButtonStatesDataObjectsArray = [currentButtonStatesUserDefaults objectForKey:@"currentButtonStatesDataObjectsArray-Full"];
             break;
     }
     

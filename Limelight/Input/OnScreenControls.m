@@ -257,7 +257,7 @@ static float L3_Y;
             [self drawButtons];
             [self layoutOnScreenButtons];
             
-            if ([_upButton.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) {   //hide dPad buttons if user is customizing OSC layout, since that view draws its own dPad buttons
+            if ([_upButton.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) {   //hide dPad buttons if user is on the OSC custom layout screen, since that view draws its own dPad buttons
                 [self hideDPadButtons];
             }
             
@@ -278,7 +278,7 @@ static float L3_Y;
             [self layoutOnScreenButtons];
             [self hideL3R3]; // Full controls don't need these they have the sticks
             
-            if ([_upButton.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //hide dPad buttons if user is customizing OSC layout, since that that draws its own dPad buttons
+            if ([_upButton.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //hide dPad buttons if user is on the OSC custom layout screen, since that view draws its own dPad buttons
                 [self hideDPadButtons];
             }
             
@@ -1184,7 +1184,7 @@ static float L3_Y;
     _l2Button.name = @"l2Button";
     _l3Button.name = @"l3Button";
     
-    //naming these 'dPadBackground' allows us to hide dPad buttons in game if the user chooses to hide the dPad when laying out OSC
+    //naming these 'dPadButton' allows us to hide dPad buttons in game if the user chooses to hide the dPad when laying out OSC
     _upButton.name = @"dPadBackground";
     _rightButton.name = @"dPadBackground";
     _downButton.name = @"dPadBackground";
