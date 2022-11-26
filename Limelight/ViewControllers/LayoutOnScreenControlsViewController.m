@@ -75,7 +75,15 @@
             UITextField * namefield = textfields[0];
             NSLog(@"%@",namefield.text);
             
+            //Save OSCProfile
+            [self->layoutOnScreenControls saveOSCProfileWithName: namefield.text];
+            
             //Let user know this profile is now the selected controller layout
+            UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [NSString stringWithFormat:@"%@ profile saved and set as your active in-game controller profile layout", namefield.text] preferredStyle:UIAlertControllerStyleAlert];
+                [savedAlertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+                    [savedAlertController dismissViewControllerAnimated:NO completion:nil];
+                }]];
+            [self presentViewController:savedAlertController animated:YES completion:nil];
 
         }]];
         [self presentViewController:alertController animated:YES completion:nil];

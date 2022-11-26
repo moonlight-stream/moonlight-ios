@@ -27,6 +27,7 @@
 }
 
 @synthesize _view;
+@synthesize OSCProfileNamesArray;
 
 - (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport streamConfig:(StreamConfiguration*)streamConfig oscLevel:(int)oscLevel {
     
@@ -49,8 +50,9 @@
     [undoButton addTarget:self action:@selector(undoButtonTapped) forControlEvents:UIControlEventTouchUpInside];
     
     buttonStatesHistoryArray = [[NSMutableArray alloc] init];
-    
     currentButtonStatesArray = [[NSMutableArray alloc] init];
+    
+    OSCProfileNamesArray = [[NSMutableArray alloc] init];
     
     [self populateButtonHistoryStates];
     
@@ -255,6 +257,16 @@
         OnScreenButtonState *buttonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:currentButtonStateDataObject error:nil];
         [currentButtonStatesArray addObject:buttonState];
     }
+}
+
+- (void)saveOSCProfileWithName:(NSString*)name {
+    
+    NSMutableArray *OSCProfileNamesArray = [[NSMutableArray alloc] init];
+    
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    OSCProfileNamesArray = [userDefaults objectForKey:@"OSCProfileNamesArray"];
+    
+    
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
