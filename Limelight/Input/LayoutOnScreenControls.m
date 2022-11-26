@@ -64,7 +64,7 @@
     if (dPadBackground == nil) {
         
         dPadBackground = [CALayer layer];
-        dPadBackground.name = @"dPadBackgroundForCustomOSC";
+        dPadBackground.name = @"dPadBackgroundForCustomOSC  ";
         dPadBackground.frame = CGRectMake(self.D_PAD_CENTER_X, self.D_PAD_CENTER_Y
                                           , self._leftButton.frame.size.width * 2.5, self._leftButton.frame.size.height * 3);
         dPadBackground.position = CGPointMake(self.D_PAD_CENTER_X, self.D_PAD_CENTER_Y);
