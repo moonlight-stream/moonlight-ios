@@ -495,6 +495,24 @@
             </objects>
             <point key="canvasLocation" x="3031.4732142857142" y="531.8840579710145"/>
         </scene>
+        <!--Controller Profiles-->
+        <scene sceneID="JiS-BO-mJP">
+            <objects>
+                <viewController storyboardIdentifier="OSCProfilesTableViewController" title="Controller Profiles" id="XJM-Ka-vkv" customClass="OSCProfilesTableViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="imq-pV-PPj"/>
+                        <viewControllerLayoutGuide type="bottom" id="k1J-JH-FlK"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="M4T-Af-W8Z">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="4Wc-AH-Vvz" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2693" y="1477"/>
+        </scene>
         <!--Loading Frame View Controller-->
         <scene sceneID="kPF-XD-S77">
             <objects>
@@ -520,12 +538,15 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="GaV-PK-JSI" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3031" y="1487"/>
+            <point key="canvasLocation" x="3622" y="1487"/>
         </scene>
     </scenes>
     <resources>
         <image name="arrow.uturn.backward.square" catalog="system" width="128" height="114"/>
         <image name="trash.square" width="10" height="10"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
         <systemColor name="systemGrayColor">
             <color red="0.55686274509803924" green="0.55686274509803924" blue="0.57647058823529407" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
