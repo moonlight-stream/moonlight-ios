@@ -79,6 +79,11 @@
         formatDesc = nil;
     }
     
+    if (formatDescImageBuffer != nil) {
+        CFRelease(formatDescImageBuffer);
+        formatDescImageBuffer = nil;
+    }
+    
     if (decompressionSession != nil){
         VTDecompressionSessionInvalidate(decompressionSession);
         CFRelease(decompressionSession);
@@ -350,21 +355,6 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
         CFRelease(dataBlockBuffer);
         CFRelease(frameBlockBuffer);
         return DR_NEED_IDR;
-    }
-    
-    CFArrayRef attachments = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, YES);
-    CFMutableDictionaryRef dict = (CFMutableDictionaryRef)CFArrayGetValueAtIndex(attachments, 0);
-    
-    CFDictionarySetValue(dict, kCMSampleAttachmentKey_IsDependedOnByOthers, kCFBooleanTrue);
-    
-    if (frameType == FRAME_TYPE_PFRAME) {
-        // P-frame
-        CFDictionarySetValue(dict, kCMSampleAttachmentKey_NotSync, kCFBooleanTrue);
-        CFDictionarySetValue(dict, kCMSampleAttachmentKey_DependsOnOthers, kCFBooleanTrue);
-    } else {
-        // I-frame
-        CFDictionarySetValue(dict, kCMSampleAttachmentKey_NotSync, kCFBooleanFalse);
-        CFDictionarySetValue(dict, kCMSampleAttachmentKey_DependsOnOthers, kCFBooleanFalse);
     }
        
     OSStatus decodeStatus = [self decodeFrameWithSampleBuffer: sampleBuffer frameType: frameType];
