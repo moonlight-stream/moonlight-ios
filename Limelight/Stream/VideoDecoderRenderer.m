@@ -25,6 +25,7 @@
     
     NSData *spsData, *ppsData, *vpsData;
     CMVideoFormatDescriptionRef formatDesc;
+    CMVideoFormatDescriptionRef formatDescImageBuffer;
     VTDecompressionSessionRef decompressionSession;
     
     CADisplayLink* _displayLink;
@@ -129,7 +130,7 @@
                                              nil,
                                              &decompressionSession);
     if (status != noErr) {
-        NSLog(@"Failed to instance VTDecompressionSessionRef, status %d", status);
+        Log(LOG_E, @"Failed to instance VTDecompressionSessionRef, status %d", status);
     }
 
 }
@@ -350,21 +351,29 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
         CFRelease(frameBlockBuffer);
         return DR_NEED_IDR;
     }
+    
+    CFArrayRef attachments = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, YES);
+    CFMutableDictionaryRef dict = (CFMutableDictionaryRef)CFArrayGetValueAtIndex(attachments, 0);
+    
+    CFDictionarySetValue(dict, kCMSampleAttachmentKey_IsDependedOnByOthers, kCFBooleanTrue);
+    
+    if (frameType == FRAME_TYPE_PFRAME) {
+        // P-frame
+        CFDictionarySetValue(dict, kCMSampleAttachmentKey_NotSync, kCFBooleanTrue);
+        CFDictionarySetValue(dict, kCMSampleAttachmentKey_DependsOnOthers, kCFBooleanTrue);
+    } else {
+        // I-frame
+        CFDictionarySetValue(dict, kCMSampleAttachmentKey_NotSync, kCFBooleanFalse);
+        CFDictionarySetValue(dict, kCMSampleAttachmentKey_DependsOnOthers, kCFBooleanFalse);
+    }
        
     OSStatus decodeStatus = [self decodeFrameWithSampleBuffer: sampleBuffer frameType: frameType];
     
     if (decodeStatus != noErr){
-        NSLog(@"Failed to decompress frame");
-    } else {
- 
+        Log(LOG_E, @"Failed to decompress frame: %d", decodeStatus);
+        return DR_NEED_IDR;
     }
     
-    /* Flush in-process frames. */
-    //VTDecompressionSessionFinishDelayedFrames(decompressionSession);
-    
-    /* Block until our callback has been called with the last frame. */
-    //VTDecompressionSessionWaitForAsynchronousFrames(decompressionSession);
-
     // Dereference the buffers
     CFRelease(dataBlockBuffer);
     CFRelease(frameBlockBuffer);
@@ -375,45 +384,33 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
 
 - (OSStatus) decodeFrameWithSampleBuffer:(CMSampleBufferRef)sampleBuffer frameType:(int)frameType{
     VTDecodeFrameFlags flags = kVTDecodeFrame_EnableAsynchronousDecompression;
-    VTDecodeInfoFlags flagOut = 0;
     
-    return VTDecompressionSessionDecodeFrameWithOutputHandler(decompressionSession, sampleBuffer, flags, &flagOut, ^(OSStatus status, VTDecodeInfoFlags infoFlags, CVImageBufferRef  _Nullable imageBuffer, CMTime presentationTimestamp, CMTime presentationDuration) {
+    return VTDecompressionSessionDecodeFrameWithOutputHandler(decompressionSession, sampleBuffer, flags, NULL, ^(OSStatus status, VTDecodeInfoFlags infoFlags, CVImageBufferRef  _Nullable imageBuffer, CMTime presentationTimestamp, CMTime presentationDuration) {
         if (status != noErr)
         {
             NSError *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
-            NSLog(@"Decompression session error: %@", error);
-        }
-        
-        CMVideoFormatDescriptionRef formatDescriptionRef;
-        
-        OSStatus res = CMVideoFormatDescriptionCreateForImageBuffer(kCFAllocatorDefault, imageBuffer, &formatDescriptionRef);
-        if (res != noErr){
-            NSLog(@"Failed to create video format description from imageBuffer");
-        }
-        
-        CMSampleBufferRef sampleBuffer;
-        CMSampleTimingInfo sampleTiming = {kCMTimeInvalid, presentationTimestamp, kCMTimeInvalid};
-        
-        OSStatus err = CMSampleBufferCreateReadyWithImageBuffer(kCFAllocatorDefault, imageBuffer, formatDescriptionRef, &sampleTiming, &sampleBuffer);
-        
-        if (err != noErr){
-            NSLog(@"Error creating sample buffer for decompressed image buffer %d", (int)err);
+            Log(LOG_E, @"Decompression session error: %@", error);
+            LiRequestIdrFrame();
             return;
         }
         
-        CFArrayRef attachments = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, YES);
-        CFMutableDictionaryRef dict = (CFMutableDictionaryRef)CFArrayGetValueAtIndex(attachments, 0);
+        if (self->formatDescImageBuffer == NULL || !CMVideoFormatDescriptionMatchesImageBuffer(self->formatDescImageBuffer, imageBuffer)){
+            
+            OSStatus res = CMVideoFormatDescriptionCreateForImageBuffer(kCFAllocatorDefault, imageBuffer, &(self->formatDescImageBuffer));
+            if (res != noErr){
+                Log(LOG_E, @"Failed to create video format description from imageBuffer");
+                return;
+            }
+        }
         
-        CFDictionarySetValue(dict, kCMSampleAttachmentKey_IsDependedOnByOthers, kCFBooleanTrue);
+        CMSampleBufferRef sampleBuffer;
+        CMSampleTimingInfo sampleTiming = {kCMTimeInvalid, presentationTimestamp, presentationDuration};
         
-        if (frameType == FRAME_TYPE_PFRAME) {
-            // P-frame
-            CFDictionarySetValue(dict, kCMSampleAttachmentKey_NotSync, kCFBooleanTrue);
-            CFDictionarySetValue(dict, kCMSampleAttachmentKey_DependsOnOthers, kCFBooleanTrue);
-        } else {
-            // I-frame
-            CFDictionarySetValue(dict, kCMSampleAttachmentKey_NotSync, kCFBooleanFalse);
-            CFDictionarySetValue(dict, kCMSampleAttachmentKey_DependsOnOthers, kCFBooleanFalse);
+        OSStatus err = CMSampleBufferCreateReadyWithImageBuffer(kCFAllocatorDefault, imageBuffer, self->formatDescImageBuffer, &sampleTiming, &sampleBuffer);
+        
+        if (err != noErr){
+            Log(LOG_E, @"Error creating sample buffer for decompressed image buffer %d", (int)err);
+            return;
         }
         
         // Enqueue the next frame
@@ -430,7 +427,6 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
         });
         
         CFRelease(sampleBuffer);
-        CFRelease(formatDescriptionRef);
     });
 }
 
