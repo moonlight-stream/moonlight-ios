@@ -55,14 +55,9 @@ int DrDecoderSetup(int videoFormat, int width, int height, int redrawRate, void*
     return 0;
 }
 
-void DrStart(void)
+void DrCleanup(void)
 {
-    [renderer start];
-}
-
-void DrStop(void)
-{
-    [renderer stop];
+    [renderer cleanup];
 }
 
 -(BOOL) getVideoStats:(video_stats_t*)stats
@@ -433,9 +428,9 @@ void ClSetHdrMode(bool enabled)
 
     LiInitializeVideoCallbacks(&_drCallbacks);
     _drCallbacks.setup = DrDecoderSetup;
-    _drCallbacks.start = DrStart;
-    _drCallbacks.stop = DrStop;
-    _drCallbacks.capabilities = CAPABILITY_PULL_RENDERER | CAPABILITY_REFERENCE_FRAME_INVALIDATION_HEVC;
+    _drCallbacks.cleanup = DrCleanup;
+    _drCallbacks.submitDecodeUnit = DrSubmitDecodeUnit;
+    _drCallbacks.capabilities = CAPABILITY_DIRECT_SUBMIT | CAPABILITY_REFERENCE_FRAME_INVALIDATION_HEVC;
 
     LiInitializeAudioCallbacks(&_arCallbacks);
     _arCallbacks.init = ArInit;
