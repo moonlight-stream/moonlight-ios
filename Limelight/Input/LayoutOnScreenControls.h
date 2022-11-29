@@ -13,7 +13,6 @@ NS_ASSUME_NONNULL_BEGIN
 @interface LayoutOnScreenControls : OnScreenControls
 
 @property UIView* _view;
-@property NSMutableArray *OSCProfileNamesArray;
 
 
 - (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport streamConfig:(StreamConfiguration*)streamConfig oscLevel:(int)oscLevel;

@@ -8,6 +8,7 @@
 
 #import "LayoutOnScreenControls.h"
 #import "OnScreenButtonState.h"
+#import "OSCProfilesTableViewController.h"
 
 @interface LayoutOnScreenControls ()
 @end
@@ -27,7 +28,6 @@
 }
 
 @synthesize _view;
-@synthesize OSCProfileNamesArray;
 
 - (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport streamConfig:(StreamConfiguration*)streamConfig oscLevel:(int)oscLevel {
     
@@ -51,9 +51,7 @@
     
     buttonStatesHistoryArray = [[NSMutableArray alloc] init];
     currentButtonStatesArray = [[NSMutableArray alloc] init];
-    
-    OSCProfileNamesArray = [[NSMutableArray alloc] init];
-    
+        
     [self populateButtonHistoryStates];
     
     [self populateCurrentButtonStates];
@@ -261,10 +259,26 @@
 
 - (void)saveOSCProfileWithName:(NSString*)name {
     
-    NSMutableArray *OSCProfileNamesArray = [[NSMutableArray alloc] init];
-    
+    NSMutableArray *OSCProfilesNamesFromUserDefaultsArray = [[NSMutableArray alloc] init];
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    OSCProfileNamesArray = [userDefaults objectForKey:@"OSCProfileNamesArray"];
+    OSCProfilesNamesFromUserDefaultsArray = [userDefaults objectForKey:@"OSCProfileNamesArray"];
+
+    
+    NSMutableArray *OSCProfileNamesArray = [[NSMutableArray alloc] init];
+    [OSCProfileNamesArray addObjectsFromArray: OSCProfilesNamesFromUserDefaultsArray];
+    [OSCProfileNamesArray addObject: name];
+    [userDefaults setObject:OSCProfileNamesArray forKey:@"OSCProfileNamesArray"];
+    [userDefaults synchronize];
+}
+
+//- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+//
+//    if ([[segue identifier] isEqualToString:@"OSCProfilesTableViewControllerSegue"]) {
+//        OSCProfilesTableViewController *vc = (OSCProfilesTableViewController *)[segue destinationViewController];
+//    }
+//}
+
+- (IBAction)loadTapped:(id)sender {
     
     
 }

@@ -437,6 +437,8 @@
                                         <buttonConfiguration key="configuration" style="plain" title="Load"/>
                                         <connections>
                                             <action selector="loadTapped:" destination="Uax-cc-nDz" eventType="touchUpInside" id="bhW-00-A2o"/>
+                                            <action selector="loadTapped:" destination="ap6-8w-leH" eventType="touchUpInside" id="k9n-bD-0aI"/>
+                                            <segue destination="K3X-30-gSc" kind="modal" identifier="" id="n6p-Am-Wtv"/>
                                         </connections>
                                     </button>
                                 </subviews>
@@ -449,8 +451,52 @@
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="eYb-Ws-6RF" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+                <exit id="ap6-8w-leH" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
             <point key="canvasLocation" x="1747.826086956522" y="1486.6071428571429"/>
+        </scene>
+        <!--Profiles Table View Controller-->
+        <scene sceneID="1fL-k2-prx">
+            <objects>
+                <viewController storyboardIdentifier="OSCProfilesTableViewController" id="K3X-30-gSc" customClass="OSCProfilesTableViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="ZyK-kF-EGO"/>
+                        <viewControllerLayoutGuide type="bottom" id="BBd-il-6dy"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="7gC-Aq-O0x">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="838"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="ez3-kV-Srk">
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="804"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <prototypes>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="Cell" id="OMT-ea-9Gm">
+                                        <rect key="frame" x="0.0" y="50" width="414" height="43.5"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="OMT-ea-9Gm" id="c0p-iS-jyt">
+                                            <rect key="frame" x="0.0" y="0.0" width="414" height="43.5"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </prototypes>
+                            </tableView>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="ez3-kV-Srk" secondAttribute="trailing" id="KDE-FM-bPC"/>
+                            <constraint firstItem="BBd-il-6dy" firstAttribute="top" secondItem="ez3-kV-Srk" secondAttribute="bottom" id="L9X-DJ-VLB"/>
+                            <constraint firstItem="ez3-kV-Srk" firstAttribute="top" secondItem="ZyK-kF-EGO" secondAttribute="bottom" id="OxK-UE-Enx"/>
+                            <constraint firstItem="ez3-kV-Srk" firstAttribute="leading" secondItem="7gC-Aq-O0x" secondAttribute="leading" id="QlC-WU-Jq8"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="tableView" destination="ez3-kV-Srk" id="oaU-Cx-xw5"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Z7t-hO-pCg" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2680" y="1487"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="pfX-8A-htT">
@@ -494,24 +540,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="pqv-jd-33O" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="3031.4732142857142" y="531.8840579710145"/>
-        </scene>
-        <!--Controller Profiles-->
-        <scene sceneID="JiS-BO-mJP">
-            <objects>
-                <viewController storyboardIdentifier="OSCProfilesTableViewController" title="Controller Profiles" id="XJM-Ka-vkv" customClass="OSCProfilesTableViewController" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="imq-pV-PPj"/>
-                        <viewControllerLayoutGuide type="bottom" id="k1J-JH-FlK"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="M4T-Af-W8Z">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                    </view>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="4Wc-AH-Vvz" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="2693" y="1477"/>
         </scene>
         <!--Loading Frame View Controller-->
         <scene sceneID="kPF-XD-S77">
