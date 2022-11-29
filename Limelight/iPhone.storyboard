@@ -437,7 +437,6 @@
                                         <buttonConfiguration key="configuration" style="plain" title="Load"/>
                                         <connections>
                                             <action selector="loadTapped:" destination="Uax-cc-nDz" eventType="touchUpInside" id="bhW-00-A2o"/>
-                                            <action selector="loadTapped:" destination="ap6-8w-leH" eventType="touchUpInside" id="k9n-bD-0aI"/>
                                             <segue destination="K3X-30-gSc" kind="modal" identifier="" id="n6p-Am-Wtv"/>
                                         </connections>
                                     </button>
@@ -451,7 +450,6 @@
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="eYb-Ws-6RF" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-                <exit id="ap6-8w-leH" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
             <point key="canvasLocation" x="1747.826086956522" y="1486.6071428571429"/>
         </scene>

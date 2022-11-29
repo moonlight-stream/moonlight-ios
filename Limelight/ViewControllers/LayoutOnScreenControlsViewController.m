@@ -24,7 +24,6 @@
     // Do any additional setup after loading the view.
     
     layoutOnScreenControls = [[LayoutOnScreenControls alloc] initWithView:self.view controllerSup:nil streamConfig:nil oscLevel:onScreenControlSegmentSelected];
-//    [layoutOnScreenContrfols setLevel: onScreenControlSegmentSelected];
     [layoutOnScreenControls show];
     [self addAnalogSticksToBackground];
 }
@@ -50,9 +49,7 @@
 }
 
 - (IBAction)closeTapped:(id)sender {
-    
-    [layoutOnScreenControls saveCurrentButtonPositions];
-    
+        
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
@@ -76,7 +73,7 @@
             NSLog(@"%@",namefield.text);
             
             //Save OSCProfile
-            [self->layoutOnScreenControls saveOSCProfileWithName: namefield.text];
+            [self->layoutOnScreenControls saveOSCProfileToArrayWithName: namefield.text];
             
             //Let user know this profile is now the selected controller layout
             UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [NSString stringWithFormat:@"%@ profile saved and set as your active in-game controller profile layout", namefield.text] preferredStyle:UIAlertControllerStyleAlert];

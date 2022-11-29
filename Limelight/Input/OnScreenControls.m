@@ -539,15 +539,46 @@ static float L3_Y;
     
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     NSMutableArray *currentButtonStatesArchivedArray = [[NSMutableArray alloc] init];
-
     switch (self._level) {
         case OnScreenControlsLevelSimple:
-            currentButtonStatesArchivedArray = [userDefaults objectForKey:@"currentButtonStatesDataObjectsArray-Simple"];
+            currentButtonStatesArchivedArray = [userDefaults objectForKey:@"Default_Simple_Layout"];
             break;
         case OnScreenControlsLevelFull:
-            currentButtonStatesArchivedArray = [userDefaults objectForKey:@"currentButtonStatesDataObjectsArray-Full"];
+            currentButtonStatesArchivedArray = [userDefaults objectForKey:@"Default_Full_Layout"];
             break;
     }
+    
+    for (NSData *currentButtonStateDataObject in currentButtonStatesArchivedArray) {
+        
+        OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:currentButtonStateDataObject error:nil];
+        
+        for (CALayer *buttonLayer in self.onScreenButtonsArray) {
+            
+            if ([buttonLayer.name isEqualToString:onScreenButtonState.name]) {
+                
+                if ([buttonLayer.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //if you're on custom OSC layout screen then move the dPad to the user's desired position
+                    
+                    buttonLayer.position = onScreenButtonState.position;
+                    buttonLayer.hidden = onScreenButtonState.isHidden;
+                }
+                else if (![buttonLayer.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"] &&
+                         ![buttonLayer.name isEqualToString:@"dPadBackground"]) {    //if user on the game streaming screen, then don't move dPad buttons to user's desired position since that's already been done by now
+                    buttonLayer.position = onScreenButtonState.position;
+                    buttonLayer.hidden = onScreenButtonState.isHidden;
+                }
+            }
+        }
+    }
+}
+
+- (void)layoutOnScreenButtonsWithProfileName: (NSString*)name {
+    
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSString *profileNameWithUnderscores = [name stringByReplacingOccurrencesOfString:@" " withString:@"_"];
+    
+    NSMutableArray *currentButtonStatesArchivedArray = [[NSMutableArray alloc] init];
+    currentButtonStatesArchivedArray = [userDefaults objectForKey: profileNameWithUnderscores];
+
     
     for (NSData *currentButtonStateDataObject in currentButtonStatesArchivedArray) {
         

@@ -25,6 +25,7 @@ const double NAV_BAR_HEIGHT = 50;
     // Do any additional setup after loading the view.
     
     [self addNavBar];
+    
     self.tableView.tableHeaderView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 0, NAV_BAR_HEIGHT)];
 
     
@@ -34,8 +35,6 @@ const double NAV_BAR_HEIGHT = 50;
     OSCProfiles = [[NSMutableArray alloc] init];
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     self.OSCProfiles = [userDefaults objectForKey:@"OSCProfileNamesArray"];
-    
-    
 }
 
 - (void)addNavBar {
@@ -55,6 +54,7 @@ const double NAV_BAR_HEIGHT = 50;
 
 -(void)onTapDone:(UIBarButtonItem*)item{
 
+    
 }
 
 -(void)onTapCancel:(UIBarButtonItem*)item{
@@ -70,7 +70,8 @@ const double NAV_BAR_HEIGHT = 50;
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell"];
-    cell.textLabel.text = self.OSCProfiles[indexPath.row];
+    NSString *profileNameWithSpaces = [self.OSCProfiles[indexPath.row] stringByReplacingOccurrencesOfString:@"_" withString:@" "];
+    cell.textLabel.text = profileNameWithSpaces;
     return cell;
 }
 
