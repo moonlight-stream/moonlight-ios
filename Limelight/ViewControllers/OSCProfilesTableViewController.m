@@ -14,7 +14,10 @@ const double NAV_BAR_HEIGHT = 50;
 
 @end
 
-@implementation OSCProfilesTableViewController
+@implementation OSCProfilesTableViewController {
+    
+    NSIndexPath *lastIndexPath;
+}
 
 @synthesize tableView;
 @synthesize OSCProfiles;
@@ -28,13 +31,21 @@ const double NAV_BAR_HEIGHT = 50;
     
     self.tableView.tableHeaderView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 0, NAV_BAR_HEIGHT)];
 
-    
     self.tableView.delegate = self;
     self.tableView.dataSource = self;
     
     OSCProfiles = [[NSMutableArray alloc] init];
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    
     self.OSCProfiles = [userDefaults objectForKey:@"OSCProfileNamesArray"];
+    
+    NSInteger profileIndexPosition = [self indexPositionForSelectedOSCProfile: [userDefaults objectForKey:@"SelectedOSCProfile"]];
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:profileIndexPosition inSection:0];
+
+    [self.tableView selectRowAtIndexPath:indexPath
+                                animated:NO
+                          scrollPosition:UITableViewScrollPositionNone];
+    [self tableView:self.tableView didSelectRowAtIndexPath:indexPath];
 }
 
 - (void)addNavBar {
@@ -42,8 +53,6 @@ const double NAV_BAR_HEIGHT = 50;
     UINavigationBar* navbar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, NAV_BAR_HEIGHT)];
 
     UINavigationItem* navItem = [[UINavigationItem alloc] initWithTitle:@"On Screen Controller Profiles"];
-    UIBarButtonItem* cancelBtn = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(onTapCancel:)];
-    navItem.leftBarButtonItem = cancelBtn;
 
     UIBarButtonItem* doneBtn = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(onTapDone:)];
     navItem.rightBarButtonItem = doneBtn;
@@ -54,13 +63,10 @@ const double NAV_BAR_HEIGHT = 50;
 
 -(void)onTapDone:(UIBarButtonItem*)item{
 
-    
-}
-
--(void)onTapCancel:(UIBarButtonItem*)item{
-
     [self dismissViewControllerAnimated:YES completion:nil];
 }
+
+#pragma mark DataSource
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     
@@ -72,8 +78,63 @@ const double NAV_BAR_HEIGHT = 50;
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell"];
     NSString *profileNameWithSpaces = [self.OSCProfiles[indexPath.row] stringByReplacingOccurrencesOfString:@"_" withString:@" "];
     cell.textLabel.text = profileNameWithSpaces;
+    
+    if ([self.OSCProfiles[indexPath.row] isEqualToString:[[NSUserDefaults standardUserDefaults] objectForKey:@"SelectedOSCProfile"]]) {
+        
+        cell.accessoryType = UITableViewCellAccessoryCheckmark;
+        lastIndexPath = indexPath;
+    }
+    else {
+        
+        cell.accessoryType = UITableViewCellAccessoryNone;
+    }
+    
     return cell;
 }
+
+-(NSInteger)indexPositionForSelectedOSCProfile: (NSString*)name {
+    
+    NSMutableArray *OSCProfilesNamesFromUserDefaultsArray = [[NSMutableArray alloc] init];
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    OSCProfilesNamesFromUserDefaultsArray = [userDefaults objectForKey:@"OSCProfileNamesArray"];
+    
+    for (int i = 0; i < [OSCProfilesNamesFromUserDefaultsArray count]; i++) {
+        
+        if ([name isEqualToString:OSCProfilesNamesFromUserDefaultsArray[i]]) {
+            
+            return i;
+        }
+    }
+    
+    return 0;
+}
+
+
+#pragma mark Delegate
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    NSInteger newRow = [indexPath row];
+    NSInteger oldRow = [lastIndexPath row];
+
+    if (newRow != oldRow)
+    {
+            UITableViewCell *newCell = [tableView cellForRowAtIndexPath: indexPath];
+            newCell.accessoryType = UITableViewCellAccessoryCheckmark;
+
+            UITableViewCell *oldCell = [tableView cellForRowAtIndexPath: lastIndexPath];
+            oldCell.accessoryType = UITableViewCellAccessoryNone;
+
+            lastIndexPath = indexPath;
+    }
+
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+        
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setObject:self.OSCProfiles[indexPath.row] forKey:@"SelectedOSCProfile"];
+    [userDefaults synchronize];
+}
+
 
 /*
 #pragma mark - Navigation

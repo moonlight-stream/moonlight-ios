@@ -167,47 +167,6 @@
     }
 }
 
-- (void)saveDefaultControllerProfile {
-    
-    NSMutableArray *OSCProfilesNamesFromUserDefaultsArray = [[NSMutableArray alloc] init];
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    OSCProfilesNamesFromUserDefaultsArray = [userDefaults objectForKey:@"OSCProfileNamesArray"];
-    
-    if ((self._level == OnScreenControlsLevelSimple && [OSCProfilesNamesFromUserDefaultsArray containsObject:@"Default_Simple_Layout"] == NO) ||
-        (self._level == OnScreenControlsLevelFull && [OSCProfilesNamesFromUserDefaultsArray containsObject:@"Default_Full_Layout"] == NO)) {
-        
-        [self saveOSCPositions];
-    }
-}
-
-- (void)saveOSCPositions {
-
-    for (CALayer *buttonLayer in self.onScreenButtonsArray) {
-
-        OnScreenButtonState *onScreenButtonState = [[OnScreenButtonState alloc] initWithButtonName:buttonLayer.name  isHidden:buttonLayer.isHidden andPosition:buttonLayer.position];
-        [currentButtonStatesArray addObject:onScreenButtonState];
-    }
-
-    NSMutableArray *currentButtonStatesDataObjectsArray = [[NSMutableArray alloc] init];
-
-    for (OnScreenButtonState *buttonState in currentButtonStatesArray) {
-
-        NSData *buttonStateDataObject = [NSKeyedArchiver archivedDataWithRootObject:buttonState requiringSecureCoding:YES error:nil];
-        [currentButtonStatesDataObjectsArray addObject: buttonStateDataObject];
-    }
-
-    NSUserDefaults *currentButtonStatesUserDefaults = [NSUserDefaults standardUserDefaults];
-
-    switch (self._level) {
-        case OnScreenControlsLevelSimple:
-            [self saveOSCProfileToArrayWithName:@"Default_Simple_Layout"];
-            break;
-        case OnScreenControlsLevelFull:
-            [self saveOSCProfileToArrayWithName:@"Default_Full_Layout"];
-            break;
-    }
-}
-
 - (void)saveButtonStateHistory {
     
     NSMutableArray *buttonStatesHistoryDataObjectsArray = [[NSMutableArray alloc] init];
@@ -272,13 +231,73 @@
     }
 }
 
+- (void)saveDefaultControllerProfile {
+    
+    NSMutableArray *OSCProfilesNamesFromUserDefaultsArray = [[NSMutableArray alloc] init];
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    OSCProfilesNamesFromUserDefaultsArray = [userDefaults objectForKey:@"OSCProfileNamesArray"];
+    
+    if (self._level == OnScreenControlsLevelSimple && [OSCProfilesNamesFromUserDefaultsArray containsObject:@"Default_Simple_Layout"] == NO) {
+        
+        NSString *profile = @"Default_Simple_Layout";
+        
+        //save profile name to list of profile names
+        [self saveOSCProfileToArrayWithName: profile];
+        
+        //save button positions to storage
+        [self saveOSCPositionsToStorageWithKeyName: profile];
+
+        //set selected profile name to storage
+        NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+        [userDefaults setObject:profile forKey:@"SelectedOSCProfile"];
+        [userDefaults synchronize];
+    }
+    if (self._level == OnScreenControlsLevelFull && [OSCProfilesNamesFromUserDefaultsArray containsObject:@"Default_Full_Layout"] == NO) {
+        
+        NSString *profile = @"Default_Full_Layout";
+        
+        //save profile name to list of profile names
+        [self saveOSCProfileToArrayWithName: profile];
+
+        //save button positions to storage
+        [self saveOSCPositionsToStorageWithKeyName: profile];
+
+        //set selected profile name to storage
+        NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+        [userDefaults setObject:profile forKey:@"SelectedOSCProfile"];
+        [userDefaults synchronize];
+    }
+    
+    //DELETE ME
+//    for (int i = 0; i < 50; i++) {
+//        NSString *profile = [NSString stringWithFormat:@"Profile%d", i];
+//        [self saveOSCProfileToArrayWithName: profile];
+//    }
+}
+
+- (void)saveOSCPositionsToStorageWithKeyName: (NSString*)name {
+
+    for (CALayer *buttonLayer in self.onScreenButtonsArray) {
+
+        OnScreenButtonState *onScreenButtonState = [[OnScreenButtonState alloc] initWithButtonName:buttonLayer.name  isHidden:buttonLayer.isHidden andPosition:buttonLayer.position];
+        [currentButtonStatesArray addObject:onScreenButtonState];
+    }
+
+    NSMutableArray *currentButtonStatesDataObjectsArray = [[NSMutableArray alloc] init];
+
+    for (OnScreenButtonState *buttonState in currentButtonStatesArray) {
+
+        NSData *buttonStateDataObject = [NSKeyedArchiver archivedDataWithRootObject:buttonState requiringSecureCoding:YES error:nil];
+        [currentButtonStatesDataObjectsArray addObject: buttonStateDataObject];
+    }
+}
+
 - (void)saveOSCProfileToArrayWithName:(NSString*)name {
     
     NSMutableArray *OSCProfilesNamesFromUserDefaultsArray = [[NSMutableArray alloc] init];
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     OSCProfilesNamesFromUserDefaultsArray = [userDefaults objectForKey:@"OSCProfileNamesArray"];
 
-    
     NSMutableArray *OSCProfileNamesArray = [[NSMutableArray alloc] init];
     [OSCProfileNamesArray addObjectsFromArray: OSCProfilesNamesFromUserDefaultsArray];
     [OSCProfileNamesArray addObject: [name stringByReplacingOccurrencesOfString:@" " withString:@"_"]];

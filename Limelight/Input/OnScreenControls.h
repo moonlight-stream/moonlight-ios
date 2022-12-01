@@ -61,7 +61,7 @@ typedef NS_ENUM(NSInteger, OnScreenControlsLevel) {
 - (void) show;
 - (void) setupComplexControls;
 - (void) drawButtons;
-- (void)layoutOnScreenButtons;
-- (void)layoutOnScreenButtonsWithProfileName: (NSString*)name;
+//- (void)layoutOSCButtonsWithProfileName: (NSString*)name;
+- (void)layoutOSC;
 
 @end

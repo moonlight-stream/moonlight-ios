@@ -255,7 +255,7 @@ static float L3_Y;
             [self hideSticks];
             [self drawStartSelect];
             [self drawButtons];
-            [self layoutOnScreenButtons];
+            [self layoutOSC];
             
             if ([_upButton.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) {   //hide dPad buttons if user is on the OSC custom layout screen, since that view draws its own dPad buttons
                 [self hideDPadButtons];
@@ -275,7 +275,7 @@ static float L3_Y;
             [self drawBumpers];
             [self drawTriggers];
             [self drawSticks];
-            [self layoutOnScreenButtons];
+            [self layoutOSC];
             [self hideL3R3]; // Full controls don't need these they have the sticks
             
             if ([_upButton.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //hide dPad buttons if user is on the OSC custom layout screen, since that view draws its own dPad buttons
@@ -535,46 +535,42 @@ static float L3_Y;
     }
 }
 
-- (void)layoutOnScreenButtons {
-    
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    NSMutableArray *currentButtonStatesArchivedArray = [[NSMutableArray alloc] init];
-    switch (self._level) {
-        case OnScreenControlsLevelSimple:
-            currentButtonStatesArchivedArray = [userDefaults objectForKey:@"Default_Simple_Layout"];
-            break;
-        case OnScreenControlsLevelFull:
-            currentButtonStatesArchivedArray = [userDefaults objectForKey:@"Default_Full_Layout"];
-            break;
-    }
-    
-    for (NSData *currentButtonStateDataObject in currentButtonStatesArchivedArray) {
-        
-        OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:currentButtonStateDataObject error:nil];
-        
-        for (CALayer *buttonLayer in self.onScreenButtonsArray) {
-            
-            if ([buttonLayer.name isEqualToString:onScreenButtonState.name]) {
-                
-                if ([buttonLayer.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //if you're on custom OSC layout screen then move the dPad to the user's desired position
-                    
-                    buttonLayer.position = onScreenButtonState.position;
-                    buttonLayer.hidden = onScreenButtonState.isHidden;
-                }
-                else if (![buttonLayer.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"] &&
-                         ![buttonLayer.name isEqualToString:@"dPadBackground"]) {    //if user on the game streaming screen, then don't move dPad buttons to user's desired position since that's already been done by now
-                    buttonLayer.position = onScreenButtonState.position;
-                    buttonLayer.hidden = onScreenButtonState.isHidden;
-                }
-            }
-        }
-    }
-}
+//- (void)layoutOSCButtonsWithProfileName: (NSString*)name {
+//
+//    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+//    NSMutableArray *currentButtonStatesArchivedArray = [[NSMutableArray alloc] init];
+//    currentButtonStatesArchivedArray = [userDefaults objectForKey:name];
+//
+//    for (NSData *currentButtonStateDataObject in currentButtonStatesArchivedArray) {
+//
+//        OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:currentButtonStateDataObject error:nil];
+//
+//        for (CALayer *buttonLayer in self.onScreenButtonsArray) {
+//
+//            if ([buttonLayer.name isEqualToString:onScreenButtonState.name]) {
+//
+//                if ([buttonLayer.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //if you're on custom OSC layout screen then move the dPad to the user's desired position
+//
+//                    buttonLayer.position = onScreenButtonState.position;
+//                    buttonLayer.hidden = onScreenButtonState.isHidden;
+//                }
+//                else if (![buttonLayer.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"] &&
+//                         ![buttonLayer.name isEqualToString:@"dPadBackground"]) {    //if user on the game streaming screen, then don't move dPad buttons to user's desired position since that's already been done by now
+//                    buttonLayer.position = onScreenButtonState.position;
+//                    buttonLayer.hidden = onScreenButtonState.isHidden;
+//                }
+//            }
+//        }
+//    }
+//}
 
-- (void)layoutOnScreenButtonsWithProfileName: (NSString*)name {
+- (void)layoutOSC {
     
+    NSString *selectedOSCProfile = @"";
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    NSString *profileNameWithUnderscores = [name stringByReplacingOccurrencesOfString:@" " withString:@"_"];
+    selectedOSCProfile = [userDefaults objectForKey:@"SelectedOSCProfile"];
+    
+    NSString *profileNameWithUnderscores = [selectedOSCProfile stringByReplacingOccurrencesOfString:@" " withString:@"_"];
     
     NSMutableArray *currentButtonStatesArchivedArray = [[NSMutableArray alloc] init];
     currentButtonStatesArchivedArray = [userDefaults objectForKey: profileNameWithUnderscores];

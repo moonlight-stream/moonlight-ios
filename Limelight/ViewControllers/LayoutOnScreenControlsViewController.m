@@ -78,7 +78,12 @@
             //Let user know this profile is now the selected controller layout
             UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [NSString stringWithFormat:@"%@ profile saved and set as your active in-game controller profile layout", namefield.text] preferredStyle:UIAlertControllerStyleAlert];
                 [savedAlertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+                    
+                    //check if the user entered a profile name that already exists
+                    
                     [savedAlertController dismissViewControllerAnimated:NO completion:nil];
+                    
+                    
                 }]];
             [self presentViewController:savedAlertController animated:YES completion:nil];
 
