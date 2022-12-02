@@ -290,6 +290,8 @@
         NSData *buttonStateDataObject = [NSKeyedArchiver archivedDataWithRootObject:buttonState requiringSecureCoding:YES error:nil];
         [currentButtonStatesDataObjectsArray addObject: buttonStateDataObject];
     }
+    
+    [[NSUserDefaults standardUserDefaults] setObject:currentButtonStatesDataObjectsArray forKey:[NSString stringWithFormat:@"%@-ButtonsLayout",name]];
 }
 
 - (void)saveOSCProfileToArrayWithName:(NSString*)name {
@@ -300,7 +302,7 @@
 
     NSMutableArray *OSCProfileNamesArray = [[NSMutableArray alloc] init];
     [OSCProfileNamesArray addObjectsFromArray: OSCProfilesNamesFromUserDefaultsArray];
-    [OSCProfileNamesArray addObject: [name stringByReplacingOccurrencesOfString:@" " withString:@"_"]];
+    [OSCProfileNamesArray addObject: name];
     [userDefaults setObject:OSCProfileNamesArray forKey:@"OSCProfileNamesArray"];
     [userDefaults synchronize];
 }

@@ -14,6 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property NSMutableArray *OSCProfiles;
+@property (nonatomic, copy) void (^didDismiss)(void);
 
 
 @end

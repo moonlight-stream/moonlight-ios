@@ -19,6 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)saveOSCPositions;
 - (void)populateButtonHistoryStates;
 - (void)saveOSCProfileToArrayWithName: (NSString*)name;
+- (void)saveOSCPositionsToStorageWithKeyName: (NSString*)name;
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event;
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event;
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event;

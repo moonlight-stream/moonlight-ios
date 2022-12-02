@@ -569,11 +569,8 @@ static float L3_Y;
     NSString *selectedOSCProfile = @"";
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     selectedOSCProfile = [userDefaults objectForKey:@"SelectedOSCProfile"];
-    
-    NSString *profileNameWithUnderscores = [selectedOSCProfile stringByReplacingOccurrencesOfString:@" " withString:@"_"];
-    
     NSMutableArray *currentButtonStatesArchivedArray = [[NSMutableArray alloc] init];
-    currentButtonStatesArchivedArray = [userDefaults objectForKey: profileNameWithUnderscores];
+    currentButtonStatesArchivedArray = [userDefaults objectForKey: [NSString stringWithFormat:@"%@-ButtonsLayout", selectedOSCProfile]];
 
     
     for (NSData *currentButtonStateDataObject in currentButtonStatesArchivedArray) {
