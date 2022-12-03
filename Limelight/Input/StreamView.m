@@ -13,13 +13,14 @@
 #import "KeyboardSupport.h"
 #import "RelativeTouchHandler.h"
 #import "AbsoluteTouchHandler.h"
+#import "KeyboardInputField.h"
 
 static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
 @implementation StreamView {
     OnScreenControls* onScreenControls;
     
-    UITextField* keyInputField;
+    KeyboardInputField* keyInputField;
     BOOL isInputingText;
     
     float streamAspectRatio;
@@ -52,7 +53,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     
     TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
     
-    keyInputField = [[UITextField alloc] initWithFrame:CGRectZero];
+    keyInputField = [[KeyboardInputField alloc] initWithFrame:CGRectZero];
     [keyInputField setKeyboardType:UIKeyboardTypeDefault];
     [keyInputField setAutocorrectionType:UITextAutocorrectionTypeNo];
     [keyInputField setAutocapitalizationType:UITextAutocapitalizationTypeNone];
