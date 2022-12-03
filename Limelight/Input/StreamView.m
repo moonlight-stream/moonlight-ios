@@ -179,6 +179,13 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     [self startInteractionTimer];
     
     if (![onScreenControls handleTouchDownEvent:touches]) {
+        // We still inform the touch handler even if we're going trigger the
+        // keyboard activation gesture. This is important to ensure the touch
+        // handler has a consistent view of touch events to correctly suppress
+        // activation of one or two finger gestures when a three finger gesture
+        // is triggered.
+        [touchHandler touchesBegan:touches withEvent:event];
+        
         if ([[event allTouches] count] == 3) {
             if (isInputingText) {
                 Log(LOG_D, @"Closing the keyboard");
@@ -197,9 +204,6 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
                 
                 isInputingText = true;
             }
-        }
-        else {
-            [touchHandler touchesBegan:touches withEvent:event];
         }
     }
 }
