@@ -509,6 +509,24 @@ BOOL isCustomResolution(CGSize res) {
     }
 }
 
+- (IBAction)OSCSegmentedControlsTapped:(id)sender {
+    
+    UISegmentedControl *segmentedControl = (UISegmentedControl*) sender;
+
+    switch ([segmentedControl selectedSegmentIndex]) {
+            case 0:
+                break;
+            case 1:
+                break;
+            case 2:
+                [[NSUserDefaults standardUserDefaults] setObject:@"Default Simple Layout" forKey:@"SelectedOSCProfile"];
+                break;
+            case 3:
+                [[NSUserDefaults standardUserDefaults] setObject:@"Default Full Layout" forKey:@"SelectedOSCProfile"];
+                break;
+        }
+}
+
 - (IBAction)layoutOnScreenControlsTapped:(id)sender {
     
     if (self.onscreenControlSelector.selectedSegmentIndex < 2) {

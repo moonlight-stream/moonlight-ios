@@ -244,45 +244,40 @@ static float L3_Y;
         case OnScreenControlsLevelSimple:
                         
             [self setupSimpleControls];
-
-            [self setDPadState];
-
-            [self setAnalogSticksStates];
-
             [self hideTriggers];
             [self hideL3R3];
             [self hideBumpers];
             [self hideSticks];
             [self drawStartSelect];
             [self drawButtons];
-            [self layoutOSC];
-            
-            if ([_upButton.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) {   //hide dPad buttons if user is on the OSC custom layout screen, since that view draws its own dPad buttons
-                [self hideDPadButtons];
-            }
-            
             break;
         case OnScreenControlsLevelFull:
             
             [self setupComplexControls];
-
-            [self setDPadState];
-                        
-            [self setAnalogSticksStates];
-
             [self drawButtons];
             [self drawStartSelect];
             [self drawBumpers];
             [self drawTriggers];
             [self drawSticks];
-            [self layoutOSC];
             [self hideL3R3]; // Full controls don't need these they have the sticks
+            break;
+        case OnScreenControlsCustom:
+            
+            [self setupComplexControls];
+            [self drawButtons];
+            [self drawStartSelect];
+            [self drawBumpers];
+            [self drawTriggers];
+            [self drawSticks];
+            
+//            [self layoutOSC];
+//            [self setDPadState];
+//            [self setAnalogSticksStates];
             
             if ([_upButton.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //hide dPad buttons if user is on the OSC custom layout screen, since that view draws its own dPad buttons
                 [self hideDPadButtons];
             }
             
-            break;
         default:
             Log(LOG_W, @"Unknown on-screen controls level: %d", (int)_level);
             break;
@@ -478,10 +473,10 @@ static float L3_Y;
     
     switch (self._level) {
         case OnScreenControlsLevelSimple:
-            currentButtonStatesArchivedArray = [userDefaults objectForKey:@"currentButtonStatesDataObjectsArray-Simple"];
+            currentButtonStatesArchivedArray = [userDefaults objectForKey:@"Default Simple Layout-ButtonsLayout"];
             break;
         case OnScreenControlsLevelFull:
-            currentButtonStatesArchivedArray = [userDefaults objectForKey:@"currentButtonStatesDataObjectsArray-Full"];
+            currentButtonStatesArchivedArray = [userDefaults objectForKey:@"Default Full Layout-ButtonsLayout"];
             break;
     }
     
@@ -508,10 +503,10 @@ static float L3_Y;
     
     switch (self._level) {
         case OnScreenControlsLevelSimple:
-            currentButtonStatesArchivedArray = [userDefaults objectForKey:@"currentButtonStatesDataObjectsArray-Simple"];
+            currentButtonStatesArchivedArray = [userDefaults objectForKey:@"Default Simple Layout-ButtonsLayout"];
             break;
         case OnScreenControlsLevelFull:
-            currentButtonStatesArchivedArray = [userDefaults objectForKey:@"currentButtonStatesDataObjectsArray-Full"];
+            currentButtonStatesArchivedArray = [userDefaults objectForKey:@"Default Full Layout-ButtonsLayout"];
             break;
     }
     

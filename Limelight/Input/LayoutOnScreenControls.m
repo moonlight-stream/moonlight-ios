@@ -217,10 +217,10 @@
     NSUserDefaults *currentButtonStatesUserDefaults = [NSUserDefaults standardUserDefaults];
     switch (self._level) {
         case OnScreenControlsLevelSimple:
-            currentButtonStatesDataObjectsArray = [currentButtonStatesUserDefaults objectForKey:@"currentButtonStatesDataObjectsArray-Simple"];
+            currentButtonStatesDataObjectsArray = [currentButtonStatesUserDefaults objectForKey:@"Default Simple Layout-ButtonsLayout"];
             break;
         case OnScreenControlsLevelFull:
-            currentButtonStatesDataObjectsArray = [currentButtonStatesUserDefaults objectForKey:@"currentButtonStatesDataObjectsArray-Full"];
+            currentButtonStatesDataObjectsArray = [currentButtonStatesUserDefaults objectForKey:@"Default Full Layout-ButtonsLayout"];
             break;
     }
     
@@ -237,9 +237,9 @@
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     OSCProfilesNamesFromUserDefaultsArray = [userDefaults objectForKey:@"OSCProfileNamesArray"];
     
-    if (self._level == OnScreenControlsLevelSimple && [OSCProfilesNamesFromUserDefaultsArray containsObject:@"Default_Simple_Layout"] == NO) {
+    if (self._level == OnScreenControlsLevelSimple && [OSCProfilesNamesFromUserDefaultsArray containsObject:@"Default Simple Layout"] == NO) {
         
-        NSString *profile = @"Default_Simple_Layout";
+        NSString *profile = @"Default Simple Layout";
         
         //save profile name to list of profile names
         [self saveOSCProfileToArrayWithName: profile];
@@ -252,9 +252,9 @@
         [userDefaults setObject:profile forKey:@"SelectedOSCProfile"];
         [userDefaults synchronize];
     }
-    if (self._level == OnScreenControlsLevelFull && [OSCProfilesNamesFromUserDefaultsArray containsObject:@"Default_Full_Layout"] == NO) {
+    if (self._level == OnScreenControlsLevelFull && [OSCProfilesNamesFromUserDefaultsArray containsObject:@"Default Full Layout"] == NO) {
         
-        NSString *profile = @"Default_Full_Layout";
+        NSString *profile = @"Default Full Layout";
         
         //save profile name to list of profile names
         [self saveOSCProfileToArrayWithName: profile];
