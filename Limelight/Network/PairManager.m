@@ -38,15 +38,13 @@
     [_httpManager executeRequestSynchronously:[HttpRequest requestForResponse:serverInfoResp withUrlRequest:[_httpManager newServerInfoRequest:false]
                                                fallbackError:401 fallbackRequest:[_httpManager newHttpServerInfoRequest]]];
     if ([serverInfoResp isStatusOk]) {
-        if ([[serverInfoResp getStringTag:@"state"] hasSuffix:@"_SERVER_BUSY"]) {
-            [_callback pairFailed:@"You cannot pair while a previous session is still running on the host PC. Quit any running games or reboot the host PC, then try pairing again."];
-        } else if (![[serverInfoResp getStringTag:@"PairStatus"] isEqual:@"1"]) {
+        if (![[serverInfoResp getStringTag:@"PairStatus"] isEqual:@"1"]) {
             NSString* appversion = [serverInfoResp getStringTag:@"appversion"];
             if (appversion == nil) {
                 [_callback pairFailed:@"Missing XML element"];
                 return;
             }            
-            [self initiatePairWithPin:PIN forServerMajorVersion:[[appversion substringToIndex:1] intValue]];
+            [self initiatePairWithPin:PIN forServerMajorVersion:[[appversion substringToIndex:1] intValue] withState:[serverInfoResp getStringTag:@"state"]];
         } else {
             [_callback alreadyPaired];
         }
@@ -82,8 +80,8 @@
 }
 
 // All codepaths must call finishPairing exactly once before returning!
-- (void) initiatePairWithPin:(NSString*)PIN forServerMajorVersion:(int)serverMajorVersion {
-    Log(LOG_I, @"Pairing with generation %d server", serverMajorVersion);
+- (void) initiatePairWithPin:(NSString*)PIN forServerMajorVersion:(int)serverMajorVersion withState:(NSString*)state {
+    Log(LOG_I, @"Pairing with generation %d server in state %@", serverMajorVersion, state);
     
     // Start a background task to help prevent the app from being killed
     // while pairing is in progress.
@@ -99,7 +97,13 @@
     HttpResponse* pairResp = [[HttpResponse alloc] init];
     [_httpManager executeRequestSynchronously:[HttpRequest requestForResponse:pairResp withUrlRequest:[_httpManager newPairRequest:salt clientCert:_clientCert]]];
     if (![self verifyResponseStatus:pairResp]) {
-        [self finishPairing:bgId forResponse:pairResp withFallbackError:@"Pairing was declined by the target."];
+        // GFE does not allow pairing while a server is busy, but Sunshine does. We give it a try and display the busy error if it fails.
+        if ([state hasSuffix:@"_SERVER_BUSY"]) {
+            [self finishPairing:bgId forResponse:pairResp withFallbackError:@"You cannot pair while a previous session is still running on the host PC. Quit any running games or reboot the host PC, then try pairing again."];
+        }
+        else {
+            [self finishPairing:bgId forResponse:pairResp withFallbackError:@"Pairing was declined by the target."];
+        }
         return;
     }
     
