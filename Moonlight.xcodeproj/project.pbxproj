@@ -1159,7 +1159,7 @@
 					"$(PROJECT_DIR)/libs/opus/lib/tvOS",
 					"$(PROJECT_DIR)/libs/SDL2/lib/tvOS",
 				);
-				MARKETING_VERSION = 8.3.1;
+				MARKETING_VERSION = 8.4.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.Moonlight";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1205,7 +1205,7 @@
 					"$(PROJECT_DIR)/libs/opus/lib/tvOS",
 					"$(PROJECT_DIR)/libs/SDL2/lib/tvOS",
 				);
-				MARKETING_VERSION = 8.3.1;
+				MARKETING_VERSION = 8.4.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.Moonlight";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1352,7 +1352,7 @@
 					"$(PROJECT_DIR)/libs/openssl/lib/iOS",
 					"$(PROJECT_DIR)/libs/SDL2/lib/iOS",
 				);
-				MARKETING_VERSION = 8.3.1;
+				MARKETING_VERSION = 8.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -1391,7 +1391,7 @@
 					"$(PROJECT_DIR)/libs/openssl/lib/iOS",
 					"$(PROJECT_DIR)/libs/SDL2/lib/iOS",
 				);
-				MARKETING_VERSION = 8.3.1;
+				MARKETING_VERSION = 8.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
