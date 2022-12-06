@@ -75,6 +75,8 @@
 				<string>20 Mbps</string>
 				<string>25 Mbps</string>
 				<string>50 Mbps</string>
+				<string>70 Mbps</string>
+				<string>80 Mbps</string>
 				<string>100 Mbps</string>
 				<string>150 Mbps</string>
 			</array>
@@ -88,6 +90,8 @@
 				<string>20000</string>
 				<string>25000</string>
 				<string>50000</string>
+				<string>70000</string>
+				<string>80000</string>
 				<string>100000</string>
 				<string>150000</string>
 			</array>
