@@ -501,17 +501,11 @@ BOOL isCustomResolution(CGSize res) {
 
 #pragma mark - Navigation
 
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    
-    if ([[segue identifier] isEqualToString:@"LayoutOnScreenControlsViewControllerSegue"]) {
-        LayoutOnScreenControlsViewController *vc = (LayoutOnScreenControlsViewController *)[segue destinationViewController];
-        vc.onScreenControlSegmentSelected = self.onscreenControlSelector.selectedSegmentIndex;
-    }
-}
-
 - (IBAction)OSCSegmentedControlsTapped:(id)sender {
     
     UISegmentedControl *segmentedControl = (UISegmentedControl*) sender;
+    UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"iPhone" bundle:nil];
+    LayoutOnScreenControlsViewController *vc = [storyboard instantiateViewControllerWithIdentifier:@"LayoutOnScreenControlsViewController"];
 
     switch ([segmentedControl selectedSegmentIndex]) {
             case 0:
@@ -519,28 +513,13 @@ BOOL isCustomResolution(CGSize res) {
             case 1:
                 break;
             case 2:
-                [[NSUserDefaults standardUserDefaults] setObject:@"Default Simple Layout" forKey:@"SelectedOSCProfile"];
                 break;
             case 3:
-                [[NSUserDefaults standardUserDefaults] setObject:@"Default Full Layout" forKey:@"SelectedOSCProfile"];
                 break;
+            case 4:
+                [self presentViewController:vc animated:YES completion:nil];
+            break;
         }
-}
-
-- (IBAction)layoutOnScreenControlsTapped:(id)sender {
-    
-    if (self.onscreenControlSelector.selectedSegmentIndex < 2) {
-        
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Wait"
-                                   message:@"Please Select Simple or Full onscreen controller styles to customize button layout"
-                                   preferredStyle:UIAlertControllerStyleAlert];
-
-        UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault
-                                       handler:^(UIAlertAction * action) {}];
-
-        [alert addAction:defaultAction];
-        [self presentViewController:alert animated:YES completion:nil];
-    }
 }
 
 @end

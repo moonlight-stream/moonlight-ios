@@ -25,6 +25,7 @@
     // Do any additional setup after loading the view.
     
     layoutOnScreenControls = [[LayoutOnScreenControls alloc] initWithView:self.view controllerSup:nil streamConfig:nil oscLevel:onScreenControlSegmentSelected];
+    layoutOnScreenControls._level = 4;
     [layoutOnScreenControls show];
     [self addAnalogSticksToBackground];
 }
@@ -76,11 +77,14 @@
         if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfileNamesArray"] containsObject:enteredProfileName]) {
             
             //let user know another profile with the same name already exists
-            UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [NSString stringWithFormat:@"Another profile with the name '%@' already exists!", enteredProfileName] preferredStyle:UIAlertControllerStyleAlert];
-            [savedAlertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-                [savedAlertController dismissViewControllerAnimated:NO completion:^{
-                    [self presentViewController:inputNameAlertController animated:YES completion:nil];
-                }];
+            UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [NSString stringWithFormat:@"Another profile with the name '%@' already exists! Do you want to overwrite it?", enteredProfileName] preferredStyle:UIAlertControllerStyleAlert];
+            [savedAlertController addAction:[UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+                [self->layoutOnScreenControls saveOSCProfileWithName: enteredProfileName];
+                [self->layoutOnScreenControls saveOSCPositionsWithKeyName: enteredProfileName];
+                [[NSUserDefaults standardUserDefaults] setObject:enteredProfileName forKey:@"SelectedOSCProfile"];
+            }]];
+            [savedAlertController addAction:[UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+                [savedAlertController dismissViewControllerAnimated:NO completion:nil];
             }]];
             [self presentViewController:savedAlertController animated:YES completion:nil];
         }
@@ -97,8 +101,8 @@
         }
         else {
             
-            [self->layoutOnScreenControls saveOSCProfileToArrayWithName: enteredProfileName];
-            [self->layoutOnScreenControls saveOSCPositionsToStorageWithKeyName: enteredProfileName];
+            [self->layoutOnScreenControls saveOSCProfileWithName: enteredProfileName];
+            [self->layoutOnScreenControls saveOSCPositionsWithKeyName: enteredProfileName];
             [[NSUserDefaults standardUserDefaults] setObject:enteredProfileName forKey:@"SelectedOSCProfile"];
             
             //Let user know this profile is now the selected controller layout
@@ -124,6 +128,7 @@
     vc.didDismiss = ^() {
         NSLog(@"Dismissed SecondViewController");
         [self->layoutOnScreenControls layoutOSC];
+        [self->layoutOnScreenControls loadButtonHistory];
     };
     [self presentViewController:vc animated:YES completion:nil];
 }

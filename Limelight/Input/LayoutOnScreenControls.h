@@ -17,9 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport streamConfig:(StreamConfiguration*)streamConfig oscLevel:(int)oscLevel;
 - (void)saveOSCPositions;
-- (void)populateButtonHistoryStates;
-- (void)saveOSCProfileToArrayWithName: (NSString*)name;
-- (void)saveOSCPositionsToStorageWithKeyName: (NSString*)name;
+- (void)loadButtonHistory;
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event;
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event;
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event;

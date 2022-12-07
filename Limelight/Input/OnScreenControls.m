@@ -270,9 +270,9 @@ static float L3_Y;
             [self drawTriggers];
             [self drawSticks];
             
-//            [self layoutOSC];
-//            [self setDPadState];
-//            [self setAnalogSticksStates];
+            [self layoutOSC];
+            [self setDPadState];
+            [self setAnalogSticksStates];
             
             if ([_upButton.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //hide dPad buttons if user is on the OSC custom layout screen, since that view draws its own dPad buttons
                 [self hideDPadButtons];
@@ -470,15 +470,7 @@ static float L3_Y;
     
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     NSMutableArray *currentButtonStatesArchivedArray = [[NSMutableArray alloc] init];
-    
-    switch (self._level) {
-        case OnScreenControlsLevelSimple:
-            currentButtonStatesArchivedArray = [userDefaults objectForKey:@"Default Simple Layout-ButtonsLayout"];
-            break;
-        case OnScreenControlsLevelFull:
-            currentButtonStatesArchivedArray = [userDefaults objectForKey:@"Default Full Layout-ButtonsLayout"];
-            break;
-    }
+    currentButtonStatesArchivedArray = [userDefaults objectForKey:@"Default-ButtonsLayout"];
     
     for (NSData *currentButtonStateDataObject in currentButtonStatesArchivedArray) {
         
@@ -500,15 +492,8 @@ static float L3_Y;
     
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     NSMutableArray *currentButtonStatesArchivedArray = [[NSMutableArray alloc] init];
-    
-    switch (self._level) {
-        case OnScreenControlsLevelSimple:
-            currentButtonStatesArchivedArray = [userDefaults objectForKey:@"Default Simple Layout-ButtonsLayout"];
-            break;
-        case OnScreenControlsLevelFull:
-            currentButtonStatesArchivedArray = [userDefaults objectForKey:@"Default Full Layout-ButtonsLayout"];
-            break;
-    }
+    currentButtonStatesArchivedArray = [userDefaults objectForKey:@"Default-ButtonsLayout"];
+
     
     for (NSData *currentButtonStateDataObject in currentButtonStatesArchivedArray) {
         
@@ -559,35 +544,98 @@ static float L3_Y;
 //    }
 //}
 
+- (void)saveOSCProfileWithName:(NSString*)name {
+    
+    NSMutableArray *OSCProfilesNamesFromUserDefaultsArray = [[NSMutableArray alloc] init];
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    [OSCProfilesNamesFromUserDefaultsArray addObjectsFromArray: [userDefaults objectForKey:@"OSCProfileNamesArray"]];
+
+    //remove existing duplicate value first
+    int i = 0;
+    for (i = 0; i < [OSCProfilesNamesFromUserDefaultsArray count]; i++) {
+        
+        if ([[OSCProfilesNamesFromUserDefaultsArray objectAtIndex:i] isEqualToString:name]) {
+            
+            [OSCProfilesNamesFromUserDefaultsArray removeObjectAtIndex:i];
+            break;
+        }
+    }
+    
+    NSMutableArray *OSCProfileNamesArray = [[NSMutableArray alloc] init];
+    [OSCProfileNamesArray addObjectsFromArray: OSCProfilesNamesFromUserDefaultsArray];
+    [OSCProfileNamesArray insertObject:name atIndex:i];
+    [userDefaults setObject:OSCProfileNamesArray forKey:@"OSCProfileNamesArray"];
+    [userDefaults synchronize];
+}
+
+- (void)saveOSCPositionsWithKeyName: (NSString*)name {
+
+    NSMutableArray *currentButtonStatesArray = [[NSMutableArray alloc] init];
+    
+    for (CALayer *buttonLayer in self.onScreenButtonsArray) {
+
+        OnScreenButtonState *onScreenButtonState = [[OnScreenButtonState alloc] initWithButtonName:buttonLayer.name  isHidden:buttonLayer.isHidden andPosition:buttonLayer.position];
+        [currentButtonStatesArray addObject:onScreenButtonState];
+    }
+
+    NSMutableArray *currentButtonStatesDataObjectsArray = [[NSMutableArray alloc] init];
+
+    for (OnScreenButtonState *buttonState in currentButtonStatesArray) {
+
+        NSData *buttonStateDataObject = [NSKeyedArchiver archivedDataWithRootObject:buttonState requiringSecureCoding:YES error:nil];
+        [currentButtonStatesDataObjectsArray addObject: buttonStateDataObject];
+    }
+    
+    [[NSUserDefaults standardUserDefaults] setObject:currentButtonStatesDataObjectsArray forKey:[NSString stringWithFormat:@"%@-ButtonsLayout",name]];
+}
+
 - (void)layoutOSC {
     
-    NSString *selectedOSCProfile = @"";
+    NSMutableArray *profiles = [[NSMutableArray alloc] init];
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    selectedOSCProfile = [userDefaults objectForKey:@"SelectedOSCProfile"];
-    NSMutableArray *currentButtonStatesArchivedArray = [[NSMutableArray alloc] init];
-    currentButtonStatesArchivedArray = [userDefaults objectForKey: [NSString stringWithFormat:@"%@-ButtonsLayout", selectedOSCProfile]];
-
+    profiles = [userDefaults objectForKey:@"OSCProfileNamesArray"];
     
-    for (NSData *currentButtonStateDataObject in currentButtonStatesArchivedArray) {
+    if ([profiles count] > 0) {
         
-        OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:currentButtonStateDataObject error:nil];
+        NSMutableArray *currentButtonStatesArchivedArray = [[NSMutableArray alloc] init];
+        currentButtonStatesArchivedArray = [userDefaults objectForKey: [NSString stringWithFormat:@"%@-ButtonsLayout", [userDefaults objectForKey:@"SelectedOSCProfile"]]];
         
-        for (CALayer *buttonLayer in self.onScreenButtonsArray) {
+        for (NSData *currentButtonStateDataObject in currentButtonStatesArchivedArray) {
             
-            if ([buttonLayer.name isEqualToString:onScreenButtonState.name]) {
+            OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:currentButtonStateDataObject error:nil];
+            
+            for (CALayer *buttonLayer in self.onScreenButtonsArray) {
                 
-                if ([buttonLayer.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //if you're on custom OSC layout screen then move the dPad to the user's desired position
+                if ([buttonLayer.name isEqualToString:onScreenButtonState.name]) {
                     
-                    buttonLayer.position = onScreenButtonState.position;
-                    buttonLayer.hidden = onScreenButtonState.isHidden;
-                }
-                else if (![buttonLayer.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"] &&
-                         ![buttonLayer.name isEqualToString:@"dPadBackground"]) {    //if user on the game streaming screen, then don't move dPad buttons to user's desired position since that's already been done by now
-                    buttonLayer.position = onScreenButtonState.position;
-                    buttonLayer.hidden = onScreenButtonState.isHidden;
+                    if ([buttonLayer.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //if you're on custom OSC layout screen then move the dPad to the user's desired position
+                        
+                        buttonLayer.position = onScreenButtonState.position;
+                        buttonLayer.hidden = onScreenButtonState.isHidden;
+                    }
+                    else if (![buttonLayer.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"] &&
+                             ![buttonLayer.name isEqualToString:@"dPadBackground"]) {    //if user on the game streaming screen, then don't move dPad buttons to user's desired position since that's already been done by now
+                        buttonLayer.position = onScreenButtonState.position;
+                        buttonLayer.hidden = onScreenButtonState.isHidden;
+                    }
                 }
             }
         }
+    }
+    else {  //no profiles exist yet so create one called 'Default' and set it as the selected one
+        
+        NSString *profile = @"Default";
+        
+        //save profile name to list of profile names
+        [self saveOSCProfileWithName: profile];
+
+        //save button positions to storage
+        [self saveOSCPositionsWithKeyName: profile];
+
+        //set selected profile name to storage
+        NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+        [userDefaults setObject:profile forKey:@"SelectedOSCProfile"];
+        [userDefaults synchronize];
     }
 }
 

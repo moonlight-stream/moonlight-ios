@@ -43,9 +43,12 @@ const double NAV_BAR_HEIGHT = 50;
     
     [super viewDidAppear: animated];
     
-    NSInteger profileIndexPosition = [self indexPositionForSelectedOSCProfile: [[NSUserDefaults standardUserDefaults] objectForKey:@"SelectedOSCProfile"]];
-    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:profileIndexPosition inSection:0];
-    [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
+    if ([self.OSCProfiles count] > 0) { //scroll to selected profile if user has any saved profiles
+        
+        NSInteger profileIndexPosition = [self indexPositionForSelectedOSCProfile: [[NSUserDefaults standardUserDefaults] objectForKey:@"SelectedOSCProfile"]];
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:profileIndexPosition inSection:0];
+        [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
+    }
 }
 
 - (void)addNavBar {

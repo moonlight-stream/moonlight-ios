@@ -64,5 +64,7 @@ typedef NS_ENUM(NSInteger, OnScreenControlsLevel) {
 - (void) drawButtons;
 //- (void)layoutOSCButtonsWithProfileName: (NSString*)name;
 - (void)layoutOSC;
+- (void)saveOSCProfileWithName: (NSString*)name;
+- (void)saveOSCPositionsWithKeyName: (NSString*)name;
 
 @end
