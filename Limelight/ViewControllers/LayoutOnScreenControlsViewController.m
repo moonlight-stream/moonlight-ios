@@ -8,6 +8,7 @@
 
 #import "LayoutOnScreenControlsViewController.h"
 #import "OSCProfilesTableViewController.h"
+#import "OnScreenButtonState.h"
 
 @interface LayoutOnScreenControlsViewController ()
 
@@ -53,6 +54,20 @@
 - (IBAction)closeTapped:(id)sender {
         
     [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (IBAction)undoTapped:(id)sender {
+    
+    if ([layoutOnScreenControls.buttonStatesHistoryArray count] > 0) {
+        
+        OnScreenButtonState *onScreenButtonState = [layoutOnScreenControls.buttonStatesHistoryArray lastObject];
+        CALayer *buttonLayer = [layoutOnScreenControls buttonLayerFromName:onScreenButtonState.name];
+        buttonLayer.position = onScreenButtonState.position;
+        buttonLayer.hidden = NO;
+        [layoutOnScreenControls.buttonStatesHistoryArray removeLastObject];
+        
+        [layoutOnScreenControls saveButtonStateHistory];
+    }
 }
 
 - (IBAction)saveTapped:(id)sender {

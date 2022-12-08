@@ -13,11 +13,13 @@ NS_ASSUME_NONNULL_BEGIN
 @interface LayoutOnScreenControls : OnScreenControls
 
 @property UIView* _view;
+@property NSMutableArray *buttonStatesHistoryArray;
 
 
 - (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport streamConfig:(StreamConfiguration*)streamConfig oscLevel:(int)oscLevel;
-- (void)saveOSCPositions;
 - (void)loadButtonHistory;
+- (CALayer*)buttonLayerFromName: (NSString*)name;
+- (void)saveButtonStateHistory;
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event;
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event;
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event;

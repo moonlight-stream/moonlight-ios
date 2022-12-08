@@ -7,8 +7,8 @@
 //
 
 #import "LayoutOnScreenControls.h"
-#import "OnScreenButtonState.h"
 #import "OSCProfilesTableViewController.h"
+#import "OnScreenButtonState.h"
 
 @interface LayoutOnScreenControls ()
 @end
@@ -19,7 +19,6 @@
     CALayer *dPadBackground;    //groups dPad buttons so they move together
     UIButton *trashCanButton;
     UIButton *undoButton;
-    NSMutableArray *buttonStatesHistoryArray;
     CALayer *upButton;
     CALayer *downButton;
     CALayer *leftButton;
@@ -27,6 +26,7 @@
 }
 
 @synthesize _view;
+@synthesize buttonStatesHistoryArray;
 
 - (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport streamConfig:(StreamConfiguration*)streamConfig oscLevel:(int)oscLevel {
     
@@ -44,9 +44,6 @@
     [self addDPadButtonsToDPadBackgroundLayer];
       
     trashCanButton = (UIButton *)[self._view viewWithTag: 20];
-    
-    undoButton = (UIButton *)[self._view viewWithTag: 30];
-    [undoButton addTarget:self action:@selector(undoButtonTapped) forControlEvents:UIControlEventTouchUpInside];
     
     buttonStatesHistoryArray = [[NSMutableArray alloc] init];
                 
@@ -128,7 +125,7 @@
 - (void)layoutOnScreenButtonsAfterUndo {
     
     NSUserDefaults *buttonStatesUserDefaults = [NSUserDefaults standardUserDefaults];
-    NSMutableArray *buttonStatesHistoryArray = [[NSMutableArray alloc] init];
+    buttonStatesHistoryArray = [[NSMutableArray alloc] init];
     [buttonStatesHistoryArray addObjectsFromArray:[buttonStatesUserDefaults objectForKey:@"buttonStatesHistoryArray"]];
     
     for (NSData *buttonStateHistoryDataObject in buttonStatesHistoryArray) {
@@ -142,20 +139,6 @@
                 buttonLayer.position = onScreenButtonState.position;
             }
         }
-    }
-}
-
-- (void)undoButtonTapped {
-    
-    if ([buttonStatesHistoryArray count] > 0) {
-        
-        OnScreenButtonState *onScreenButtonState = [buttonStatesHistoryArray lastObject];
-        CALayer *buttonLayer = [self buttonLayerFromName:onScreenButtonState.name];
-        buttonLayer.position = onScreenButtonState.position;
-        buttonLayer.hidden = NO;
-        [buttonStatesHistoryArray removeLastObject];
-        
-        [self saveButtonStateHistory];
     }
 }
 

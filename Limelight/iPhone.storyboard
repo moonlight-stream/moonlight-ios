@@ -397,7 +397,7 @@
                                             <action selector="trashCanTapped:" destination="Uax-cc-nDz" eventType="touchUpInside" id="qs5-qK-ahS"/>
                                         </connections>
                                     </button>
-                                    <button opaque="NO" tag="30" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="aVP-l1-JHT">
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="aVP-l1-JHT">
                                         <rect key="frame" x="120.5" y="0.0" width="50" height="50"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="50" id="0TK-3l-8UP"/>
@@ -408,6 +408,9 @@
                                         <state key="normal" image="arrow.uturn.backward.square" catalog="system">
                                             <preferredSymbolConfiguration key="preferredSymbolConfiguration" configurationType="pointSize" pointSize="64"/>
                                         </state>
+                                        <connections>
+                                            <action selector="undoTapped:" destination="Uax-cc-nDz" eventType="touchUpInside" id="3nt-vO-1FK"/>
+                                        </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lEA-mL-0kc">
                                         <rect key="frame" x="240.5" y="0.0" width="61" height="50"/>
