@@ -11,9 +11,12 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface LayoutOnScreenControlsViewController : UIViewController
+@interface LayoutOnScreenControlsViewController : UIViewController 
 
 @property NSInteger onScreenControlSegmentSelected;
+@property (weak, nonatomic) IBOutlet UIView *toolbarRootView;
+@property (weak, nonatomic) IBOutlet UIView *chevronView;
+@property (weak, nonatomic) IBOutlet UIImageView *chevronImageView;
 
 
 @end

@@ -368,6 +368,91 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <view alpha="0.75" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Wzt-tm-tiU" customClass="ToolBarContainerView">
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="50"/>
+                                <subviews>
+                                    <view alpha="0.90000000000000002" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="VOd-OY-x7s" userLabel="Chevron View">
+                                        <rect key="frame" x="181" y="50" width="52" height="25"/>
+                                        <subviews>
+                                            <imageView clipsSubviews="YES" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chevron.compact.up" translatesAutoresizingMaskIntoConstraints="NO" id="JIU-0y-IHy">
+                                                <rect key="frame" x="0.0" y="0.0" width="52" height="23"/>
+                                            </imageView>
+                                        </subviews>
+                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                        <constraints>
+                                            <constraint firstItem="JIU-0y-IHy" firstAttribute="leading" secondItem="VOd-OY-x7s" secondAttribute="leading" id="00c-bM-Mnr"/>
+                                            <constraint firstItem="JIU-0y-IHy" firstAttribute="top" secondItem="VOd-OY-x7s" secondAttribute="top" id="0zI-XY-ApE"/>
+                                            <constraint firstAttribute="trailing" secondItem="JIU-0y-IHy" secondAttribute="trailing" id="Dvu-YJ-Ael"/>
+                                            <constraint firstAttribute="width" constant="52" id="Fqb-Ty-nol"/>
+                                            <constraint firstAttribute="bottom" secondItem="JIU-0y-IHy" secondAttribute="bottom" constant="2" id="UkG-4b-PIa"/>
+                                            <constraint firstAttribute="height" constant="25" id="bm4-Ig-vIn"/>
+                                        </constraints>
+                                    </view>
+                                    <stackView opaque="NO" contentMode="scaleAspectFill" spacing="70" translatesAutoresizingMaskIntoConstraints="NO" id="bg4-Wl-MSl">
+                                        <rect key="frame" x="-9.5" y="0.0" width="433" height="50"/>
+                                        <subviews>
+                                            <button opaque="NO" tag="20" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jfa-1m-Wpy">
+                                                <rect key="frame" x="0.0" y="0.0" width="50.5" height="50"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="50" id="6HK-zG-wDi"/>
+                                                    <constraint firstAttribute="width" constant="50" id="QIa-XN-lfm"/>
+                                                </constraints>
+                                                <color key="tintColor" red="0.6705882353" green="0.61711704730000005" blue="0.99902987480000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                                <state key="normal" image="trash.square">
+                                                    <preferredSymbolConfiguration key="preferredSymbolConfiguration" configurationType="pointSize" pointSize="64"/>
+                                                </state>
+                                                <connections>
+                                                    <action selector="trashCanTapped:" destination="Uax-cc-nDz" eventType="touchUpInside" id="qs5-qK-ahS"/>
+                                                </connections>
+                                            </button>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="aVP-l1-JHT">
+                                                <rect key="frame" x="120.5" y="0.0" width="50" height="50"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="width" constant="50" id="0TK-3l-8UP"/>
+                                                    <constraint firstAttribute="height" constant="50" id="dqI-pv-0ws"/>
+                                                </constraints>
+                                                <color key="tintColor" red="0.6705882353" green="0.61568627450000002" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                                <state key="normal" image="arrow.uturn.backward.square" catalog="system">
+                                                    <preferredSymbolConfiguration key="preferredSymbolConfiguration" configurationType="pointSize" pointSize="64"/>
+                                                </state>
+                                                <connections>
+                                                    <action selector="undoTapped:" destination="Uax-cc-nDz" eventType="touchUpInside" id="3nt-vO-1FK"/>
+                                                </connections>
+                                            </button>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lEA-mL-0kc">
+                                                <rect key="frame" x="240.5" y="0.0" width="61" height="50"/>
+                                                <state key="normal" title="Button"/>
+                                                <buttonConfiguration key="configuration" style="plain" title="Save"/>
+                                                <connections>
+                                                    <action selector="saveTapped:" destination="Uax-cc-nDz" eventType="touchUpInside" id="80D-tB-jqx"/>
+                                                </connections>
+                                            </button>
+                                            <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="IH5-Tw-Mfu">
+                                                <rect key="frame" x="336.5" y="0.0" width="0.0" height="50"/>
+                                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                            </view>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ewU-4C-FpK">
+                                                <rect key="frame" x="371.5" y="0.0" width="61.5" height="50"/>
+                                                <state key="normal" title="Button"/>
+                                                <buttonConfiguration key="configuration" style="plain" title="Load"/>
+                                                <connections>
+                                                    <action selector="loadTapped:" destination="Uax-cc-nDz" eventType="touchUpInside" id="b48-C8-b01"/>
+                                                </connections>
+                                            </button>
+                                        </subviews>
+                                    </stackView>
+                                </subviews>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstItem="bg4-Wl-MSl" firstAttribute="top" secondItem="Wzt-tm-tiU" secondAttribute="top" id="3d2-qc-1Hn"/>
+                                    <constraint firstAttribute="height" constant="50" id="EdA-2I-zda"/>
+                                    <constraint firstItem="VOd-OY-x7s" firstAttribute="top" secondItem="Wzt-tm-tiU" secondAttribute="top" constant="50" id="GYl-lc-PJS"/>
+                                    <constraint firstItem="bg4-Wl-MSl" firstAttribute="centerX" secondItem="Wzt-tm-tiU" secondAttribute="centerX" id="j3y-yV-f8v"/>
+                                    <constraint firstItem="VOd-OY-x7s" firstAttribute="centerX" secondItem="Wzt-tm-tiU" secondAttribute="centerX" id="oBM-U6-9Xp"/>
+                                </constraints>
+                            </view>
                             <button opaque="NO" tag="40" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cRZ-7v-e7c">
                                 <rect key="frame" x="25" y="5" width="36" height="35"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -379,63 +464,19 @@
                                     <action selector="closeTapped:" destination="Uax-cc-nDz" eventType="touchUpInside" id="8rt-nE-yf1"/>
                                 </connections>
                             </button>
-                            <stackView opaque="NO" contentMode="scaleAspectFill" ambiguous="YES" spacing="70" translatesAutoresizingMaskIntoConstraints="NO" id="bg4-Wl-MSl">
-                                <rect key="frame" x="-9.5" y="5" width="433" height="50"/>
-                                <subviews>
-                                    <button opaque="NO" tag="20" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jfa-1m-Wpy">
-                                        <rect key="frame" x="0.0" y="0.0" width="50.5" height="50"/>
-                                        <constraints>
-                                            <constraint firstAttribute="height" constant="50" id="6HK-zG-wDi"/>
-                                            <constraint firstAttribute="width" constant="50" id="QIa-XN-lfm"/>
-                                        </constraints>
-                                        <color key="tintColor" red="0.6705882353" green="0.61711704730000005" blue="0.99902987480000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                        <state key="normal" image="trash.square">
-                                            <preferredSymbolConfiguration key="preferredSymbolConfiguration" configurationType="pointSize" pointSize="64"/>
-                                        </state>
-                                        <connections>
-                                            <action selector="trashCanTapped:" destination="Uax-cc-nDz" eventType="touchUpInside" id="qs5-qK-ahS"/>
-                                        </connections>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="aVP-l1-JHT">
-                                        <rect key="frame" x="120.5" y="0.0" width="50" height="50"/>
-                                        <constraints>
-                                            <constraint firstAttribute="width" constant="50" id="0TK-3l-8UP"/>
-                                            <constraint firstAttribute="height" constant="50" id="dqI-pv-0ws"/>
-                                        </constraints>
-                                        <color key="tintColor" red="0.6705882353" green="0.61568627450000002" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                        <state key="normal" image="arrow.uturn.backward.square" catalog="system">
-                                            <preferredSymbolConfiguration key="preferredSymbolConfiguration" configurationType="pointSize" pointSize="64"/>
-                                        </state>
-                                        <connections>
-                                            <action selector="undoTapped:" destination="Uax-cc-nDz" eventType="touchUpInside" id="3nt-vO-1FK"/>
-                                        </connections>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lEA-mL-0kc">
-                                        <rect key="frame" x="240.5" y="0.0" width="61" height="50"/>
-                                        <state key="normal" title="Button"/>
-                                        <buttonConfiguration key="configuration" style="plain" title="Save"/>
-                                        <connections>
-                                            <action selector="saveTapped:" destination="Uax-cc-nDz" eventType="touchUpInside" id="80D-tB-jqx"/>
-                                        </connections>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ewU-4C-FpK">
-                                        <rect key="frame" x="371.5" y="0.0" width="61.5" height="50"/>
-                                        <state key="normal" title="Button"/>
-                                        <buttonConfiguration key="configuration" style="plain" title="Load"/>
-                                        <connections>
-                                            <action selector="loadTapped:" destination="Uax-cc-nDz" eventType="touchUpInside" id="b48-C8-b01"/>
-                                        </connections>
-                                    </button>
-                                </subviews>
-                            </stackView>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemGrayColor"/>
                         <constraints>
-                            <constraint firstItem="bg4-Wl-MSl" firstAttribute="centerX" secondItem="qLt-go-aMf" secondAttribute="centerX" id="7i9-DN-YLt"/>
+                            <constraint firstItem="Wzt-tm-tiU" firstAttribute="leading" secondItem="qLt-go-aMf" secondAttribute="leading" id="nQV-a3-IUO"/>
+                            <constraint firstAttribute="trailing" secondItem="Wzt-tm-tiU" secondAttribute="trailing" id="u6n-Mk-6UO"/>
+                            <constraint firstItem="Wzt-tm-tiU" firstAttribute="top" secondItem="qLt-go-aMf" secondAttribute="top" id="yox-vQ-dcp"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="chevronImageView" destination="JIU-0y-IHy" id="FJc-e9-xdM"/>
+                        <outlet property="chevronView" destination="VOd-OY-x7s" id="kmH-6r-jRf"/>
+                        <outlet property="toolbarRootView" destination="Wzt-tm-tiU" id="yXg-25-fvA"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="eYb-Ws-6RF" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -557,6 +598,7 @@
     </scenes>
     <resources>
         <image name="arrow.uturn.backward.square" catalog="system" width="128" height="114"/>
+        <image name="chevron.compact.up" width="9" height="3"/>
         <image name="trash.square" width="10" height="10"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

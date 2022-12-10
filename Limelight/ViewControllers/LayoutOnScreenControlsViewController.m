@@ -14,21 +14,107 @@
 
 @end
 
+
 @implementation LayoutOnScreenControlsViewController {
     
     LayoutOnScreenControls *layoutOnScreenControls;
+    BOOL isToolbarHidden;
 }
 
 @synthesize onScreenControlSegmentSelected;
+@synthesize toolbarRootView;
+@synthesize chevronView;
+@synthesize chevronImageView;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
+    isToolbarHidden = NO;
+    
+    //Add curve to bottom of chevron tab view
+    UIBezierPath *maskPath = [UIBezierPath bezierPathWithRoundedRect:self.chevronView.bounds byRoundingCorners:(UIRectCornerBottomLeft | UIRectCornerBottomRight) cornerRadii:CGSizeMake(10.0, 10.0)];
+    CAShapeLayer *maskLayer = [[CAShapeLayer alloc] init];
+    maskLayer.frame = self.view.bounds;
+    maskLayer.path  = maskPath.CGPath;
+    self.chevronView.layer.mask = maskLayer;
+    
+    
+    UISwipeGestureRecognizer *swipeUp = [[UISwipeGestureRecognizer alloc]initWithTarget:self action:@selector(moveToolbar:)];
+    swipeUp.direction = UISwipeGestureRecognizerDirectionUp;
+    [self.chevronView addGestureRecognizer:swipeUp];
+    [self.chevronImageView addGestureRecognizer:swipeUp];
+    [self.toolbarRootView addGestureRecognizer:swipeUp];
+
+    UITapGestureRecognizer *singleFingerTap =
+      [[UITapGestureRecognizer alloc] initWithTarget:self
+                                              action:@selector(moveToolbar:)];
+    [self.chevronView addGestureRecognizer:singleFingerTap];
+    [self.chevronImageView addGestureRecognizer:singleFingerTap];
+
     layoutOnScreenControls = [[LayoutOnScreenControls alloc] initWithView:self.view controllerSup:nil streamConfig:nil oscLevel:onScreenControlSegmentSelected];
     layoutOnScreenControls._level = 4;
     [layoutOnScreenControls show];
     [self addAnalogSticksToBackground];
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{   //keeps VC modal animation from completing the toolbar's bounce animation immediately
+
+        [UIView animateWithDuration:0.3
+          delay:1
+          usingSpringWithDamping:0.8
+          initialSpringVelocity:0.5
+          options:UIViewAnimationOptionCurveEaseInOut animations:^{
+            //Animations
+            self.toolbarRootView.frame = CGRectMake(self.toolbarRootView.frame.origin.x, self.toolbarRootView.frame.origin.y - 25, self.toolbarRootView.frame.size.width, self.toolbarRootView.frame.size.height);
+            }
+          completion:^(BOOL finished) {
+            //Completion Block
+            [UIView animateWithDuration:0.3
+              delay:0
+              usingSpringWithDamping:0.7
+              initialSpringVelocity:1.0
+              options:UIViewAnimationOptionCurveEaseIn animations:^{
+                //Animations
+                self.toolbarRootView.frame = CGRectMake(self.toolbarRootView.frame.origin.x, self.toolbarRootView.frame.origin.y + 25, self.toolbarRootView.frame.size.width, self.toolbarRootView.frame.size.height);
+                }
+              completion:^(BOOL finished) {
+                //Completion Block
+                NSLog (@"done");
+            }];
+        }];
+    });
+}
+
+- (void)moveToolbar:(UISwipeGestureRecognizer *)sender {
+    
+    if (isToolbarHidden == NO) {
+        
+        [UIView animateWithDuration:0.2 animations:^{
+            //Animations
+            self.toolbarRootView.frame = CGRectMake(self.toolbarRootView.frame.origin.x, self.toolbarRootView.frame.origin.y - self.toolbarRootView.frame.size.height, self.toolbarRootView.frame.size.width, self.toolbarRootView.frame.size.height);
+        }
+                         completion:^(BOOL finished) {
+            if (finished) {
+                
+                self->isToolbarHidden = YES;
+                self.chevronImageView.image = [UIImage imageNamed:@"chevron.compact.down"];
+            }
+        }];
+    }
+    else {
+        
+        [UIView animateWithDuration:0.2 animations:^{
+            //Animations
+            self.toolbarRootView.frame = CGRectMake(self.toolbarRootView.frame.origin.x, self.toolbarRootView.frame.origin.y + self.toolbarRootView.frame.size.height, self.toolbarRootView.frame.size.width, self.toolbarRootView.frame.size.height);
+        }
+                         completion:^(BOOL finished) {
+            if (finished) {
+                
+                self->isToolbarHidden = NO;
+                self.chevronImageView.image = [UIImage imageNamed:@"chevron.compact.up"];
+            }
+        }];
+    }
 }
 
 - (void)addAnalogSticksToBackground {
@@ -150,6 +236,17 @@
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
  
+    for (UITouch* touch in touches) {
+        
+        CGPoint touchLocation = [touch locationInView:self.view];
+        touchLocation = [[touch view] convertPoint:touchLocation toView:nil];
+        CALayer *layer = [self.view.layer hitTest:touchLocation];
+        
+        if (layer == self.toolbarRootView.layer || layer == self.chevronView.layer || layer == self.chevronImageView.layer) {  //don't let user move Tool Bar
+            return;
+        }
+    }
+    
     [layoutOnScreenControls touchesBegan:touches withEvent:event];
 }
 
