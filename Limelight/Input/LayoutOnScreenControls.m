@@ -159,6 +159,8 @@
     
     [buttonStatesHistoryUserDefaults setObject:buttonStatesHistoryDataObjectsArray forKey:[NSString stringWithFormat:@"%@-buttonStateHistoryDataObjectsArray", selectedOSCProfile]];
     [buttonStatesHistoryUserDefaults synchronize];
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"ButtonsHistoryChanged" object:self];
 }
 
 - (void)loadButtonHistory {    //Loads this profile's button-change history into an array to be used in case the user wants to tap 'undo'
@@ -219,16 +221,15 @@
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-    
+        
     UITouch *touch = [touches anyObject];
     CGPoint touchLocation = [touch locationInView:_view];
-    touchLocation = [[touch view] convertPoint:touchLocation toView:nil];
     
     if ([layerCurrentlyBeingTouched.superlayer.delegate isKindOfClass:[UIButton class]]) { //dont let user move the trashcan, undo, or exit buttons
         return;
     }
     
-    layerCurrentlyBeingTouched.position = [touch locationInView:_view]; //move object to touch location
+    layerCurrentlyBeingTouched.position = touchLocation; //move object to touch location
     
     if ([self isButtonHoveringOverTrashCan]) {
      

@@ -11,6 +11,8 @@
 		450B660529147B120057517C /* LayoutOnScreenControls.m in Sources */ = {isa = PBXBuildFile; fileRef = 450B660429147B120057517C /* LayoutOnScreenControls.m */; };
 		450B660D29147C2A0057517C /* OnScreenButtonState.m in Sources */ = {isa = PBXBuildFile; fileRef = 450B660B29147C2A0057517C /* OnScreenButtonState.m */; };
 		450B660F29147D4D0057517C /* iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 450B660E29147D4D0057517C /* iPhone.storyboard */; };
+		4573A445294683D1000A036A /* ProfileTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 4573A443294683D1000A036A /* ProfileTableViewCell.m */; };
+		4573A446294683D1000A036A /* ProfileTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4573A444294683D1000A036A /* ProfileTableViewCell.xib */; };
 		45999AEE2935451D0073975D /* OSCProfilesTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 45999AED2935451D0073975D /* OSCProfilesTableViewController.m */; };
 		45E9CBF529453CDC00C88D96 /* ToolBarContainerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 45E9CBF429453CDC00C88D96 /* ToolBarContainerView.m */; };
 		693B3A9B218638CD00982F7B /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 693B3A9A218638CD00982F7B /* Settings.bundle */; };
@@ -176,6 +178,9 @@
 		450B660B29147C2A0057517C /* OnScreenButtonState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OnScreenButtonState.m; sourceTree = "<group>"; };
 		450B660C29147C2A0057517C /* OnScreenButtonState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OnScreenButtonState.h; sourceTree = "<group>"; };
 		450B660E29147D4D0057517C /* iPhone.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = iPhone.storyboard; sourceTree = "<group>"; };
+		4573A442294683D1000A036A /* ProfileTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ProfileTableViewCell.h; sourceTree = "<group>"; };
+		4573A443294683D1000A036A /* ProfileTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ProfileTableViewCell.m; sourceTree = "<group>"; };
+		4573A444294683D1000A036A /* ProfileTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ProfileTableViewCell.xib; sourceTree = "<group>"; };
 		45999AEC2935451D0073975D /* OSCProfilesTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OSCProfilesTableViewController.h; sourceTree = "<group>"; };
 		45999AED2935451D0073975D /* OSCProfilesTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OSCProfilesTableViewController.m; sourceTree = "<group>"; };
 		45E9CBF329453CDC00C88D96 /* ToolBarContainerView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ToolBarContainerView.h; sourceTree = "<group>"; };
@@ -438,6 +443,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4573A43C29467F03000A036A /* Cells */ = {
+			isa = PBXGroup;
+			children = (
+				4573A442294683D1000A036A /* ProfileTableViewCell.h */,
+				4573A443294683D1000A036A /* ProfileTableViewCell.m */,
+				4573A444294683D1000A036A /* ProfileTableViewCell.xib */,
+			);
+			path = Cells;
+			sourceTree = "<group>";
+		};
 		9896219423D15C2900211983 /* X1Kit */ = {
 			isa = PBXGroup;
 			children = (
@@ -640,6 +655,7 @@
 		FB89462319F646E200339C8A /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
+				4573A43C29467F03000A036A /* Cells */,
 				FBD3495119FF36FB002D2A60 /* SWRevealViewController.h */,
 				FBD3495219FF36FB002D2A60 /* SWRevealViewController.m */,
 				FB89462419F646E200339C8A /* MainFrameViewController.h */,
@@ -996,6 +1012,7 @@
 				FB290D0919B2C406004C83CF /* Images.xcassets in Resources */,
 				FB89463819F6473800339C8A /* Launch Screen.xib in Resources */,
 				450B660F29147D4D0057517C /* iPhone.storyboard in Resources */,
+				4573A446294683D1000A036A /* ProfileTableViewCell.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1109,6 +1126,7 @@
 				FB9AFD3D1A7E111600872C98 /* AppAssetResponse.m in Sources */,
 				FBD349621A0089F6002D2A60 /* DataManager.m in Sources */,
 				FB4A23B81A9D3637004D2EF2 /* LoadingFrameViewController.m in Sources */,
+				4573A445294683D1000A036A /* ProfileTableViewCell.m in Sources */,
 				FB9AFD3A1A7E05CE00872C98 /* ServerInfoResponse.m in Sources */,
 				FB89463119F646E200339C8A /* StreamManager.m in Sources */,
 			);

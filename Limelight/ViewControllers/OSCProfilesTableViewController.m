@@ -8,6 +8,7 @@
 
 #import "OSCProfilesTableViewController.h"
 #import "LayoutOnScreenControlsViewController.h"
+#import "ProfileTableViewCell.h"
 
 const double NAV_BAR_HEIGHT = 50;
 
@@ -34,6 +35,9 @@ const double NAV_BAR_HEIGHT = 50;
 
     self.tableView.delegate = self;
     self.tableView.dataSource = self;
+    
+    // Register the nib file with the table view
+    [self.tableView registerNib:[UINib nibWithNibName:@"ProfileTableViewCell" bundle:nil] forCellReuseIdentifier:@"Cell"];
     
     self.OSCProfiles = [[NSMutableArray alloc] init];
     [self.OSCProfiles addObjectsFromArray: [[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfileNamesArray"]];
@@ -82,8 +86,8 @@ const double NAV_BAR_HEIGHT = 50;
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell"];
-    cell.textLabel.text = self.OSCProfiles[indexPath.row];
+    ProfileTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
+    cell.name.text = self.OSCProfiles[indexPath.row];
     
     if ([self.OSCProfiles[indexPath.row] isEqualToString:[[NSUserDefaults standardUserDefaults] objectForKey:@"SelectedOSCProfile"]]) {
         

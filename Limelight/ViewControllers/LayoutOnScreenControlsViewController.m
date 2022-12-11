@@ -19,6 +19,7 @@
     
     LayoutOnScreenControls *layoutOnScreenControls;
     BOOL isToolbarHidden;
+    __weak IBOutlet UIStackView *toolbarStackView;
 }
 
 @synthesize onScreenControlSegmentSelected;
@@ -31,7 +32,7 @@
     // Do any additional setup after loading the view.
     
     isToolbarHidden = NO;
-    
+        
     //Add curve to bottom of chevron tab view
     UIBezierPath *maskPath = [UIBezierPath bezierPathWithRoundedRect:self.chevronView.bounds byRoundingCorners:(UIRectCornerBottomLeft | UIRectCornerBottomRight) cornerRadii:CGSizeMake(10.0, 10.0)];
     CAShapeLayer *maskLayer = [[CAShapeLayer alloc] init];
@@ -56,6 +57,15 @@
     layoutOnScreenControls._level = 4;
     [layoutOnScreenControls show];
     [self addAnalogSticksToBackground];
+    
+    if ([layoutOnScreenControls.buttonStatesHistoryArray count] == 0) {
+        self.undoButton.alpha = 0.3;
+    }
+    else {
+        self.undoButton.alpha = 1.0;
+    }
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(buttonsHistoryChanged:) name:@"ButtonsHistoryChanged" object:nil];
     
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{   //keeps VC modal animation from completing the toolbar's bounce animation immediately
 
@@ -83,6 +93,18 @@
             }];
         }];
     });
+}
+
+- (void)buttonsHistoryChanged:(NSNotification *)notification {
+    
+    if ([layoutOnScreenControls.buttonStatesHistoryArray count] > 0) {
+        
+        self.undoButton.alpha = 1.0;
+    }
+    else {
+        
+        self.undoButton.alpha = 0.3;
+    }
 }
 
 - (void)moveToolbar:(UISwipeGestureRecognizer *)sender {
@@ -154,6 +176,14 @@
         
         [layoutOnScreenControls saveButtonStateHistory];
     }
+    else {
+        
+        UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@"Nothing to Undo"] message: @"You haven't made any changes to undo" preferredStyle:UIAlertControllerStyleAlert];
+        [savedAlertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+            [savedAlertController dismissViewControllerAnimated:NO completion:nil];
+        }]];
+        [self presentViewController:savedAlertController animated:YES completion:nil];
+    }
 }
 
 - (IBAction)saveTapped:(id)sender {
@@ -168,7 +198,7 @@
         textField.placeholder = @"name";
         textField.textColor = [UIColor blueColor];
         textField.clearButtonMode = UITextFieldViewModeWhileEditing;
-        textField.borderStyle = UITextBorderStyleRoundedRect;
+        textField.borderStyle = UITextBorderStyleNone;
     }];
     [inputNameAlertController addAction:[UIAlertAction actionWithTitle:@"Save" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
         NSArray * textFields = inputNameAlertController.textFields;

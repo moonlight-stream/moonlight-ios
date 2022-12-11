@@ -17,6 +17,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (weak, nonatomic) IBOutlet UIView *toolbarRootView;
 @property (weak, nonatomic) IBOutlet UIView *chevronView;
 @property (weak, nonatomic) IBOutlet UIImageView *chevronImageView;
+@property (weak, nonatomic) IBOutlet UIButton *undoButton;
+@property (weak, nonatomic) IBOutlet UIStackView *toolbarStackView;
 
 
 @end
