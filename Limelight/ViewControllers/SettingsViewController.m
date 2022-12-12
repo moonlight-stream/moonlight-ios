@@ -504,8 +504,21 @@ BOOL isCustomResolution(CGSize res) {
 - (IBAction)OSCSegmentedControlsTapped:(id)sender {
     
     UISegmentedControl *segmentedControl = (UISegmentedControl*) sender;
-    UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"iPhone" bundle:nil];
-    LayoutOnScreenControlsViewController *vc = [storyboard instantiateViewControllerWithIdentifier:@"LayoutOnScreenControlsViewController"];
+    
+    BOOL isIPhone = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone);
+
+    LayoutOnScreenControlsViewController *vc = [[LayoutOnScreenControlsViewController alloc] init];
+    if (isIPhone) {
+        
+        UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"iPhone" bundle:nil];
+        vc = [storyboard instantiateViewControllerWithIdentifier:@"LayoutOnScreenControlsViewController"];
+    }
+    else {
+        
+        UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"iPad" bundle:nil];
+        vc = [storyboard instantiateViewControllerWithIdentifier:@"LayoutOnScreenControlsViewController"];
+        vc.modalPresentationStyle = UIModalPresentationFullScreen;
+    }
 
     switch ([segmentedControl selectedSegmentIndex]) {
             case 0:
