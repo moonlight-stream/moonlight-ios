@@ -515,17 +515,35 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="ez3-kV-Srk">
-                                <rect key="frame" x="0.0" y="48" width="414" height="814"/>
+                                <rect key="frame" x="0.0" y="48" width="414" height="848"/>
                                 <color key="backgroundColor" red="0.1215686275" green="0.12941176469999999" blue="0.14117647059999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <color key="sectionIndexBackgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </tableView>
+                            <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="KVR-Ly-40f">
+                                <rect key="frame" x="0.0" y="48" width="414" height="44"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="44" id="TsX-5e-gco"/>
+                                </constraints>
+                                <items>
+                                    <navigationItem title="On Screen Controller Profiles" id="epN-zZ-lvG">
+                                        <barButtonItem key="rightBarButtonItem" style="plain" systemItem="done" id="5jM-Ee-UPo">
+                                            <connections>
+                                                <action selector="doneTapped:" destination="K3X-30-gSc" id="IxX-Ky-Euf"/>
+                                            </connections>
+                                        </barButtonItem>
+                                    </navigationItem>
+                                </items>
+                            </navigationBar>
                         </subviews>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <color key="backgroundColor" systemColor="systemGray3Color"/>
                         <constraints>
+                            <constraint firstAttribute="bottom" secondItem="ez3-kV-Srk" secondAttribute="bottom" id="JY4-i1-0Ki"/>
                             <constraint firstAttribute="trailing" secondItem="ez3-kV-Srk" secondAttribute="trailing" id="KDE-FM-bPC"/>
-                            <constraint firstItem="BBd-il-6dy" firstAttribute="top" secondItem="ez3-kV-Srk" secondAttribute="bottom" id="L9X-DJ-VLB"/>
+                            <constraint firstItem="KVR-Ly-40f" firstAttribute="top" secondItem="7gC-Aq-O0x" secondAttribute="topMargin" id="MWj-Ya-LWY"/>
                             <constraint firstItem="ez3-kV-Srk" firstAttribute="top" secondItem="ZyK-kF-EGO" secondAttribute="bottom" id="OxK-UE-Enx"/>
+                            <constraint firstItem="KVR-Ly-40f" firstAttribute="leading" secondItem="7gC-Aq-O0x" secondAttribute="leading" id="PBF-0r-GrB"/>
                             <constraint firstItem="ez3-kV-Srk" firstAttribute="leading" secondItem="7gC-Aq-O0x" secondAttribute="leading" id="QlC-WU-Jq8"/>
+                            <constraint firstAttribute="trailing" secondItem="KVR-Ly-40f" secondAttribute="trailing" id="WFK-GY-jZM"/>
                         </constraints>
                     </view>
                     <connections>
@@ -615,6 +633,9 @@
         <image name="trash.square" width="10" height="10"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemGray3Color">
+            <color red="0.7803921568627451" green="0.7803921568627451" blue="0.80000000000000004" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemGrayColor">
             <color red="0.55686274509803924" green="0.55686274509803924" blue="0.57647058823529407" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

@@ -353,7 +353,7 @@
                                     <stackView opaque="NO" contentMode="scaleToFill" spacing="70" translatesAutoresizingMaskIntoConstraints="NO" id="opF-ga-G7E">
                                         <rect key="frame" x="152" y="0.0" width="530" height="50"/>
                                         <subviews>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8d0-ax-LUG" userLabel="Trash">
+                                            <button opaque="NO" tag="20" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8d0-ax-LUG" userLabel="Trash">
                                                 <rect key="frame" x="0.0" y="0.0" width="9" height="50"/>
                                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                                 <state key="normal" image="trash.square"/>
@@ -468,8 +468,8 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="LDa-IA-q6l">
-                                <rect key="frame" x="0.0" y="44" width="834" height="1130"/>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <rect key="frame" x="0.0" y="44" width="834" height="1150"/>
+                                <color key="backgroundColor" red="0.12156862745098039" green="0.12941176470588234" blue="0.14117647058823529" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </tableView>
                             <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="f4y-5I-u5C">
                                 <rect key="frame" x="0.0" y="0.0" width="834" height="44"/>
@@ -477,14 +477,20 @@
                                     <constraint firstAttribute="height" constant="44" id="bZp-d6-TXA"/>
                                 </constraints>
                                 <items>
-                                    <navigationItem title="On Screen Controller Profiles" id="npO-qK-e65"/>
+                                    <navigationItem title="On Screen Controller Profiles" id="npO-qK-e65">
+                                        <barButtonItem key="rightBarButtonItem" style="plain" systemItem="done" id="n1W-ot-Ebz">
+                                            <connections>
+                                                <action selector="doneTapped:" destination="hVe-cU-sXy" id="I38-LD-56A"/>
+                                            </connections>
+                                        </barButtonItem>
+                                    </navigationItem>
                                 </items>
                             </navigationBar>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="D8d-mH-PQM" firstAttribute="top" secondItem="LDa-IA-q6l" secondAttribute="bottom" id="081-YE-Aap"/>
                             <constraint firstItem="LDa-IA-q6l" firstAttribute="top" secondItem="f4y-5I-u5C" secondAttribute="bottom" id="AXH-ra-4jQ"/>
+                            <constraint firstAttribute="bottom" secondItem="LDa-IA-q6l" secondAttribute="bottom" id="F13-Gh-mPs"/>
                             <constraint firstAttribute="trailing" secondItem="f4y-5I-u5C" secondAttribute="trailing" id="JB0-GZ-skB"/>
                             <constraint firstItem="f4y-5I-u5C" firstAttribute="leading" secondItem="8q7-CM-uf0" secondAttribute="leading" id="JsL-ez-5Yn"/>
                             <constraint firstItem="f4y-5I-u5C" firstAttribute="top" secondItem="8q7-CM-uf0" secondAttribute="top" id="LuW-xZ-bNZ"/>
@@ -492,6 +498,9 @@
                             <constraint firstAttribute="trailing" secondItem="LDa-IA-q6l" secondAttribute="trailing" id="yOq-vj-pNm"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="tableView" destination="LDa-IA-q6l" id="dsM-yz-icW"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="69c-O9-qkY" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>

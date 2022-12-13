@@ -28,9 +28,7 @@ const double NAV_BAR_HEIGHT = 50;
     
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    
- //   [self addNavBar];
-    
+        
     self.tableView.tableHeaderView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 0, NAV_BAR_HEIGHT)];
 
     self.tableView.delegate = self;
@@ -55,21 +53,8 @@ const double NAV_BAR_HEIGHT = 50;
     }
 }
 
-- (void)addNavBar {
+- (IBAction)doneTapped:(id)sender {
     
-    UINavigationBar* navbar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, NAV_BAR_HEIGHT)];
-
-    UINavigationItem* navItem = [[UINavigationItem alloc] initWithTitle:@"Controller Profiles"];
-
-    UIBarButtonItem* doneBtn = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(onTapDone:)];
-    navItem.rightBarButtonItem = doneBtn;
-
-    [navbar setItems:@[navItem]];
-    [self.view addSubview:navbar];
-}
-
--(void)onTapDone:(UIBarButtonItem*)item{
-
     [self dismissViewControllerAnimated:YES completion:nil];
 
     if (self.didDismiss) {
