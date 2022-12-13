@@ -505,9 +505,8 @@ BOOL isCustomResolution(CGSize res) {
     
     UISegmentedControl *segmentedControl = (UISegmentedControl*) sender;
     
-    BOOL isIPhone = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone);
-
     LayoutOnScreenControlsViewController *vc = [[LayoutOnScreenControlsViewController alloc] init];
+    BOOL isIPhone = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone);
     if (isIPhone) {
         
         UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"iPhone" bundle:nil];

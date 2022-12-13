@@ -470,10 +470,10 @@
                                     <constraint firstItem="VOd-OY-x7s" firstAttribute="centerX" secondItem="Wzt-tm-tiU" secondAttribute="centerX" id="oBM-U6-9Xp"/>
                                 </constraints>
                             </view>
-                            <button opaque="NO" tag="40" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cRZ-7v-e7c">
-                                <rect key="frame" x="25" y="5" width="36" height="35"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <button opaque="NO" tag="40" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cRZ-7v-e7c">
+                                <rect key="frame" x="25" y="5" width="30" height="47"/>
                                 <fontDescription key="fontDescription" name="ArialRoundedMTBold" family="Arial Rounded MT Bold" pointSize="30"/>
+                                <color key="tintColor" red="0.6705882353" green="0.61568627450000002" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                 <state key="normal" title="x"/>
                                 <connections>
@@ -483,6 +483,8 @@
                         </subviews>
                         <color key="backgroundColor" systemColor="systemGrayColor"/>
                         <constraints>
+                            <constraint firstItem="cRZ-7v-e7c" firstAttribute="top" secondItem="qLt-go-aMf" secondAttribute="top" constant="5" id="0za-w5-XpF"/>
+                            <constraint firstItem="cRZ-7v-e7c" firstAttribute="leading" secondItem="qLt-go-aMf" secondAttribute="leading" constant="25" id="D6q-2c-PTO"/>
                             <constraint firstItem="Wzt-tm-tiU" firstAttribute="leading" secondItem="qLt-go-aMf" secondAttribute="leading" id="nQV-a3-IUO"/>
                             <constraint firstAttribute="trailing" secondItem="Wzt-tm-tiU" secondAttribute="trailing" id="u6n-Mk-6UO"/>
                             <constraint firstItem="Wzt-tm-tiU" firstAttribute="top" secondItem="qLt-go-aMf" secondAttribute="top" id="yox-vQ-dcp"/>
@@ -516,16 +518,6 @@
                                 <rect key="frame" x="0.0" y="48" width="414" height="814"/>
                                 <color key="backgroundColor" red="0.1215686275" green="0.12941176469999999" blue="0.14117647059999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <color key="sectionIndexBackgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <prototypes>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="Cell" id="oTu-Br-GCr">
-                                        <rect key="frame" x="0.0" y="50" width="414" height="43.5"/>
-                                        <autoresizingMask key="autoresizingMask"/>
-                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="oTu-Br-GCr" id="pNc-vE-rlc">
-                                            <rect key="frame" x="0.0" y="0.0" width="414" height="43.5"/>
-                                            <autoresizingMask key="autoresizingMask"/>
-                                        </tableViewCellContentView>
-                                    </tableViewCell>
-                                </prototypes>
                             </tableView>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -600,7 +592,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="oNu-Gu-QeM">
-                                <rect key="frame" x="266" y="417" width="37" height="33"/>
+                                <rect key="frame" x="266" y="416" width="37" height="34"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinY="YES" flexibleMaxY="YES"/>
                             </activityIndicatorView>
                         </subviews>

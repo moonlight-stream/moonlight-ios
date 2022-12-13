@@ -252,10 +252,17 @@
 }
 
 - (IBAction)loadTapped:(id)sender {
-    //load TVC that shows all controller profiles by name
-    UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"iPhone" bundle:nil];
-    OSCProfilesTableViewController *vc = [storyboard   instantiateViewControllerWithIdentifier:@"OSCProfilesTableViewController"] ;
     
+    UIStoryboard *storyboard;
+    BOOL isIPhone = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone);
+    if (isIPhone) {
+        //load TVC that shows all controller profiles by name
+        storyboard = [UIStoryboard storyboardWithName:@"iPhone" bundle:nil];
+    }
+    else {
+        storyboard = [UIStoryboard storyboardWithName:@"iPad" bundle:nil];
+    }
+    OSCProfilesTableViewController *vc = [storyboard   instantiateViewControllerWithIdentifier:@"OSCProfilesTableViewController"] ;
     vc.didDismiss = ^() {
         NSLog(@"Dismissed SecondViewController");
         [self->layoutOnScreenControls layoutOSC];
