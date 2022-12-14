@@ -19,7 +19,6 @@
     
     LayoutOnScreenControls *layoutOnScreenControls;
     BOOL isToolbarHidden;
-    __weak IBOutlet UIStackView *toolbarStackView;
 }
 
 @synthesize onScreenControlSegmentSelected;
@@ -45,7 +44,6 @@
     swipeUp.direction = UISwipeGestureRecognizerDirectionUp;
     [self.chevronView addGestureRecognizer:swipeUp];
     [self.chevronImageView addGestureRecognizer:swipeUp];
-    [self.toolbarRootView addGestureRecognizer:swipeUp];
 
     UITapGestureRecognizer *singleFingerTap =
       [[UITapGestureRecognizer alloc] initWithTarget:self
@@ -192,7 +190,7 @@
             
     //pop up notification that lets users name profile and either cancel or save
     UIAlertController * inputNameAlertController = [UIAlertController alertControllerWithTitle: @"Name Profile"
-                                                                              message: @"Input controller profile name"
+                                                                              message: @"Enter the name you want to save this controller profile as"
                                                                        preferredStyle:UIAlertControllerStyleAlert];
     [inputNameAlertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {
         textField.placeholder = @"name";
@@ -279,7 +277,7 @@
         touchLocation = [[touch view] convertPoint:touchLocation toView:nil];
         CALayer *layer = [self.view.layer hitTest:touchLocation];
         
-        if (layer == self.toolbarRootView.layer || layer == self.chevronView.layer || layer == self.chevronImageView.layer) {  //don't let user move Tool Bar
+        if (layer == self.toolbarRootView.layer || layer == self.chevronView.layer || layer == self.chevronImageView.layer || layer == self.toolbarStackView.layer) {  //don't let user move Tool Bar stuff
             return;
         }
     }

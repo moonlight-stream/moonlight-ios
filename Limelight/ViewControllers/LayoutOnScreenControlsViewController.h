@@ -8,13 +8,14 @@
 
 #import <UIKit/UIKit.h>
 #import "LayoutOnScreenControls.h"
+#import "ToolBarContainerView.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface LayoutOnScreenControlsViewController : UIViewController 
 
-@property NSInteger onScreenControlSegmentSelected;
-@property (weak, nonatomic) IBOutlet UIView *toolbarRootView;
+@property int onScreenControlSegmentSelected;
+@property (weak, nonatomic) IBOutlet ToolBarContainerView *toolbarRootView;
 @property (weak, nonatomic) IBOutlet UIView *chevronView;
 @property (weak, nonatomic) IBOutlet UIImageView *chevronImageView;
 @property (weak, nonatomic) IBOutlet UIButton *undoButton;

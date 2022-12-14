@@ -375,7 +375,7 @@
                                         <rect key="frame" x="181" y="50" width="52" height="25"/>
                                         <subviews>
                                             <imageView clipsSubviews="YES" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chevron.compact.up" translatesAutoresizingMaskIntoConstraints="NO" id="JIU-0y-IHy">
-                                                <rect key="frame" x="0.0" y="0.0" width="52" height="23"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="52" height="25"/>
                                             </imageView>
                                         </subviews>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -384,7 +384,7 @@
                                             <constraint firstItem="JIU-0y-IHy" firstAttribute="top" secondItem="VOd-OY-x7s" secondAttribute="top" id="0zI-XY-ApE"/>
                                             <constraint firstAttribute="trailing" secondItem="JIU-0y-IHy" secondAttribute="trailing" id="Dvu-YJ-Ael"/>
                                             <constraint firstAttribute="width" constant="52" id="Fqb-Ty-nol"/>
-                                            <constraint firstAttribute="bottom" secondItem="JIU-0y-IHy" secondAttribute="bottom" constant="2" id="UkG-4b-PIa"/>
+                                            <constraint firstAttribute="bottom" secondItem="JIU-0y-IHy" secondAttribute="bottom" id="UkG-4b-PIa"/>
                                             <constraint firstAttribute="height" constant="25" id="bm4-Ig-vIn"/>
                                         </constraints>
                                     </view>
@@ -494,7 +494,7 @@
                         <outlet property="chevronImageView" destination="JIU-0y-IHy" id="FJc-e9-xdM"/>
                         <outlet property="chevronView" destination="VOd-OY-x7s" id="kmH-6r-jRf"/>
                         <outlet property="toolbarRootView" destination="Wzt-tm-tiU" id="yXg-25-fvA"/>
-                        <outlet property="toolbarStackView" destination="bg4-Wl-MSl" id="JmQ-cM-U6t"/>
+                        <outlet property="toolbarStackView" destination="bg4-Wl-MSl" id="zui-sm-l1Z"/>
                         <outlet property="undoButton" destination="aVP-l1-JHT" id="0Ku-bg-Lqe"/>
                     </connections>
                 </viewController>
