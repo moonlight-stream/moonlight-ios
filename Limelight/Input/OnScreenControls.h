@@ -47,7 +47,7 @@ typedef NS_ENUM(NSInteger, OnScreenControlsLevel) {
 @property CALayer* _leftStick;
 @property CALayer* _rightStickBackground;
 @property CALayer* _rightStick;
-@property NSMutableArray *onScreenButtonsArray;
+@property NSMutableArray *OSCButtonLayers;
 @property NSMutableArray *dPadLayersArray;
 @property float D_PAD_CENTER_X;
 @property float D_PAD_CENTER_Y;
@@ -62,9 +62,9 @@ typedef NS_ENUM(NSInteger, OnScreenControlsLevel) {
 - (void) show;
 - (void) setupComplexControls;
 - (void) drawButtons;
-//- (void)layoutOSCButtonsWithProfileName: (NSString*)name;
-- (void)layoutOSC;
-- (void)saveOSCProfileWithName: (NSString*)name;
-- (void)saveOSCPositionsWithKeyName: (NSString*)name;
-
+- (void) layoutOSC;
+- (void) updateControls;
+- (void) saveOSCProfileWithName: (NSString*)name;
+- (void) saveOSCPositionsWithKeyName: (NSString*)name;
+ 
 @end

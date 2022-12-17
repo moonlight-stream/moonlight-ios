@@ -38,7 +38,7 @@ const double NAV_BAR_HEIGHT = 50;
     [self.tableView registerNib:[UINib nibWithNibName:@"ProfileTableViewCell" bundle:nil] forCellReuseIdentifier:@"Cell"];
     
     self.OSCProfiles = [[NSMutableArray alloc] init];
-    [self.OSCProfiles addObjectsFromArray: [[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfileNamesArray"]];
+    [self.OSCProfiles addObjectsFromArray: [[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfileNames"]];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -98,7 +98,7 @@ const double NAV_BAR_HEIGHT = 50;
         
         [self.OSCProfiles removeObjectAtIndex:indexPath.row];
 
-        [[NSUserDefaults standardUserDefaults] setObject:self.OSCProfiles forKey:@"OSCProfileNamesArray"];
+        [[NSUserDefaults standardUserDefaults] setObject:self.OSCProfiles forKey:@"OSCProfileNames"];
         [[NSUserDefaults standardUserDefaults] synchronize];
         
         [tableView reloadData]; 
@@ -109,7 +109,7 @@ const double NAV_BAR_HEIGHT = 50;
     
     NSMutableArray *OSCProfilesNamesFromUserDefaultsArray = [[NSMutableArray alloc] init];
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    OSCProfilesNamesFromUserDefaultsArray = [userDefaults objectForKey:@"OSCProfileNamesArray"];
+    OSCProfilesNamesFromUserDefaultsArray = [userDefaults objectForKey:@"OSCProfileNames"];
     
     for (int i = 0; i < [OSCProfilesNamesFromUserDefaultsArray count]; i++) {
         

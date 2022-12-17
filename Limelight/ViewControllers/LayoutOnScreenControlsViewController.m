@@ -21,6 +21,8 @@
     BOOL isToolbarHidden;
 }
 
+@synthesize trashCanButton;
+@synthesize undoButton;
 @synthesize onScreenControlSegmentSelected;
 @synthesize toolbarRootView;
 @synthesize chevronView;
@@ -184,68 +186,78 @@
     }
 }
 
+/*show pop up notification that lets users choose to either name profile. User can also choose to cancel out of this pop up or Save the name they've entered*/
 - (IBAction)saveTapped:(id)sender {
     
     __block NSString *enteredProfileName = @"";
             
-    //pop up notification that lets users name profile and either cancel or save
     UIAlertController * inputNameAlertController = [UIAlertController alertControllerWithTitle: @"Name Profile"
                                                                               message: @"Enter the name you want to save this controller profile as"
                                                                        preferredStyle:UIAlertControllerStyleAlert];
-    [inputNameAlertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {
+    [inputNameAlertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {  //pop up notification with text field where user can enter the text they wish to name their on screen controller layout profile
+        
         textField.placeholder = @"name";
         textField.textColor = [UIColor blueColor];
         textField.clearButtonMode = UITextFieldViewModeWhileEditing;
         textField.borderStyle = UITextBorderStyleNone;
     }];
-    [inputNameAlertController addAction:[UIAlertAction actionWithTitle:@"Save" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+    [inputNameAlertController addAction:[UIAlertAction actionWithTitle:@"Save" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {   //add save button to pop up notification
+        
         NSArray * textFields = inputNameAlertController.textFields;
         UITextField * nameField = textFields[0];
         enteredProfileName = nameField.text;
         
-        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfileNamesArray"] containsObject:enteredProfileName]) {
+        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfileNames"] containsObject:enteredProfileName]) {  //if entered profile name already exists then let the user know. Offer to allow them to overwrite the existing profile
             
-            //let user know another profile with the same name already exists
             UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [NSString stringWithFormat:@"Another profile with the name '%@' already exists! Do you want to overwrite it?", enteredProfileName] preferredStyle:UIAlertControllerStyleAlert];
-            [savedAlertController addAction:[UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+            
+            [savedAlertController addAction:[UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {    //overwrite existing profile
                 [self->layoutOnScreenControls saveOSCProfileWithName: enteredProfileName];
                 [self->layoutOnScreenControls saveOSCPositionsWithKeyName: enteredProfileName];
                 [[NSUserDefaults standardUserDefaults] setObject:enteredProfileName forKey:@"SelectedOSCProfile"];
             }]];
-            [savedAlertController addAction:[UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+            
+            [savedAlertController addAction:[UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) { //don't overwrite the existing profile
                 [savedAlertController dismissViewControllerAnimated:NO completion:nil];
             }]];
+            
             [self presentViewController:savedAlertController animated:YES completion:nil];
         }
-        else if ([enteredProfileName length] == 0) {
+        else if ([enteredProfileName length] == 0) {    //if user entered no text but tapped the 'Save' button
             
             //let user know not to leave name blank
             UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [NSString stringWithFormat:@"Profile name cannot be blank!"] preferredStyle:UIAlertControllerStyleAlert];
-            [savedAlertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+            
+            [savedAlertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) { //show pop up notification letting user know they must enter a name in the text field if they wish to save the controller profile
+                
                 [savedAlertController dismissViewControllerAnimated:NO completion:^{
                     [self presentViewController:inputNameAlertController animated:YES completion:nil];
                 }];
             }]];
+            
             [self presentViewController:savedAlertController animated:YES completion:nil];
         }
-        else {
+        else {  //if user entered a valid name that doesn't already exist then save it to persistent storage
             
             [self->layoutOnScreenControls saveOSCProfileWithName: enteredProfileName];
             [self->layoutOnScreenControls saveOSCPositionsWithKeyName: enteredProfileName];
             [[NSUserDefaults standardUserDefaults] setObject:enteredProfileName forKey:@"SelectedOSCProfile"];
             
-            //Let user know this profile is now the selected controller layout
             UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [NSString stringWithFormat:@"%@ profile saved and set as your active in-game controller profile layout", enteredProfileName] preferredStyle:UIAlertControllerStyleAlert];
-            [savedAlertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-                                
+            
+            [savedAlertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) { //Let user know this profile is now the selected controller layout
+
                 [savedAlertController dismissViewControllerAnimated:NO completion:nil];
             }]];
+            
             [self presentViewController:savedAlertController animated:YES completion:nil];
         }
     }]];
-    [inputNameAlertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+    [inputNameAlertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) { //adds a button that allows user to decline the option to save the controller layout they currently see on screen 
+        
         [inputNameAlertController dismissViewControllerAnimated:NO completion:nil];
     }]];
+    
     [self presentViewController:inputNameAlertController animated:YES completion:nil];
 }
 
@@ -263,7 +275,7 @@
     OSCProfilesTableViewController *vc = [storyboard   instantiateViewControllerWithIdentifier:@"OSCProfilesTableViewController"] ;
     vc.didDismiss = ^() {
         NSLog(@"Dismissed SecondViewController");
-        [self->layoutOnScreenControls layoutOSC];
+        [self->layoutOnScreenControls updateControls];
         [self->layoutOnScreenControls loadButtonHistory];
     };
     [self presentViewController:vc animated:YES completion:nil];
@@ -288,9 +300,25 @@
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
     
     [layoutOnScreenControls touchesMoved:touches withEvent:event];
+    
+    if ([layoutOnScreenControls isLayer:layoutOnScreenControls.layerCurrentlyBeingTouched hoveringOverButton:trashCanButton]) {
+     
+        trashCanButton.tintColor = [UIColor redColor];
+    }
+    else {
+        
+        trashCanButton.tintColor = [UIColor colorWithRed:171.0/255.0 green:157.0/255.0 blue:255.0/255.0 alpha:1];
+    }
 }
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    
+    if (layoutOnScreenControls.layerCurrentlyBeingTouched != nil && [layoutOnScreenControls isLayer:layoutOnScreenControls.layerCurrentlyBeingTouched hoveringOverButton:trashCanButton]) { //check if user wants to throw controller button into the trash can
+        
+        layoutOnScreenControls.layerCurrentlyBeingTouched.hidden = YES;
+        
+        trashCanButton.tintColor = [UIColor colorWithRed:171.0/255.0 green:157.0/255.0 blue:255.0/255.0 alpha:1];
+    }
     
     [layoutOnScreenControls touchesEnded:touches withEvent:event];
 }

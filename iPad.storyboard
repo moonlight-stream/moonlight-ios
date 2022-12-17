@@ -356,10 +356,12 @@
                                             <button opaque="NO" tag="20" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8d0-ax-LUG" userLabel="Trash">
                                                 <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
                                                 <constraints>
+                                                    <constraint firstAttribute="height" constant="50" id="1Yj-1d-YRM"/>
                                                     <constraint firstAttribute="width" constant="50" id="chA-lW-DGW"/>
                                                 </constraints>
+                                                <color key="tintColor" red="0.6705882353" green="0.61568627450000002" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                                <state key="normal" image="trash.square"/>
+                                                <state key="normal" image="Trash"/>
                                                 <connections>
                                                     <action selector="trashCanTapped:" destination="YXP-lQ-L2x" eventType="touchUpInside" id="a2y-Ot-4hb"/>
                                                 </connections>
@@ -368,9 +370,11 @@
                                                 <rect key="frame" x="120" y="0.0" width="50" height="50"/>
                                                 <constraints>
                                                     <constraint firstAttribute="width" constant="50" id="KOh-Rb-O2T"/>
+                                                    <constraint firstAttribute="height" constant="50" id="TpX-sS-OlW"/>
                                                 </constraints>
+                                                <color key="tintColor" red="0.6705882353" green="0.61568627450000002" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                                <state key="normal" image="arrow.uturn.backward.square"/>
+                                                <state key="normal" image="ArrowBackward"/>
                                                 <connections>
                                                     <action selector="undoTapped:" destination="YXP-lQ-L2x" eventType="touchUpInside" id="M2Y-xv-i1r"/>
                                                 </connections>
@@ -384,10 +388,12 @@
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="b72-Sn-VrO" userLabel="Save">
                                                 <rect key="frame" x="360" y="0.0" width="50" height="50"/>
                                                 <constraints>
+                                                    <constraint firstAttribute="height" constant="50" id="9lg-Os-MX3"/>
                                                     <constraint firstAttribute="width" constant="50" id="Vxs-b6-lmy"/>
                                                 </constraints>
+                                                <color key="tintColor" red="0.6705882353" green="0.61568627450000002" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                                <state key="normal" image="square.and.arrow.down"/>
+                                                <state key="normal" image="SquareArrowDown"/>
                                                 <connections>
                                                     <action selector="saveTapped:" destination="YXP-lQ-L2x" eventType="touchUpInside" id="7ZN-jc-WxC"/>
                                                 </connections>
@@ -396,9 +402,11 @@
                                                 <rect key="frame" x="480" y="0.0" width="50" height="50"/>
                                                 <constraints>
                                                     <constraint firstAttribute="width" constant="50" id="Yde-A0-dwd"/>
+                                                    <constraint firstAttribute="height" constant="50" id="oFb-7k-XBI"/>
                                                 </constraints>
+                                                <color key="tintColor" red="0.6705882353" green="0.61568627450000002" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                                <state key="normal" image="square.and.arrow.up.on.square"/>
+                                                <state key="normal" image="SquaresArrowUp"/>
                                                 <connections>
                                                     <action selector="loadTapped:" destination="YXP-lQ-L2x" eventType="touchUpInside" id="Lkl-YC-ZQS"/>
                                                 </connections>
@@ -407,9 +415,7 @@
                                         <constraints>
                                             <constraint firstAttribute="width" constant="530" id="4MC-JF-ogA"/>
                                             <constraint firstItem="wbj-UF-uss" firstAttribute="centerY" secondItem="opF-ga-G7E" secondAttribute="centerY" id="Cn0-Z9-fop"/>
-                                            <constraint firstItem="8d0-ax-LUG" firstAttribute="centerY" secondItem="opF-ga-G7E" secondAttribute="centerY" id="Qao-R6-PDe"/>
                                             <constraint firstItem="wbj-UF-uss" firstAttribute="centerX" secondItem="opF-ga-G7E" secondAttribute="centerX" id="q3y-cY-vRC"/>
-                                            <constraint firstItem="7N9-ms-EQx" firstAttribute="centerY" secondItem="opF-ga-G7E" secondAttribute="centerY" id="zln-f8-KXu"/>
                                         </constraints>
                                     </stackView>
                                     <view alpha="0.90000000000000002" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="B2M-kv-L0a" userLabel="Chevron View">
@@ -441,10 +447,10 @@
                                 </constraints>
                             </view>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0dc-Qb-Sdw">
-                                <rect key="frame" x="30" y="34" width="35.5" height="34.5"/>
+                                <rect key="frame" x="30" y="34" width="32.5" height="34.5"/>
                                 <color key="tintColor" red="0.6705882353" green="0.61568627450000002" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" title="X"/>
+                                <buttonConfiguration key="configuration" style="plain" title="x"/>
                                 <connections>
                                     <action selector="closeTapped:" destination="YXP-lQ-L2x" eventType="touchUpInside" id="gCh-KV-p80"/>
                                 </connections>
@@ -465,6 +471,7 @@
                         <outlet property="chevronView" destination="B2M-kv-L0a" id="Wlu-RD-EYM"/>
                         <outlet property="toolbarRootView" destination="tSG-Qp-sZx" id="c1q-EJ-JCF"/>
                         <outlet property="toolbarStackView" destination="opF-ga-G7E" id="2q0-ei-cxr"/>
+                        <outlet property="trashCanButton" destination="8d0-ax-LUG" id="DzG-Kp-HSl"/>
                         <outlet property="undoButton" destination="7N9-ms-EQx" id="ndb-oh-Bia"/>
                     </connections>
                 </viewController>
@@ -614,11 +621,11 @@
         </scene>
     </scenes>
     <resources>
-        <image name="arrow.uturn.backward.square" width="10" height="10"/>
+        <image name="ArrowBackward" width="40" height="40"/>
+        <image name="SquareArrowDown" width="40" height="40"/>
+        <image name="SquaresArrowUp" width="40" height="40"/>
+        <image name="Trash" width="40" height="40"/>
         <image name="chevron.compact.up" width="9" height="3"/>
-        <image name="square.and.arrow.down" width="9" height="11"/>
-        <image name="square.and.arrow.up.on.square" width="12" height="14"/>
-        <image name="trash.square" width="10" height="10"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

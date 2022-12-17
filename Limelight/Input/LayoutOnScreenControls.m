@@ -15,16 +15,15 @@
 
 @implementation LayoutOnScreenControls {
     
-    CALayer *layerCurrentlyBeingTouched;
     CALayer *dPadBackground;    //groups dPad buttons so they move together
     UIButton *trashCanButton;
-    UIButton *undoButton;
     CALayer *upButton;
     CALayer *downButton;
     CALayer *leftButton;
     CALayer *rightButton;
 }
 
+@synthesize layerCurrentlyBeingTouched;
 @synthesize _view;
 @synthesize buttonStatesHistoryArray;
 
@@ -55,11 +54,11 @@
     if (dPadBackground == nil) {
         
         dPadBackground = [CALayer layer];
-        dPadBackground.name = @"dPadBackgroundForCustomOSC";
+        dPadBackground.name = @"dPadBackgroundForOSCLayoutScreen";
         dPadBackground.frame = CGRectMake(self.D_PAD_CENTER_X, self.D_PAD_CENTER_Y
                                           , self._leftButton.frame.size.width * 2.5, self._leftButton.frame.size.height * 3);
         dPadBackground.position = CGPointMake(self.D_PAD_CENTER_X, self.D_PAD_CENTER_Y);
-        [self.onScreenButtonsArray addObject:dPadBackground];
+        [self.OSCButtonLayers addObject:dPadBackground];
         
         [self._view.layer addSublayer:dPadBackground];
     }
@@ -96,11 +95,11 @@
     [dPadBackground addSublayer:leftButton];
 }
 
-- (BOOL)isButtonHoveringOverTrashCan {
+- (BOOL)isLayer:(CALayer *)layer hoveringOverButton:(UIButton *)button {
     
-    CGRect trashCanFrameInViewController = [self._view convertRect:trashCanButton.imageView.frame fromView:trashCanButton.superview];
+    CGRect trashCanFrameInViewController = [self._view convertRect:button.imageView.frame fromView:button.superview];
     
-    if (CGRectIntersectsRect(layerCurrentlyBeingTouched.frame, trashCanFrameInViewController)) {
+    if (CGRectIntersectsRect(layer.frame, trashCanFrameInViewController)) {
      
         return YES;
     }
@@ -112,7 +111,7 @@
 
 - (CALayer*)buttonLayerFromName: (NSString*)name {
     
-    for (CALayer *buttonLayer in self.onScreenButtonsArray) {
+    for (CALayer *buttonLayer in self.OSCButtonLayers) {
         
         if ([buttonLayer.name isEqualToString:name]) {
             return buttonLayer;
@@ -132,7 +131,7 @@
         
         OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateHistoryDataObject error:nil];
         
-        for (CALayer *buttonLayer in self.onScreenButtonsArray) {
+        for (CALayer *buttonLayer in self.OSCButtonLayers) {
             
             if ([buttonLayer.name isEqualToString:onScreenButtonState.name]) {
                 
@@ -230,15 +229,6 @@
     }
     
     layerCurrentlyBeingTouched.position = touchLocation; //move object to touch location
-    
-    if ([self isButtonHoveringOverTrashCan]) {
-     
-        trashCanButton.tintColor = [UIColor redColor];
-    }
-    else {
-        
-        trashCanButton.tintColor = [UIColor colorWithRed:171.0/255.0 green:157.0/255.0 blue:255.0/255.0 alpha:1];
-    }
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -246,13 +236,6 @@
     layerCurrentlyBeingTouched = nil;
 }
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-    
-    if (layerCurrentlyBeingTouched != nil && [self isButtonHoveringOverTrashCan]) { //check if user wants to throw controller button into the trash can
-        
-        layerCurrentlyBeingTouched.hidden = YES;
-        
-        trashCanButton.tintColor = [UIColor colorWithRed:171.0/255.0 green:157.0/255.0 blue:255.0/255.0 alpha:1];
-    }
     
     layerCurrentlyBeingTouched = nil;
 }

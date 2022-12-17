@@ -371,23 +371,6 @@
                             <view alpha="0.75" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Wzt-tm-tiU" customClass="ToolBarContainerView">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="50"/>
                                 <subviews>
-                                    <view alpha="0.90000000000000002" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="VOd-OY-x7s" userLabel="Chevron View">
-                                        <rect key="frame" x="181" y="50" width="52" height="25"/>
-                                        <subviews>
-                                            <imageView clipsSubviews="YES" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chevron.compact.up" translatesAutoresizingMaskIntoConstraints="NO" id="JIU-0y-IHy">
-                                                <rect key="frame" x="0.0" y="0.0" width="52" height="25"/>
-                                            </imageView>
-                                        </subviews>
-                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                        <constraints>
-                                            <constraint firstItem="JIU-0y-IHy" firstAttribute="leading" secondItem="VOd-OY-x7s" secondAttribute="leading" id="00c-bM-Mnr"/>
-                                            <constraint firstItem="JIU-0y-IHy" firstAttribute="top" secondItem="VOd-OY-x7s" secondAttribute="top" id="0zI-XY-ApE"/>
-                                            <constraint firstAttribute="trailing" secondItem="JIU-0y-IHy" secondAttribute="trailing" id="Dvu-YJ-Ael"/>
-                                            <constraint firstAttribute="width" constant="52" id="Fqb-Ty-nol"/>
-                                            <constraint firstAttribute="bottom" secondItem="JIU-0y-IHy" secondAttribute="bottom" id="UkG-4b-PIa"/>
-                                            <constraint firstAttribute="height" constant="25" id="bm4-Ig-vIn"/>
-                                        </constraints>
-                                    </view>
                                     <stackView opaque="NO" contentMode="scaleAspectFill" alignment="center" spacing="70" translatesAutoresizingMaskIntoConstraints="NO" id="bg4-Wl-MSl">
                                         <rect key="frame" x="-58" y="0.0" width="530" height="50"/>
                                         <subviews>
@@ -399,7 +382,7 @@
                                                 </constraints>
                                                 <color key="tintColor" red="0.6705882353" green="0.61711704730000005" blue="0.99902987480000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                                <state key="normal" image="trash.square">
+                                                <state key="normal" image="Trash">
                                                     <preferredSymbolConfiguration key="preferredSymbolConfiguration" configurationType="pointSize" pointSize="64"/>
                                                 </state>
                                                 <connections>
@@ -414,7 +397,7 @@
                                                 </constraints>
                                                 <color key="tintColor" red="0.6705882353" green="0.61568627450000002" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                                <state key="normal" image="arrow.uturn.backward.square" catalog="system">
+                                                <state key="normal" image="ArrowBackward">
                                                     <preferredSymbolConfiguration key="preferredSymbolConfiguration" configurationType="pointSize" pointSize="64"/>
                                                 </state>
                                                 <connections>
@@ -433,7 +416,7 @@
                                                 <fontDescription key="fontDescription" type="system" pointSize="18"/>
                                                 <color key="tintColor" red="0.6705882353" green="0.61568627450000002" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                                <state key="normal" image="square.and.arrow.down">
+                                                <state key="normal" image="SquareArrowDown">
                                                     <preferredSymbolConfiguration key="preferredSymbolConfiguration" configurationType="pointSize" pointSize="64"/>
                                                 </state>
                                                 <connections>
@@ -448,7 +431,7 @@
                                                 </constraints>
                                                 <color key="tintColor" red="0.6705882353" green="0.61568627450000002" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                                <state key="normal" image="square.and.arrow.up.on.square">
+                                                <state key="normal" image="SquaresArrowUp">
                                                     <preferredSymbolConfiguration key="preferredSymbolConfiguration" configurationType="pointSize" pointSize="64"/>
                                                 </state>
                                                 <connections>
@@ -460,6 +443,23 @@
                                             <constraint firstAttribute="width" constant="530" id="BV3-UF-eBt"/>
                                         </constraints>
                                     </stackView>
+                                    <view alpha="0.90000000000000002" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="VOd-OY-x7s" userLabel="Chevron View">
+                                        <rect key="frame" x="181" y="50" width="52" height="25"/>
+                                        <subviews>
+                                            <imageView clipsSubviews="YES" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chevron.compact.up" translatesAutoresizingMaskIntoConstraints="NO" id="JIU-0y-IHy">
+                                                <rect key="frame" x="0.0" y="0.0" width="52" height="25"/>
+                                            </imageView>
+                                        </subviews>
+                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                        <constraints>
+                                            <constraint firstItem="JIU-0y-IHy" firstAttribute="leading" secondItem="VOd-OY-x7s" secondAttribute="leading" id="00c-bM-Mnr"/>
+                                            <constraint firstItem="JIU-0y-IHy" firstAttribute="top" secondItem="VOd-OY-x7s" secondAttribute="top" id="0zI-XY-ApE"/>
+                                            <constraint firstAttribute="trailing" secondItem="JIU-0y-IHy" secondAttribute="trailing" id="Dvu-YJ-Ael"/>
+                                            <constraint firstAttribute="width" constant="52" id="Fqb-Ty-nol"/>
+                                            <constraint firstAttribute="bottom" secondItem="JIU-0y-IHy" secondAttribute="bottom" id="UkG-4b-PIa"/>
+                                            <constraint firstAttribute="height" constant="25" id="bm4-Ig-vIn"/>
+                                        </constraints>
+                                    </view>
                                 </subviews>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <constraints>
@@ -495,6 +495,7 @@
                         <outlet property="chevronView" destination="VOd-OY-x7s" id="kmH-6r-jRf"/>
                         <outlet property="toolbarRootView" destination="Wzt-tm-tiU" id="yXg-25-fvA"/>
                         <outlet property="toolbarStackView" destination="bg4-Wl-MSl" id="zui-sm-l1Z"/>
+                        <outlet property="trashCanButton" destination="jfa-1m-Wpy" id="5Ch-QP-cWa"/>
                         <outlet property="undoButton" destination="aVP-l1-JHT" id="0Ku-bg-Lqe"/>
                     </connections>
                 </viewController>
@@ -610,7 +611,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="oNu-Gu-QeM">
-                                <rect key="frame" x="266" y="416" width="37" height="34"/>
+                                <rect key="frame" x="266" y="416" width="37" height="33"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinY="YES" flexibleMaxY="YES"/>
                             </activityIndicatorView>
                         </subviews>
@@ -626,11 +627,11 @@
         </scene>
     </scenes>
     <resources>
-        <image name="arrow.uturn.backward.square" catalog="system" width="128" height="114"/>
+        <image name="ArrowBackward" width="40" height="40"/>
+        <image name="SquareArrowDown" width="40" height="40"/>
+        <image name="SquaresArrowUp" width="40" height="40"/>
+        <image name="Trash" width="40" height="40"/>
         <image name="chevron.compact.up" width="9" height="3"/>
-        <image name="square.and.arrow.down" width="9" height="11"/>
-        <image name="square.and.arrow.up.on.square" width="12" height="14"/>
-        <image name="trash.square" width="10" height="10"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

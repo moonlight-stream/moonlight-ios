@@ -14,12 +14,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property UIView* _view;
 @property NSMutableArray *buttonStatesHistoryArray;
-
+@property CALayer *layerCurrentlyBeingTouched;
 
 - (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport streamConfig:(StreamConfiguration*)streamConfig oscLevel:(int)oscLevel;
 - (void)loadButtonHistory;
 - (CALayer*)buttonLayerFromName: (NSString*)name;
 - (void)saveButtonStateHistory;
+- (BOOL)isLayer:(CALayer*)layer hoveringOverButton: (UIButton*)button;
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event;
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event;
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event;
