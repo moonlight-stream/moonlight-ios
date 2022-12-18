@@ -509,16 +509,7 @@ static float L3_Y;
             _leftStickBackground.position = onScreenButtonState.position;
             _leftStickBackground.hidden = onScreenButtonState.isHidden;
             _leftStick.hidden = onScreenButtonState.isHidden;
-            
-            if ([_leftStickBackground.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) {   // if user is laying out controls then make the inner analog stick a child to the analog stick background so that the two move together
-                
-                [_leftStickBackground addSublayer:_leftStick];
-                _leftStick.position = CGPointMake(_leftStickBackground.frame.size.width/2, _leftStickBackground.frame.size.height/2);
-            }
-            else {  //user is on game stream view, move the inner stick over the stick's background but the inner stick should be separate from the analog stick background so the user can move the stick without moving the background
-                
-                _leftStick.position = _leftStickBackground.position;
-            }
+            _leftStick.position = _leftStickBackground.position;
         }
         
         if ([onScreenButtonState.name isEqualToString:@"rightAnalogStick"]) {
@@ -529,16 +520,7 @@ static float L3_Y;
             _rightStickBackground.position = onScreenButtonState.position;
             _rightStickBackground.hidden = onScreenButtonState.isHidden;
             _rightStick.hidden = onScreenButtonState.isHidden;
-            
-            if ([_rightStickBackground.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) {   // if user is laying out controls then make the inner analog stick a child to the analog stick background so that the two move together
-                
-                [_rightStickBackground addSublayer:_rightStick];
-                _rightStick.position = CGPointMake(_rightStickBackground.frame.size.width/2, _rightStickBackground.frame.size.height/2);
-            }
-            else {  //user is on game stream view, move the inner stick over the stick's background but the inner stick should be separate from the analog stick background so the user can move the stick without moving the background
-                
-                _rightStick.position = _rightStickBackground.position;
-            }
+            _rightStick.position = _rightStickBackground.position;
         }
     }
 }

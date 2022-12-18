@@ -56,8 +56,8 @@
     layoutOnScreenControls = [[LayoutOnScreenControls alloc] initWithView:self.view controllerSup:nil streamConfig:nil oscLevel:onScreenControlSegmentSelected];
     layoutOnScreenControls._level = 4;
     [layoutOnScreenControls show];
-    [self addAnalogSticksToBackground];
-    
+    [self addInnerAnalogSticksToOuterAnalogLayers];
+
     if ([layoutOnScreenControls.buttonStateHistory count] == 0) {
         self.undoButton.alpha = 0.3;
     }
@@ -139,7 +139,7 @@
     }
 }
 
-- (void)addAnalogSticksToBackground {
+- (void)addInnerAnalogSticksToOuterAnalogLayers {
     
     [layoutOnScreenControls._rightStickBackground addSublayer: layoutOnScreenControls._rightStick];
     layoutOnScreenControls._rightStick.position = CGPointMake(layoutOnScreenControls._rightStickBackground.frame.size.width / 2, layoutOnScreenControls._rightStickBackground.frame.size.height / 2);
@@ -277,6 +277,7 @@
         NSLog(@"Dismissed SecondViewController");
         [self->layoutOnScreenControls updateControls];
         [self->layoutOnScreenControls loadButtonHistory];
+        [self addInnerAnalogSticksToOuterAnalogLayers];
     };
     [self presentViewController:vc animated:YES completion:nil];
 }
