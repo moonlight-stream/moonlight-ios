@@ -15,7 +15,7 @@
 
 @implementation LayoutOnScreenControls {
     
-    CALayer *dPadBackground;    //groups dPad buttons so they move together
+    CALayer *dPadBackground;    //dPad buttons moved onto here so user can drag them around the screen together
     UIButton *trashCanButton;
     CALayer *upButton;
     CALayer *downButton;
@@ -25,7 +25,7 @@
 
 @synthesize layerCurrentlyBeingTouched;
 @synthesize _view;
-@synthesize buttonStatesHistoryArray;
+@synthesize buttonStateHistory;
 
 - (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport streamConfig:(StreamConfiguration*)streamConfig oscLevel:(int)oscLevel {
     
@@ -41,10 +41,8 @@
     
     [self addDPadBackground];
     [self addDPadButtonsToDPadBackgroundLayer];
-      
-    trashCanButton = (UIButton *)[self._view viewWithTag: 20];
-    
-    buttonStatesHistoryArray = [[NSMutableArray alloc] init];
+          
+    buttonStateHistory = [[NSMutableArray alloc] init];
                 
     return self;
 }
@@ -95,6 +93,7 @@
     [dPadBackground addSublayer:leftButton];
 }
 
+/* used to determine whether user is dragging a button over the trash can with the intent of deleting that button*/
 - (BOOL)isLayer:(CALayer *)layer hoveringOverButton:(UIButton *)button {
     
     CGRect trashCanFrameInViewController = [self._view convertRect:button.imageView.frame fromView:button.superview];
@@ -109,6 +108,7 @@
     }
 }
 
+/* returns reference to button layer object given the button's name*/
 - (CALayer*)buttonLayerFromName: (NSString*)name {
     
     for (CALayer *buttonLayer in self.OSCButtonLayers) {
@@ -123,11 +123,10 @@
 
 - (void)layoutOnScreenButtonsAfterUndo {
     
-    NSUserDefaults *buttonStatesUserDefaults = [NSUserDefaults standardUserDefaults];
-    buttonStatesHistoryArray = [[NSMutableArray alloc] init];
-    [buttonStatesHistoryArray addObjectsFromArray:[buttonStatesUserDefaults objectForKey:@"buttonStatesHistoryArray"]];
+    buttonStateHistory = [[NSMutableArray alloc] init];
+    [buttonStateHistory addObjectsFromArray:[[NSUserDefaults standardUserDefaults] objectForKey:@"buttonStatesHistoryArray"]];
     
-    for (NSData *buttonStateHistoryDataObject in buttonStatesHistoryArray) {
+    for (NSData *buttonStateHistoryDataObject in buttonStateHistory) {
         
         OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateHistoryDataObject error:nil];
         
@@ -141,30 +140,28 @@
     }
 }
 
-- (void)saveButtonStateHistory {
+/* Saves the last OSC layout change the user made. The record of changes is used to allow user to undo prior changes*/
+- (void)saveButtonStateToHistory {
     
-    NSMutableArray *buttonStatesHistoryDataObjectsArray = [[NSMutableArray alloc] init];
+    NSMutableArray *buttonStateHistoryDataObjects = [[NSMutableArray alloc] init];  //will contain encoded button state objects which are a record of OSC layout changes the user made for the current profile
     
-    for (OnScreenButtonState *buttonState in buttonStatesHistoryArray) {
+    for (OnScreenButtonState *buttonState in buttonStateHistory) {
         
         NSData *buttonStateHistoryDataObject = [NSKeyedArchiver archivedDataWithRootObject:buttonState requiringSecureCoding:YES error:nil];
-        [buttonStatesHistoryDataObjectsArray addObject: buttonStateHistoryDataObject];
+        [buttonStateHistoryDataObjects addObject: buttonStateHistoryDataObject];
     }
+        
+    NSString *profile = [[NSUserDefaults standardUserDefaults] objectForKey:@"SelectedOSCProfile"];
     
-    NSUserDefaults *buttonStatesHistoryUserDefaults = [NSUserDefaults standardUserDefaults];
+    [[NSUserDefaults standardUserDefaults] setObject:buttonStateHistoryDataObjects forKey:[NSString stringWithFormat:@"%@-buttonStateHistoryDataObjectsArray", profile]];
+    [[NSUserDefaults standardUserDefaults] synchronize];
     
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    NSString *selectedOSCProfile = [userDefaults objectForKey:@"SelectedOSCProfile"];
-    
-    [buttonStatesHistoryUserDefaults setObject:buttonStatesHistoryDataObjectsArray forKey:[NSString stringWithFormat:@"%@-buttonStateHistoryDataObjectsArray", selectedOSCProfile]];
-    [buttonStatesHistoryUserDefaults synchronize];
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"ButtonsHistoryChanged" object:self];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"OSCLayoutHistoryChanged" object:self];
 }
 
 - (void)loadButtonHistory {    //Loads this profile's button-change history into an array to be used in case the user wants to tap 'undo'
 
-    [buttonStatesHistoryArray removeAllObjects];
+    [buttonStateHistory removeAllObjects];
     
     NSString *selectedOSCProfile = [[NSUserDefaults standardUserDefaults] objectForKey:@"SelectedOSCProfile"];
 
@@ -176,7 +173,7 @@
         for (NSData *buttonStateHistoryDataObject in buttonStatesHistoryDataObjectsArray) {
 
             OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateHistoryDataObject error:nil];
-            [buttonStatesHistoryArray addObject:onScreenButtonState];
+            [buttonStateHistory addObject:onScreenButtonState];
         }
     }
 }
@@ -213,9 +210,9 @@
         
         // save button's position in array for use in case user wants to undo the move later
         OnScreenButtonState *onScreenButtonState = [[OnScreenButtonState alloc] initWithButtonName:layerCurrentlyBeingTouched.name isHidden:layerCurrentlyBeingTouched.isHidden andPosition:layerCurrentlyBeingTouched.position];
-        [buttonStatesHistoryArray addObject:onScreenButtonState];
+        [buttonStateHistory addObject:onScreenButtonState];
         
-        [self saveButtonStateHistory];
+        [self saveButtonStateToHistory];
     }
 }
 

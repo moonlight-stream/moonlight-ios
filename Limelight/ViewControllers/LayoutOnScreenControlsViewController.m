@@ -58,19 +58,19 @@
     [layoutOnScreenControls show];
     [self addAnalogSticksToBackground];
     
-    if ([layoutOnScreenControls.buttonStatesHistoryArray count] == 0) {
+    if ([layoutOnScreenControls.buttonStateHistory count] == 0) {
         self.undoButton.alpha = 0.3;
     }
     else {
         self.undoButton.alpha = 1.0;
     }
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(buttonsHistoryChanged:) name:@"ButtonsHistoryChanged" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OSCLayoutHistoryChanged:) name:@"OSCLayoutHistoryChanged" object:nil];    //used to notifiy the view controller so that it can either fade out or fade in its 'Undo button' which will signify to the user whether there are any OSC layout changes to undo
     
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{   //keeps VC modal animation from completing the toolbar's bounce animation immediately
 
         [UIView animateWithDuration:0.3
-          delay:1
+          delay:0.35
           usingSpringWithDamping:0.8
           initialSpringVelocity:0.5
           options:UIViewAnimationOptionCurveEaseInOut animations:^{
@@ -95,9 +95,9 @@
     });
 }
 
-- (void)buttonsHistoryChanged:(NSNotification *)notification {
+- (void)OSCLayoutHistoryChanged:(NSNotification *)notification {
     
-    if ([layoutOnScreenControls.buttonStatesHistoryArray count] > 0) {
+    if ([layoutOnScreenControls.buttonStateHistory count] > 0) {
         
         self.undoButton.alpha = 1.0;
     }
@@ -166,15 +166,15 @@
 
 - (IBAction)undoTapped:(id)sender {
     
-    if ([layoutOnScreenControls.buttonStatesHistoryArray count] > 0) {
+    if ([layoutOnScreenControls.buttonStateHistory count] > 0) {
         
-        OnScreenButtonState *onScreenButtonState = [layoutOnScreenControls.buttonStatesHistoryArray lastObject];
+        OnScreenButtonState *onScreenButtonState = [layoutOnScreenControls.buttonStateHistory lastObject];
         CALayer *buttonLayer = [layoutOnScreenControls buttonLayerFromName:onScreenButtonState.name];
         buttonLayer.position = onScreenButtonState.position;
         buttonLayer.hidden = NO;
-        [layoutOnScreenControls.buttonStatesHistoryArray removeLastObject];
+        [layoutOnScreenControls.buttonStateHistory removeLastObject];
         
-        [layoutOnScreenControls saveButtonStateHistory];
+        [layoutOnScreenControls saveButtonStateToHistory];
     }
     else {
         

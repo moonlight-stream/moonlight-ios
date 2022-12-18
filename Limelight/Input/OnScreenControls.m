@@ -494,9 +494,7 @@ static float L3_Y;
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     
     NSString *profile = [userDefaults objectForKey:@"SelectedOSCProfile"];
-    
     NSMutableArray *buttonStateDataObjects = [[NSMutableArray alloc] init];
-    
     buttonStateDataObjects = [userDefaults objectForKey:[NSString stringWithFormat:@"%@-ButtonsLayout", profile]];
     
     for (NSData *buttonStateDataObject in buttonStateDataObjects) {
@@ -510,15 +508,14 @@ static float L3_Y;
 
             _leftStickBackground.position = onScreenButtonState.position;
             _leftStickBackground.hidden = onScreenButtonState.isHidden;
-            
             _leftStick.hidden = onScreenButtonState.isHidden;
             
-            if ([_upButton.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) {   // if user is laying out controls then add the inner analog stick to the analog stick background so that the two move together
+            if ([_leftStickBackground.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) {   // if user is laying out controls then make the inner analog stick a child to the analog stick background so that the two move together
                 
                 [_leftStickBackground addSublayer:_leftStick];
                 _leftStick.position = CGPointMake(_leftStickBackground.frame.size.width/2, _leftStickBackground.frame.size.height/2);
             }
-            else {  //user is on game stream view
+            else {  //user is on game stream view, move the inner stick over the stick's background but the inner stick should be separate from the analog stick background so the user can move the stick without moving the background
                 
                 _leftStick.position = _leftStickBackground.position;
             }
@@ -531,15 +528,14 @@ static float L3_Y;
 
             _rightStickBackground.position = onScreenButtonState.position;
             _rightStickBackground.hidden = onScreenButtonState.isHidden;
-            
             _rightStick.hidden = onScreenButtonState.isHidden;
             
-            if ([_upButton.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) {   // if user is laying out controls then add the inner analog stick to the analog stick background so that the two move together
+            if ([_rightStickBackground.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) {   // if user is laying out controls then make the inner analog stick a child to the analog stick background so that the two move together
                 
                 [_rightStickBackground addSublayer:_rightStick];
                 _rightStick.position = CGPointMake(_rightStickBackground.frame.size.width/2, _rightStickBackground.frame.size.height/2);
             }
-            else {  //user is on game stream view
+            else {  //user is on game stream view, move the inner stick over the stick's background but the inner stick should be separate from the analog stick background so the user can move the stick without moving the background
                 
                 _rightStick.position = _rightStickBackground.position;
             }
@@ -549,7 +545,7 @@ static float L3_Y;
 
 - (void)saveOSCProfileWithName:(NSString*)name {
 
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfileNames"] containsObject:name]) { //if the 'name' argument value already exists then exit the function
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfileNames"] containsObject:name]) { //if the 'name' argument value already exists then exit the function so you don't end up saving a duplicate profile name
 
         return;
     }
@@ -564,17 +560,18 @@ static float L3_Y;
     }
 }
 
+/* Will save an array of 'OnScreenButtonState' objects that contain the name and corresponding positions of each OSC button*/
 - (void)saveOSCPositionsWithKeyName: (NSString*)name {
 
     NSMutableArray *OSCButtonStates = [[NSMutableArray alloc] init];    //array will contain 'OnScreenButtonState' objects for OSC button on screen. Each 'buttonState' contains the name, position, hidden state of that button
     
-    for (CALayer *buttonLayer in self.OSCButtonLayers) {    //iterate through each OSC button the user sees on screen, create an 'OnScreenButtonState' object from it, and add it to an array that will be saved to storage
+    for (CALayer *buttonLayer in self.OSCButtonLayers) {    //iterate through each OSC button the user sees on screen, create an 'OnScreenButtonState' object from each button, and then add the object to an array that will be saved to storage
 
         OnScreenButtonState *onScreenButtonState = [[OnScreenButtonState alloc] initWithButtonName:buttonLayer.name  isHidden:buttonLayer.isHidden andPosition:buttonLayer.position];
         [OSCButtonStates addObject:onScreenButtonState];
     }
 
-    NSMutableArray *saveableOSCButtonStates = [[NSMutableArray alloc] init];    //will containan array of 'OnScreenButtonState' objects converted to a saveable data format
+    NSMutableArray *saveableOSCButtonStates = [[NSMutableArray alloc] init];    //will contain an array of 'OnScreenButtonState' objects converted to a saveable data format
 
     for (OnScreenButtonState *buttonState in OSCButtonStates) { //convert each 'OnScreenButtonState' object in the array into a saveable data object
 
@@ -585,18 +582,32 @@ static float L3_Y;
     [[NSUserDefaults standardUserDefaults] setObject:saveableOSCButtonStates forKey:[NSString stringWithFormat:@"%@-ButtonsLayout",name]];
 }
 
-/* Loads the OSC profile the user currently selected and lays out each OSC button associated with the profile onto the screen */
+/* Loads the OSC profile the user selected and lays out each OSC button associated with the profile onto the screen */
 - (void)layoutOSC {
     
     NSMutableArray *profiles = [[NSMutableArray alloc] init];
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     profiles = [userDefaults objectForKey:@"OSCProfileNames"];
     
-    if ([profiles count] > 0) { // if a saved OSC profile already exists then load it and lay out the buttons on screen accordingly
+    if ([profiles count] == 0) { //if no profiles exist yet then create one called 'Default' and set it as the selected profile. This new 'Default' profile will lay out OSC according to the 'Full' layout configuration
+        
+        NSString *profile = @"Default";
+        
+        //save profile name to list of profile names
+        [self saveOSCProfileWithName: profile];
+
+        //save button positions to storage
+        [self saveOSCPositionsWithKeyName: profile];
+
+        //set selected profile name to storage
+        [[NSUserDefaults standardUserDefaults] setObject:profile forKey:@"SelectedOSCProfile"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+    }
+    else {  // if a saved OSC profile already exists then load it and lay out the buttons on screen accordingly
         
         NSMutableArray *buttonStateDataObjects = [[NSMutableArray alloc] init];
-        NSString *selectedOSCProfile = [userDefaults objectForKey:@"SelectedOSCProfile"];
-        [buttonStateDataObjects addObjectsFromArray: [userDefaults objectForKey: [NSString stringWithFormat:@"%@-ButtonsLayout", selectedOSCProfile]]];
+        NSString *profile = [userDefaults objectForKey:@"SelectedOSCProfile"];
+        [buttonStateDataObjects addObjectsFromArray: [userDefaults objectForKey: [NSString stringWithFormat:@"%@-ButtonsLayout", profile]]];
         
         for (NSData *buttonStateDataObject in buttonStateDataObjects) {
             
@@ -622,20 +633,6 @@ static float L3_Y;
                 }
             }
         }
-    }
-    else {  //no profiles exist yet so create one called 'Default' and set it as the selected profile
-        
-        NSString *profile = @"Default";
-        
-        //save profile name to list of profile names
-        [self saveOSCProfileWithName: profile];
-
-        //save button positions to storage
-        [self saveOSCPositionsWithKeyName: profile];
-
-        //set selected profile name to storage
-        [[NSUserDefaults standardUserDefaults] setObject:profile forKey:@"SelectedOSCProfile"];
-        [[NSUserDefaults standardUserDefaults] synchronize];
     }
 }
 
