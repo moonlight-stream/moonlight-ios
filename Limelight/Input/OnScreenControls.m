@@ -507,25 +507,42 @@ static float L3_Y;
             
             LS_CENTER_X = onScreenButtonState.position.x;
             LS_CENTER_Y = onScreenButtonState.position.y;
-            
-            //LEFT OFF - See if these are necessary
-            _leftStick.position = onScreenButtonState.position;
-            _leftStick.hidden = onScreenButtonState.isHidden;
-            
+
             _leftStickBackground.position = onScreenButtonState.position;
             _leftStickBackground.hidden = onScreenButtonState.isHidden;
+            
+            _leftStick.hidden = onScreenButtonState.isHidden;
+            
+            if ([_upButton.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) {   // if user is laying out controls then add the inner analog stick to the analog stick background so that the two move together
+                
+                [_leftStickBackground addSublayer:_leftStick];
+                _leftStick.position = CGPointMake(_leftStickBackground.frame.size.width/2, _leftStickBackground.frame.size.height/2);
+            }
+            else {  //user is on game stream view
+                
+                _leftStick.position = _leftStickBackground.position;
+            }
         }
         
         if ([onScreenButtonState.name isEqualToString:@"rightAnalogStick"]) {
             
             RS_CENTER_X = onScreenButtonState.position.x;
             RS_CENTER_Y = onScreenButtonState.position.y;
-            
-            _rightStick.position = onScreenButtonState.position;
-            _rightStick.hidden = onScreenButtonState.isHidden;
-            
+
             _rightStickBackground.position = onScreenButtonState.position;
             _rightStickBackground.hidden = onScreenButtonState.isHidden;
+            
+            _rightStick.hidden = onScreenButtonState.isHidden;
+            
+            if ([_upButton.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) {   // if user is laying out controls then add the inner analog stick to the analog stick background so that the two move together
+                
+                [_rightStickBackground addSublayer:_rightStick];
+                _rightStick.position = CGPointMake(_rightStickBackground.frame.size.width/2, _rightStickBackground.frame.size.height/2);
+            }
+            else {  //user is on game stream view
+                
+                _rightStick.position = _rightStickBackground.position;
+            }
         }
     }
 }
