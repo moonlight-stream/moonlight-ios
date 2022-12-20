@@ -502,9 +502,14 @@
                                 </constraints>
                                 <items>
                                     <navigationItem title="On Screen Controller Profiles" id="npO-qK-e65">
-                                        <barButtonItem key="rightBarButtonItem" style="plain" systemItem="done" id="n1W-ot-Ebz">
+                                        <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="AVW-rN-Tso">
                                             <connections>
-                                                <action selector="doneTapped:" destination="hVe-cU-sXy" id="I38-LD-56A"/>
+                                                <action selector="cancelTapped:" destination="hVe-cU-sXy" id="gT5-H5-tCa"/>
+                                            </connections>
+                                        </barButtonItem>
+                                        <barButtonItem key="rightBarButtonItem" title="Load" style="plain" id="n1W-ot-Ebz">
+                                            <connections>
+                                                <action selector="loadTapped:" destination="hVe-cU-sXy" id="Mvk-6f-3Mi"/>
                                             </connections>
                                         </barButtonItem>
                                     </navigationItem>

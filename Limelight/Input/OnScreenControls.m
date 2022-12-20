@@ -470,7 +470,6 @@ static float L3_Y;
 - (void)setDPadCenter {
         
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    
     NSMutableArray *buttonStatesDataObjects = [[NSMutableArray alloc] init];
     
     NSString *profile = [userDefaults objectForKey:@"SelectedOSCProfile"];
@@ -480,7 +479,7 @@ static float L3_Y;
         
         OnScreenButtonState *buttonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateDataObject error:nil];
             
-        if ([buttonState.name isEqualToString:@"dPadBackgroundForOSCLayoutScreen"]) {   //if the button state is associated with the layer used for the dPad on the OSC layout screen
+        if ([buttonState.name isEqualToString:@"dPadBackgroundForOSCLayoutScreen"]) {   //if the button state is associated with the layer used for the dPad on the OSC layout screen then set the layer's position to the corresponding class property
             
             //Set the following two vars to be used later
             D_PAD_CENTER_X = buttonState.position.x;
@@ -501,26 +500,28 @@ static float L3_Y;
         
         OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateDataObject error:nil];
         
-        if ([onScreenButtonState.name isEqualToString:@"leftAnalogStick"]) {
+        if ([onScreenButtonState.name isEqualToString:@"leftStickBackground"]) {
             
             LS_CENTER_X = onScreenButtonState.position.x;
             LS_CENTER_Y = onScreenButtonState.position.y;
 
             _leftStickBackground.position = onScreenButtonState.position;
             _leftStickBackground.hidden = onScreenButtonState.isHidden;
-            _leftStick.hidden = onScreenButtonState.isHidden;
+            
             _leftStick.position = _leftStickBackground.position;
+            _leftStick.hidden = onScreenButtonState.isHidden;
         }
         
-        if ([onScreenButtonState.name isEqualToString:@"rightAnalogStick"]) {
+        if ([onScreenButtonState.name isEqualToString:@"rightStickBackground"]) {
             
             RS_CENTER_X = onScreenButtonState.position.x;
             RS_CENTER_Y = onScreenButtonState.position.y;
 
             _rightStickBackground.position = onScreenButtonState.position;
             _rightStickBackground.hidden = onScreenButtonState.isHidden;
-            _rightStick.hidden = onScreenButtonState.isHidden;
+            
             _rightStick.position = _rightStickBackground.position;
+            _rightStick.hidden = onScreenButtonState.isHidden;
         }
     }
 }
@@ -547,7 +548,7 @@ static float L3_Y;
 
     NSMutableArray *OSCButtonStates = [[NSMutableArray alloc] init];    //array will contain 'OnScreenButtonState' objects for OSC button on screen. Each 'buttonState' contains the name, position, hidden state of that button
     
-    for (CALayer *buttonLayer in self.OSCButtonLayers) {    //iterate through each OSC button the user sees on screen, create an 'OnScreenButtonState' object from each button, and then add the object to an array that will be saved to storage
+    for (CALayer *buttonLayer in self.OSCButtonLayers) {    //iterate through each OSC button the user sees on screen, create an 'OnScreenButtonState' object from each button, and then add the object to an array that will be saved to storage later
 
         OnScreenButtonState *onScreenButtonState = [[OnScreenButtonState alloc] initWithButtonName:buttonLayer.name  isHidden:buttonLayer.isHidden andPosition:buttonLayer.position];
         [OSCButtonStates addObject:onScreenButtonState];
@@ -571,7 +572,7 @@ static float L3_Y;
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     profiles = [userDefaults objectForKey:@"OSCProfileNames"];
     
-    if ([profiles count] == 0) { //if no profiles exist yet then create one called 'Default' and set it as the selected profile. This new 'Default' profile will lay out OSC according to the 'Full' layout configuration
+    if ([profiles count] == 0) { //if no profiles exist yet then create one called 'Default' and set it as the selected profile. This new 'Default' profile will lay out OSC according to the way the user currently sees them laid out on screen
         
         NSString *profile = @"Default";
         
@@ -582,8 +583,8 @@ static float L3_Y;
         [self saveOSCPositionsWithKeyName: profile];
 
         //set selected profile name to storage
-        [[NSUserDefaults standardUserDefaults] setObject:profile forKey:@"SelectedOSCProfile"];
-        [[NSUserDefaults standardUserDefaults] synchronize];
+        [userDefaults setObject:profile forKey:@"SelectedOSCProfile"];
+        [userDefaults synchronize];
     }
     else {  // if a saved OSC profile already exists then load it and lay out the buttons on screen accordingly
         
@@ -595,11 +596,11 @@ static float L3_Y;
             
             OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateDataObject error:nil];
             
-            for (CALayer *buttonLayer in self.OSCButtonLayers) {    //iterate through each 'OnScreenButtonState' in the array and lay out the OSC buttons accordingly
+            for (CALayer *buttonLayer in self.OSCButtonLayers) {    //iterate through each 'OnScreenButtonState' in the array and lay out the OSC buttons on screen accordingly
                 
                 if ([buttonLayer.name isEqualToString:onScreenButtonState.name]) {
                     
-                    if ([buttonLayer.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //if user is on the custom OSC layout screen then move the dPad to the user's desired position
+                    if ([buttonLayer.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //if user is on the custom OSC layout screen then move all buttons including the dPad background and its buttons to the user's desired position
                         
                         buttonLayer.position = onScreenButtonState.position;
                         buttonLayer.hidden = onScreenButtonState.isHidden;
@@ -608,7 +609,7 @@ static float L3_Y;
                              && [buttonLayer.name isEqualToString:@"upButton"] == NO
                              && [buttonLayer.name isEqualToString:@"rightButton"] == NO
                              && [buttonLayer.name isEqualToString:@"downButton"] == NO
-                             && [buttonLayer.name isEqualToString:@"leftButton"] == NO) {    //if user is on the game streaming screen, then move all buttons EXCEPT the dPad buttons to user's desired position since the dPad buttons have already been positioned appropriately by this point
+                             && [buttonLayer.name isEqualToString:@"leftButton"] == NO) {    //if user is on the game streaming screen, then move all buttons EXCEPT the dPad buttons to user's desired position since the dPad buttons have already been positioned appropriately on the game stream view by this point
                         buttonLayer.position = onScreenButtonState.position;
                         buttonLayer.hidden = onScreenButtonState.isHidden;
                     }
@@ -1211,11 +1212,9 @@ static float L3_Y;
 
 - (void)nameOnScreenButtonLayers {
     
-    _leftStickBackground.name = @"leftAnalogStick";
-    _leftStick.name = @"leftAnalogStick";
-    _rightStickBackground.name = @"rightAnalogStick";
-    _rightStick.name = @"rightAnalogStick";
-    
+    _leftStickBackground.name = @"leftStickBackground";
+    _rightStickBackground.name = @"rightStickBackground";
+
     _aButton.name = @"aButton";
     _bButton.name = @"bButton";
     _xButton.name = @"xButton";

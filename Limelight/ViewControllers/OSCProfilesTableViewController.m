@@ -53,12 +53,32 @@ const double NAV_BAR_HEIGHT = 50;
     }
 }
 
-- (IBAction)doneTapped:(id)sender {
+- (IBAction)loadTapped:(id)sender {
+    
+    if ([self.OSCProfiles count] > 0) {
+        
+        NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+        NSString *selectedOSCProfile = [self.OSCProfiles objectAtIndex:lastIndexPath.row];
+        [userDefaults setObject:selectedOSCProfile forKey:@"SelectedOSCProfile"];
+        [userDefaults synchronize];
+    }
     
     [self dismissViewControllerAnimated:YES completion:nil];
 
     if (self.didDismiss) {
         self.didDismiss();
+    }
+}
+
+- (IBAction)cancelTapped:(id)sender {
+    
+    [self dismissViewControllerAnimated:YES completion:nil];
+    
+    if ([self.OSCProfiles count] == 0) {    //if user deleted all profiles this will create another 'Default' profile with Moonlight's legacy 'Full' OSC layout
+        
+        if (self.didDismiss) {
+            self.didDismiss();
+        }
     }
 }
 
@@ -142,11 +162,6 @@ const double NAV_BAR_HEIGHT = 50;
     }
 
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-        
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    NSString *selectedOSCProfile = self.OSCProfiles[indexPath.row];
-    [userDefaults setObject:selectedOSCProfile forKey:@"SelectedOSCProfile"];
-    [userDefaults synchronize];
 }
 
 

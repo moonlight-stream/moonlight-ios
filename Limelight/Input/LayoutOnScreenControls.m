@@ -43,10 +43,11 @@
     [self addDPadButtonsToDPadBackgroundLayer];
           
     buttonStateHistory = [[NSMutableArray alloc] init];
-                
+    
     return self;
 }
 
+/* adds the layer used to contain each individual up, down, left, right dPad buttons. This layer allows the user to move the dPad around the screen as a single unit */
 - (void)addDPadBackground {
     
     if (dPadBackground == nil) {
@@ -93,7 +94,7 @@
     [dPadBackground addSublayer:leftButton];
 }
 
-/* used to determine whether user is dragging a button over the trash can with the intent of deleting that button*/
+/* currently used to determine whether user is dragging a button over the trash can with the intent of deleting that button*/
 - (BOOL)isLayer:(CALayer *)layer hoveringOverButton:(UIButton *)button {
     
     CGRect trashCanFrameInViewController = [self._view convertRect:button.imageView.frame fromView:button.superview];
@@ -119,63 +120,6 @@
     }
     
     return nil;
-}
-
-- (void)layoutOnScreenButtonsAfterUndo {
-    
-    buttonStateHistory = [[NSMutableArray alloc] init];
-    [buttonStateHistory addObjectsFromArray:[[NSUserDefaults standardUserDefaults] objectForKey:@"buttonStatesHistoryArray"]];
-    
-    for (NSData *buttonStateHistoryDataObject in buttonStateHistory) {
-        
-        OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateHistoryDataObject error:nil];
-        
-        for (CALayer *buttonLayer in self.OSCButtonLayers) {
-            
-            if ([buttonLayer.name isEqualToString:onScreenButtonState.name]) {
-                
-                buttonLayer.position = onScreenButtonState.position;
-            }
-        }
-    }
-}
-
-/* Saves the last OSC layout change the user made. The record of changes is used to allow user to undo prior changes*/
-- (void)saveButtonStateToHistory {
-    
-    NSMutableArray *buttonStateHistoryDataObjects = [[NSMutableArray alloc] init];  //will contain encoded button state objects which are a record of OSC layout changes the user made for the current profile
-    
-    for (OnScreenButtonState *buttonState in buttonStateHistory) {
-        
-        NSData *buttonStateHistoryDataObject = [NSKeyedArchiver archivedDataWithRootObject:buttonState requiringSecureCoding:YES error:nil];
-        [buttonStateHistoryDataObjects addObject: buttonStateHistoryDataObject];
-    }
-        
-    NSString *profile = [[NSUserDefaults standardUserDefaults] objectForKey:@"SelectedOSCProfile"];
-    
-    [[NSUserDefaults standardUserDefaults] setObject:buttonStateHistoryDataObjects forKey:[NSString stringWithFormat:@"%@-buttonStateHistoryDataObjectsArray", profile]];
-    [[NSUserDefaults standardUserDefaults] synchronize];
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"OSCLayoutHistoryChanged" object:self];
-}
-
-- (void)loadButtonHistory {    //Loads this profile's button-change history into an array to be used in case the user wants to tap 'undo'
-
-    [buttonStateHistory removeAllObjects];
-    
-    NSString *selectedOSCProfile = [[NSUserDefaults standardUserDefaults] objectForKey:@"SelectedOSCProfile"];
-
-    if (selectedOSCProfile != nil) {
-
-        NSMutableArray *buttonStatesHistoryDataObjectsArray = [[NSMutableArray alloc] init];
-        [buttonStatesHistoryDataObjectsArray addObjectsFromArray:[[NSUserDefaults standardUserDefaults] objectForKey:[NSString stringWithFormat:@"%@-buttonStateHistoryDataObjectsArray", selectedOSCProfile]]];
-
-        for (NSData *buttonStateHistoryDataObject in buttonStatesHistoryDataObjectsArray) {
-
-            OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateHistoryDataObject error:nil];
-            [buttonStateHistory addObject:onScreenButtonState];
-        }
-    }
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -212,7 +156,7 @@
         OnScreenButtonState *onScreenButtonState = [[OnScreenButtonState alloc] initWithButtonName:layerCurrentlyBeingTouched.name isHidden:layerCurrentlyBeingTouched.isHidden andPosition:layerCurrentlyBeingTouched.position];
         [buttonStateHistory addObject:onScreenButtonState];
         
-        [self saveButtonStateToHistory];
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"OSCLayoutHistoryChanged" object:self]; //  lets the view controller know whether to fade the undo button in or out depending on whether there are any further OSC layout changes to undo
     }
 }
 

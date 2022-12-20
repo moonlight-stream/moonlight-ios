@@ -58,12 +58,7 @@
     [layoutOnScreenControls show];
     [self addInnerAnalogSticksToOuterAnalogLayers];
 
-    if ([layoutOnScreenControls.buttonStateHistory count] == 0) {
-        self.undoButton.alpha = 0.3;
-    }
-    else {
-        self.undoButton.alpha = 1.0;
-    }
+    self.undoButton.alpha = 0.3;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OSCLayoutHistoryChanged:) name:@"OSCLayoutHistoryChanged" object:nil];    //used to notifiy the view controller so that it can either fade out or fade in its 'Undo button' which will signify to the user whether there are any OSC layout changes to undo
     
@@ -171,10 +166,11 @@
         OnScreenButtonState *onScreenButtonState = [layoutOnScreenControls.buttonStateHistory lastObject];
         CALayer *buttonLayer = [layoutOnScreenControls buttonLayerFromName:onScreenButtonState.name];
         buttonLayer.position = onScreenButtonState.position;
-        buttonLayer.hidden = NO;
+        buttonLayer.hidden = onScreenButtonState.isHidden;
+        
         [layoutOnScreenControls.buttonStateHistory removeLastObject];
         
-        [layoutOnScreenControls saveButtonStateToHistory];
+        [self OSCLayoutHistoryChanged: nil];    //will fade the undo button in or depending on whether there are any further changes to undo
     }
     else {
         
@@ -274,10 +270,12 @@
     }
     OSCProfilesTableViewController *vc = [storyboard   instantiateViewControllerWithIdentifier:@"OSCProfilesTableViewController"] ;
     vc.didDismiss = ^() {
-        NSLog(@"Dismissed SecondViewController");
+        
         [self->layoutOnScreenControls updateControls];
-        [self->layoutOnScreenControls loadButtonHistory];
         [self addInnerAnalogSticksToOuterAnalogLayers];
+        
+        [self->layoutOnScreenControls.buttonStateHistory removeAllObjects];
+        [self OSCLayoutHistoryChanged:nil];
     };
     [self presentViewController:vc animated:YES completion:nil];
 }

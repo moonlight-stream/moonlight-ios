@@ -420,7 +420,7 @@
                                                     <preferredSymbolConfiguration key="preferredSymbolConfiguration" configurationType="pointSize" pointSize="64"/>
                                                 </state>
                                                 <connections>
-                                                    <action selector="saveTapped:" destination="Uax-cc-nDz" eventType="touchUpInside" id="80D-tB-jqx"/>
+                                                    <action selector="saveTapped:" destination="Uax-cc-nDz" eventType="touchUpInside" id="Qce-VU-znX"/>
                                                 </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ewU-4C-FpK" userLabel="Load">
@@ -435,7 +435,7 @@
                                                     <preferredSymbolConfiguration key="preferredSymbolConfiguration" configurationType="pointSize" pointSize="64"/>
                                                 </state>
                                                 <connections>
-                                                    <action selector="loadTapped:" destination="Uax-cc-nDz" eventType="touchUpInside" id="b48-C8-b01"/>
+                                                    <action selector="loadTapped:" destination="Uax-cc-nDz" eventType="touchUpInside" id="7yr-cC-91S"/>
                                                 </connections>
                                             </button>
                                         </subviews>
@@ -450,7 +450,7 @@
                                                 <rect key="frame" x="0.0" y="0.0" width="52" height="25"/>
                                             </imageView>
                                         </subviews>
-                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <constraints>
                                             <constraint firstItem="JIU-0y-IHy" firstAttribute="leading" secondItem="VOd-OY-x7s" secondAttribute="leading" id="00c-bM-Mnr"/>
                                             <constraint firstItem="JIU-0y-IHy" firstAttribute="top" secondItem="VOd-OY-x7s" secondAttribute="top" id="0zI-XY-ApE"/>
@@ -461,7 +461,7 @@
                                         </constraints>
                                     </view>
                                 </subviews>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
                                     <constraint firstItem="bg4-Wl-MSl" firstAttribute="top" secondItem="Wzt-tm-tiU" secondAttribute="top" id="3d2-qc-1Hn"/>
                                     <constraint firstAttribute="height" constant="50" id="EdA-2I-zda"/>
@@ -527,9 +527,14 @@
                                 </constraints>
                                 <items>
                                     <navigationItem title="On Screen Controller Profiles" id="epN-zZ-lvG">
-                                        <barButtonItem key="rightBarButtonItem" style="plain" systemItem="done" id="5jM-Ee-UPo">
+                                        <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="FRj-P0-wAo">
                                             <connections>
-                                                <action selector="doneTapped:" destination="K3X-30-gSc" id="IxX-Ky-Euf"/>
+                                                <action selector="cancelTapped:" destination="K3X-30-gSc" id="uUd-7j-Hg6"/>
+                                            </connections>
+                                        </barButtonItem>
+                                        <barButtonItem key="rightBarButtonItem" title="Load" style="plain" id="5jM-Ee-UPo">
+                                            <connections>
+                                                <action selector="loadTapped:" destination="K3X-30-gSc" id="cSA-Il-Y1v"/>
                                             </connections>
                                         </barButtonItem>
                                     </navigationItem>
@@ -611,7 +616,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="oNu-Gu-QeM">
-                                <rect key="frame" x="266" y="416" width="37" height="33"/>
+                                <rect key="frame" x="266" y="416" width="37" height="32"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinY="YES" flexibleMaxY="YES"/>
                             </activityIndicatorView>
                         </subviews>
@@ -632,9 +637,6 @@
         <image name="SquaresArrowUp" width="40" height="40"/>
         <image name="Trash" width="40" height="40"/>
         <image name="chevron.compact.up" width="9" height="3"/>
-        <systemColor name="systemBackgroundColor">
-            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
         <systemColor name="systemGray3Color">
             <color red="0.7803921568627451" green="0.7803921568627451" blue="0.80000000000000004" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
