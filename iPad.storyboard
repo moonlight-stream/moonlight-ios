@@ -447,10 +447,12 @@
                                 </constraints>
                             </view>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0dc-Qb-Sdw">
-                                <rect key="frame" x="30" y="34" width="32.5" height="34.5"/>
+                                <rect key="frame" x="30" y="29" width="41" height="56"/>
                                 <color key="tintColor" red="0.6705882353" green="0.61568627450000002" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" title="x"/>
+                                <buttonConfiguration key="configuration" style="plain" title="x">
+                                    <fontDescription key="titleFontDescription" type="system" pointSize="35"/>
+                                </buttonConfiguration>
                                 <connections>
                                     <action selector="closeTapped:" destination="YXP-lQ-L2x" eventType="touchUpInside" id="gCh-KV-p80"/>
                                 </connections>
@@ -459,7 +461,7 @@
                         <color key="backgroundColor" systemColor="systemGrayColor"/>
                         <constraints>
                             <constraint firstItem="tSG-Qp-sZx" firstAttribute="leading" secondItem="bPg-9I-jqW" secondAttribute="leading" id="4gb-Hq-MyL"/>
-                            <constraint firstItem="0dc-Qb-Sdw" firstAttribute="top" secondItem="l77-ae-uMh" secondAttribute="bottom" constant="10" id="Faf-YK-zIP"/>
+                            <constraint firstItem="0dc-Qb-Sdw" firstAttribute="top" secondItem="l77-ae-uMh" secondAttribute="bottom" constant="5" id="Faf-YK-zIP"/>
                             <constraint firstItem="tSG-Qp-sZx" firstAttribute="top" secondItem="l77-ae-uMh" secondAttribute="bottom" id="MWl-zv-edR"/>
                             <constraint firstItem="0dc-Qb-Sdw" firstAttribute="leading" secondItem="bPg-9I-jqW" secondAttribute="leadingMargin" constant="10" id="fuD-Dp-bKq"/>
                             <constraint firstAttribute="trailing" secondItem="tSG-Qp-sZx" secondAttribute="trailing" id="g69-IP-O46"/>

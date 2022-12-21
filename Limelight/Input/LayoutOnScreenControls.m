@@ -58,7 +58,8 @@
                                           self.D_PAD_CENTER_Y,
                                           self._leftButton.frame.size.width * 2.5,
                                           self._leftButton.frame.size.height * 3);
-        
+        dPadBackground.position = CGPointMake(self.D_PAD_CENTER_X, self.D_PAD_CENTER_Y);    //since dPadBackgroun's dimensions have change you need to reset its position again here
+
         [self.OSCButtonLayers addObject:dPadBackground];
         
         [self._view.layer addSublayer:dPadBackground];

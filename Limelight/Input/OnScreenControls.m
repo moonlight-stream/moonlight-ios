@@ -590,19 +590,20 @@ static float L3_Y;
     [userDefaults synchronize];
 }
 
-/* Loads the OSC profile the user selected and lays out each OSC button associated with the profile onto the screen */
+/* Loads the OSC profile the user selected and lays out each button associated with the profile onto the screen */
 - (void)layoutOSC {
     
-    NSMutableArray *profiles = [[NSMutableArray alloc] init];
+    // Get array of saved profile names
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSMutableArray *profiles = [[NSMutableArray alloc] init];
     [profiles addObjectsFromArray: [userDefaults objectForKey:@"OSCProfileNames"]];
    
+    //Get array of saved OSC button layout configurations
     NSMutableArray *buttonStateDataObjects = [[NSMutableArray alloc] init];
     NSString *profile = [userDefaults objectForKey:@"SelectedOSCProfile"];
-    
     [buttonStateDataObjects addObjectsFromArray: [userDefaults objectForKey: [NSString stringWithFormat:@"%@-ButtonsLayout", profile]]];
     
-    for (NSData *buttonStateDataObject in buttonStateDataObjects) {
+    for (NSData *buttonStateDataObject in buttonStateDataObjects) {    //Layout OSC button onto the screen
         
         OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateDataObject error:nil];
         
@@ -610,7 +611,7 @@ static float L3_Y;
             
             if ([buttonLayer.name isEqualToString:onScreenButtonState.name]) {
                 
-                if ([buttonLayer.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //if user is on the custom OSC layout screen then move all buttons including the dPad background and its buttons to the user's desired position
+                if ([buttonLayer.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //if user is on the OSC layout screen then move all buttons including the dPad background and dPad buttons to the user's desired position
                     
                     buttonLayer.position = onScreenButtonState.position;
                     buttonLayer.hidden = onScreenButtonState.isHidden;

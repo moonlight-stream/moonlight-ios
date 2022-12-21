@@ -132,7 +132,7 @@ const double NAV_BAR_HEIGHT = 50;
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    if ([self.OSCProfileNames[indexPath.row] isEqualToString:@"Default"]) {   //If user is attempting to delete the 'Default' profile then show pop up telling user they can't delete the default profile
+    if ([self.OSCProfileNames[indexPath.row] isEqualToString:@"Default"]) {   //If user is attempting to delete the 'Default' profile then show a pop up telling user they can't do that
         
         UIAlertController * alertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: @"Deleting the 'Default' profile is not allowed" preferredStyle:UIAlertControllerStyleAlert];
         
@@ -188,6 +188,7 @@ const double NAV_BAR_HEIGHT = 50;
         selectedIndexPath = indexPath;
     
         [[NSUserDefaults standardUserDefaults] setObject:self.OSCProfileNames[selectedIndexPath.row] forKey:@"SelectedOSCProfile"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
     }
 
     [tableView deselectRowAtIndexPath:indexPath animated:YES];

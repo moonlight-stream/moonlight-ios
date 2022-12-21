@@ -17,7 +17,7 @@
 
 @implementation LayoutOnScreenControlsViewController {
     
-    LayoutOnScreenControls *layoutOnScreenControls;
+    LayoutOnScreenControls *onscreenControls;
     BOOL isToolbarHidden;
 }
 
@@ -54,9 +54,9 @@
     [self.chevronView addGestureRecognizer:singleFingerTap];
     [self.chevronImageView addGestureRecognizer:singleFingerTap];
 
-    layoutOnScreenControls = [[LayoutOnScreenControls alloc] initWithView:self.view controllerSup:nil streamConfig:nil oscLevel:OSCSegmentSelected];
-    layoutOnScreenControls._level = 4;
-    [layoutOnScreenControls show];
+    onscreenControls = [[LayoutOnScreenControls alloc] initWithView:self.view controllerSup:nil streamConfig:nil oscLevel:OSCSegmentSelected];
+    onscreenControls._level = 4;
+    [onscreenControls show];
     
     [self addInnerAnalogSticksToOuterAnalogLayers];
 
@@ -99,7 +99,7 @@
 /* fades the 'Undo Button' in or out depending on whether the user has any OSC layout changes to undo*/
 - (void)OSCLayoutChanged {
     
-    if ([layoutOnScreenControls.layoutChanges count] > 0) {
+    if ([onscreenControls.layoutChanges count] > 0) {
         
         self.undoButton.alpha = 1.0;
     }
@@ -144,11 +144,11 @@
 
 - (void)addInnerAnalogSticksToOuterAnalogLayers {
     
-    [layoutOnScreenControls._rightStickBackground addSublayer: layoutOnScreenControls._rightStick];
-    layoutOnScreenControls._rightStick.position = CGPointMake(layoutOnScreenControls._rightStickBackground.frame.size.width / 2, layoutOnScreenControls._rightStickBackground.frame.size.height / 2);
+    [onscreenControls._rightStickBackground addSublayer: onscreenControls._rightStick];
+    onscreenControls._rightStick.position = CGPointMake(onscreenControls._rightStickBackground.frame.size.width / 2, onscreenControls._rightStickBackground.frame.size.height / 2);
     
-    [layoutOnScreenControls._leftStickBackground addSublayer: layoutOnScreenControls._leftStick];
-    layoutOnScreenControls._leftStick.position = CGPointMake(layoutOnScreenControls._leftStickBackground.frame.size.width / 2, layoutOnScreenControls._leftStickBackground.frame.size.height / 2);
+    [onscreenControls._leftStickBackground addSublayer: onscreenControls._leftStick];
+    onscreenControls._leftStick.position = CGPointMake(onscreenControls._leftStickBackground.frame.size.width / 2, onscreenControls._leftStickBackground.frame.size.height / 2);
 }
 
 
@@ -170,17 +170,17 @@
 
 - (IBAction)undoTapped:(id)sender {
     
-    if ([layoutOnScreenControls.layoutChanges count] > 0) { //check if there are layout changes to roll back to
+    if ([onscreenControls.layoutChanges count] > 0) { //check if there are layout changes to roll back to
         
         //Get the name, position, and visiblity state of the button the user last moved
-        OnScreenButtonState *onScreenButtonState = [layoutOnScreenControls.layoutChanges lastObject];
-        CALayer *buttonLayer = [layoutOnScreenControls buttonLayerFromName:onScreenButtonState.name];
+        OnScreenButtonState *onScreenButtonState = [onscreenControls.layoutChanges lastObject];
+        CALayer *buttonLayer = [onscreenControls buttonLayerFromName:onScreenButtonState.name];
         
         //Set the button's position and visiblity to what it was before the user last moved it
         buttonLayer.position = onScreenButtonState.position;
         buttonLayer.hidden = onScreenButtonState.isHidden;
         
-        [layoutOnScreenControls.layoutChanges removeLastObject];
+        [onscreenControls.layoutChanges removeLastObject];
         
         [self OSCLayoutChanged];    //will fade the undo button in or depending on whether there are any further changes to undo
     }
@@ -244,8 +244,8 @@
             UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [NSString stringWithFormat:@"Another profile with the name '%@' already exists! Do you want to overwrite it?", enteredProfileName] preferredStyle:UIAlertControllerStyleAlert];
             
             [savedAlertController addAction:[UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {    //overwrite existing profile
-                [self->layoutOnScreenControls saveOSCProfileWithName: enteredProfileName];
-                [self->layoutOnScreenControls saveOSCPositionsWithKeyName: enteredProfileName];
+                [self->onscreenControls saveOSCProfileWithName: enteredProfileName];
+                [self->onscreenControls saveOSCPositionsWithKeyName: enteredProfileName];
                 [[NSUserDefaults standardUserDefaults] setObject:enteredProfileName forKey:@"SelectedOSCProfile"];
             }]];
             
@@ -257,8 +257,8 @@
         }
         else {  //if user entered a valid name that doesn't already exist then save it to persistent storage
             
-            [self->layoutOnScreenControls saveOSCProfileWithName: enteredProfileName];
-            [self->layoutOnScreenControls saveOSCPositionsWithKeyName: enteredProfileName];
+            [self->onscreenControls saveOSCProfileWithName: enteredProfileName];
+            [self->onscreenControls saveOSCPositionsWithKeyName: enteredProfileName];
             [[NSUserDefaults standardUserDefaults] setObject:enteredProfileName forKey:@"SelectedOSCProfile"];
             
             UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [NSString stringWithFormat:@"%@ profile saved and set as your active in-game controller profile layout", enteredProfileName] preferredStyle:UIAlertControllerStyleAlert];
@@ -294,14 +294,15 @@
     
     vc.didDismiss = ^() {   //block that will be called when the profiles list VC is dismissed. code will move all buttons to where they need to go depending on which profile the user selected
         
-        [self->layoutOnScreenControls updateControls];  //lays out OSC
+        [self->onscreenControls updateControls];  //creates and saves a 'Default' OSC profile or loads the one the user selected on the previous screen
         
         [self addInnerAnalogSticksToOuterAnalogLayers];
         
-        [self->layoutOnScreenControls.layoutChanges removeAllObjects];  //since a new profile is being loaded, this will remove all layout changes made before 
+        [self->onscreenControls.layoutChanges removeAllObjects];  //since a new OSC profile is being loaded, this will remove all layout changes made before
         
         [self OSCLayoutChanged];    //fades the 'Undo Button' in or out
     };
+    
     [self presentViewController:vc animated:YES completion:nil];
 }
 
@@ -319,20 +320,20 @@
         if (layer == self.toolbarRootView.layer ||
             layer == self.chevronView.layer ||
             layer == self.chevronImageView.layer ||
-            layer == self.toolbarStackView.layer) {  //don't let user move Tool Bar stuff
+            layer == self.toolbarStackView.layer) {  //don't let user move toolbar and toolbar related stuff
             
             return;
         }
     }
     
-    [layoutOnScreenControls touchesBegan:touches withEvent:event];
+    [onscreenControls touchesBegan:touches withEvent:event];
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
     
-    [layoutOnScreenControls touchesMoved:touches withEvent:event];
+    [onscreenControls touchesMoved:touches withEvent:event];
     
-    if ([layoutOnScreenControls isLayer:layoutOnScreenControls.layerCurrentlyBeingTouched hoveringOverButton:trashCanButton]) {
+    if ([onscreenControls isLayer:onscreenControls.layerCurrentlyBeingTouched hoveringOverButton:trashCanButton]) { //check if the layer the user is currently moving is hovering over the trash can button
      
         trashCanButton.tintColor = [UIColor redColor];
     }
@@ -344,14 +345,15 @@
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     
-    if (layoutOnScreenControls.layerCurrentlyBeingTouched != nil && [layoutOnScreenControls isLayer:layoutOnScreenControls.layerCurrentlyBeingTouched hoveringOverButton:trashCanButton]) { //check if user wants to throw controller button into the trash can
+    if (onscreenControls.layerCurrentlyBeingTouched != nil &&
+        [onscreenControls isLayer:onscreenControls.layerCurrentlyBeingTouched hoveringOverButton:trashCanButton]) { //check if user wants to throw controller button into the trash can
         
-        layoutOnScreenControls.layerCurrentlyBeingTouched.hidden = YES;
+        onscreenControls.layerCurrentlyBeingTouched.hidden = YES;
         
         trashCanButton.tintColor = [UIColor colorWithRed:171.0/255.0 green:157.0/255.0 blue:255.0/255.0 alpha:1];
     }
     
-    [layoutOnScreenControls touchesEnded:touches withEvent:event];
+    [onscreenControls touchesEnded:touches withEvent:event];
 }
 
 @end
