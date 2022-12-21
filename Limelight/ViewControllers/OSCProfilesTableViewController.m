@@ -94,10 +94,10 @@ const double NAV_BAR_HEIGHT = 50;
     ProfileTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
     cell.name.text = self.OSCProfiles[indexPath.row];
     
-    if ([self.OSCProfiles[indexPath.row] isEqualToString:[[NSUserDefaults standardUserDefaults] objectForKey:@"SelectedOSCProfile"]]) {
+    if ([self.OSCProfiles[indexPath.row] isEqualToString:[[NSUserDefaults standardUserDefaults] objectForKey:@"SelectedOSCProfile"]]) { //if this cell contains the name of the currently selected OSC profile then add a checkmark to the right side of the cell
         
         cell.accessoryType = UITableViewCellAccessoryCheckmark;
-        lastIndexPath = indexPath;
+        lastIndexPath = indexPath;  //keeps track of which cell contains the currently selected OSC profile
     }
     else {
         
@@ -114,12 +114,39 @@ const double NAV_BAR_HEIGHT = 50;
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     
+    if ([self.OSCProfiles[indexPath.row] isEqualToString:@"Default"]) {   //If user is attempting to delete the 'Default' profile then show pop up telling user they can't delete the default profile
+        
+        UIAlertController * alertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: @"Deleting the 'Default' profile is not allowed" preferredStyle:UIAlertControllerStyleAlert];
+        
+        [alertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+            [alertController dismissViewControllerAnimated:NO completion:nil];
+        }]];
+        
+        [self presentViewController:alertController animated:YES completion:nil];
+        
+        return;
+    }
+    
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         
+        NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+        NSString *profile = [self.OSCProfiles objectAtIndex:indexPath.row];
+        
+        [userDefaults removeObjectForKey:[NSString stringWithFormat:@"%@-ButtonsLayout", profile]]; //Delete profile's corresponding array of 'OnScreenButtonState' objects from persistant storage
+        
+        //Delete profile name from persistant storage
         [self.OSCProfiles removeObjectAtIndex:indexPath.row];
+        [userDefaults setObject:self.OSCProfiles forKey:@"OSCProfileNames"];
+        
+        if (indexPath.row == lastIndexPath.row) {   //if user is deleting the currently selected OSC profile then make the previous profile the currently selected OSC profile
+            
+            if (indexPath.row > 0) {
+                
+                [userDefaults setObject:[self.OSCProfiles objectAtIndex:indexPath.row - 1] forKey:@"SelectedOSCProfile"];
+            }
+        }
 
-        [[NSUserDefaults standardUserDefaults] setObject:self.OSCProfiles forKey:@"OSCProfileNames"];
-        [[NSUserDefaults standardUserDefaults] synchronize];
+        [userDefaults synchronize];
         
         [tableView reloadData]; 
     }
@@ -152,27 +179,19 @@ const double NAV_BAR_HEIGHT = 50;
 
     if (newRow != oldRow)
     {
-            UITableViewCell *newCell = [tableView cellForRowAtIndexPath: indexPath];
-            newCell.accessoryType = UITableViewCellAccessoryCheckmark;
+        UITableViewCell *newCell = [tableView cellForRowAtIndexPath: indexPath];
+        newCell.accessoryType = UITableViewCellAccessoryCheckmark;
 
-            UITableViewCell *oldCell = [tableView cellForRowAtIndexPath: lastIndexPath];
-            oldCell.accessoryType = UITableViewCellAccessoryNone;
+        UITableViewCell *oldCell = [tableView cellForRowAtIndexPath: lastIndexPath];
+        oldCell.accessoryType = UITableViewCellAccessoryNone;
 
-            lastIndexPath = indexPath;
+        lastIndexPath = indexPath;
+    
+        [[NSUserDefaults standardUserDefaults] setObject:self.OSCProfiles[lastIndexPath.row] forKey:@"SelectedOSCProfile"];
     }
 
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
-
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
 
 @end

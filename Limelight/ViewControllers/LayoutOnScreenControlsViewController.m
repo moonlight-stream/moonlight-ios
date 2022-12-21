@@ -187,9 +187,7 @@
     
     __block NSString *enteredProfileName = @"";
             
-    UIAlertController * inputNameAlertController = [UIAlertController alertControllerWithTitle: @"Name Profile"
-                                                                              message: @"Enter the name you want to save this controller profile as"
-                                                                       preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertController * inputNameAlertController = [UIAlertController alertControllerWithTitle: @"Enter the name you want to save this controller profile as" message: @"" preferredStyle:UIAlertControllerStyleAlert];
     [inputNameAlertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {  //pop up notification with text field where user can enter the text they wish to name their on screen controller layout profile
         
         textField.placeholder = @"name";
@@ -203,21 +201,18 @@
         UITextField * nameField = textFields[0];
         enteredProfileName = nameField.text;
         
-        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfileNames"] containsObject:enteredProfileName]) {  //if entered profile name already exists then let the user know. Offer to allow them to overwrite the existing profile
+        if ([enteredProfileName isEqualToString:@"Default"]) {  //don't user user overwrite the 'Default' profile
+         
+            UIAlertController * alertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [NSString stringWithFormat:@"Saving over the 'Default' profile is not allowed"] preferredStyle:UIAlertControllerStyleAlert];
             
-            UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [NSString stringWithFormat:@"Another profile with the name '%@' already exists! Do you want to overwrite it?", enteredProfileName] preferredStyle:UIAlertControllerStyleAlert];
-            
-            [savedAlertController addAction:[UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {    //overwrite existing profile
-                [self->layoutOnScreenControls saveOSCProfileWithName: enteredProfileName];
-                [self->layoutOnScreenControls saveOSCPositionsWithKeyName: enteredProfileName];
-                [[NSUserDefaults standardUserDefaults] setObject:enteredProfileName forKey:@"SelectedOSCProfile"];
+            [alertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) { //show pop up notification letting user know they must enter a name in the text field if they wish to save the controller profile
+                
+                [alertController dismissViewControllerAnimated:NO completion:^{
+                    [self presentViewController:inputNameAlertController animated:YES completion:nil];
+                }];
             }]];
             
-            [savedAlertController addAction:[UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) { //don't overwrite the existing profile
-                [savedAlertController dismissViewControllerAnimated:NO completion:nil];
-            }]];
-            
-            [self presentViewController:savedAlertController animated:YES completion:nil];
+            [self presentViewController:alertController animated:YES completion:nil];
         }
         else if ([enteredProfileName length] == 0) {    //if user entered no text but tapped the 'Save' button
             
@@ -229,6 +224,22 @@
                 [savedAlertController dismissViewControllerAnimated:NO completion:^{
                     [self presentViewController:inputNameAlertController animated:YES completion:nil];
                 }];
+            }]];
+            
+            [self presentViewController:savedAlertController animated:YES completion:nil];
+        }
+        else if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfileNames"] containsObject:enteredProfileName]) {  //if entered profile name already exists then let the user know. Offer to allow them to overwrite the existing profile
+            
+            UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [NSString stringWithFormat:@"Another profile with the name '%@' already exists! Do you want to overwrite it?", enteredProfileName] preferredStyle:UIAlertControllerStyleAlert];
+            
+            [savedAlertController addAction:[UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {    //overwrite existing profile
+                [self->layoutOnScreenControls saveOSCProfileWithName: enteredProfileName];
+                [self->layoutOnScreenControls saveOSCPositionsWithKeyName: enteredProfileName];
+                [[NSUserDefaults standardUserDefaults] setObject:enteredProfileName forKey:@"SelectedOSCProfile"];
+            }]];
+            
+            [savedAlertController addAction:[UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) { //don't overwrite the existing profile
+                [savedAlertController dismissViewControllerAnimated:NO completion:nil];
             }]];
             
             [self presentViewController:savedAlertController animated:YES completion:nil];

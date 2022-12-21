@@ -97,9 +97,9 @@
 /* currently used to determine whether user is dragging a button over the trash can with the intent of deleting that button*/
 - (BOOL)isLayer:(CALayer *)layer hoveringOverButton:(UIButton *)button {
     
-    CGRect trashCanFrameInViewController = [self._view convertRect:button.imageView.frame fromView:button.superview];
+    CGRect buttonConvertedRect = [self._view convertRect:button.imageView.frame fromView:button.superview];
     
-    if (CGRectIntersectsRect(layer.frame, trashCanFrameInViewController)) {
+    if (CGRectIntersectsRect(layer.frame, buttonConvertedRect)) {
      
         return YES;
     }
