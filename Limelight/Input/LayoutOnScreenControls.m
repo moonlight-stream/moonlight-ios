@@ -15,7 +15,7 @@
 
 @implementation LayoutOnScreenControls {
     
-    CALayer *dPadBackground;    //dPad buttons moved onto here so user can drag them around the screen together
+    CALayer *dPadBackground;    //will contain each individual dPad button so user can drag them around the screen together
     UIButton *trashCanButton;
     CALayer *upButton;
     CALayer *downButton;
@@ -25,7 +25,7 @@
 
 @synthesize layerCurrentlyBeingTouched;
 @synthesize _view;
-@synthesize buttonStateHistory;
+@synthesize layoutChanges;
 
 - (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport streamConfig:(StreamConfiguration*)streamConfig oscLevel:(int)oscLevel {
     
@@ -42,7 +42,7 @@
     [self addDPadBackground];
     [self addDPadButtonsToDPadBackgroundLayer];
           
-    buttonStateHistory = [[NSMutableArray alloc] init];
+    layoutChanges = [[NSMutableArray alloc] init];  //will contain OSC button layout changes the user has made for this profile
     
     return self;
 }
@@ -54,9 +54,11 @@
         
         dPadBackground = [CALayer layer];
         dPadBackground.name = @"dPadBackgroundForOSCLayoutScreen";
-        dPadBackground.frame = CGRectMake(self.D_PAD_CENTER_X, self.D_PAD_CENTER_Y
-                                          , self._leftButton.frame.size.width * 2.5, self._leftButton.frame.size.height * 3);
-        dPadBackground.position = CGPointMake(self.D_PAD_CENTER_X, self.D_PAD_CENTER_Y);
+        dPadBackground.frame = CGRectMake(self.D_PAD_CENTER_X,
+                                          self.D_PAD_CENTER_Y,
+                                          self._leftButton.frame.size.width * 2.5,
+                                          self._leftButton.frame.size.height * 3);
+        
         [self.OSCButtonLayers addObject:dPadBackground];
         
         [self._view.layer addSublayer:dPadBackground];
@@ -94,7 +96,7 @@
     [dPadBackground addSublayer:leftButton];
 }
 
-/* currently used to determine whether user is dragging a button over the trash can with the intent of deleting that button*/
+/* currently used to determine whether user is dragging an OSC button (of type CALayer) over the trash can with the intent of deleting that button*/
 - (BOOL)isLayer:(CALayer *)layer hoveringOverButton:(UIButton *)button {
     
     CGRect buttonConvertedRect = [self._view convertRect:button.imageView.frame fromView:button.superview];
@@ -128,35 +130,34 @@
         
         CGPoint touchLocation = [touch locationInView:_view];
         touchLocation = [[touch view] convertPoint:touchLocation toView:nil];
-        CALayer *layer = [_view.layer hitTest:touchLocation];
+        CALayer *touchedLayer = [_view.layer hitTest:touchLocation];
 
-        if (layer == _view.layer) { //don't let user move the background
+        if (touchedLayer == _view.layer) { //don't let user move the background
             return;
         }
         
-        if (layer == upButton || layer == downButton || layer == leftButton || layer == rightButton) { // don't let user move individual dPad buttons
+        if (touchedLayer == upButton || touchedLayer == downButton || touchedLayer == leftButton || touchedLayer == rightButton) { // don't let user move individual dPad buttons
             
             layerCurrentlyBeingTouched = dPadBackground;
             
-        } else if (layer == self._rightStick) {  // only let user move right stick background, not the stick itself
+        } else if (touchedLayer == self._rightStick) {  // only let user move right stick background, not the stick itself
             
             layerCurrentlyBeingTouched = self._rightStickBackground;
             
-            
-        } else if (layer == self._leftStick) {  // only let user move left stick background, not the stick itself
+        } else if (touchedLayer == self._leftStick) {  // only let user move left stick background, not the stick itself
             
             layerCurrentlyBeingTouched = self._leftStickBackground;
             
         } else {    // let user move whatever other valid button they're touching
             
-            layerCurrentlyBeingTouched = layer;
+            layerCurrentlyBeingTouched = touchedLayer;
         }
         
-        // save button's position in array for use in case user wants to undo the move later
+        // save name and position of layer being touched in array in case user wants to undo the move later
         OnScreenButtonState *onScreenButtonState = [[OnScreenButtonState alloc] initWithButtonName:layerCurrentlyBeingTouched.name isHidden:layerCurrentlyBeingTouched.isHidden andPosition:layerCurrentlyBeingTouched.position];
-        [buttonStateHistory addObject:onScreenButtonState];
+        [layoutChanges addObject:onScreenButtonState];
         
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"OSCLayoutHistoryChanged" object:self]; //  lets the view controller know whether to fade the undo button in or out depending on whether there are any further OSC layout changes to undo
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"OSCLayoutChanged" object:self]; //  lets the view controller know whether to fade the undo button in or out depending on whether there are any further OSC layout changes to undo
     }
 }
 
@@ -164,10 +165,6 @@
         
     UITouch *touch = [touches anyObject];
     CGPoint touchLocation = [touch locationInView:_view];
-    
-    if ([layerCurrentlyBeingTouched.superlayer.delegate isKindOfClass:[UIButton class]]) { //dont let user move the trashcan, undo, or exit buttons
-        return;
-    }
     
     layerCurrentlyBeingTouched.position = touchLocation; //move object to touch location
 }

@@ -23,14 +23,14 @@
 
 @synthesize trashCanButton;
 @synthesize undoButton;
-@synthesize onScreenControlSegmentSelected;
+@synthesize OSCSegmentSelected;
 @synthesize toolbarRootView;
 @synthesize chevronView;
 @synthesize chevronImageView;
 
 - (void)viewDidLoad {
+    
     [super viewDidLoad];
-    // Do any additional setup after loading the view.
     
     isToolbarHidden = NO;
         
@@ -41,34 +41,37 @@
     maskLayer.path  = maskPath.CGPath;
     self.chevronView.layer.mask = maskLayer;
     
-    
+    //Add swipe gesture to toolbar to allow user to swipe it up and off screen
     UISwipeGestureRecognizer *swipeUp = [[UISwipeGestureRecognizer alloc]initWithTarget:self action:@selector(moveToolbar:)];
     swipeUp.direction = UISwipeGestureRecognizerDirectionUp;
     [self.chevronView addGestureRecognizer:swipeUp];
     [self.chevronImageView addGestureRecognizer:swipeUp];
 
+    //Add tap gesture to toolbar's chevron to allow user to tap it in order to move the toolbar on and off screen
     UITapGestureRecognizer *singleFingerTap =
       [[UITapGestureRecognizer alloc] initWithTarget:self
                                               action:@selector(moveToolbar:)];
     [self.chevronView addGestureRecognizer:singleFingerTap];
     [self.chevronImageView addGestureRecognizer:singleFingerTap];
 
-    layoutOnScreenControls = [[LayoutOnScreenControls alloc] initWithView:self.view controllerSup:nil streamConfig:nil oscLevel:onScreenControlSegmentSelected];
+    layoutOnScreenControls = [[LayoutOnScreenControls alloc] initWithView:self.view controllerSup:nil streamConfig:nil oscLevel:OSCSegmentSelected];
     layoutOnScreenControls._level = 4;
     [layoutOnScreenControls show];
+    
     [self addInnerAnalogSticksToOuterAnalogLayers];
 
     self.undoButton.alpha = 0.3;
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OSCLayoutHistoryChanged:) name:@"OSCLayoutHistoryChanged" object:nil];    //used to notifiy the view controller so that it can either fade out or fade in its 'Undo button' which will signify to the user whether there are any OSC layout changes to undo
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OSCLayoutChanged) name:@"OSCLayoutChanged" object:nil];    //used to notifiy the view controller so that it can either fade in or out its 'Undo button' which will signify to the user whether there are any OSC layout changes to undo
     
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{   //keeps VC modal animation from completing the toolbar's bounce animation immediately
+    /* This will animate the toolbar with a subtle up and down motion which will telegraph to the user they can hide the toolbar if they wish*/
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{   //adding short time delay to avoid a bug that causes animations running in a modal VC from appearing
 
         [UIView animateWithDuration:0.3
           delay:0.35
           usingSpringWithDamping:0.8
           initialSpringVelocity:0.5
-          options:UIViewAnimationOptionCurveEaseInOut animations:^{
+          options:UIViewAnimationOptionCurveEaseInOut animations:^{ //Animate toolbar up a a very small distance
             //Animations
             self.toolbarRootView.frame = CGRectMake(self.toolbarRootView.frame.origin.x, self.toolbarRootView.frame.origin.y - 25, self.toolbarRootView.frame.size.width, self.toolbarRootView.frame.size.height);
             }
@@ -78,7 +81,7 @@
               delay:0
               usingSpringWithDamping:0.7
               initialSpringVelocity:1.0
-              options:UIViewAnimationOptionCurveEaseIn animations:^{
+              options:UIViewAnimationOptionCurveEaseIn animations:^{    //Animate the toolbar back down that same distance
                 //Animations
                 self.toolbarRootView.frame = CGRectMake(self.toolbarRootView.frame.origin.x, self.toolbarRootView.frame.origin.y + 25, self.toolbarRootView.frame.size.width, self.toolbarRootView.frame.size.height);
                 }
@@ -90,9 +93,13 @@
     });
 }
 
-- (void)OSCLayoutHistoryChanged:(NSNotification *)notification {
+
+#pragma mark - Helper Functions
+
+/* fades the 'Undo Button' in or out depending on whether the user has any OSC layout changes to undo*/
+- (void)OSCLayoutChanged {
     
-    if ([layoutOnScreenControls.buttonStateHistory count] > 0) {
+    if ([layoutOnScreenControls.layoutChanges count] > 0) {
         
         self.undoButton.alpha = 1.0;
     }
@@ -102,11 +109,12 @@
     }
 }
 
+/* animates the toolbar up and off the screen or back down onto the screen*/
 - (void)moveToolbar:(UISwipeGestureRecognizer *)sender {
     
     if (isToolbarHidden == NO) {
         
-        [UIView animateWithDuration:0.2 animations:^{
+        [UIView animateWithDuration:0.2 animations:^{   //animates toolbar up and off screen
             //Animations
             self.toolbarRootView.frame = CGRectMake(self.toolbarRootView.frame.origin.x, self.toolbarRootView.frame.origin.y - self.toolbarRootView.frame.size.height, self.toolbarRootView.frame.size.width, self.toolbarRootView.frame.size.height);
         }
@@ -120,7 +128,7 @@
     }
     else {
         
-        [UIView animateWithDuration:0.2 animations:^{
+        [UIView animateWithDuration:0.2 animations:^{   //animates the toolbar back down into view
             //Animations
             self.toolbarRootView.frame = CGRectMake(self.toolbarRootView.frame.origin.x, self.toolbarRootView.frame.origin.y + self.toolbarRootView.frame.size.height, self.toolbarRootView.frame.size.width, self.toolbarRootView.frame.size.height);
         }
@@ -143,34 +151,38 @@
     layoutOnScreenControls._leftStick.position = CGPointMake(layoutOnScreenControls._leftStickBackground.frame.size.width / 2, layoutOnScreenControls._leftStickBackground.frame.size.height / 2);
 }
 
-- (IBAction)trashCanTapped:(id)sender {
-    
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Delete Buttons Here" message:@"Drag and drop buttons onto this trash can to remove them from the interface" preferredStyle:UIAlertControllerStyleAlert];
 
-    UIAlertAction *ok = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                            //button click event
-                        }];
-    [alert addAction:ok];
-    [self presentViewController:alert animated:YES completion:nil];
-}
+#pragma mark - UIButton Actions
 
 - (IBAction)closeTapped:(id)sender {
         
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
+- (IBAction)trashCanTapped:(id)sender {
+    
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Delete Buttons Here" message:@"Drag and drop buttons onto this trash can to remove them from the interface" preferredStyle:UIAlertControllerStyleAlert];
+
+    UIAlertAction *ok = [UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:nil];
+    [alert addAction:ok];
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
 - (IBAction)undoTapped:(id)sender {
     
-    if ([layoutOnScreenControls.buttonStateHistory count] > 0) {
+    if ([layoutOnScreenControls.layoutChanges count] > 0) { //check if there are layout changes to roll back to
         
-        OnScreenButtonState *onScreenButtonState = [layoutOnScreenControls.buttonStateHistory lastObject];
+        //Get the name, position, and visiblity state of the button the user last moved
+        OnScreenButtonState *onScreenButtonState = [layoutOnScreenControls.layoutChanges lastObject];
         CALayer *buttonLayer = [layoutOnScreenControls buttonLayerFromName:onScreenButtonState.name];
+        
+        //Set the button's position and visiblity to what it was before the user last moved it
         buttonLayer.position = onScreenButtonState.position;
         buttonLayer.hidden = onScreenButtonState.isHidden;
         
-        [layoutOnScreenControls.buttonStateHistory removeLastObject];
+        [layoutOnScreenControls.layoutChanges removeLastObject];
         
-        [self OSCLayoutHistoryChanged: nil];    //will fade the undo button in or depending on whether there are any further changes to undo
+        [self OSCLayoutChanged];    //will fade the undo button in or depending on whether there are any further changes to undo
     }
     else {
         
@@ -182,13 +194,13 @@
     }
 }
 
-/*show pop up notification that lets users choose to either name profile. User can also choose to cancel out of this pop up or Save the name they've entered*/
+/*show pop up notification that lets users choose to save the current OSC layout configuration as a profile they can load when they want. User can also choose to cancel out of this pop up*/
 - (IBAction)saveTapped:(id)sender {
     
     __block NSString *enteredProfileName = @"";
             
     UIAlertController * inputNameAlertController = [UIAlertController alertControllerWithTitle: @"Enter the name you want to save this controller profile as" message: @"" preferredStyle:UIAlertControllerStyleAlert];
-    [inputNameAlertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {  //pop up notification with text field where user can enter the text they wish to name their on screen controller layout profile
+    [inputNameAlertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {  //pop up notification with text field where user can enter the text they wish to name their OSC layout profile
         
         textField.placeholder = @"name";
         textField.textColor = [UIColor blueColor];
@@ -205,7 +217,7 @@
          
             UIAlertController * alertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [NSString stringWithFormat:@"Saving over the 'Default' profile is not allowed"] preferredStyle:UIAlertControllerStyleAlert];
             
-            [alertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) { //show pop up notification letting user know they must enter a name in the text field if they wish to save the controller profile
+            [alertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
                 
                 [alertController dismissViewControllerAnimated:NO completion:^{
                     [self presentViewController:inputNameAlertController animated:YES completion:nil];
@@ -214,9 +226,8 @@
             
             [self presentViewController:alertController animated:YES completion:nil];
         }
-        else if ([enteredProfileName length] == 0) {    //if user entered no text but tapped the 'Save' button
+        else if ([enteredProfileName length] == 0) {    //if user entered no text but tapped the 'Save' button let them know they can't do that
             
-            //let user know not to leave name blank
             UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [NSString stringWithFormat:@"Profile name cannot be blank!"] preferredStyle:UIAlertControllerStyleAlert];
             
             [savedAlertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) { //show pop up notification letting user know they must enter a name in the text field if they wish to save the controller profile
@@ -268,28 +279,34 @@
     [self presentViewController:inputNameAlertController animated:YES completion:nil];
 }
 
+/* Shows the VC that lists all OSC profiles the user can choose from*/
 - (IBAction)loadTapped:(id)sender {
     
     UIStoryboard *storyboard;
     BOOL isIPhone = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone);
     if (isIPhone) {
-        //load TVC that shows all controller profiles by name
         storyboard = [UIStoryboard storyboardWithName:@"iPhone" bundle:nil];
     }
     else {
         storyboard = [UIStoryboard storyboardWithName:@"iPad" bundle:nil];
     }
     OSCProfilesTableViewController *vc = [storyboard   instantiateViewControllerWithIdentifier:@"OSCProfilesTableViewController"] ;
-    vc.didDismiss = ^() {
+    
+    vc.didDismiss = ^() {   //block that will be called when the profiles list VC is dismissed. code will move all buttons to where they need to go depending on which profile the user selected
         
-        [self->layoutOnScreenControls updateControls];
+        [self->layoutOnScreenControls updateControls];  //lays out OSC
+        
         [self addInnerAnalogSticksToOuterAnalogLayers];
         
-        [self->layoutOnScreenControls.buttonStateHistory removeAllObjects];
-        [self OSCLayoutHistoryChanged:nil];
+        [self->layoutOnScreenControls.layoutChanges removeAllObjects];  //since a new profile is being loaded, this will remove all layout changes made before 
+        
+        [self OSCLayoutChanged];    //fades the 'Undo Button' in or out
     };
     [self presentViewController:vc animated:YES completion:nil];
 }
+
+
+#pragma mark - Touch Methods
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
  
@@ -299,7 +316,11 @@
         touchLocation = [[touch view] convertPoint:touchLocation toView:nil];
         CALayer *layer = [self.view.layer hitTest:touchLocation];
         
-        if (layer == self.toolbarRootView.layer || layer == self.chevronView.layer || layer == self.chevronImageView.layer || layer == self.toolbarStackView.layer) {  //don't let user move Tool Bar stuff
+        if (layer == self.toolbarRootView.layer ||
+            layer == self.chevronView.layer ||
+            layer == self.chevronImageView.layer ||
+            layer == self.toolbarStackView.layer) {  //don't let user move Tool Bar stuff
+            
             return;
         }
     }

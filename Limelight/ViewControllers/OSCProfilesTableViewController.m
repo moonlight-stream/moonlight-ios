@@ -18,16 +18,15 @@ const double NAV_BAR_HEIGHT = 50;
 
 @implementation OSCProfilesTableViewController {
     
-    NSIndexPath *lastIndexPath;
+    NSIndexPath *selectedIndexPath;
 }
 
 @synthesize tableView;
-@synthesize OSCProfiles;
+@synthesize OSCProfileNames;
 
 - (void)viewDidLoad {
     
     [super viewDidLoad];
-    // Do any additional setup after loading the view.
         
     self.tableView.tableHeaderView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 0, NAV_BAR_HEIGHT)];
 
@@ -37,15 +36,16 @@ const double NAV_BAR_HEIGHT = 50;
     // Register the nib file with the table view
     [self.tableView registerNib:[UINib nibWithNibName:@"ProfileTableViewCell" bundle:nil] forCellReuseIdentifier:@"Cell"];
     
-    self.OSCProfiles = [[NSMutableArray alloc] init];
-    [self.OSCProfiles addObjectsFromArray: [[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfileNames"]];
+    self.OSCProfileNames = [[NSMutableArray alloc] init];
+        
+    [self.OSCProfileNames addObjectsFromArray: [[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfileNames"]];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
     
     [super viewDidAppear: animated];
     
-    if ([self.OSCProfiles count] > 0) { //scroll to selected profile if user has any saved profiles
+    if ([self.OSCProfileNames count] > 0) { //scroll to selected profile if user has any saved profiles
         
         NSInteger profileIndexPosition = [self indexPositionForSelectedOSCProfile: [[NSUserDefaults standardUserDefaults] objectForKey:@"SelectedOSCProfile"]];
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:profileIndexPosition inSection:0];
@@ -53,12 +53,29 @@ const double NAV_BAR_HEIGHT = 50;
     }
 }
 
+#pragma mark - Helper Functions
+
+- (NSInteger)indexPositionForSelectedOSCProfile: (NSString*)name {
+
+    for (int i = 0; i < [self.OSCProfileNames count]; i++) {
+        
+        if ([name isEqualToString:self.OSCProfileNames[i]]) {
+            
+            return i;
+        }
+    }
+    
+    return 0;
+}
+
+#pragma mark - UIButton Actions
+
 - (IBAction)loadTapped:(id)sender {
     
-    if ([self.OSCProfiles count] > 0) {
+    if ([self.OSCProfileNames count] > 0) {
         
         NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-        NSString *selectedOSCProfile = [self.OSCProfiles objectAtIndex:lastIndexPath.row];
+        NSString *selectedOSCProfile = [self.OSCProfileNames objectAtIndex:selectedIndexPath.row];
         [userDefaults setObject:selectedOSCProfile forKey:@"SelectedOSCProfile"];
         [userDefaults synchronize];
     }
@@ -74,7 +91,7 @@ const double NAV_BAR_HEIGHT = 50;
     
     [self dismissViewControllerAnimated:YES completion:nil];
     
-    if ([self.OSCProfiles count] == 0) {    //if user deleted all profiles this will create another 'Default' profile with Moonlight's legacy 'Full' OSC layout
+    if ([self.OSCProfileNames count] == 0) {    //if user deleted all profiles this will create another 'Default' profile with Moonlight's legacy 'Full' OSC layout
         
         if (self.didDismiss) {
             self.didDismiss();
@@ -82,22 +99,23 @@ const double NAV_BAR_HEIGHT = 50;
     }
 }
 
-#pragma mark DataSource
+
+#pragma mark - TableView DataSource
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     
-    return [self.OSCProfiles count];
+    return [self.OSCProfileNames count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     ProfileTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
-    cell.name.text = self.OSCProfiles[indexPath.row];
+    cell.name.text = self.OSCProfileNames[indexPath.row];
     
-    if ([self.OSCProfiles[indexPath.row] isEqualToString:[[NSUserDefaults standardUserDefaults] objectForKey:@"SelectedOSCProfile"]]) { //if this cell contains the name of the currently selected OSC profile then add a checkmark to the right side of the cell
+    if ([self.OSCProfileNames[indexPath.row] isEqualToString:[[NSUserDefaults standardUserDefaults] objectForKey:@"SelectedOSCProfile"]]) { //if this cell contains the name of the currently selected OSC profile then add a checkmark to the right side of the cell
         
         cell.accessoryType = UITableViewCellAccessoryCheckmark;
-        lastIndexPath = indexPath;  //keeps track of which cell contains the currently selected OSC profile
+        selectedIndexPath = indexPath;  //keeps track of which cell contains the currently selected OSC profile
     }
     else {
         
@@ -114,7 +132,7 @@ const double NAV_BAR_HEIGHT = 50;
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    if ([self.OSCProfiles[indexPath.row] isEqualToString:@"Default"]) {   //If user is attempting to delete the 'Default' profile then show pop up telling user they can't delete the default profile
+    if ([self.OSCProfileNames[indexPath.row] isEqualToString:@"Default"]) {   //If user is attempting to delete the 'Default' profile then show pop up telling user they can't delete the default profile
         
         UIAlertController * alertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: @"Deleting the 'Default' profile is not allowed" preferredStyle:UIAlertControllerStyleAlert];
         
@@ -130,19 +148,19 @@ const double NAV_BAR_HEIGHT = 50;
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         
         NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-        NSString *profile = [self.OSCProfiles objectAtIndex:indexPath.row];
+        NSString *profile = [self.OSCProfileNames objectAtIndex:indexPath.row];
         
         [userDefaults removeObjectForKey:[NSString stringWithFormat:@"%@-ButtonsLayout", profile]]; //Delete profile's corresponding array of 'OnScreenButtonState' objects from persistant storage
         
         //Delete profile name from persistant storage
-        [self.OSCProfiles removeObjectAtIndex:indexPath.row];
-        [userDefaults setObject:self.OSCProfiles forKey:@"OSCProfileNames"];
+        [self.OSCProfileNames removeObjectAtIndex:indexPath.row];
+        [userDefaults setObject:self.OSCProfileNames forKey:@"OSCProfileNames"];
         
-        if (indexPath.row == lastIndexPath.row) {   //if user is deleting the currently selected OSC profile then make the previous profile the currently selected OSC profile
+        if (indexPath.row == selectedIndexPath.row) {   //if user is deleting the currently selected OSC profile then make the previous profile the currently selected OSC profile
             
             if (indexPath.row > 0) {
                 
-                [userDefaults setObject:[self.OSCProfiles objectAtIndex:indexPath.row - 1] forKey:@"SelectedOSCProfile"];
+                [userDefaults setObject:[self.OSCProfileNames objectAtIndex:indexPath.row - 1] forKey:@"SelectedOSCProfile"];
             }
         }
 
@@ -152,42 +170,24 @@ const double NAV_BAR_HEIGHT = 50;
     }
 }
 
--(NSInteger)indexPositionForSelectedOSCProfile: (NSString*)name {
-    
-    NSMutableArray *OSCProfilesNamesFromUserDefaultsArray = [[NSMutableArray alloc] init];
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    OSCProfilesNamesFromUserDefaultsArray = [userDefaults objectForKey:@"OSCProfileNames"];
-    
-    for (int i = 0; i < [OSCProfilesNamesFromUserDefaultsArray count]; i++) {
-        
-        if ([name isEqualToString:OSCProfilesNamesFromUserDefaultsArray[i]]) {
-            
-            return i;
-        }
-    }
-    
-    return 0;
-}
-
-
-#pragma mark Delegate
+#pragma mark - TableView Delegate
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     NSInteger newRow = [indexPath row];
-    NSInteger oldRow = [lastIndexPath row];
+    NSInteger oldRow = [selectedIndexPath row];
 
     if (newRow != oldRow)
     {
         UITableViewCell *newCell = [tableView cellForRowAtIndexPath: indexPath];
         newCell.accessoryType = UITableViewCellAccessoryCheckmark;
 
-        UITableViewCell *oldCell = [tableView cellForRowAtIndexPath: lastIndexPath];
+        UITableViewCell *oldCell = [tableView cellForRowAtIndexPath: selectedIndexPath];
         oldCell.accessoryType = UITableViewCellAccessoryNone;
 
-        lastIndexPath = indexPath;
+        selectedIndexPath = indexPath;
     
-        [[NSUserDefaults standardUserDefaults] setObject:self.OSCProfiles[lastIndexPath.row] forKey:@"SelectedOSCProfile"];
+        [[NSUserDefaults standardUserDefaults] setObject:self.OSCProfileNames[selectedIndexPath.row] forKey:@"SelectedOSCProfile"];
     }
 
     [tableView deselectRowAtIndexPath:indexPath animated:YES];

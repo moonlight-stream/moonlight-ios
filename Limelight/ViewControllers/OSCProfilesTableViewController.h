@@ -13,7 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface OSCProfilesTableViewController : UIViewController <UITableViewDelegate, UITableViewDataSource>
 
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
-@property NSMutableArray *OSCProfiles;
+@property NSMutableArray *OSCProfileNames;
 @property (nonatomic, copy) void (^didDismiss)(void);
 
 

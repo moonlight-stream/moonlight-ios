@@ -271,10 +271,18 @@ static float L3_Y;
             [self drawTriggers];
             [self drawSticks];
             
-            [self layoutOSC];
+            if ([[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfileNames"] == 0) { // No OSC profiles exist yet so create one called 'Default' and associate it with 'Full' OSC that's already been laid out on the screen at this point
+                
+                [self saveDefaultProfile];
+            }
+            else {  //User loaded an existing OSC profile so load it and lay it out on screen
+                
+                [self layoutOSC];
+            }
+            
             [self setAnalogStickPositions];
             
-            if ([_upButton.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //if user is on the OSC custom layout screen then hide dPad up, donw, left, right buttons, since LayoutOnScreenControlsViewController draws its own dPad buttons
+            if ([_upButton.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //if user is on the OSC layout screen then hide dPad up, donw, left, right buttons, since LayoutOnScreenControlsViewController draws its own dPad buttons
                 [self hideDPadButtons];
             }
             
@@ -565,54 +573,55 @@ static float L3_Y;
     [[NSUserDefaults standardUserDefaults] setObject:saveableOSCButtonStates forKey:[NSString stringWithFormat:@"%@-ButtonsLayout",name]];
 }
 
+/* Used to create and save a 'Default' profile. Will also save the current button layout and associate it with the default profile. The current button layout is Moonlight's legacy 'Full' OSC layout*/
+- (void)saveDefaultProfile {
+    
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSString *defaultProfile = @"Default";
+    
+    //save profile name to list of profile names
+    [self saveOSCProfileWithName: defaultProfile];
+
+    //save current button positions to persistent storage. current button positions will be Moonlight's legacy 'Full' OSC layout
+    [self saveOSCPositionsWithKeyName: defaultProfile];
+
+    //set selected profile name to storage
+    [userDefaults setObject:defaultProfile forKey:@"SelectedOSCProfile"];
+    [userDefaults synchronize];
+}
+
 /* Loads the OSC profile the user selected and lays out each OSC button associated with the profile onto the screen */
 - (void)layoutOSC {
     
     NSMutableArray *profiles = [[NSMutableArray alloc] init];
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    profiles = [userDefaults objectForKey:@"OSCProfileNames"];
+    [profiles addObjectsFromArray: [userDefaults objectForKey:@"OSCProfileNames"]];
+   
+    NSMutableArray *buttonStateDataObjects = [[NSMutableArray alloc] init];
+    NSString *profile = [userDefaults objectForKey:@"SelectedOSCProfile"];
     
-    if ([profiles count] == 0) { //if no profiles exist yet then create one called 'Default' and set it as the selected profile. This new 'Default' profile will lay out OSC according to the way the user currently sees them laid out on screen
+    [buttonStateDataObjects addObjectsFromArray: [userDefaults objectForKey: [NSString stringWithFormat:@"%@-ButtonsLayout", profile]]];
+    
+    for (NSData *buttonStateDataObject in buttonStateDataObjects) {
         
-        NSString *profile = @"Default";
+        OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateDataObject error:nil];
         
-        //save profile name to list of profile names
-        [self saveOSCProfileWithName: profile];
-
-        //save button positions to storage
-        [self saveOSCPositionsWithKeyName: profile];
-
-        //set selected profile name to storage
-        [userDefaults setObject:profile forKey:@"SelectedOSCProfile"];
-        [userDefaults synchronize];
-    }
-    else {  // if a saved OSC profile already exists then load it and lay out the buttons on screen accordingly
-        
-        NSMutableArray *buttonStateDataObjects = [[NSMutableArray alloc] init];
-        NSString *profile = [userDefaults objectForKey:@"SelectedOSCProfile"];
-        [buttonStateDataObjects addObjectsFromArray: [userDefaults objectForKey: [NSString stringWithFormat:@"%@-ButtonsLayout", profile]]];
-        
-        for (NSData *buttonStateDataObject in buttonStateDataObjects) {
+        for (CALayer *buttonLayer in self.OSCButtonLayers) {    //iterate through each 'OnScreenButtonState' in the array and lay out the OSC buttons on screen accordingly
             
-            OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateDataObject error:nil];
-            
-            for (CALayer *buttonLayer in self.OSCButtonLayers) {    //iterate through each 'OnScreenButtonState' in the array and lay out the OSC buttons on screen accordingly
+            if ([buttonLayer.name isEqualToString:onScreenButtonState.name]) {
                 
-                if ([buttonLayer.name isEqualToString:onScreenButtonState.name]) {
+                if ([buttonLayer.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //if user is on the custom OSC layout screen then move all buttons including the dPad background and its buttons to the user's desired position
                     
-                    if ([buttonLayer.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //if user is on the custom OSC layout screen then move all buttons including the dPad background and its buttons to the user's desired position
-                        
-                        buttonLayer.position = onScreenButtonState.position;
-                        buttonLayer.hidden = onScreenButtonState.isHidden;
-                    }
-                    else if ([buttonLayer.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"] == NO
-                             && [buttonLayer.name isEqualToString:@"upButton"] == NO
-                             && [buttonLayer.name isEqualToString:@"rightButton"] == NO
-                             && [buttonLayer.name isEqualToString:@"downButton"] == NO
-                             && [buttonLayer.name isEqualToString:@"leftButton"] == NO) {    //if user is on the game streaming screen, then move all buttons EXCEPT the dPad buttons to user's desired position since the dPad buttons have already been positioned appropriately on the game stream view by this point
-                        buttonLayer.position = onScreenButtonState.position;
-                        buttonLayer.hidden = onScreenButtonState.isHidden;
-                    }
+                    buttonLayer.position = onScreenButtonState.position;
+                    buttonLayer.hidden = onScreenButtonState.isHidden;
+                }
+                else if ([buttonLayer.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"] == NO
+                         && [buttonLayer.name isEqualToString:@"upButton"] == NO
+                         && [buttonLayer.name isEqualToString:@"rightButton"] == NO
+                         && [buttonLayer.name isEqualToString:@"downButton"] == NO
+                         && [buttonLayer.name isEqualToString:@"leftButton"] == NO) {    //if user is on the game streaming screen, then move all buttons EXCEPT the dPad buttons to user's desired position since the dPad buttons have already been positioned appropriately on the game stream view by this point
+                    buttonLayer.position = onScreenButtonState.position;
+                    buttonLayer.hidden = onScreenButtonState.isHidden;
                 }
             }
         }

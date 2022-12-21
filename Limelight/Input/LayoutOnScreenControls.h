@@ -13,7 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface LayoutOnScreenControls : OnScreenControls
 
 @property UIView* _view;
-@property NSMutableArray *buttonStateHistory;
+@property NSMutableArray *layoutChanges;
 @property CALayer *layerCurrentlyBeingTouched;
 
 - (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport streamConfig:(StreamConfiguration*)streamConfig oscLevel:(int)oscLevel;
