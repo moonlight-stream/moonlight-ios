@@ -12,6 +12,7 @@
 #include "Limelight.h"
 #import "OnScreenButtonState.h"
 
+
 #define UPDATE_BUTTON(x, y) (buttonFlags = \
 (y) ? (buttonFlags | (x)) : (buttonFlags & ~(x)))
 
@@ -119,10 +120,7 @@ static float L3_Y;
 - (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport streamConfig:(StreamConfiguration*)streamConfig {
     self = [self init];
     _view = view;
-    
-    dPadLayersArray = [[NSMutableArray alloc] init];
-    OSCButtonLayers = [[NSMutableArray alloc] init];
-    
+
     if (controllerSupport) {
         _controllerSupport = controllerSupport;
     }
@@ -145,7 +143,7 @@ static float L3_Y;
         _controlArea.origin.x = _controlArea.size.width * EDGE_WIDTH;
         _controlArea.size.width -= _controlArea.origin.x * 2;
     }
-    
+
     _aButton = [CALayer layer];
     _bButton = [CALayer layer];
     _xButton = [CALayer layer];
@@ -167,11 +165,52 @@ static float L3_Y;
     _leftStick = [CALayer layer];
     _rightStick = [CALayer layer];
         
-    [self addDPadLayersToArray];
     
-    [self addOnScreenButtonsToArray];   //adds the on screen buttons to an array. these onscreen buttons are the layers we wish the user to move around on the screen when they're customizing the on screen buttons layout
+    dPadLayersArray = [[NSMutableArray alloc] init];    //will contain references to each dPadbutton
+    [dPadLayersArray addObject:_upButton];
+    [dPadLayersArray addObject:_rightButton];
+    [dPadLayersArray addObject:_downButton];
+    [dPadLayersArray addObject:_leftButton];
+    
+    OSCButtonLayers = [[NSMutableArray alloc] init];    //will contain references to every OSC button on screen
+    [OSCButtonLayers addObject:_aButton];
+    [OSCButtonLayers addObject:_bButton];
+    [OSCButtonLayers addObject:_xButton];
+    [OSCButtonLayers addObject:_yButton];
+    [OSCButtonLayers addObject:_startButton];
+    [OSCButtonLayers addObject:_selectButton];
+    [OSCButtonLayers addObject:_r1Button];
+    [OSCButtonLayers addObject:_r2Button];
+    [OSCButtonLayers addObject:_r3Button];
+    [OSCButtonLayers addObject:_l1Button];
+    [OSCButtonLayers addObject:_l2Button];
+    [OSCButtonLayers addObject:_l3Button];
+    [OSCButtonLayers addObject:_upButton];
+    [OSCButtonLayers addObject:_downButton];
+    [OSCButtonLayers addObject:_leftButton];
+    [OSCButtonLayers addObject:_rightButton];
+    [OSCButtonLayers addObject:_leftStickBackground];
+    [OSCButtonLayers addObject:_rightStickBackground];
 
-    [self nameOnScreenButtonLayers];
+    //Name every on screen button to reference them more easily when iterating through the OSC buttons
+    _leftStickBackground.name = @"leftStickBackground";
+    _rightStickBackground.name = @"rightStickBackground";
+    _aButton.name = @"aButton";
+    _bButton.name = @"bButton";
+    _xButton.name = @"xButton";
+    _yButton.name = @"yButton";
+    _startButton.name = @"startButton";
+    _selectButton.name = @"selectButton";
+    _r1Button.name = @"r1Button";
+    _r2Button.name = @"r2Button";
+    _r3Button.name = @"r3Button";
+    _l1Button.name = @"l1Button";
+    _l2Button.name = @"l2Button";
+    _l3Button.name = @"l3Button";
+    _upButton.name = @"upButton";
+    _rightButton.name = @"rightButton";
+    _downButton.name = @"downButton";
+    _leftButton.name = @"leftButton";
     
     return self;
 }
@@ -271,9 +310,9 @@ static float L3_Y;
             [self drawTriggers];
             [self drawSticks];
             
-            if ([[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfileNames"] == 0) { // No OSC profiles exist yet so create one called 'Default' and associate it with 'Full' OSC that's already been laid out on the screen at this point
+            if ([[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfiles"] == 0) { // No OSC profiles exist yet so create one called 'Default' and associate it Moonlight's legacy 'Full' OSC layout that's already been laid out on the screen at this point
                 
-                [self saveDefaultProfile];
+                [self saveOSCProfileWithName:@"Default"];
             }
             else {  //User loaded an existing OSC profile so load it and lay it out on screen
                 
@@ -476,18 +515,14 @@ static float L3_Y;
 
 /* if user chooses a custom layout for d-Pad position then this will set it */
 - (void)setDPadCenter {
-        
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    NSMutableArray *buttonStatesDataObjects = [[NSMutableArray alloc] init];
     
-    NSString *profile = [userDefaults objectForKey:@"SelectedOSCProfile"];
-    buttonStatesDataObjects = [userDefaults objectForKey:[NSString stringWithFormat:@"%@-ButtonsLayout", profile]];
+    OSCProfile *oscProfile = [self selectedOSCProfile]; //returns the currently selected OSCProfile
     
-    for (NSData *buttonStateDataObject in buttonStatesDataObjects) {
+    for (NSData *buttonStateDataObject in oscProfile.buttonStates) {
         
         OnScreenButtonState *buttonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateDataObject error:nil];
             
-        if ([buttonState.name isEqualToString:@"dPadBackgroundForOSCLayoutScreen"]) {   //if the button state is associated with the layer used for the dPad on the OSC layout screen then set the layer's position to the corresponding class property
+        if ([buttonState.name isEqualToString:@"dPadBackgroundForOSCLayoutScreen"]) {   //if the 'ButtonState' is for the dPad then set the dPad's position
             
             //Set the following two vars to be used later
             D_PAD_CENTER_X = buttonState.position.x;
@@ -497,14 +532,10 @@ static float L3_Y;
 }
 
 -(void) setAnalogStickPositions {
+
+    OSCProfile *oscProfile = [self selectedOSCProfile]; //returns the currently selected OSCProfile
     
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    
-    NSString *profile = [userDefaults objectForKey:@"SelectedOSCProfile"];
-    NSMutableArray *buttonStateDataObjects = [[NSMutableArray alloc] init];
-    buttonStateDataObjects = [userDefaults objectForKey:[NSString stringWithFormat:@"%@-ButtonsLayout", profile]];
-    
-    for (NSData *buttonStateDataObject in buttonStateDataObjects) {
+    for (NSData *buttonStateDataObject in oscProfile.buttonStates) {
         
         OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateDataObject error:nil];
         
@@ -534,80 +565,16 @@ static float L3_Y;
     }
 }
 
-- (void)saveOSCProfileWithName:(NSString*)name {
-
-    if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfileNames"] containsObject:name]) { //if the 'name' argument value already exists then exit the function so you don't end up saving a duplicate profile name
-
-        return;
-    }
-    else {
-        
-        NSMutableArray *OSCProfileNames = [[NSMutableArray alloc] init];
-        [OSCProfileNames addObjectsFromArray: [[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfileNames"]];
-        
-        [OSCProfileNames addObject:name];
-        [[NSUserDefaults standardUserDefaults] setObject:OSCProfileNames forKey:@"OSCProfileNames"];
-        [[NSUserDefaults standardUserDefaults] synchronize];
-    }
-}
-
-/* Will save an array of 'OnScreenButtonState' objects that contain the name and corresponding positions of each OSC button*/
-- (void)saveOSCPositionsWithKeyName: (NSString*)name {
-
-    NSMutableArray *OSCButtonStates = [[NSMutableArray alloc] init];    //array will contain 'OnScreenButtonState' objects for OSC button on screen. Each 'buttonState' contains the name, position, hidden state of that button
-    
-    for (CALayer *buttonLayer in self.OSCButtonLayers) {    //iterate through each OSC button the user sees on screen, create an 'OnScreenButtonState' object from each button, and then add the object to an array that will be saved to storage later
-
-        OnScreenButtonState *onScreenButtonState = [[OnScreenButtonState alloc] initWithButtonName:buttonLayer.name  isHidden:buttonLayer.isHidden andPosition:buttonLayer.position];
-        [OSCButtonStates addObject:onScreenButtonState];
-    }
-
-    NSMutableArray *saveableOSCButtonStates = [[NSMutableArray alloc] init];    //will contain an array of 'OnScreenButtonState' objects converted to a saveable data format
-
-    for (OnScreenButtonState *buttonState in OSCButtonStates) { //convert each 'OnScreenButtonState' object in the array into a saveable data object
-
-        NSData *buttonStateDataObject = [NSKeyedArchiver archivedDataWithRootObject:buttonState requiringSecureCoding:YES error:nil];
-        [saveableOSCButtonStates addObject: buttonStateDataObject];
-    }
-    
-    [[NSUserDefaults standardUserDefaults] setObject:saveableOSCButtonStates forKey:[NSString stringWithFormat:@"%@-ButtonsLayout",name]];
-}
-
-/* Used to create and save a 'Default' profile. Will also save the current button layout and associate it with the default profile. The current button layout is Moonlight's legacy 'Full' OSC layout*/
-- (void)saveDefaultProfile {
-    
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    NSString *defaultProfile = @"Default";
-    
-    //save profile name to list of profile names
-    [self saveOSCProfileWithName: defaultProfile];
-
-    //save current button positions to persistent storage. current button positions will be Moonlight's legacy 'Full' OSC layout
-    [self saveOSCPositionsWithKeyName: defaultProfile];
-
-    //set selected profile name to storage
-    [userDefaults setObject:defaultProfile forKey:@"SelectedOSCProfile"];
-    [userDefaults synchronize];
-}
-
 /* Loads the OSC profile the user selected and lays out each button associated with the profile onto the screen */
 - (void)layoutOSC {
+
+    OSCProfile *oscProfile = [self selectedOSCProfile];
     
-    // Get array of saved profile names
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    NSMutableArray *profiles = [[NSMutableArray alloc] init];
-    [profiles addObjectsFromArray: [userDefaults objectForKey:@"OSCProfileNames"]];
-   
-    //Get array of saved OSC button layout configurations
-    NSMutableArray *buttonStateDataObjects = [[NSMutableArray alloc] init];
-    NSString *profile = [userDefaults objectForKey:@"SelectedOSCProfile"];
-    [buttonStateDataObjects addObjectsFromArray: [userDefaults objectForKey: [NSString stringWithFormat:@"%@-ButtonsLayout", profile]]];
-    
-    for (NSData *buttonStateDataObject in buttonStateDataObjects) {    //Layout OSC button onto the screen
+    for (NSData *buttonStateDataObject in oscProfile.buttonStates) {    //iterate through each button state in the array that was just loaded
         
-        OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateDataObject error:nil];
+        OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateDataObject error:nil];    //decode button state into a useable format
         
-        for (CALayer *buttonLayer in self.OSCButtonLayers) {    //iterate through each 'OnScreenButtonState' in the array and lay out the OSC buttons on screen accordingly
+        for (CALayer *buttonLayer in self.OSCButtonLayers) {    //iterate through each button layer on the screen and position and hide/unhide it accordingly
             
             if ([buttonLayer.name isEqualToString:onScreenButtonState.name]) {
                 
@@ -1190,58 +1157,94 @@ static float L3_Y;
     
 }
 
-- (void)addDPadLayersToArray {
+#pragma mark - OSCProfiles Interface
+
+- (OSCProfile *)selectedOSCProfile {
     
-    [dPadLayersArray addObject:_upButton];
-    [dPadLayersArray addObject:_rightButton];
-    [dPadLayersArray addObject:_downButton];
-    [dPadLayersArray addObject:_leftButton];
+    NSMutableArray *OSCProfiles = [[NSMutableArray alloc] init];
+    [OSCProfiles addObjectsFromArray: [[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfiles"]];
+    
+    for (OSCProfile *oscProfile in OSCProfiles) {
+        
+        if (oscProfile.isSelected) {
+            
+            return oscProfile;
+        }
+    }
+    
+    return nil;
 }
 
-- (void)addOnScreenButtonsToArray {
+//Returns the OSCProfile with the given name
+- (OSCProfile *)OSCProfileWithName: (NSString*)name {
     
-    [OSCButtonLayers addObject:_aButton];
-    [OSCButtonLayers addObject:_bButton];
-    [OSCButtonLayers addObject:_xButton];
-    [OSCButtonLayers addObject:_yButton];
-    [OSCButtonLayers addObject:_startButton];
-    [OSCButtonLayers addObject:_selectButton];
-    [OSCButtonLayers addObject:_r1Button];
-    [OSCButtonLayers addObject:_r2Button];
-    [OSCButtonLayers addObject:_r3Button];
-    [OSCButtonLayers addObject:_l1Button];
-    [OSCButtonLayers addObject:_l2Button];
-    [OSCButtonLayers addObject:_l3Button];
-    [OSCButtonLayers addObject:_upButton];
-    [OSCButtonLayers addObject:_downButton];
-    [OSCButtonLayers addObject:_leftButton];
-    [OSCButtonLayers addObject:_rightButton];
-    [OSCButtonLayers addObject:_leftStickBackground];
-    [OSCButtonLayers addObject:_rightStickBackground];
+    NSMutableArray *OSCProfiles = [[NSMutableArray alloc] init];
+    [OSCProfiles addObjectsFromArray: [[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfiles"]];
+    
+    for (OSCProfile *OSCProfile in OSCProfiles) {
+        
+        if ([OSCProfile.name isEqualToString:name]) {
+            
+            return OSCProfile;
+        }
+    }
+    
+    return nil;
 }
 
-- (void)nameOnScreenButtonLayers {
-    
-    _leftStickBackground.name = @"leftStickBackground";
-    _rightStickBackground.name = @"rightStickBackground";
+- (void)saveOSCProfileWithName: (NSString*)name {
 
-    _aButton.name = @"aButton";
-    _bButton.name = @"bButton";
-    _xButton.name = @"xButton";
-    _yButton.name = @"yButton";
-    _startButton.name = @"startButton";
-    _selectButton.name = @"selectButton";
-    _r1Button.name = @"r1Button";
-    _r2Button.name = @"r2Button";
-    _r3Button.name = @"r3Button";
-    _l1Button.name = @"l1Button";
-    _l2Button.name = @"l2Button";
-    _l3Button.name = @"l3Button";
+    NSMutableArray *OSCButtonStates = [[NSMutableArray alloc] init];    //array will contain 'OnScreenButtonState' objects for OSC button on screen. Each 'buttonState' contains the name, position, hidden state of that button
     
-    _upButton.name = @"upButton";
-    _rightButton.name = @"rightButton";
-    _downButton.name = @"downButton";
-    _leftButton.name = @"leftButton";
+    for (CALayer *buttonLayer in self.OSCButtonLayers) {    //iterate through each OSC button the user sees on screen, create an 'OnScreenButtonState' object from each button, and then add the object to an array that will be saved to storage later
+
+        OnScreenButtonState *onScreenButtonState = [[OnScreenButtonState alloc] initWithButtonName:buttonLayer.name  isHidden:buttonLayer.isHidden andPosition:buttonLayer.position];
+        [OSCButtonStates addObject:onScreenButtonState];
+    }
+
+    NSMutableArray *saveableOSCButtonStates = [[NSMutableArray alloc] init];    //will contain an array of 'OnScreenButtonState' objects converted to a saveable data format
+
+    for (OnScreenButtonState *buttonState in OSCButtonStates) { //convert each 'OnScreenButtonState' object in the array into a saveable data object
+
+        NSData *buttonStateDataObject = [NSKeyedArchiver archivedDataWithRootObject:buttonState requiringSecureCoding:YES error:nil];
+        [saveableOSCButtonStates addObject: buttonStateDataObject];
+    }
+    
+    //create a new OSCProfile with the buttonStates array created above
+    OSCProfile *newProfile = [[OSCProfile alloc] initWithName:name buttonStates:saveableOSCButtonStates isSelected:YES];
+
+    //Get an array of all currently saved OSCProfiles from persistent storage
+    NSMutableArray *OSCProfiles = [[NSMutableArray alloc] init];
+    [OSCProfiles addObjectsFromArray: [[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfiles"]];
+    
+    if ([self profileNameAlreadyExist:name]) {  //if profile with 'name' already exists then overwrite it
+        
+        OSCProfile *profile = [self OSCProfileWithName:name];
+        profile = newProfile;
+    }
+    else {  //otherwise add the new profile to the end of the OSCProfiles array
+        
+        [OSCProfiles addObject:newProfile];
+    }
+    
+    [[NSUserDefaults standardUserDefaults] setObject:OSCProfiles forKey:@"OSCPorifles"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+- (BOOL)profileNameAlreadyExist: (NSString*)name {
+    
+    NSMutableArray *OSCProfiles = [[NSMutableArray alloc] init];
+    [OSCProfiles addObjectsFromArray: [[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfiles"]];
+    
+    for (OSCProfile *OSCProfile in OSCProfiles) {
+        
+        if ([OSCProfile.name isEqualToString:name]) {
+            
+            return YES;
+        }
+    }
+    
+    return NO;
 }
 
 @end

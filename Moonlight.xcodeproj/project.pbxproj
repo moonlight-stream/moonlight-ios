@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		450112CA29563A9600FD306F /* OSCProfile.m in Sources */ = {isa = PBXBuildFile; fileRef = 450112C829563A9600FD306F /* OSCProfile.m */; };
 		450B65FF29147AB40057517C /* LayoutOnScreenControlsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 450B65FE29147AB40057517C /* LayoutOnScreenControlsViewController.m */; };
 		450B660529147B120057517C /* LayoutOnScreenControls.m in Sources */ = {isa = PBXBuildFile; fileRef = 450B660429147B120057517C /* LayoutOnScreenControls.m */; };
 		450B660D29147C2A0057517C /* OnScreenButtonState.m in Sources */ = {isa = PBXBuildFile; fileRef = 450B660B29147C2A0057517C /* OnScreenButtonState.m */; };
@@ -171,6 +172,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		450112C829563A9600FD306F /* OSCProfile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OSCProfile.m; sourceTree = "<group>"; };
+		450112C929563A9600FD306F /* OSCProfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSCProfile.h; sourceTree = "<group>"; };
 		450B65FD29147AB30057517C /* LayoutOnScreenControlsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LayoutOnScreenControlsViewController.h; sourceTree = "<group>"; };
 		450B65FE29147AB40057517C /* LayoutOnScreenControlsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LayoutOnScreenControlsViewController.m; sourceTree = "<group>"; };
 		450B660329147B110057517C /* LayoutOnScreenControls.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LayoutOnScreenControls.h; sourceTree = "<group>"; };
@@ -593,6 +596,8 @@
 				FB4678EC1A50C40900377732 /* OnScreenControls.m */,
 				450B660C29147C2A0057517C /* OnScreenButtonState.h */,
 				450B660B29147C2A0057517C /* OnScreenButtonState.m */,
+				450112C929563A9600FD306F /* OSCProfile.h */,
+				450112C829563A9600FD306F /* OSCProfile.m */,
 				FB1A674B2131E65900507771 /* KeyboardSupport.h */,
 				FB1A674C2131E65900507771 /* KeyboardSupport.m */,
 				9897B6A0221260EF00966419 /* Controller.m */,
@@ -1125,6 +1130,7 @@
 				FB89462A19F646E200339C8A /* ControllerSupport.m in Sources */,
 				FB9AFD3D1A7E111600872C98 /* AppAssetResponse.m in Sources */,
 				FBD349621A0089F6002D2A60 /* DataManager.m in Sources */,
+				450112CA29563A9600FD306F /* OSCProfile.m in Sources */,
 				FB4A23B81A9D3637004D2EF2 /* LoadingFrameViewController.m in Sources */,
 				4573A445294683D1000A036A /* ProfileTableViewCell.m in Sources */,
 				FB9AFD3A1A7E05CE00872C98 /* ServerInfoResponse.m in Sources */,
