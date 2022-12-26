@@ -195,9 +195,7 @@
 
 /*show pop up notification that lets users choose to save the current OSC layout configuration as a profile they can load when they want. User can also choose to cancel out of this pop up*/
 - (IBAction)saveTapped:(id)sender {
-    
-    __block NSString *enteredProfileName = @"";
-            
+                
     UIAlertController * inputNameAlertController = [UIAlertController alertControllerWithTitle: @"Enter the name you want to save this controller profile as" message: @"" preferredStyle:UIAlertControllerStyleAlert];
     [inputNameAlertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {  //pop up notification with text field where user can enter the text they wish to name their OSC layout profile
         
@@ -210,7 +208,7 @@
         
         NSArray * textFields = inputNameAlertController.textFields;
         UITextField * nameField = textFields[0];
-        enteredProfileName = nameField.text;
+        NSString *enteredProfileName = nameField.text;
         
         if ([enteredProfileName isEqualToString:@"Default"]) {  //don't user user overwrite the 'Default' profile
          
@@ -255,7 +253,6 @@
         else {  //if user entered a valid name that doesn't already exist then save it to persistent storage
             
             [self.layoutOSC saveOSCProfileWithName: enteredProfileName];
-            [self.layoutOSC saveOSCPositionsWithKeyName: enteredProfileName];
             [[NSUserDefaults standardUserDefaults] setObject:enteredProfileName forKey:@"SelectedOSCProfileName"];
             
             UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [NSString stringWithFormat:@"%@ profile saved and set as your active in-game controller profile layout", enteredProfileName] preferredStyle:UIAlertControllerStyleAlert];

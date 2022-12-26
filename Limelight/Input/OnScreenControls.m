@@ -1157,7 +1157,7 @@ static float L3_Y;
     
 }
 
-#pragma mark - OSCProfiles Interface
+#pragma mark - OSCProfiles Helper Methods
 
 - (OSCProfile *)selectedOSCProfile {
     
@@ -1192,6 +1192,22 @@ static float L3_Y;
     return nil;
 }
 
+- (BOOL)profileNameAlreadyExist: (NSString*)name {
+    
+    NSMutableArray *OSCProfiles = [[NSMutableArray alloc] init];
+    [OSCProfiles addObjectsFromArray: [[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfiles"]];
+    
+    for (OSCProfile *OSCProfile in OSCProfiles) {
+        
+        if ([OSCProfile.name isEqualToString:name]) {
+            
+            return YES;
+        }
+    }
+    
+    return NO;
+}
+
 - (void)saveOSCProfileWithName: (NSString*)name {
 
     NSMutableArray *OSCButtonStates = [[NSMutableArray alloc] init];    //array will contain 'OnScreenButtonState' objects for OSC button on screen. Each 'buttonState' contains the name, position, hidden state of that button
@@ -1219,32 +1235,29 @@ static float L3_Y;
     
     if ([self profileNameAlreadyExist:name]) {  //if profile with 'name' already exists then overwrite it
         
-        OSCProfile *profile = [self OSCProfileWithName:name];
-        profile = newProfile;
+        OSCProfile *oldProfile = [self OSCProfileWithName:name];
+        [self replaceOSCProfile:oldProfile withOSCProfile:newProfile];
     }
     else {  //otherwise add the new profile to the end of the OSCProfiles array
         
         [OSCProfiles addObject:newProfile];
     }
     
-    [[NSUserDefaults standardUserDefaults] setObject:OSCProfiles forKey:@"OSCPorifles"];
+    [[NSUserDefaults standardUserDefaults] setObject:OSCProfiles forKey:@"OSCProfiles"];
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
-- (BOOL)profileNameAlreadyExist: (NSString*)name {
+- (void)replaceOSCProfile: (OSCProfile*)oldProfile withOSCProfile: (OSCProfile*)newProfile {
     
     NSMutableArray *OSCProfiles = [[NSMutableArray alloc] init];
     [OSCProfiles addObjectsFromArray: [[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfiles"]];
     
-    for (OSCProfile *OSCProfile in OSCProfiles) {
-        
-        if ([OSCProfile.name isEqualToString:name]) {
-            
-            return YES;
-        }
-    }
+    NSUInteger index = [OSCProfiles indexOfObject:oldProfile];
     
-    return NO;
+    [OSCProfiles removeObjectAtIndex:index];
+    [OSCProfiles insertObject:newProfile atIndex:index];
+    
+    [[NSUserDefaults standardUserDefaults] setObject:OSCProfiles forKey:@"OSCProfiles"];
 }
 
 @end
