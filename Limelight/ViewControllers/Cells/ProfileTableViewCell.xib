@@ -34,7 +34,7 @@
             <color key="backgroundColor" red="0.1215686275" green="0.12941176469999999" blue="0.14117647059999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
             <color key="tintColor" red="0.6705882353" green="0.61568627450000002" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
             <connections>
-                <outlet property="name" destination="b1d-b4-TCK" id="bfH-aY-SOI"/>
+                <outlet property="name" destination="b1d-b4-TCK" id="CX8-IC-jlM"/>
             </connections>
             <point key="canvasLocation" x="108" y="39"/>
         </tableViewCell>

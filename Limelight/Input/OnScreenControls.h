@@ -65,6 +65,7 @@ typedef NS_ENUM(NSInteger, OnScreenControlsLevel) {
 - (void) drawButtons;
 - (void) layoutOSC;
 - (void) updateControls;
+- (void) setOSCProfileAsSelectedWithName: (NSString *)name;
 - (void) saveOSCProfileWithName: (NSString*)name;
 - (OSCProfile *) selectedOSCProfile;
 - (BOOL) profileNameAlreadyExist: (NSString*)name;

@@ -9,6 +9,8 @@
 #import "OSCProfilesTableViewController.h"
 #import "LayoutOnScreenControlsViewController.h"
 #import "ProfileTableViewCell.h"
+#import "OSCProfile.h"
+#import "OnScreenButtonState.h"
 
 const double NAV_BAR_HEIGHT = 50;
 
@@ -19,6 +21,7 @@ const double NAV_BAR_HEIGHT = 50;
 @implementation OSCProfilesTableViewController {
     
     NSIndexPath *selectedIndexPath;
+    LayoutOnScreenControlsViewController *presentingVC;
 }
 
 @synthesize tableView;
@@ -37,8 +40,20 @@ const double NAV_BAR_HEIGHT = 50;
     [self.tableView registerNib:[UINib nibWithNibName:@"ProfileTableViewCell" bundle:nil] forCellReuseIdentifier:@"Cell"];
     
     self.OSCProfiles = [[NSMutableArray alloc] init];
+
+    NSData *encodedProfiles = [[NSUserDefaults standardUserDefaults] objectForKey: @"OSCProfiles"];
+    NSSet *classes = [NSSet setWithObjects:[NSString class], [NSMutableData class], [NSMutableArray class], [OSCProfile class], [OnScreenButtonState class], nil];
+    NSError *error;
+    NSMutableArray *profilesEncoded = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:encodedProfiles error: &error];
+    
+    OSCProfile *profileDecoded;
+    for (NSData *profileEncoded in profilesEncoded) {
         
-    [self.OSCProfiles addObjectsFromArray: [[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfiles"]];
+        profileDecoded = [NSKeyedUnarchiver unarchivedObjectOfClasses: classes fromData:profileEncoded error: nil];
+        [self.OSCProfiles addObject: profileDecoded];
+    }
+    
+    LayoutOnScreenControlsViewController *presentingVC = (LayoutOnScreenControlsViewController*)self.presentingViewController;  //keeps reference to instance of OnScreenControls so that we can use its OSC Profile Helper Methods
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -47,7 +62,6 @@ const double NAV_BAR_HEIGHT = 50;
     
     if ([self.OSCProfiles count] > 0) { //scroll to selected profile if user has any saved profiles
         
-        LayoutOnScreenControlsViewController *presentingVC = (LayoutOnScreenControlsViewController*)self.presentingViewController;
         OSCProfile *selectedOSCProfile = [presentingVC.layoutOSC selectedOSCProfile];
         NSUInteger index = [self.OSCProfiles indexOfObject:selectedOSCProfile];
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
@@ -61,10 +75,8 @@ const double NAV_BAR_HEIGHT = 50;
     
     if ([self.OSCProfiles count] > 0) {
         
-        NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-        NSString *selectedOSCProfile = [self.OSCProfiles objectAtIndex:selectedIndexPath.row];
-        [userDefaults setObject:selectedOSCProfile forKey:@"SelectedOSCProfileName"];
-        [userDefaults synchronize];
+        OSCProfile *profile = [self.OSCProfiles objectAtIndex:selectedIndexPath.row];
+        [presentingVC.layoutOSC setOSCProfileAsSelectedWithName: profile.name];
     }
     
     [self dismissViewControllerAnimated:YES completion:nil];
@@ -87,6 +99,26 @@ const double NAV_BAR_HEIGHT = 50;
 }
 
 
+- (OSCProfile *)selectedOSCProfile {
+    
+    NSData *encodedProfiles = [[NSUserDefaults standardUserDefaults] objectForKey: @"OSCProfiles"];
+    NSSet *classes = [NSSet setWithObjects:[NSString class], [NSMutableData class], [NSMutableArray class], [OSCProfile class], [OnScreenButtonState class], nil];
+    NSMutableArray *profilesEncoded = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:encodedProfiles error: nil];
+    
+    OSCProfile *profileDecoded;
+    for (NSData *profileEncoded in profilesEncoded) {
+        
+        profileDecoded = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:profileEncoded error:nil];
+        
+        if (profileDecoded.isSelected) {
+            
+            return profileDecoded;
+        }
+    }
+    
+    return nil;
+}
+
 #pragma mark - TableView DataSource
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -97,9 +129,10 @@ const double NAV_BAR_HEIGHT = 50;
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     ProfileTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
-    cell.name.text = self.OSCProfiles[indexPath.row];
+    OSCProfile *profile = self.OSCProfiles[indexPath.row];
+    cell.name.text = profile.name;
     
-    if ([self.OSCProfiles[indexPath.row] isEqualToString:[[NSUserDefaults standardUserDefaults] objectForKey:@"SelectedOSCProfileName"]]) { //if this cell contains the name of the currently selected OSC profile then add a checkmark to the right side of the cell
+    if ([profile.name isEqualToString: [self selectedOSCProfile].name]) { //if this cell contains the name of the currently selected OSC profile then add a checkmark to the right side of the cell
         
         cell.accessoryType = UITableViewCellAccessoryCheckmark;
         selectedIndexPath = indexPath;  //keeps track of which cell contains the currently selected OSC profile
@@ -147,8 +180,9 @@ const double NAV_BAR_HEIGHT = 50;
         
         [self.OSCProfiles removeObjectAtIndex:indexPath.row];
         
-        [[NSUserDefaults standardUserDefaults] setObject:self.OSCProfiles forKey:@"OSCProfiles"];
-
+        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:self.OSCProfiles requiringSecureCoding:YES error:nil];
+        
+        [[NSUserDefaults standardUserDefaults] setObject:data forKey:@"OSCProfiles"];
         [[NSUserDefaults standardUserDefaults] synchronize];
         
         [tableView reloadData]; 
@@ -162,8 +196,8 @@ const double NAV_BAR_HEIGHT = 50;
     NSInteger newRow = [indexPath row];
     NSInteger oldRow = [selectedIndexPath row];
 
-    if (newRow != oldRow)
-    {
+    if (newRow != oldRow) {
+        
         UITableViewCell *newCell = [tableView cellForRowAtIndexPath: indexPath];
         newCell.accessoryType = UITableViewCellAccessoryCheckmark;
 
@@ -171,9 +205,9 @@ const double NAV_BAR_HEIGHT = 50;
         oldCell.accessoryType = UITableViewCellAccessoryNone;
 
         selectedIndexPath = indexPath;
-    
-        [[NSUserDefaults standardUserDefaults] setObject:self.OSCProfiles[selectedIndexPath.row] forKey:@"SelectedOSCProfileName"];
-        [[NSUserDefaults standardUserDefaults] synchronize];
+        
+        OSCProfile *profile = self.OSCProfiles[indexPath.row];
+        [presentingVC.layoutOSC setOSCProfileAsSelectedWithName: profile.name];
     }
 
     [tableView deselectRowAtIndexPath:indexPath animated:YES];

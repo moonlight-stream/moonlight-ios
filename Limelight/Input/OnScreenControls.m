@@ -321,7 +321,7 @@ static float L3_Y;
             
             [self setAnalogStickPositions];
             
-            if ([_upButton.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //if user is on the OSC layout screen then hide dPad up, donw, left, right buttons, since LayoutOnScreenControlsViewController draws its own dPad buttons
+            if ([_upButton.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //if user is on the OSC layout screen then hide dPad up, down, left, right buttons, since LayoutOnScreenControlsViewController draws its own dPad buttons
                 [self hideDPadButtons];
             }
             
@@ -1161,31 +1161,80 @@ static float L3_Y;
 
 - (OSCProfile *)selectedOSCProfile {
     
-    NSMutableArray *OSCProfiles = [[NSMutableArray alloc] init];
-    [OSCProfiles addObjectsFromArray: [[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfiles"]];
+    NSData *encodedProfiles = [[NSUserDefaults standardUserDefaults] objectForKey: @"OSCProfiles"];
+    NSSet *classes = [NSSet setWithObjects:[NSString class], [NSMutableData class], [NSMutableArray class], [OSCProfile class], [OnScreenButtonState class], nil];
+    NSMutableArray *profilesEncoded = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:encodedProfiles error: nil];
     
-    for (OSCProfile *oscProfile in OSCProfiles) {
+    OSCProfile *profileDecoded;
+    for (NSData *profileEncoded in profilesEncoded) {
         
-        if (oscProfile.isSelected) {
+        profileDecoded = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:profileEncoded error:nil];
+        
+        if (profileDecoded.isSelected) {
             
-            return oscProfile;
+            return profileDecoded;
         }
     }
     
     return nil;
 }
 
-//Returns the OSCProfile with the given name
-- (OSCProfile *)OSCProfileWithName: (NSString*)name {
+- (void) setOSCProfileAsSelectedWithName: (NSString *)name {
     
-    NSMutableArray *OSCProfiles = [[NSMutableArray alloc] init];
-    [OSCProfiles addObjectsFromArray: [[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfiles"]];
+    NSData *encodedProfiles = [[NSUserDefaults standardUserDefaults] objectForKey: @"OSCProfiles"];
+    NSSet *classes = [NSSet setWithObjects:[NSString class], [NSMutableData class], [NSMutableArray class], [OSCProfile class], [OnScreenButtonState class], nil];
+    NSMutableArray *profilesEncoded = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:encodedProfiles error: nil];
     
-    for (OSCProfile *OSCProfile in OSCProfiles) {
+    NSMutableArray *profilesDecoded = [[NSMutableArray alloc] init];
+    OSCProfile *profileDecoded;
+    for (NSData *profileEncoded in profilesEncoded) {    //decode profiles
         
-        if ([OSCProfile.name isEqualToString:name]) {
+        profileDecoded = [NSKeyedUnarchiver unarchivedObjectOfClass:[OSCProfile class] fromData:profileEncoded error:nil];
+        [profilesDecoded addObject:profileDecoded];
+    }
+    
+    for (OSCProfile *profile in profilesDecoded) {
+                
+        if ([profile.name isEqualToString:name]) {
             
-            return OSCProfile;
+            profile.isSelected = YES;
+        }
+        else {
+            
+            profile.isSelected = NO;
+        }
+    }
+    
+    [profilesEncoded removeAllObjects];
+    for (OSCProfile *profileDecoded in profilesDecoded) {   //add encoded profiles back into an array
+        
+        NSData *profileEncoded = [NSKeyedArchiver archivedDataWithRootObject:profileDecoded requiringSecureCoding:YES error:nil];
+        [profilesEncoded addObject:profileEncoded];
+    }
+        
+    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:profilesEncoded requiringSecureCoding:YES error:nil];
+    
+    [[NSUserDefaults standardUserDefaults] setObject:data forKey:@"OSCProfiles"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+//Returns the OSCProfile with the given name
+- (NSData *)OSCProfileWithName: (NSString*)name {
+    
+    NSData *encodedProfiles = [[NSUserDefaults standardUserDefaults] objectForKey: @"OSCProfiles"];
+    NSSet *classes = [NSSet setWithObjects:[NSString class], [NSMutableData class], [NSMutableArray class], [OSCProfile class], [OnScreenButtonState class], nil];
+    NSMutableArray *profilesEncoded = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:encodedProfiles error: nil];
+    
+    OSCProfile *profileDecoded;
+    for (NSData *profile in profilesEncoded) {
+        
+        profileDecoded = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:profile error:nil];
+        
+        if ([profileDecoded.name isEqualToString:name]) {
+            
+            NSData *profileEncoded = [NSKeyedArchiver archivedDataWithRootObject:profileDecoded requiringSecureCoding:YES error:nil];
+            
+            return profileEncoded;
         }
     }
     
@@ -1194,12 +1243,21 @@ static float L3_Y;
 
 - (BOOL)profileNameAlreadyExist: (NSString*)name {
     
-    NSMutableArray *OSCProfiles = [[NSMutableArray alloc] init];
-    [OSCProfiles addObjectsFromArray: [[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfiles"]];
+    NSData *encodedProfiles = [[NSUserDefaults standardUserDefaults] objectForKey: @"OSCProfiles"];
+    NSSet *classes = [NSSet setWithObjects:[NSString class], [NSMutableData class], [NSMutableArray class], [OSCProfile class], [OnScreenButtonState class], nil];
+    NSMutableArray *profilesEncoded = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:encodedProfiles error: nil];
     
-    for (OSCProfile *OSCProfile in OSCProfiles) {
+    NSMutableArray *profilesDecoded = [[NSMutableArray alloc] init];
+    OSCProfile *profileDecoded;
+    for (NSData *profileEncoded in profilesEncoded) {    //decode profiles
         
-        if ([OSCProfile.name isEqualToString:name]) {
+        profileDecoded = [NSKeyedUnarchiver unarchivedObjectOfClass:[OSCProfile class] fromData:profileEncoded error:nil];
+        [profilesDecoded addObject:profileDecoded];
+    }
+    
+    for (OSCProfile *profile in profilesDecoded) {
+        
+        if ([profile.name isEqualToString:name]) {
             
             return YES;
         }
@@ -1226,38 +1284,72 @@ static float L3_Y;
         [saveableOSCButtonStates addObject: buttonStateDataObject];
     }
     
+    
+    
     //create a new OSCProfile with the buttonStates array created above
-    OSCProfile *newProfile = [[OSCProfile alloc] initWithName:name buttonStates:saveableOSCButtonStates isSelected:YES];
+    OSCProfile *newProfileDecoded = [[OSCProfile alloc] initWithName:name buttonStates:saveableOSCButtonStates isSelected:YES];
+    NSData *newProfileEncoded = [NSKeyedArchiver archivedDataWithRootObject:newProfileDecoded requiringSecureCoding:YES error:nil];
 
     //Get an array of all currently saved OSCProfiles from persistent storage
-    NSMutableArray *OSCProfiles = [[NSMutableArray alloc] init];
-    [OSCProfiles addObjectsFromArray: [[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfiles"]];
+    NSData *encodedProfiles = [[NSUserDefaults standardUserDefaults] objectForKey: @"OSCProfiles"];
+    NSSet *classes = [NSSet setWithObjects:[NSString class], [NSMutableData class], [NSMutableArray class], [OSCProfile class], [OnScreenButtonState class], nil];
+    NSMutableArray *profilesEncoded = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:encodedProfiles error: nil];
     
+    NSMutableArray *profilesDecoded = [[NSMutableArray alloc] init];
+    OSCProfile *profileDecoded;
+    for (NSData *profileEncoded in profilesEncoded) {   //decode profiles
+        
+        profileDecoded = [NSKeyedUnarchiver unarchivedObjectOfClass:[OSCProfile class] fromData:profileEncoded error:nil];
+        [profilesDecoded addObject: profileDecoded];
+    }
+    
+    for (OSCProfile *profile in profilesDecoded) {   //set all saved OSCProfiles 'isSelected' bool to NO since the one you're saving will be set as the selected profile
+        
+        profile.isSelected = NO;
+    }
+    
+    NSMutableArray *encodedProfilesEncoded = [[NSMutableArray alloc] init];
     if ([self profileNameAlreadyExist:name]) {  //if profile with 'name' already exists then overwrite it
         
-        OSCProfile *oldProfile = [self OSCProfileWithName:name];
-        [self replaceOSCProfile:oldProfile withOSCProfile:newProfile];
+        NSData *oldProfileEncoded = [self OSCProfileWithName:name];
+                        
+        [self replaceOSCProfile:oldProfileEncoded withOSCProfile:newProfileEncoded];
     }
     else {  //otherwise add the new profile to the end of the OSCProfiles array
-        
-        [OSCProfiles addObject:newProfile];
+                
+        [encodedProfilesEncoded addObject:newProfileEncoded];
     }
     
-    [[NSUserDefaults standardUserDefaults] setObject:OSCProfiles forKey:@"OSCProfiles"];
+    //try encoding profilesEncoded and saving it to user defaults then try decoding it below this method
+    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:encodedProfilesEncoded requiringSecureCoding:YES error:nil];
+    
+    [[NSUserDefaults standardUserDefaults] setObject:data forKey:@"OSCProfiles"];
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
-- (void)replaceOSCProfile: (OSCProfile*)oldProfile withOSCProfile: (OSCProfile*)newProfile {
+- (void)replaceOSCProfile: (NSData*)oldProfile withOSCProfile: (NSData*)newProfile {
     
-    NSMutableArray *OSCProfiles = [[NSMutableArray alloc] init];
-    [OSCProfiles addObjectsFromArray: [[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfiles"]];
+    NSData *encodedProfiles = [[NSUserDefaults standardUserDefaults] objectForKey: @"OSCProfiles"];
+    NSSet *classes = [NSSet setWithObjects:[NSString class], [NSMutableData class], [NSMutableArray class], [OSCProfile class], [OnScreenButtonState class], nil];
+    NSMutableArray *profilesEncoded = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:encodedProfiles error: nil];
     
-    NSUInteger index = [OSCProfiles indexOfObject:oldProfile];
+    NSMutableArray *profilesDecoded = [[NSMutableArray alloc] init];
+    OSCProfile *profileDecoded;
+    for (NSData *profileEncoded in profilesEncoded) {
+        
+        profileDecoded = [NSKeyedUnarchiver unarchivedObjectOfClasses: classes fromData:profileEncoded error: nil];
+        [profilesDecoded addObject: profileDecoded];
+    }
     
-    [OSCProfiles removeObjectAtIndex:index];
-    [OSCProfiles insertObject:newProfile atIndex:index];
+    NSUInteger index = [profilesDecoded indexOfObject:oldProfile];
     
-    [[NSUserDefaults standardUserDefaults] setObject:OSCProfiles forKey:@"OSCProfiles"];
+    [profilesDecoded removeObjectAtIndex:index];
+    [profilesDecoded insertObject:newProfile atIndex:index];
+    
+    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:profilesEncoded requiringSecureCoding:YES error:nil];
+    
+    [[NSUserDefaults standardUserDefaults] setObject:data forKey:@"OSCProfiles"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 @end

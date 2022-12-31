@@ -253,7 +253,7 @@
         else {  //if user entered a valid name that doesn't already exist then save it to persistent storage
             
             [self.layoutOSC saveOSCProfileWithName: enteredProfileName];
-            [[NSUserDefaults standardUserDefaults] setObject:enteredProfileName forKey:@"SelectedOSCProfileName"];
+            [self.layoutOSC setOSCProfileAsSelectedWithName: enteredProfileName];
             
             UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [NSString stringWithFormat:@"%@ profile saved and set as your active in-game controller profile layout", enteredProfileName] preferredStyle:UIAlertControllerStyleAlert];
             

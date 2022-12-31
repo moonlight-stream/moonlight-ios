@@ -7,13 +7,14 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "OnScreenButtonState.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface OSCProfile : NSObject <NSCoding, NSSecureCoding>
 
 @property NSString *name;
-@property NSMutableArray *buttonStates;
+@property NSMutableArray <OnScreenButtonState *> *buttonStates;
 @property BOOL isSelected;
 
 - (id)initWithName: (NSString*)name buttonStates: (NSMutableArray*)buttonStates isSelected: (BOOL)isSelected;
