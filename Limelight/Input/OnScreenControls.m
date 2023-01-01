@@ -1186,11 +1186,10 @@ static float L3_Y;
     NSMutableArray *profilesEncoded = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:encodedProfiles error: nil];
     
     NSMutableArray *profilesDecoded = [[NSMutableArray alloc] init];
-    OSCProfile *profileDecoded;
-    for (NSData *profileEncoded in profilesEncoded) {    //decode profiles
+    for (NSData *profileEncoded in profilesEncoded) {
         
-        profileDecoded = [NSKeyedUnarchiver unarchivedObjectOfClass:[OSCProfile class] fromData:profileEncoded error:nil];
-        [profilesDecoded addObject:profileDecoded];
+        OSCProfile *profileDecoded = [NSKeyedUnarchiver unarchivedObjectOfClasses: classes fromData:profileEncoded error: nil];
+        [profilesDecoded addObject: profileDecoded];
     }
     
     for (OSCProfile *profile in profilesDecoded) {
@@ -1249,10 +1248,10 @@ static float L3_Y;
     
     NSMutableArray *profilesDecoded = [[NSMutableArray alloc] init];
     OSCProfile *profileDecoded;
-    for (NSData *profileEncoded in profilesEncoded) {    //decode profiles
+    for (NSData *profileEncoded in profilesEncoded) {
         
-        profileDecoded = [NSKeyedUnarchiver unarchivedObjectOfClass:[OSCProfile class] fromData:profileEncoded error:nil];
-        [profilesDecoded addObject:profileDecoded];
+        profileDecoded = [NSKeyedUnarchiver unarchivedObjectOfClasses: classes fromData:profileEncoded error: nil];
+        [profilesDecoded addObject: profileDecoded];
     }
     
     for (OSCProfile *profile in profilesDecoded) {
@@ -1268,6 +1267,7 @@ static float L3_Y;
 
 - (void)saveOSCProfileWithName: (NSString*)name {
 
+    //Get button positions currently on screen and save them to array
     NSMutableArray *OSCButtonStates = [[NSMutableArray alloc] init];    //array will contain 'OnScreenButtonState' objects for OSC button on screen. Each 'buttonState' contains the name, position, hidden state of that button
     
     for (CALayer *buttonLayer in self.OSCButtonLayers) {    //iterate through each OSC button the user sees on screen, create an 'OnScreenButtonState' object from each button, and then add the object to an array that will be saved to storage later
@@ -1297,18 +1297,20 @@ static float L3_Y;
     
     NSMutableArray *profilesDecoded = [[NSMutableArray alloc] init];
     OSCProfile *profileDecoded;
-    for (NSData *profileEncoded in profilesEncoded) {   //decode profiles
+    for (NSData *profileEncoded in profilesEncoded) {
         
-        profileDecoded = [NSKeyedUnarchiver unarchivedObjectOfClass:[OSCProfile class] fromData:profileEncoded error:nil];
+        profileDecoded = [NSKeyedUnarchiver unarchivedObjectOfClasses: classes fromData:profileEncoded error: nil];
         [profilesDecoded addObject: profileDecoded];
     }
     
+    NSMutableArray *encodedProfilesEncoded = [[NSMutableArray alloc] init];
     for (OSCProfile *profile in profilesDecoded) {   //set all saved OSCProfiles 'isSelected' bool to NO since the one you're saving will be set as the selected profile
         
         profile.isSelected = NO;
+        NSData *profileEncoded = [NSKeyedArchiver archivedDataWithRootObject:profile requiringSecureCoding:YES error:nil];
+        [encodedProfilesEncoded addObject:profileEncoded];
     }
     
-    NSMutableArray *encodedProfilesEncoded = [[NSMutableArray alloc] init];
     if ([self profileNameAlreadyExist:name]) {  //if profile with 'name' already exists then overwrite it
         
         NSData *oldProfileEncoded = [self OSCProfileWithName:name];
