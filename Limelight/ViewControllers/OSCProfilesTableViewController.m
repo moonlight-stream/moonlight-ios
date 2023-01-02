@@ -11,6 +11,7 @@
 #import "ProfileTableViewCell.h"
 #import "OSCProfile.h"
 #import "OnScreenButtonState.h"
+#import "OSCProfilesManager.h"
 
 const double NAV_BAR_HEIGHT = 50;
 
@@ -21,6 +22,7 @@ const double NAV_BAR_HEIGHT = 50;
 @implementation OSCProfilesTableViewController {
     
     NSIndexPath *selectedIndexPath;
+    OSCProfilesManager *profilesManager;
 }
 
 @synthesize tableView;
@@ -30,6 +32,8 @@ const double NAV_BAR_HEIGHT = 50;
     
     [super viewDidLoad];
         
+    profilesManager = [OSCProfilesManager sharedManager];
+
     self.tableView.tableHeaderView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 0, NAV_BAR_HEIGHT)];
 
     self.tableView.delegate = self;
@@ -59,7 +63,7 @@ const double NAV_BAR_HEIGHT = 50;
     
     if ([self.OSCProfiles count] > 0) { //scroll to selected profile if user has any saved profiles
         
-        OSCProfile *selectedOSCProfile = [self selectedOSCProfile];
+        OSCProfile *selectedOSCProfile = [profilesManager selectedOSCProfile];
         NSUInteger index = [self.OSCProfiles indexOfObject:selectedOSCProfile];
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
         [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
@@ -73,7 +77,7 @@ const double NAV_BAR_HEIGHT = 50;
     if ([self.OSCProfiles count] > 0) {
         
         OSCProfile *profile = [self.OSCProfiles objectAtIndex:selectedIndexPath.row];
-        [self setOSCProfileAsSelectedWithName: profile.name];
+        [profilesManager setOSCProfileAsSelectedWithName: profile.name];
     }
     
     [self dismissViewControllerAnimated:YES completion:nil];
@@ -95,65 +99,6 @@ const double NAV_BAR_HEIGHT = 50;
     }
 }
 
-
-- (OSCProfile *)selectedOSCProfile {
-    
-    NSData *encodedProfiles = [[NSUserDefaults standardUserDefaults] objectForKey: @"OSCProfiles"];
-    NSSet *classes = [NSSet setWithObjects:[NSString class], [NSMutableData class], [NSMutableArray class], [OSCProfile class], [OnScreenButtonState class], nil];
-    NSMutableArray *profilesEncoded = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:encodedProfiles error: nil];
-    
-    OSCProfile *profileDecoded;
-    for (NSData *profileEncoded in profilesEncoded) {
-        
-        profileDecoded = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:profileEncoded error:nil];
-        
-        if (profileDecoded.isSelected) {
-            
-            return profileDecoded;
-        }
-    }
-    
-    return nil;
-}
-
-- (void) setOSCProfileAsSelectedWithName: (NSString *)name {
-    
-    NSData *encodedProfiles = [[NSUserDefaults standardUserDefaults] objectForKey: @"OSCProfiles"];
-    NSSet *classes = [NSSet setWithObjects:[NSString class], [NSMutableData class], [NSMutableArray class], [OSCProfile class], [OnScreenButtonState class], nil];
-    NSMutableArray *profilesEncoded = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:encodedProfiles error: nil];
-    
-    NSMutableArray *profilesDecoded = [[NSMutableArray alloc] init];
-    for (NSData *profileEncoded in profilesEncoded) {
-        
-        OSCProfile *profileDecoded = [NSKeyedUnarchiver unarchivedObjectOfClasses: classes fromData:profileEncoded error: nil];
-        [profilesDecoded addObject: profileDecoded];
-    }
-    
-    for (OSCProfile *profile in profilesDecoded) {
-                
-        if ([profile.name isEqualToString:name]) {
-            
-            profile.isSelected = YES;
-        }
-        else {
-            
-            profile.isSelected = NO;
-        }
-    }
-    
-    [profilesEncoded removeAllObjects];
-    for (OSCProfile *profileDecoded in profilesDecoded) {   //add encoded profiles back into an array
-        
-        NSData *profileEncoded = [NSKeyedArchiver archivedDataWithRootObject:profileDecoded requiringSecureCoding:YES error:nil];
-        [profilesEncoded addObject:profileEncoded];
-    }
-        
-    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:profilesEncoded requiringSecureCoding:YES error:nil];
-    
-    [[NSUserDefaults standardUserDefaults] setObject:data forKey:@"OSCProfiles"];
-    [[NSUserDefaults standardUserDefaults] synchronize];
-}
-
 #pragma mark - TableView DataSource
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -167,7 +112,7 @@ const double NAV_BAR_HEIGHT = 50;
     OSCProfile *profile = self.OSCProfiles[indexPath.row];
     cell.name.text = profile.name;
     
-    if ([profile.name isEqualToString: [self selectedOSCProfile].name]) { //if this cell contains the name of the currently selected OSC profile then add a checkmark to the right side of the cell
+    if ([profile.name isEqualToString: [profilesManager selectedOSCProfile].name]) { //if this cell contains the name of the currently selected OSC profile then add a checkmark to the right side of the cell
         
         cell.accessoryType = UITableViewCellAccessoryCheckmark;
         selectedIndexPath = indexPath;  //keeps track of which cell contains the currently selected OSC profile
@@ -242,7 +187,7 @@ const double NAV_BAR_HEIGHT = 50;
         selectedIndexPath = indexPath;
         
         OSCProfile *profile = self.OSCProfiles[indexPath.row];
-        [self setOSCProfileAsSelectedWithName: profile.name];
+        [profilesManager setOSCProfileAsSelectedWithName: profile.name];
     }
 
     [tableView deselectRowAtIndexPath:indexPath animated:YES];

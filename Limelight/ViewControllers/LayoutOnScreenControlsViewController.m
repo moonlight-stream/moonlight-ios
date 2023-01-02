@@ -10,6 +10,7 @@
 #import "OSCProfilesTableViewController.h"
 #import "OnScreenButtonState.h"
 #import "OnScreenControls.h"
+#import "OSCProfilesManager.h"
 
 @interface LayoutOnScreenControlsViewController ()
 
@@ -18,6 +19,7 @@
 
 @implementation LayoutOnScreenControlsViewController {
     BOOL isToolbarHidden;
+    OSCProfilesManager *profilesManager;
 }
 
 @synthesize trashCanButton;
@@ -31,6 +33,8 @@
     
     [super viewDidLoad];
     
+    profilesManager = [OSCProfilesManager sharedManager];
+
     isToolbarHidden = NO;
         
     //Add curve to bottom of chevron tab view
@@ -236,12 +240,12 @@
             
             [self presentViewController:savedAlertController animated:YES completion:nil];
         }
-        else if ([self.layoutOSC profileNameAlreadyExist:enteredProfileName] == YES) {  //if entered profile name already exists then let the user know. Offer to allow them to overwrite the existing profile
+        else if ([profilesManager profileNameAlreadyExist:enteredProfileName] == YES) {  //if entered profile name already exists then let the user know. Offer to allow them to overwrite the existing profile
             
             UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [NSString stringWithFormat:@"Another profile with the name '%@' already exists! Do you want to overwrite it?", enteredProfileName] preferredStyle:UIAlertControllerStyleAlert];
             
             [savedAlertController addAction:[UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {    //overwrite existing profile
-                [self.layoutOSC saveOSCProfileWithName: enteredProfileName];
+                [profilesManager saveOSCProfileWithName: enteredProfileName];
             }]];
             
             [savedAlertController addAction:[UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) { //don't overwrite the existing profile
@@ -252,8 +256,8 @@
         }
         else {  //if user entered a valid name that doesn't already exist then save it to persistent storage
             
-            [self.layoutOSC saveOSCProfileWithName: enteredProfileName];
-            [self.layoutOSC setOSCProfileAsSelectedWithName: enteredProfileName];
+            [profilesManager saveOSCProfileWithName: enteredProfileName];
+            [profilesManager setOSCProfileAsSelectedWithName: enteredProfileName];
             
             UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [NSString stringWithFormat:@"%@ profile saved and set as your active in-game controller profile layout", enteredProfileName] preferredStyle:UIAlertControllerStyleAlert];
             
@@ -284,6 +288,7 @@
     else {
         storyboard = [UIStoryboard storyboardWithName:@"iPad" bundle:nil];
     }
+    
     OSCProfilesTableViewController *vc = [storyboard   instantiateViewControllerWithIdentifier:@"OSCProfilesTableViewController"] ;
     
     vc.didDismiss = ^() {   //block that will be called when the profiles list VC is dismissed. code will move all buttons to where they need to go depending on which profile the user selected

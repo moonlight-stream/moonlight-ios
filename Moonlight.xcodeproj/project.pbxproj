@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		450112CA29563A9600FD306F /* OSCProfile.m in Sources */ = {isa = PBXBuildFile; fileRef = 450112C829563A9600FD306F /* OSCProfile.m */; };
+		4505461229625AF300439FF7 /* OSCProfilesManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4505461129625AF300439FF7 /* OSCProfilesManager.m */; };
 		450B65FF29147AB40057517C /* LayoutOnScreenControlsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 450B65FE29147AB40057517C /* LayoutOnScreenControlsViewController.m */; };
 		450B660529147B120057517C /* LayoutOnScreenControls.m in Sources */ = {isa = PBXBuildFile; fileRef = 450B660429147B120057517C /* LayoutOnScreenControls.m */; };
 		450B660D29147C2A0057517C /* OnScreenButtonState.m in Sources */ = {isa = PBXBuildFile; fileRef = 450B660B29147C2A0057517C /* OnScreenButtonState.m */; };
@@ -174,6 +175,8 @@
 /* Begin PBXFileReference section */
 		450112C829563A9600FD306F /* OSCProfile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OSCProfile.m; sourceTree = "<group>"; };
 		450112C929563A9600FD306F /* OSCProfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSCProfile.h; sourceTree = "<group>"; };
+		4505461029625AF300439FF7 /* OSCProfilesManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OSCProfilesManager.h; sourceTree = "<group>"; };
+		4505461129625AF300439FF7 /* OSCProfilesManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OSCProfilesManager.m; sourceTree = "<group>"; };
 		450B65FD29147AB30057517C /* LayoutOnScreenControlsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LayoutOnScreenControlsViewController.h; sourceTree = "<group>"; };
 		450B65FE29147AB40057517C /* LayoutOnScreenControlsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LayoutOnScreenControlsViewController.m; sourceTree = "<group>"; };
 		450B660329147B110057517C /* LayoutOnScreenControls.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LayoutOnScreenControls.h; sourceTree = "<group>"; };
@@ -598,6 +601,8 @@
 				450B660B29147C2A0057517C /* OnScreenButtonState.m */,
 				450112C929563A9600FD306F /* OSCProfile.h */,
 				450112C829563A9600FD306F /* OSCProfile.m */,
+				4505461029625AF300439FF7 /* OSCProfilesManager.h */,
+				4505461129625AF300439FF7 /* OSCProfilesManager.m */,
 				FB1A674B2131E65900507771 /* KeyboardSupport.h */,
 				FB1A674C2131E65900507771 /* KeyboardSupport.m */,
 				9897B6A0221260EF00966419 /* Controller.m */,
@@ -1115,6 +1120,7 @@
 				FB89463619F646E200339C8A /* StreamFrameViewController.m in Sources */,
 				9827E7A32514366900F25707 /* HapticContext.m in Sources */,
 				9832D1361BBCD5C50036EF48 /* TemporaryApp.m in Sources */,
+				4505461229625AF300439FF7 /* OSCProfilesManager.m in Sources */,
 				450B660529147B120057517C /* LayoutOnScreenControls.m in Sources */,
 				98D585701C0ED0E800F6CC00 /* TemporarySettings.m in Sources */,
 				FB89462819F646E200339C8A /* CryptoManager.m in Sources */,
