@@ -63,7 +63,7 @@
         dPadBackground.position = CGPointMake(self.D_PAD_CENTER_X, self.D_PAD_CENTER_Y);    //since dPadBackgroun's dimensions have change you need to reset its position again here
 
         OSCProfilesManager *profilesManager = [OSCProfilesManager sharedManager];
-        [profilesManager.OSCButtonLayers addObject:dPadBackground];
+        [self.OSCButtonLayers addObject:dPadBackground];
         
         [self._view.layer addSublayer:dPadBackground];
     }
@@ -120,7 +120,7 @@
     
     OSCProfilesManager *profilesManager = [OSCProfilesManager sharedManager];
 
-    for (CALayer *buttonLayer in profilesManager.OSCButtonLayers) {
+    for (CALayer *buttonLayer in self.OSCButtonLayers) {
         
         if ([buttonLayer.name isEqualToString:name]) {
             return buttonLayer;

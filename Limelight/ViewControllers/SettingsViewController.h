@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "AppDelegate.h"
+#import "LayoutOnScreenControlsViewController.h"
 
 @interface SettingsViewController : UIViewController
 @property (strong, nonatomic) IBOutlet UILabel *bitrateLabel;
@@ -16,7 +17,6 @@
 @property (strong, nonatomic) IBOutlet UISegmentedControl *resolutionSelector;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *touchModeSelector;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *onscreenControlSelector;
-@property (weak, nonatomic) IBOutlet UIButton *layoutOnScreenControls;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *optimizeSettingsSelector;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *multiControllerSelector;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *swapABXYButtonsSelector;
@@ -27,6 +27,7 @@
 @property (strong, nonatomic) IBOutlet UISegmentedControl *btMouseSelector;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *statsOverlaySelector;
 @property (strong, nonatomic) IBOutlet UIScrollView *scrollView;
+@property (strong, nonatomic) LayoutOnScreenControlsViewController *layoutOSCVC;
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability"

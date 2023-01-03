@@ -52,6 +52,7 @@ typedef NS_ENUM(NSInteger, OnScreenControlsLevel) {
 @property float D_PAD_CENTER_X;
 @property float D_PAD_CENTER_Y;
 @property OnScreenControlsLevel _level;
+@property NSMutableArray *OSCButtonLayers;
 
 - (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport streamConfig:(StreamConfiguration*)streamConfig;
 - (BOOL) handleTouchDownEvent:(NSSet*)touches;

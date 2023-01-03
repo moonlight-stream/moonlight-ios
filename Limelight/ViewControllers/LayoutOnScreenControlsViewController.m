@@ -204,7 +204,7 @@
     [inputNameAlertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {  //pop up notification with text field where user can enter the text they wish to name their OSC layout profile
         
         textField.placeholder = @"name";
-        textField.textColor = [UIColor blueColor];
+        textField.textColor = [UIColor lightGrayColor];
         textField.clearButtonMode = UITextFieldViewModeWhileEditing;
         textField.borderStyle = UITextBorderStyleNone;
     }];
@@ -245,7 +245,7 @@
             UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [NSString stringWithFormat:@"Another profile with the name '%@' already exists! Do you want to overwrite it?", enteredProfileName] preferredStyle:UIAlertControllerStyleAlert];
             
             [savedAlertController addAction:[UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {    //overwrite existing profile
-                [profilesManager saveOSCProfileWithName: enteredProfileName];
+                [self->profilesManager saveOSCProfileWithName: enteredProfileName andButtonLayersArray:self.layoutOSC.OSCButtonLayers];
             }]];
             
             [savedAlertController addAction:[UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) { //don't overwrite the existing profile
@@ -256,8 +256,8 @@
         }
         else {  //if user entered a valid name that doesn't already exist then save it to persistent storage
             
-            [profilesManager saveOSCProfileWithName: enteredProfileName];
-            [profilesManager setOSCProfileAsSelectedWithName: enteredProfileName];
+            [self->profilesManager saveOSCProfileWithName: enteredProfileName andButtonLayersArray:self.layoutOSC.OSCButtonLayers];
+            [self->profilesManager setOSCProfileAsSelectedWithName: enteredProfileName];
             
             UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [NSString stringWithFormat:@"%@ profile saved and set as your active in-game controller profile layout", enteredProfileName] preferredStyle:UIAlertControllerStyleAlert];
             

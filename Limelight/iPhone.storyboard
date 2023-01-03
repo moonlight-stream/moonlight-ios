@@ -616,7 +616,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="oNu-Gu-QeM">
-                                <rect key="frame" x="266" y="416" width="37" height="32"/>
+                                <rect key="frame" x="266" y="415" width="37" height="32"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinY="YES" flexibleMaxY="YES"/>
                             </activityIndicatorView>
                         </subviews>

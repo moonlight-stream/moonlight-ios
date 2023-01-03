@@ -12,12 +12,13 @@
 
 #import <VideoToolbox/VideoToolbox.h>
 #import <AVFoundation/AVFoundation.h>
-#import "LayoutOnScreenControlsViewController.h"
 
 
 @implementation SettingsViewController {
     NSInteger _bitrate;
     NSInteger _lastSelectedResolutionIndex;
+    NSInteger previouslySelectedSegmentIndex;
+    UITapGestureRecognizer *tapGesture;
 }
 
 @dynamic overrideUserInterfaceStyle;
@@ -261,6 +262,24 @@ BOOL isCustomResolution(CGSize res) {
     [self.bitrateSlider addTarget:self action:@selector(bitrateSliderMoved) forControlEvents:UIControlEventValueChanged];
     [self updateBitrateText];
     [self updateCustomResolutionText];
+    
+    tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(touched:)];
+    [self.onscreenControlSelector addGestureRecognizer:tapGesture];
+    
+    
+    self.layoutOSCVC = [[LayoutOnScreenControlsViewController alloc] init];
+    BOOL isIPhone = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone);
+    if (isIPhone) {
+        
+        UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"iPhone" bundle:nil];
+        self.layoutOSCVC = [storyboard instantiateViewControllerWithIdentifier:@"LayoutOnScreenControlsViewController"];
+    }
+    else {
+        
+        UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"iPad" bundle:nil];
+        self.layoutOSCVC = [storyboard instantiateViewControllerWithIdentifier:@"LayoutOnScreenControlsViewController"];
+        self.layoutOSCVC.modalPresentationStyle = UIModalPresentationFullScreen;
+    }
 }
 
 - (void) touchModeChanged {
@@ -529,9 +548,37 @@ BOOL isCustomResolution(CGSize res) {
             case 3:
                 break;
             case 4:
-                [self presentViewController:vc animated:YES completion:nil];
-            break;
+                [self presentViewController:self.layoutOSCVC animated:YES completion:nil];
+                break;
         }
+}
+
+- (void)touched:(id)sender {
+    
+    // code to check if the segmented controls index has not changed.
+    // execute desired functionality
+    CGPoint point = [tapGesture locationInView:self.onscreenControlSelector];
+    NSUInteger segmentSize = self.onscreenControlSelector.bounds.size.width / self.onscreenControlSelector.numberOfSegments;
+    // Warning: If you are using segments not equally sized, you have to adapt the code in the next line
+    
+    NSUInteger touchedSegment = point.x / segmentSize;
+    if (self.onscreenControlSelector.selectedSegmentIndex != touchedSegment) {
+        
+        // Normal behaviour the segment changes
+        self.onscreenControlSelector.selectedSegmentIndex = touchedSegment;
+        
+    } else {
+        
+        if (self.onscreenControlSelector.selectedSegmentIndex == 4) {
+            
+            [self presentViewController:self.layoutOSCVC animated:YES completion:nil];
+        }
+        
+        // Tap on the already selected segment, I'm switching to No segment selected just to show the effect
+//        self.onscreenControlSelector.selectedSegmentIndex = UISegmentedControlNoSegment;
+    }
+    // You have to call your selector because the UIControlEventValueChanged can't work together with UITapGestureRecognizer
+    [self OSCSegmentedControlsTapped:self.onscreenControlSelector];
 }
 
 @end

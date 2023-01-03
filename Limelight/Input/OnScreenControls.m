@@ -78,6 +78,7 @@
 @synthesize _l2Button;
 @synthesize _l3Button;
 @synthesize _level;
+@synthesize OSCButtonLayers;
 
 static const float EDGE_WIDTH = .05;
 
@@ -123,6 +124,8 @@ static float L3_Y;
     _view = view;
     
     profilesManager = [OSCProfilesManager sharedManager];
+    
+    self.OSCButtonLayers = [[NSMutableArray alloc] init];
 
     if (controllerSupport) {
         _controllerSupport = controllerSupport;
@@ -175,24 +178,24 @@ static float L3_Y;
     [dPadLayersArray addObject:_downButton];
     [dPadLayersArray addObject:_leftButton];
     
-    [profilesManager.OSCButtonLayers addObject:_aButton];
-    [profilesManager.OSCButtonLayers addObject:_bButton];
-    [profilesManager.OSCButtonLayers addObject:_xButton];
-    [profilesManager.OSCButtonLayers addObject:_yButton];
-    [profilesManager.OSCButtonLayers addObject:_startButton];
-    [profilesManager.OSCButtonLayers addObject:_selectButton];
-    [profilesManager.OSCButtonLayers addObject:_r1Button];
-    [profilesManager.OSCButtonLayers addObject:_r2Button];
-    [profilesManager.OSCButtonLayers addObject:_r3Button];
-    [profilesManager.OSCButtonLayers addObject:_l1Button];
-    [profilesManager.OSCButtonLayers addObject:_l2Button];
-    [profilesManager.OSCButtonLayers addObject:_l3Button];
-    [profilesManager.OSCButtonLayers addObject:_upButton];
-    [profilesManager.OSCButtonLayers addObject:_downButton];
-    [profilesManager.OSCButtonLayers addObject:_leftButton];
-    [profilesManager.OSCButtonLayers addObject:_rightButton];
-    [profilesManager.OSCButtonLayers addObject:_leftStickBackground];
-    [profilesManager.OSCButtonLayers addObject:_rightStickBackground];
+    [self.OSCButtonLayers addObject:_aButton];
+    [self.OSCButtonLayers addObject:_bButton];
+    [self.OSCButtonLayers addObject:_xButton];
+    [self.OSCButtonLayers addObject:_yButton];
+    [self.OSCButtonLayers addObject:_startButton];
+    [self.OSCButtonLayers addObject:_selectButton];
+    [self.OSCButtonLayers addObject:_r1Button];
+    [self.OSCButtonLayers addObject:_r2Button];
+    [self.OSCButtonLayers addObject:_r3Button];
+    [self.OSCButtonLayers addObject:_l1Button];
+    [self.OSCButtonLayers addObject:_l2Button];
+    [self.OSCButtonLayers addObject:_l3Button];
+    [self.OSCButtonLayers addObject:_upButton];
+    [self.OSCButtonLayers addObject:_downButton];
+    [self.OSCButtonLayers addObject:_leftButton];
+    [self.OSCButtonLayers addObject:_rightButton];
+    [self.OSCButtonLayers addObject:_leftStickBackground];
+    [self.OSCButtonLayers addObject:_rightStickBackground];
 
     //Name every on screen button to reference them more easily when iterating through the OSC buttons
     _leftStickBackground.name = @"leftStickBackground";
@@ -314,7 +317,7 @@ static float L3_Y;
             
             if ([[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfiles"] == 0) { // No OSC profiles exist yet so create one called 'Default' and associate it Moonlight's legacy 'Full' OSC layout that's already been laid out on the screen at this point
                 
-                [profilesManager saveOSCProfileWithName:@"Default"];
+                [profilesManager saveOSCProfileWithName:@"Default" andButtonLayersArray:nil];
             }
             else {  //User loaded an existing OSC profile so load it and lay it out on screen
                 
@@ -576,7 +579,7 @@ static float L3_Y;
         
         OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateDataObject error:nil];    //decode button state into a useable format
         
-        for (CALayer *buttonLayer in profilesManager.OSCButtonLayers) {    //iterate through each button layer on the screen and position and hide/unhide it accordingly
+        for (CALayer *buttonLayer in self.OSCButtonLayers) {    //iterate through each button layer on the screen and position and hide/unhide it accordingly
             
             if ([buttonLayer.name isEqualToString:onScreenButtonState.name]) {
                 

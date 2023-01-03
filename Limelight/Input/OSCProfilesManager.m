@@ -10,7 +10,6 @@
 
 @implementation OSCProfilesManager
 
-@synthesize OSCButtonLayers;
 
 + (OSCProfilesManager *)sharedManager {
     static OSCProfilesManager *_sharedManager = nil;
@@ -19,14 +18,6 @@
         _sharedManager = [[self alloc] init];
     });
     return _sharedManager;
-}
-
-- (id)init {
-    self = [super init];
-    if (self) {
-        OSCButtonLayers = [[NSMutableArray alloc] init];
-    }
-    return self;
 }
 
 - (OSCProfile *)selectedOSCProfile {
@@ -38,7 +29,6 @@
     OSCProfile *profileDecoded;
     for (NSData *profileEncoded in profilesEncoded) {
         
-        NSError *error;
         profileDecoded = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:profileEncoded error:nil];
         
         if (profileDecoded.isSelected) {
@@ -136,12 +126,12 @@
     return NO;
 }
 
-- (void)saveOSCProfileWithName: (NSString*)name {
+- (void)saveOSCProfileWithName: (NSString*)name andButtonLayersArray:(nonnull NSMutableArray *)buttonLayersArray {
 
     //Get button positions currently on screen and save them to array
     NSMutableArray *OSCButtonStates = [[NSMutableArray alloc] init];    //array will contain 'OnScreenButtonState' objects for OSC button on screen. Each 'buttonState' contains the name, position, hidden state of that button
     
-    for (CALayer *buttonLayer in OSCButtonLayers) {    //iterate through each OSC button the user sees on screen, create an 'OnScreenButtonState' object from each button, and then add the object to an array that will be saved to storage later
+    for (CALayer *buttonLayer in buttonLayersArray) {    //iterate through each OSC button the user sees on screen, create an 'OnScreenButtonState' object from each button, and then add the object to an array that will be saved to storage later
 
         OnScreenButtonState *onScreenButtonState = [[OnScreenButtonState alloc] initWithButtonName:buttonLayer.name  isHidden:buttonLayer.isHidden andPosition:buttonLayer.position];
         [OSCButtonStates addObject:onScreenButtonState];
