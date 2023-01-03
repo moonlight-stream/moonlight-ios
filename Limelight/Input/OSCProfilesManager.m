@@ -12,15 +12,6 @@
 
 @synthesize OSCButtonLayers;
 
-- (id)init {
-    self = [super init];
-    if (self) {
-        OSCButtonLayers = [[NSMutableArray alloc] init];
-    }
-    return self;
-}
-
-
 + (OSCProfilesManager *)sharedManager {
     static OSCProfilesManager *_sharedManager = nil;
     static dispatch_once_t onceToken;
@@ -28,6 +19,14 @@
         _sharedManager = [[self alloc] init];
     });
     return _sharedManager;
+}
+
+- (id)init {
+    self = [super init];
+    if (self) {
+        OSCButtonLayers = [[NSMutableArray alloc] init];
+    }
+    return self;
 }
 
 - (OSCProfile *)selectedOSCProfile {
@@ -39,6 +38,7 @@
     OSCProfile *profileDecoded;
     for (NSData *profileEncoded in profilesEncoded) {
         
+        NSError *error;
         profileDecoded = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:profileEncoded error:nil];
         
         if (profileDecoded.isSelected) {

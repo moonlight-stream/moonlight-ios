@@ -23,7 +23,6 @@
     CALayer *downButton;
     CALayer *leftButton;
     CALayer *rightButton;
-    OSCProfilesManager *profilesManager;
 }
 
 @synthesize layerCurrentlyBeingTouched;
@@ -46,9 +45,7 @@
     [self addDPadButtonsToDPadBackgroundLayer];
           
     layoutChanges = [[NSMutableArray alloc] init];  //will contain OSC button layout changes the user has made for this profile
-    
-    profilesManager = [OSCProfilesManager sharedManager];
-    
+        
     return self;
 }
 
@@ -65,6 +62,7 @@
                                           self._leftButton.frame.size.height * 3);
         dPadBackground.position = CGPointMake(self.D_PAD_CENTER_X, self.D_PAD_CENTER_Y);    //since dPadBackgroun's dimensions have change you need to reset its position again here
 
+        OSCProfilesManager *profilesManager = [OSCProfilesManager sharedManager];
         [profilesManager.OSCButtonLayers addObject:dPadBackground];
         
         [self._view.layer addSublayer:dPadBackground];
@@ -120,6 +118,8 @@
 /* returns reference to button layer object given the button's name*/
 - (CALayer*)buttonLayerFromName: (NSString*)name {
     
+    OSCProfilesManager *profilesManager = [OSCProfilesManager sharedManager];
+
     for (CALayer *buttonLayer in profilesManager.OSCButtonLayers) {
         
         if ([buttonLayer.name isEqualToString:name]) {

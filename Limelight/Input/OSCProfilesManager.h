@@ -13,11 +13,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface OSCProfilesManager : NSObject
 
-+ (OSCProfilesManager *)sharedManager;
 @property (nonatomic, strong) NSMutableArray *OSCButtonLayers;
 
++ (OSCProfilesManager *)sharedManager;
 - (OSCProfile *)selectedOSCProfile;
-- (void) setOSCProfileAsSelectedWithName: (NSString *)name;
+- (void)setOSCProfileAsSelectedWithName: (NSString *)name;
 - (NSData *)OSCProfileWithName: (NSString*)name;
 - (BOOL)profileNameAlreadyExist: (NSString*)name;
 - (void)saveOSCProfileWithName: (NSString*)name;

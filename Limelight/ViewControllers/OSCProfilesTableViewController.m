@@ -132,7 +132,7 @@ const double NAV_BAR_HEIGHT = 50;
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    if ([self.OSCProfiles[indexPath.row] isEqualToString:@"Default"]) {   //If user is attempting to delete the 'Default' profile then show a pop up telling user they can't do that
+    if ([[self.OSCProfiles[indexPath.row] name] isEqualToString:@"Default"]) {   //If user is attempting to delete the 'Default' profile then show a pop up telling user they can't do that
         
         UIAlertController * alertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: @"Deleting the 'Default' profile is not allowed" preferredStyle:UIAlertControllerStyleAlert];
         
@@ -160,7 +160,14 @@ const double NAV_BAR_HEIGHT = 50;
         
         [self.OSCProfiles removeObjectAtIndex:indexPath.row];
         
-        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:self.OSCProfiles requiringSecureCoding:YES error:nil];
+        NSMutableArray *profilesEncoded = [[NSMutableArray alloc] init];
+        for (OSCProfile *profileDecoded in self.OSCProfiles) {
+            
+            NSData *profileEncoded = [NSKeyedArchiver archivedDataWithRootObject:profileDecoded requiringSecureCoding:YES error:nil];
+            [profilesEncoded addObject:profileEncoded];
+        }
+        
+        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:profilesEncoded requiringSecureCoding:YES error:nil];
         
         [[NSUserDefaults standardUserDefaults] setObject:data forKey:@"OSCProfiles"];
         [[NSUserDefaults standardUserDefaults] synchronize];
