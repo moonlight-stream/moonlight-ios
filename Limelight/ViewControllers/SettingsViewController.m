@@ -263,22 +263,22 @@ BOOL isCustomResolution(CGSize res) {
     [self updateBitrateText];
     [self updateCustomResolutionText];
     
-    tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(touched:)];
+    tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(OSCSegmentControlTouched:)];  // detects when OSC segmented control button is re-selected
     [self.onscreenControlSelector addGestureRecognizer:tapGesture];
-    
-    
-    self.layoutOSCVC = [[LayoutOnScreenControlsViewController alloc] init];
+
+    /* set reference to modal view controller which lets user layout OSC */
+    self.layoutOnScreenControlsVC = [[LayoutOnScreenControlsViewController alloc] init];
     BOOL isIPhone = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone);
     if (isIPhone) {
         
         UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"iPhone" bundle:nil];
-        self.layoutOSCVC = [storyboard instantiateViewControllerWithIdentifier:@"LayoutOnScreenControlsViewController"];
+        self.layoutOnScreenControlsVC = [storyboard instantiateViewControllerWithIdentifier:@"LayoutOnScreenControlsViewController"];
     }
     else {
         
         UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"iPad" bundle:nil];
-        self.layoutOSCVC = [storyboard instantiateViewControllerWithIdentifier:@"LayoutOnScreenControlsViewController"];
-        self.layoutOSCVC.modalPresentationStyle = UIModalPresentationFullScreen;
+        self.layoutOnScreenControlsVC = [storyboard instantiateViewControllerWithIdentifier:@"LayoutOnScreenControlsViewController"];
+        self.layoutOnScreenControlsVC.modalPresentationStyle = UIModalPresentationFullScreen;
     }
 }
 
@@ -548,37 +548,33 @@ BOOL isCustomResolution(CGSize res) {
             case 3:
                 break;
             case 4:
-                [self presentViewController:self.layoutOSCVC animated:YES completion:nil];
+                [self presentViewController:self.layoutOnScreenControlsVC animated:YES completion:nil];
                 break;
         }
 }
 
-- (void)touched:(id)sender {
-    
-    // code to check if the segmented controls index has not changed.
-    // execute desired functionality
+/* Used to detect when user taps on an on screen control UISegmentedControl button, even if that button is already selected */
+- (void)OSCSegmentControlTouched:(id)sender {
+
     CGPoint point = [tapGesture locationInView:self.onscreenControlSelector];
     NSUInteger segmentSize = self.onscreenControlSelector.bounds.size.width / self.onscreenControlSelector.numberOfSegments;
-    // Warning: If you are using segments not equally sized, you have to adapt the code in the next line
     
-    NSUInteger touchedSegment = point.x / segmentSize;
-    if (self.onscreenControlSelector.selectedSegmentIndex != touchedSegment) {
+    
+    NSUInteger touchedSegment = point.x / segmentSize;  // Warning: If you are using segments not equally sized, you have to adapt the code here
+    
+    if (self.onscreenControlSelector.selectedSegmentIndex != touchedSegment) {  // normal behavior, button is selected
         
-        // Normal behaviour the segment changes
         self.onscreenControlSelector.selectedSegmentIndex = touchedSegment;
         
-    } else {
+    } else {    //  already selected button is tapped again
         
         if (self.onscreenControlSelector.selectedSegmentIndex == 4) {
             
-            [self presentViewController:self.layoutOSCVC animated:YES completion:nil];
+            [self presentViewController:self.layoutOnScreenControlsVC animated:YES completion:nil];
         }
-        
-        // Tap on the already selected segment, I'm switching to No segment selected just to show the effect
-//        self.onscreenControlSelector.selectedSegmentIndex = UISegmentedControlNoSegment;
     }
-    // You have to call your selector because the UIControlEventValueChanged can't work together with UITapGestureRecognizer
-    [self OSCSegmentedControlsTapped:self.onscreenControlSelector];
+    
+    [self OSCSegmentedControlsTapped:self.onscreenControlSelector]; // must call your selector because the UIControlEventValueChanged can't work together with UITapGestureRecognizer
 }
 
 @end
