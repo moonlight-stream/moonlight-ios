@@ -96,9 +96,6 @@
     _spinner = [[UIActivityIndicatorView alloc] init];
     [_spinner setUserInteractionEnabled:NO];
     
-    //DELETE ME
-//    [self connectionStarted];
-    
 #if TARGET_OS_TV
     [_spinner setActivityIndicatorViewStyle:UIActivityIndicatorViewStyleWhiteLarge];
 #else

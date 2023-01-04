@@ -48,7 +48,6 @@ typedef NS_ENUM(NSInteger, OnScreenControlsLevel) {
 @property CALayer* _leftStick;
 @property CALayer* _rightStickBackground;
 @property CALayer* _rightStick;
-@property NSMutableArray *dPadLayersArray;
 @property float D_PAD_CENTER_X;
 @property float D_PAD_CENTER_Y;
 @property OnScreenControlsLevel _level;

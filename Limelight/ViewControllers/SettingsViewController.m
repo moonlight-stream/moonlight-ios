@@ -548,7 +548,11 @@ BOOL isCustomResolution(CGSize res) {
             case 3:
                 break;
             case 4:
-                [self presentViewController:self.layoutOnScreenControlsVC animated:YES completion:nil];
+
+                if (self.layoutOnScreenControlsVC.isBeingPresented == NO) {
+                    
+                    [self presentViewController:self.layoutOnScreenControlsVC animated:YES completion:nil];
+                }
                 break;
         }
 }
@@ -570,7 +574,10 @@ BOOL isCustomResolution(CGSize res) {
         
         if (self.onscreenControlSelector.selectedSegmentIndex == 4) {
             
-            [self presentViewController:self.layoutOnScreenControlsVC animated:YES completion:nil];
+            if (self.layoutOnScreenControlsVC.isBeingPresented == NO) {
+                
+                [self presentViewController:self.layoutOnScreenControlsVC animated:YES completion:nil];
+            }
         }
     }
     

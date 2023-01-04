@@ -26,7 +26,6 @@ const double NAV_BAR_HEIGHT = 50;
 }
 
 @synthesize tableView;
-@synthesize OSCProfiles;
 
 - (void)viewDidLoad {
     
@@ -41,30 +40,16 @@ const double NAV_BAR_HEIGHT = 50;
     
     // Register the nib file with the table view
     [self.tableView registerNib:[UINib nibWithNibName:@"ProfileTableViewCell" bundle:nil] forCellReuseIdentifier:@"Cell"];
-    
-    self.OSCProfiles = [[NSMutableArray alloc] init];
-
-    NSData *encodedProfiles = [[NSUserDefaults standardUserDefaults] objectForKey: @"OSCProfiles"];
-    NSSet *classes = [NSSet setWithObjects:[NSString class], [NSMutableData class], [NSMutableArray class], [OSCProfile class], [OnScreenButtonState class], nil];
-    NSError *error;
-    NSMutableArray *profilesEncoded = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:encodedProfiles error: &error];
-    
-    OSCProfile *profileDecoded;
-    for (NSData *profileEncoded in profilesEncoded) {
-        
-        profileDecoded = [NSKeyedUnarchiver unarchivedObjectOfClasses: classes fromData:profileEncoded error: nil];
-        [self.OSCProfiles addObject: profileDecoded];
-    }
 }
 
 - (void)viewDidAppear:(BOOL)animated {
     
     [super viewDidAppear: animated];
     
-    if ([self.OSCProfiles count] > 0) { //scroll to selected profile if user has any saved profiles
+    if ([[profilesManager profilesDecoded] count] > 0) { //scroll to selected profile if user has any saved profiles
         
-        OSCProfile *selectedOSCProfile = [profilesManager selectedOSCProfile];
-        NSUInteger index = [self.OSCProfiles indexOfObject:selectedOSCProfile];
+        OSCProfile *selectedOSCProfile = [profilesManager selectedProfile];
+        NSUInteger index = [[profilesManager profilesDecoded] indexOfObject:selectedOSCProfile];
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
         [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
     }
@@ -74,10 +59,10 @@ const double NAV_BAR_HEIGHT = 50;
 
 - (IBAction)loadTapped:(id)sender {
     
-    if ([self.OSCProfiles count] > 0) {
+    if ([[profilesManager profilesDecoded] count] > 0) {
         
-        OSCProfile *profile = [self.OSCProfiles objectAtIndex:selectedIndexPath.row];
-        [profilesManager setOSCProfileAsSelectedWithName: profile.name];
+        OSCProfile *profile = [[profilesManager profilesDecoded] objectAtIndex:selectedIndexPath.row];
+        [profilesManager setProfileWithNameAsSelected: profile.name];
     }
     
     [self dismissViewControllerAnimated:YES completion:nil];
@@ -91,7 +76,7 @@ const double NAV_BAR_HEIGHT = 50;
     
     [self dismissViewControllerAnimated:YES completion:nil];
     
-    if ([self.OSCProfiles count] == 0) {    //if user deleted all profiles this will create another 'Default' profile with Moonlight's legacy 'Full' OSC layout
+    if ([[profilesManager profilesDecoded] count] == 0) {    //if user deleted all profiles this will create another 'Default' profile with Moonlight's legacy 'Full' OSC layout
         
         if (self.didDismiss) {
             self.didDismiss();
@@ -103,16 +88,16 @@ const double NAV_BAR_HEIGHT = 50;
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     
-    return [self.OSCProfiles count];
+    return [[profilesManager profilesDecoded] count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     ProfileTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
-    OSCProfile *profile = self.OSCProfiles[indexPath.row];
+    OSCProfile *profile = [profilesManager.profilesDecoded objectAtIndex: indexPath.row];
     cell.name.text = profile.name;
     
-    if ([profile.name isEqualToString: [profilesManager selectedOSCProfile].name]) { //if this cell contains the name of the currently selected OSC profile then add a checkmark to the right side of the cell
+    if ([profile.name isEqualToString: [profilesManager selectedProfile].name]) { //if this cell contains the name of the currently selected OSC profile then add a checkmark to the right side of the cell
         
         cell.accessoryType = UITableViewCellAccessoryCheckmark;
         selectedIndexPath = indexPath;  //keeps track of which cell contains the currently selected OSC profile
@@ -132,7 +117,7 @@ const double NAV_BAR_HEIGHT = 50;
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    if ([[self.OSCProfiles[indexPath.row] name] isEqualToString:@"Default"]) {   //If user is attempting to delete the 'Default' profile then show a pop up telling user they can't do that
+    if ([[[[profilesManager profilesDecoded] objectAtIndex:indexPath.row] name] isEqualToString:@"Default"]) {   //If user is attempting to delete the 'Default' profile then show a pop up telling user they can't do that
         
         UIAlertController * alertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: @"Deleting the 'Default' profile is not allowed" preferredStyle:UIAlertControllerStyleAlert];
         
@@ -147,21 +132,21 @@ const double NAV_BAR_HEIGHT = 50;
     
     if (editingStyle == UITableViewCellEditingStyleDelete) {
 
-        OSCProfile *profile = [self.OSCProfiles objectAtIndex:indexPath.row];
+        OSCProfile *profile = [[profilesManager profilesDecoded] objectAtIndex:indexPath.row];
         
         if (profile.isSelected) {   //if user is deleting the currently selected OSC profile then make the  profile at its previous index the currently selected OSC profile
             
             if (indexPath.row > 0) {    //user shouldn't be able to delete the cell at row 0 because that row contains the 'Default' profile which we check for above, but just in case they're able to add this to avoid an app crash
                 
-                OSCProfile *profile = [self.OSCProfiles objectAtIndex:indexPath.row - 1];
+                OSCProfile *profile = [[profilesManager profilesDecoded] objectAtIndex:indexPath.row - 1];
                 profile.isSelected = YES;
             }
         }
         
-        [self.OSCProfiles removeObjectAtIndex:indexPath.row];
+        [[profilesManager profilesDecoded] removeObjectAtIndex:indexPath.row];
         
         NSMutableArray *profilesEncoded = [[NSMutableArray alloc] init];
-        for (OSCProfile *profileDecoded in self.OSCProfiles) {
+        for (OSCProfile *profileDecoded in [profilesManager profilesDecoded]) {
             
             NSData *profileEncoded = [NSKeyedArchiver archivedDataWithRootObject:profileDecoded requiringSecureCoding:YES error:nil];
             [profilesEncoded addObject:profileEncoded];
@@ -193,8 +178,8 @@ const double NAV_BAR_HEIGHT = 50;
 
         selectedIndexPath = indexPath;
         
-        OSCProfile *profile = self.OSCProfiles[indexPath.row];
-        [profilesManager setOSCProfileAsSelectedWithName: profile.name];
+        OSCProfile *profile = [[profilesManager profilesDecoded] objectAtIndex:indexPath.row];
+        [profilesManager setProfileWithNameAsSelected: profile.name];
     }
 
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
