@@ -257,7 +257,7 @@
         else {  //if user entered a valid name that doesn't already exist then save it to persistent storage
             
             [self->profilesManager saveProfileWithName: enteredProfileName andButtonLayers:self.layoutOSC.OSCButtonLayers];
-            [self->profilesManager setProfileWithNameAsSelected: enteredProfileName];
+            [self->profilesManager setProfileToSelected: enteredProfileName];
             
             UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [NSString stringWithFormat:@"%@ profile saved and set as your active in-game controller profile layout", enteredProfileName] preferredStyle:UIAlertControllerStyleAlert];
             

@@ -62,7 +62,7 @@ const double NAV_BAR_HEIGHT = 50;
     if ([[profilesManager profilesDecoded] count] > 0) {
         
         OSCProfile *profile = [[profilesManager profilesDecoded] objectAtIndex:selectedIndexPath.row];
-        [profilesManager setProfileWithNameAsSelected: profile.name];
+        [profilesManager setProfileToSelected: profile.name];
     }
     
     [self dismissViewControllerAnimated:YES completion:nil];
@@ -179,7 +179,7 @@ const double NAV_BAR_HEIGHT = 50;
         selectedIndexPath = indexPath;
         
         OSCProfile *profile = [[profilesManager profilesDecoded] objectAtIndex:indexPath.row];
-        [profilesManager setProfileWithNameAsSelected: profile.name];
+        [profilesManager setProfileToSelected: profile.name];
     }
 
     [tableView deselectRowAtIndexPath:indexPath animated:YES];

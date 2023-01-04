@@ -10,12 +10,12 @@
 
 @implementation OnScreenButtonState
 
-+ (BOOL)supportsSecureCoding
++ (BOOL) supportsSecureCoding
 {
     return YES;
 }
 
-- (id)initWithButtonName:(NSString*)name isHidden:(BOOL)isHidden andPosition:(CGPoint) position {
+- (id) initWithButtonName:(NSString*)name isHidden:(BOOL)isHidden andPosition:(CGPoint)position {
 
     if ((self = [self init])) {
         
@@ -27,13 +27,13 @@
     return self;
 }
 
-- (void)encodeWithCoder: (NSCoder*) encoder {
+- (void) encodeWithCoder:(NSCoder*)encoder {
     [encoder encodeObject:self.name forKey:@"name"];
     [encoder encodeBool:self.isHidden forKey:@"isHidden"];
     [encoder encodeCGPoint:self.position forKey:@"position"];
 }
 
-- (id)initWithCoder:(NSCoder*) decoder {
+- (id) initWithCoder:(NSCoder*)decoder {
     
     if (self = [super init]) {
         

@@ -58,11 +58,11 @@ typedef NS_ENUM(NSInteger, OnScreenControlsLevel) {
 - (BOOL) handleTouchUpEvent:(NSSet*)touches;
 - (BOOL) handleTouchMovedEvent:(NSSet*)touches;
 - (void) setLevel:(OnScreenControlsLevel)level;
-- (OnScreenControlsLevel) getLevel;
 - (void) show;
 - (void) setupComplexControls;
 - (void) drawButtons;
 - (void) layoutOSC;
 - (void) updateControls;
+- (OnScreenControlsLevel) getLevel;
 
 @end

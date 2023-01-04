@@ -12,7 +12,7 @@
 
 #pragma mark - Initializer
 
-+ (OSCProfilesManager *)sharedManager {
++ (OSCProfilesManager *) sharedManager {
     static OSCProfilesManager *_sharedManager = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -24,9 +24,10 @@
 
 #pragma mark - Class Helper Methods
 
-/* Returns the OSCProfile with the given name*/
-- (NSData *)OSCProfileWithName: (NSString*)name {
-    
+/**
+ * Returns the encoded OSCProfile object with the given name
+ */
+- (NSData *) OSCProfileWithName:(NSString*)name {
     NSData *encodedProfiles = [[NSUserDefaults standardUserDefaults] objectForKey: @"OSCProfiles"];
     NSSet *classes = [NSSet setWithObjects:[NSString class], [NSMutableData class], [NSMutableArray class], [OSCProfile class], [OnScreenButtonState class], nil];
     NSMutableArray *profilesEncoded = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:encodedProfiles error: nil];
@@ -37,7 +38,6 @@
         profileDecoded = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:profile error:nil];
         
         if ([profileDecoded.name isEqualToString:name]) {
-            
             NSData *profileEncoded = [NSKeyedArchiver archivedDataWithRootObject:profileDecoded requiringSecureCoding:YES error:nil];
             
             return profileEncoded;
@@ -47,8 +47,10 @@
     return nil;
 }
 
-- (void)replaceProfile: (NSData*)oldProfile withProfile: (NSData*)newProfile {
-    
+/**
+ * Replaces a profile object with another profile object in the OSCProfiles array
+ */
+- (void) replaceProfile:(NSData*)oldProfile withProfile:(NSData*)newProfile {
     NSData *encodedProfiles = [[NSUserDefaults standardUserDefaults] objectForKey: @"OSCProfiles"];
     NSSet *classes = [NSSet setWithObjects:[NSString class], [NSMutableData class], [NSMutableArray class], [OSCProfile class], [OnScreenButtonState class], nil];
     NSMutableArray *profilesEncoded = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:encodedProfiles error: nil];
@@ -94,6 +96,9 @@
 
 #pragma mark - Globally Accessible Methods
 
+/**
+ * Returns OSC Profile that is currently selected to be displayed during game streaming
+ */
 - (OSCProfile *)selectedProfile {
     
     NSData *encodedProfiles = [[NSUserDefaults standardUserDefaults] objectForKey: @"OSCProfiles"];
@@ -114,7 +119,10 @@
     return nil;
 }
 
-- (void) setProfileWithNameAsSelected: (NSString *)name {
+/**
+ * Sets the profile object with 'name' as the selected profile to be displayed during game streaming
+ */
+- (void) setProfileToSelected:(NSString *)name {
     
     NSData *encodedProfiles = [[NSUserDefaults standardUserDefaults] objectForKey: @"OSCProfiles"];
     NSSet *classes = [NSSet setWithObjects:[NSString class], [NSMutableData class], [NSMutableArray class], [OSCProfile class], [OnScreenButtonState class], nil];
@@ -152,7 +160,10 @@
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
-- (BOOL)profileNameAlreadyExist: (NSString*)name {
+/**
+ * Lets caller know whether a profile with a given name already exists
+ */
+- (BOOL) profileNameAlreadyExist:(NSString*)name {
     
     NSData *encodedProfiles = [[NSUserDefaults standardUserDefaults] objectForKey: @"OSCProfiles"];
     NSSet *classes = [NSSet setWithObjects:[NSString class], [NSMutableData class], [NSMutableArray class], [OSCProfile class], [OnScreenButtonState class], nil];
@@ -177,7 +188,10 @@
     return NO;
 }
 
-- (void)saveProfileWithName: (NSString*)name andButtonLayers:(nonnull NSMutableArray *)buttonLayers {
+/**
+ * Saves a profile object with a 'name' and an array of buttonLayers
+ */
+- (void)saveProfileWithName:(NSString*)name andButtonLayers:(NSMutableArray *)buttonLayers {
 
     //Get button positions currently on screen and save them to array
     NSMutableArray *OSCButtonStates = [[NSMutableArray alloc] init];    //array will contain 'OnScreenButtonState' objects for OSC button on screen. Each 'buttonState' contains the name, position, hidden state of that button
@@ -241,6 +255,9 @@
     }
 }
 
+/**
+ * Returns an array of decoded profile objects in an
+ */
 - (NSMutableArray *)profilesDecoded {
     
     NSData *encodedProfiles = [[NSUserDefaults standardUserDefaults] objectForKey: @"OSCProfiles"];

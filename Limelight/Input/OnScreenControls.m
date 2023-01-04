@@ -313,10 +313,9 @@ static float L3_Y;
             else {  //User loaded an existing OSC profile so load it and lay it out on screen
                 [self layoutOSC];
             }
-            
             [self setAnalogStickPositions];
             
-            if ([_upButton.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //if user is on the OSC layout screen then hide dPad up, down, left, right buttons, since LayoutOnScreenControlsViewController draws its own dPad buttons
+            if ([_upButton.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //if user is on the OSC layout screen then remove the dPad's up, down, left, right buttons, since LayoutOnScreenControlsViewController draws its own dPad buttons
                 [self hideDPadButtons];
             }
             break;
@@ -530,7 +529,7 @@ static float L3_Y;
 - (void) setAnalogStickPositions {
     OSCProfile *oscProfile = [profilesManager selectedProfile]; 
     
-    for (NSData *buttonStateDataObject in oscProfile.buttonStates) {
+    for (NSData *buttonStateDataObject in oscProfile.buttonStates) {    //  iterate through each button associated with the currently selected OSC profile and set the analog stick positions and hide/unhide them accordingly
         OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateDataObject error:nil];
         
         if ([onScreenButtonState.name isEqualToString:@"leftStickBackground"]) {
@@ -564,23 +563,24 @@ static float L3_Y;
     OSCProfile *oscProfile = [profilesManager selectedProfile];
     
     for (NSData *buttonStateDataObject in oscProfile.buttonStates) {
-        OnScreenButtonState *onScreenButtonStateDecoded = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateDataObject error:nil];        
-        for (CALayer *buttonLayer in self.OSCButtonLayers) {    //iterate through each button layer on the screen and position and hide/unhide it accordingly
+        
+        OnScreenButtonState *buttonStateDecoded = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateDataObject error:nil];        
+        for (CALayer *buttonLayer in self.OSCButtonLayers) {    //iterate through each button layer on screen and position and hide/unhide each accordingly
             
-            if ([buttonLayer.name isEqualToString:onScreenButtonStateDecoded.name]) {
+            if ([buttonLayer.name isEqualToString:buttonStateDecoded.name]) {
                 
                 if ([buttonLayer.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //if user is on the OSC layout screen then position ALL buttons including the dPad background and dPad buttons to the user's desired position
                     
-                    buttonLayer.position = onScreenButtonStateDecoded.position;
-                    buttonLayer.hidden = onScreenButtonStateDecoded.isHidden;
+                    buttonLayer.position = buttonStateDecoded.position;
+                    buttonLayer.hidden = buttonStateDecoded.isHidden;
                 }
                 else if ([buttonLayer.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"] == NO
                          && [buttonLayer.name isEqualToString:@"upButton"] == NO
                          && [buttonLayer.name isEqualToString:@"rightButton"] == NO
                          && [buttonLayer.name isEqualToString:@"downButton"] == NO
                          && [buttonLayer.name isEqualToString:@"leftButton"] == NO) {    //if user is on the game streaming screen, then move all buttons EXCEPT the dPad buttons to user's desired position since the dPad buttons have already been positioned appropriately on the game stream view by this point
-                    buttonLayer.position = onScreenButtonStateDecoded.position;
-                    buttonLayer.hidden = onScreenButtonStateDecoded.isHidden;
+                    buttonLayer.position = buttonStateDecoded.position;
+                    buttonLayer.hidden = buttonStateDecoded.isHidden;
                 }
             }
         }
@@ -684,7 +684,6 @@ static float L3_Y;
 }
 
 - (void)hideDPadButtons {
-    
     [_upButton removeFromSuperlayer];
     [_downButton removeFromSuperlayer];
     [_leftButton removeFromSuperlayer];

@@ -16,10 +16,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property CGPoint position;
 @property BOOL isHidden;
 
-- (id)initWithButtonName:(NSString*)name isHidden:(BOOL)isHidden andPosition:(CGPoint) position;
-- (void)encodeWithCoder: (NSCoder*) encoder;
-- (id)initWithCoder:(NSCoder*) decoder;
-+ (BOOL)supportsSecureCoding;
+- (id) initWithButtonName:(NSString*)name isHidden:(BOOL)isHidden andPosition:(CGPoint)position;
+- (void) encodeWithCoder: (NSCoder*) encoder;
+- (id) initWithCoder:(NSCoder*) decoder;
++ (BOOL) supportsSecureCoding;
 
 @end
 

@@ -17,10 +17,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property NSMutableArray <OnScreenButtonState *> *buttonStates;
 @property BOOL isSelected;
 
-- (id)initWithName: (NSString*)name buttonStates: (NSMutableArray*)buttonStates isSelected: (BOOL)isSelected;
-- (void)encodeWithCoder: (NSCoder*) encoder;
-- (id)initWithCoder:(NSCoder*) decoder;
-+ (BOOL)supportsSecureCoding;
+- (id) initWithName:(NSString*)name buttonStates:(NSMutableArray*)buttonStates
+        isSelected:(BOOL)isSelected;
+- (id) initWithCoder:(NSCoder*)decoder;
+- (void) encodeWithCoder:(NSCoder*)encoder;
++ (BOOL) supportsSecureCoding;
 
 @end
 
