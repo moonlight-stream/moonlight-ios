@@ -16,13 +16,15 @@
 @end
 
 @implementation LayoutOnScreenControls {
-    
-    CALayer *dPadBackground;    //will contain each individual dPad button so user can drag them around the screen together
-    UIButton *trashCanButton;
+        
+    CALayer *dPadBackground;    //parent layer that contains each individual dPad button so user can drag them around the screen together
     CALayer *upButton;
     CALayer *downButton;
     CALayer *leftButton;
     CALayer *rightButton;
+    
+    UIButton *trashCanButton;
+
 }
 
 @synthesize layerCurrentlyBeingTouched;
@@ -30,7 +32,6 @@
 @synthesize layoutChanges;
 
 - (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport streamConfig:(StreamConfiguration*)streamConfig oscLevel:(int)oscLevel {
-    
     _view = view;
     _view.multipleTouchEnabled = false;
   

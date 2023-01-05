@@ -16,12 +16,16 @@ NS_ASSUME_NONNULL_BEGIN
 @property NSMutableArray *layoutChanges;
 @property CALayer *layerCurrentlyBeingTouched;
 
-- (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport streamConfig:(StreamConfiguration*)streamConfig oscLevel:(int)oscLevel;
-- (CALayer*)buttonLayerFromName: (NSString*)name;
-- (BOOL)isLayer:(CALayer*)layer hoveringOverButton: (UIButton*)button;
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event;
-- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event;
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event;
+- (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport
+       streamConfig:(StreamConfiguration*)streamConfig oscLevel:(int)oscLevel;
+
+- (CALayer*) buttonLayerFromName:(NSString*)name;
+- (BOOL) isLayer:(CALayer*)layer hoveringOverButton:(UIButton*)button;
+
+- (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event;
+- (void) touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event;
+- (void) touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -16,28 +16,35 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (OSCProfilesManager *) sharedManager;
 
+#pragma mark - Getters
 /**
  * Returns OSC Profile that is currently selected to be displayed on screen during game streaming
  */
-- (OSCProfile *) selectedProfile;
+- (OSCProfile *) getSelectedProfile;
+
 
 /**
- * Returns an array of decoded profile objects in an
+ * Returns an array of decoded profile objects
  */
-- (NSMutableArray *) profilesDecoded;
+- (NSMutableArray *) getProfiles;
 
+
+#pragma mark - Setters
 /**
- * Sets the profile object with 'name' as the selected profile to be displayed on screen during game streaming
+ * Sets the profile object that has a particular 'name' as the selected profile to be displayed on screen during game streaming
  */
 - (void) setProfileToSelected:(NSString *)name;
 
+
 /**
- * Saves a profile object with a 'name' and an array of buttonLayers to persistent storage
+ * Saves a profile object that has a particular 'name' and an array of button layers (usually the button layers currently visible on screen during game streaming or the OSC layout customization view) to persistent storage
  */
 - (void) saveProfileWithName:(NSString*)name andButtonLayers:(NSMutableArray *)buttonLayers;
 
+
+#pragma mark - Queries
 /**
- * Lets caller know whether a profile with a given name already exists
+ * Lets the caller of this method know whether a profile with a given name already exists in persistent storage
  */
 - (BOOL) profileNameAlreadyExist:(NSString*)name;
 

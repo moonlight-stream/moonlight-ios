@@ -307,7 +307,7 @@ static float L3_Y;
             [self drawTriggers];
             [self drawSticks];
             
-            if ([[profilesManager profilesDecoded] count] == 0) { // No OSC profiles exist yet so create one called 'Default' and associate it Moonlight's legacy 'Full' OSC layout that's already been laid out on the screen at this point
+            if ([[profilesManager getProfiles] count] == 0) { // No OSC profiles exist yet so create one called 'Default' and associate it Moonlight's legacy 'Full' OSC layout that's already been laid out on the screen at this point
                 [profilesManager saveProfileWithName:@"Default" andButtonLayers:nil];
             }
             else {  //User loaded an existing OSC profile so load it and lay it out on screen
@@ -511,7 +511,7 @@ static float L3_Y;
  * Sets D-Pad position for class var
  */
 - (void) setDPadCenter {
-    OSCProfile *oscProfile = [profilesManager selectedProfile]; //returns the currently selected OSCProfile
+    OSCProfile *oscProfile = [profilesManager getSelectedProfile]; //returns the currently selected OSCProfile
     
     for (NSData *buttonStateDataObject in oscProfile.buttonStates) {
         OnScreenButtonState *buttonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateDataObject error:nil];
@@ -527,7 +527,7 @@ static float L3_Y;
  * Positions the analog stick layers according to the OSC layout profile's directions
  */
 - (void) setAnalogStickPositions {
-    OSCProfile *oscProfile = [profilesManager selectedProfile]; 
+    OSCProfile *oscProfile = [profilesManager getSelectedProfile]; 
     
     for (NSData *buttonStateDataObject in oscProfile.buttonStates) {    //  iterate through each button associated with the currently selected OSC profile and set the analog stick positions and hide/unhide them accordingly
         OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateDataObject error:nil];
@@ -560,7 +560,7 @@ static float L3_Y;
  * Loads the OSC profile the user selected and lays out each button associated with the profile onto the screen
  */
 - (void) layoutOSC {
-    OSCProfile *oscProfile = [profilesManager selectedProfile];
+    OSCProfile *oscProfile = [profilesManager getSelectedProfile];
     
     for (NSData *buttonStateDataObject in oscProfile.buttonStates) {
         
