@@ -307,7 +307,7 @@ static float L3_Y;
             [self drawTriggers];
             [self drawSticks];
             
-            if ([[profilesManager getProfiles] count] == 0) { // No OSC profiles exist yet so create one called 'Default' and associate it Moonlight's legacy 'Full' OSC layout that's already been laid out on the screen at this point
+            if ([[profilesManager getAllProfiles] count] == 0) { // No OSC profiles exist yet so create one called 'Default' and associate it Moonlight's legacy 'Full' OSC layout that's already been laid out on the screen at this point
                 [profilesManager saveProfileWithName:@"Default" andButtonLayers:nil];
             }
             else {  //User loaded an existing OSC profile so load it and lay it out on screen

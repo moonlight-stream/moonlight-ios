@@ -26,7 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Returns an array of decoded profile objects
  */
-- (NSMutableArray *) getProfiles;
+- (NSMutableArray *) getAllProfiles;
 
 
 #pragma mark - Setters

@@ -46,10 +46,10 @@ const double NAV_BAR_HEIGHT = 50;
     
     [super viewDidAppear: animated];
     
-    if ([[profilesManager getProfiles] count] > 0) { //scroll to selected profile if user has any saved profiles
+    if ([[profilesManager getAllProfiles] count] > 0) { //scroll to selected profile if user has any saved profiles
         
         OSCProfile *selectedOSCProfile = [profilesManager getSelectedProfile];
-        NSUInteger index = [[profilesManager getProfiles] indexOfObject:selectedOSCProfile];
+        NSUInteger index = [[profilesManager getAllProfiles] indexOfObject:selectedOSCProfile];
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
         [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
     }
@@ -59,9 +59,9 @@ const double NAV_BAR_HEIGHT = 50;
 
 - (IBAction)loadTapped:(id)sender {
     
-    if ([[profilesManager getProfiles] count] > 0) {
+    if ([[profilesManager getAllProfiles] count] > 0) {
         
-        OSCProfile *profile = [[profilesManager getProfiles] objectAtIndex:selectedIndexPath.row];
+        OSCProfile *profile = [[profilesManager getAllProfiles] objectAtIndex:selectedIndexPath.row];
         [profilesManager setProfileToSelected: profile.name];
     }
     
@@ -76,7 +76,7 @@ const double NAV_BAR_HEIGHT = 50;
     
     [self dismissViewControllerAnimated:YES completion:nil];
     
-    if ([[profilesManager getProfiles] count] == 0) {    //if user deleted all profiles this will create another 'Default' profile with Moonlight's legacy 'Full' OSC layout
+    if ([[profilesManager getAllProfiles] count] == 0) {    //if user deleted all profiles this will create another 'Default' profile with Moonlight's legacy 'Full' OSC layout
         
         if (self.didDismiss) {
             self.didDismiss();
@@ -88,13 +88,13 @@ const double NAV_BAR_HEIGHT = 50;
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     
-    return [[profilesManager getProfiles] count];
+    return [[profilesManager getAllProfiles] count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     ProfileTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
-    OSCProfile *profile = [[profilesManager getProfiles] objectAtIndex: indexPath.row];
+    OSCProfile *profile = [[profilesManager getAllProfiles] objectAtIndex: indexPath.row];
     cell.name.text = profile.name;
     
     if ([profile.name isEqualToString: [profilesManager getSelectedProfile].name]) { //if this cell contains the name of the currently selected OSC profile then add a checkmark to the right side of the cell
@@ -117,7 +117,7 @@ const double NAV_BAR_HEIGHT = 50;
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    if ([[[[profilesManager getProfiles] objectAtIndex:indexPath.row] name] isEqualToString:@"Default"]) {   //If user is attempting to delete the 'Default' profile then show a pop up telling user they can't do that
+    if ([[[[profilesManager getAllProfiles] objectAtIndex:indexPath.row] name] isEqualToString:@"Default"]) {   //If user is attempting to delete the 'Default' profile then show a pop up telling user they can't do that
         
         UIAlertController * alertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: @"Deleting the 'Default' profile is not allowed" preferredStyle:UIAlertControllerStyleAlert];
         
@@ -132,21 +132,21 @@ const double NAV_BAR_HEIGHT = 50;
     
     if (editingStyle == UITableViewCellEditingStyleDelete) {
 
-        OSCProfile *profile = [[profilesManager getProfiles] objectAtIndex:indexPath.row];
+        OSCProfile *profile = [[profilesManager getAllProfiles] objectAtIndex:indexPath.row];
         
         if (profile.isSelected) {   //if user is deleting the currently selected OSC profile then make the  profile at its previous index the currently selected OSC profile
             
             if (indexPath.row > 0) {    //user shouldn't be able to delete the cell at row 0 because that row contains the 'Default' profile which we check for above, but just in case they're able to add this to avoid an app crash
                 
-                OSCProfile *profile = [[profilesManager getProfiles] objectAtIndex:indexPath.row - 1];
+                OSCProfile *profile = [[profilesManager getAllProfiles] objectAtIndex:indexPath.row - 1];
                 profile.isSelected = YES;
             }
         }
         
-        [[profilesManager getProfiles] removeObjectAtIndex:indexPath.row];
+        [[profilesManager getAllProfiles] removeObjectAtIndex:indexPath.row];
         
         NSMutableArray *profilesEncoded = [[NSMutableArray alloc] init];
-        for (OSCProfile *profileDecoded in [profilesManager getProfiles]) {
+        for (OSCProfile *profileDecoded in [profilesManager getAllProfiles]) {
             
             NSData *profileEncoded = [NSKeyedArchiver archivedDataWithRootObject:profileDecoded requiringSecureCoding:YES error:nil];
             [profilesEncoded addObject:profileEncoded];
@@ -178,7 +178,7 @@ const double NAV_BAR_HEIGHT = 50;
 
         selectedIndexPath = indexPath;
         
-        OSCProfile *profile = [[profilesManager getProfiles] objectAtIndex:indexPath.row];
+        OSCProfile *profile = [[profilesManager getAllProfiles] objectAtIndex:indexPath.row];
         [profilesManager setProfileToSelected: profile.name];
     }
 
