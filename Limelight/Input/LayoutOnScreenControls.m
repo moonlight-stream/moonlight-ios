@@ -16,7 +16,6 @@
 @end
 
 @implementation LayoutOnScreenControls {
-        
     CALayer *dPadBackground;    //parent layer that contains each individual dPad button so user can drag them around the screen together
     CALayer *upButton;
     CALayer *downButton;
@@ -52,7 +51,6 @@
 
 /* adds the layer used to contain each individual up, down, left, right dPad buttons. This layer allows the user to move the dPad around the screen as a single unit */
 - (void)addDPadBackground {
-    
     if (dPadBackground == nil) {
         
         dPadBackground = [CALayer layer];
@@ -63,7 +61,6 @@
                                           self._leftButton.frame.size.height * 3);
         dPadBackground.position = CGPointMake(self.D_PAD_CENTER_X, self.D_PAD_CENTER_Y);    //since dPadBackgroun's dimensions have change you need to reset its position again here
 
-        OSCProfilesManager *profilesManager = [OSCProfilesManager sharedManager];
         [self.OSCButtonLayers addObject:dPadBackground];
         
         [self._view.layer addSublayer:dPadBackground];
@@ -71,7 +68,6 @@
 }
 
 - (void) addDPadButtonsToDPadBackgroundLayer {
-
     // create Down button
     UIImage* downButtonImage = [UIImage imageNamed:@"DownButton"];
     downButton = [CALayer layer];
@@ -103,7 +99,6 @@
 
 /* currently used to determine whether user is dragging an OSC button (of type CALayer) over the trash can with the intent of deleting that button*/
 - (BOOL)isLayer:(CALayer *)layer hoveringOverButton:(UIButton *)button {
-    
     CGRect buttonConvertedRect = [self._view convertRect:button.imageView.frame fromView:button.superview];
     
     if (CGRectIntersectsRect(layer.frame, buttonConvertedRect)) {
@@ -118,9 +113,6 @@
 
 /* returns reference to button layer object given the button's name*/
 - (CALayer*)buttonLayerFromName: (NSString*)name {
-    
-    OSCProfilesManager *profilesManager = [OSCProfilesManager sharedManager];
-
     for (CALayer *buttonLayer in self.OSCButtonLayers) {
         
         if ([buttonLayer.name isEqualToString:name]) {
@@ -132,7 +124,6 @@
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
- 
     for (UITouch* touch in touches) {
         
         CGPoint touchLocation = [touch locationInView:_view];
@@ -144,19 +135,15 @@
         }
         
         if (touchedLayer == upButton || touchedLayer == downButton || touchedLayer == leftButton || touchedLayer == rightButton) { // don't let user move individual dPad buttons
-            
             layerCurrentlyBeingTouched = dPadBackground;
             
         } else if (touchedLayer == self._rightStick) {  // only let user move right stick background, not the stick itself
-            
             layerCurrentlyBeingTouched = self._rightStickBackground;
             
         } else if (touchedLayer == self._leftStick) {  // only let user move left stick background, not the stick itself
-            
             layerCurrentlyBeingTouched = self._leftStickBackground;
             
         } else {    // let user move whatever other valid button they're touching
-            
             layerCurrentlyBeingTouched = touchedLayer;
         }
         
@@ -164,24 +151,21 @@
         OnScreenButtonState *onScreenButtonState = [[OnScreenButtonState alloc] initWithButtonName:layerCurrentlyBeingTouched.name isHidden:layerCurrentlyBeingTouched.isHidden andPosition:layerCurrentlyBeingTouched.position];
         [layoutChanges addObject:onScreenButtonState];
         
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"OSCLayoutChanged" object:self]; //  lets the view controller know whether to fade the undo button in or out depending on whether there are any further OSC layout changes to undo
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"OSCLayoutChanged" object:self]; //  lets the view controller know whether to fade the undo button in or out depending on whether there are any further OSC layout changes the user is allowed to undo
     }
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-        
     UITouch *touch = [touches anyObject];
     CGPoint touchLocation = [touch locationInView:_view];
-    
     layerCurrentlyBeingTouched.position = touchLocation; //move object to touch location
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
-
     layerCurrentlyBeingTouched = nil;
 }
+
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-    
     layerCurrentlyBeingTouched = nil;
 }
 

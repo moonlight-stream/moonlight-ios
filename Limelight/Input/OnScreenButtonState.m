@@ -16,7 +16,6 @@
 }
 
 - (id) initWithButtonName:(NSString*)name isHidden:(BOOL)isHidden andPosition:(CGPoint)position {
-
     if ((self = [self init])) {
         
         self.name = name;
@@ -34,7 +33,6 @@
 }
 
 - (id) initWithCoder:(NSCoder*)decoder {
-    
     if (self = [super init]) {
         
         self.name = [decoder decodeObjectForKey:@"name"];

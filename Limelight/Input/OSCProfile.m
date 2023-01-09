@@ -16,7 +16,6 @@
 }
 
 - (id) initWithName:(NSString*)name buttonStates:(NSMutableArray*)buttonStates isSelected:(BOOL)isSelected {
-
     if ((self = [self init])) {
         
         self.name = name;
