@@ -564,7 +564,15 @@ static float L3_Y;
     
     for (NSData *buttonStateDataObject in oscProfile.buttonStates) {
         
-        OnScreenButtonState *buttonStateDecoded = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateDataObject error:nil];        
+        OnScreenButtonState *buttonStateDecoded = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateDataObject error:nil];
+        
+        if ([buttonStateDecoded.name isEqualToString:@"dPadBackgroundForOSCLayoutScreen"]) {
+         
+            if (buttonStateDecoded.isHidden) {
+                [self hideDPadButtons];
+            }
+        }
+        
         for (CALayer *buttonLayer in self.OSCButtonLayers) {    //iterate through each button layer on screen and position and hide/unhide each accordingly
             
             if ([buttonLayer.name isEqualToString:buttonStateDecoded.name]) {

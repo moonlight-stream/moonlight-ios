@@ -96,7 +96,9 @@ const double NAV_BAR_HEIGHT = 50;
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
-    if ([[[[profilesManager getAllProfiles] objectAtIndex:indexPath.row] name] isEqualToString:@"Default"]) {   //If user is attempting to delete the 'Default' profile then show a pop up telling user they can't do that
+    NSMutableArray *profiles = [profilesManager getAllProfiles];    //create new instance of array containing all profiles from persistent storage so that we can modify this array before we save it back to persistent storage
+
+    if ([[[profiles objectAtIndex:indexPath.row] name] isEqualToString:@"Default"]) {   //If user is attempting to delete the 'Default' profile then show a pop up telling user they can't do that and return out of this method
         UIAlertController *alertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: @"Deleting the 'Default' profile is not allowed" preferredStyle:UIAlertControllerStyleAlert];
         
         [alertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
@@ -108,23 +110,24 @@ const double NAV_BAR_HEIGHT = 50;
     }
     
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        OSCProfile *profile = [[profilesManager getAllProfiles] objectAtIndex:indexPath.row];
-        if (profile.isSelected) {   //if user is deleting the currently selected OSC profile then make the  profile at its previous index the currently selected OSC profile
-            if (indexPath.row > 0) {    //user shouldn't be able to delete the cell at row 0 because that row contains the 'Default' profile which we check for above, but just in case they're able to add this to avoid an app crash
-                OSCProfile *profile = [[profilesManager getAllProfiles] objectAtIndex:indexPath.row - 1];
+        OSCProfile *profile = [profiles objectAtIndex:indexPath.row];
+        if (profile.isSelected) {   //if user is deleting the currently selected OSC profile then make the  profile at its previous index the currently selected profile
+            if (indexPath.row > 0) {    // check that row is greater than zero to avoid an out of bounds crash
+                OSCProfile *profile = [profiles objectAtIndex:indexPath.row - 1];
                 profile.isSelected = YES;
             }
         }
         
-        [[profilesManager getAllProfiles] removeObjectAtIndex:indexPath.row];
+        [profiles removeObjectAtIndex:indexPath.row];
         
         /* save OSC profiles array changes to persistent storage */
         NSMutableArray *profilesEncoded = [[NSMutableArray alloc] init];
-        for (OSCProfile *profileDecoded in [profilesManager getAllProfiles]) {  //encode each OSC profile object and add them to an array
+        for (OSCProfile *profileDecoded in profiles) {  //encode each OSC profile object and add them to an array
             
             NSData *profileEncoded = [NSKeyedArchiver archivedDataWithRootObject:profileDecoded requiringSecureCoding:YES error:nil];
             [profilesEncoded addObject:profileEncoded];
         }
+        
         NSData *data = [NSKeyedArchiver archivedDataWithRootObject:profilesEncoded requiringSecureCoding:YES error:nil];    //encode the array itself, NOT the objects in the array
         [[NSUserDefaults standardUserDefaults] setObject:data forKey:@"OSCProfiles"];
         [[NSUserDefaults standardUserDefaults] synchronize];
@@ -150,7 +153,7 @@ const double NAV_BAR_HEIGHT = 50;
         
         /* Remove checkmark on the previously selected cell  */
         UITableViewCell *lastSelectedCell = [tableView cellForRowAtIndexPath: lastSelectedIndexPath];
-        lastSelectedCell.accessoryType = UITableViewCellAccessoryNone;   // remove checkmark from previously selectec ell
+        lastSelectedCell.accessoryType = UITableViewCellAccessoryNone;   // remove checkmark from previously selectec cell
         [tableView deselectRowAtIndexPath:lastSelectedIndexPath animated:YES];
     }
 }
