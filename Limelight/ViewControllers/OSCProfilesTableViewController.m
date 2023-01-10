@@ -155,7 +155,7 @@ const double NAV_BAR_HEIGHT = 50;
         OSCProfile *profile = [[profilesManager getAllProfiles] objectAtIndex:indexPath.row];
         [profilesManager setProfileToSelected: profile.name];   //  set the profile associated with this cell's 'isSelected' property to YES
         
-        /* Remove checkmark on the previously selected cell */
+        /* Remove checkmark on the previously selected cell  */
         UITableViewCell *lastSelectedCell = [tableView cellForRowAtIndexPath: lastSelectedIndexPath];
         lastSelectedCell.accessoryType = UITableViewCellAccessoryNone;   // remove checkmark from previously selectec ell
         [tableView deselectRowAtIndexPath:lastSelectedIndexPath animated:YES];
