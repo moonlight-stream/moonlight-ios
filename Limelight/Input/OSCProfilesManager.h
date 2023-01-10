@@ -23,6 +23,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (OSCProfile *) getSelectedProfile;
 
 
+#pragma mark - Getters
+/**
+ * Returns the index of the selected profile within the array it's in
+ */
+- (NSInteger) getIndexOfSelectedProfile;
+
 /**
  * Returns an array of decoded profile objects
  */

@@ -154,6 +154,19 @@
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
+- (NSInteger) getIndexOfSelectedProfile {
+    
+    NSInteger index = 0;
+    NSMutableArray *profiles = [self getAllProfiles];
+    for (OSCProfile *profile in profiles) {
+        
+        if (profile.isSelected == YES) {
+            return [profiles indexOfObject:profile];
+        }
+    }
+    return index;
+}
+
 - (void)saveProfileWithName:(NSString*)name andButtonLayers:(NSMutableArray *)buttonLayers {
     /* iterate through each OSC button the user sees on screen, create an 'OnScreenButtonState' object from each button, encode the object, and then add the object to an array */
     NSMutableArray *buttonStatesEncoded = [[NSMutableArray alloc] init];
@@ -178,7 +191,7 @@
                         
         [self replaceProfile:[self OSCProfileWithName:name] withProfile:newProfile];
     }
-    else {  //otherwise encode then add the new profile to the end of the OSCProfiles array and save the array of OSC profiles to persistent storage
+    else {  //otherwise encode then add the new profile to the end of the OSCProfiles array
                 
         NSData *newProfileEncoded = [NSKeyedArchiver archivedDataWithRootObject:newProfile requiringSecureCoding:YES error:nil];
         NSMutableArray *profilesEncoded = [self encodedProfilesFromArray:profiles];

@@ -21,7 +21,7 @@ const double NAV_BAR_HEIGHT = 50;
 
 @implementation OSCProfilesTableViewController {
     
-    NSIndexPath *selectedIndexPath;
+//    NSIndexPath *selectedIndexPath;
     OSCProfilesManager *profilesManager;
 }
 
@@ -56,10 +56,10 @@ const double NAV_BAR_HEIGHT = 50;
 
 /* Loads the OSC profile that user selected, dismisses this view, then tells the presenting view controller to lay out the on screen buttons according to the selected profile's instructions*/
 - (IBAction)loadTapped:(id)sender {
-    if ([[profilesManager getAllProfiles] count] > 0) { //make sure profiles array isn't empty for some reason. app can crash if it is
-        OSCProfile *profile = [[profilesManager getAllProfiles] objectAtIndex:selectedIndexPath.row];
-        [profilesManager setProfileToSelected: profile.name];
-    }
+//    if ([[profilesManager getAllProfiles] count] > 0) { //make sure profiles array isn't empty for some reason. app can crash if it is
+//        OSCProfile *profile = [[profilesManager getAllProfiles] objectAtIndex:selectedIndexPath.row];
+//        [profilesManager setProfileToSelected: profile.name];
+//    }
     [self dismissViewControllerAnimated:YES completion:nil];
 
     if (self.didDismissOSCProfilesTVC) {    //  tells the presenting view controller to lay out the on screen buttons according to the selected profile's instructions
@@ -90,7 +90,7 @@ const double NAV_BAR_HEIGHT = 50;
     
     if ([profile.name isEqualToString: [profilesManager getSelectedProfile].name]) { //if this cell contains the name of the currently selected OSC profile then add a checkmark to the right side of the cell
         cell.accessoryType = UITableViewCellAccessoryCheckmark;
-        selectedIndexPath = indexPath;  //keeps track of which cell contains the currently selected OSC profile
+//        selectedIndexPath = indexPath;  //keeps track of which cell contains the currently selected OSC profile
     }
     else {
         cell.accessoryType = UITableViewCellAccessoryNone;
@@ -145,23 +145,21 @@ const double NAV_BAR_HEIGHT = 50;
 /* When user taps a cell it moves the checkmark to that cell indicating to the user the profile associated with that cell is now the selected profile. Also sets the 'selectedIndexPath' variable to keep track of which cell is associated with the selected profile */
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSInteger newRow = [indexPath row];
-    NSInteger oldRow = [selectedIndexPath row];
+    NSIndexPath *selectedIndexPath = [NSIndexPath indexPathForRow:indexPath.row inSection:0];
+    NSIndexPath *lastSelectedIndexPath = [NSIndexPath indexPathForRow:[profilesManager getIndexOfSelectedProfile] inSection:0];
 
-    if (newRow != oldRow) {
-        UITableViewCell *newCell = [tableView cellForRowAtIndexPath: indexPath];
-        newCell.accessoryType = UITableViewCellAccessoryCheckmark;  // add checkmark to the cell the user tapped
-        
-        UITableViewCell *oldCell = [tableView cellForRowAtIndexPath: selectedIndexPath];
-        oldCell.accessoryType = UITableViewCellAccessoryNone;   // remove checkmark from previously selectec ell
-
-        selectedIndexPath = indexPath;
-        
+    if (selectedIndexPath != lastSelectedIndexPath) {
+        /* Place checkmark on selected cell and set profile associated with cell as selected profile */
+        UITableViewCell *selectedCell = [tableView cellForRowAtIndexPath: selectedIndexPath];
+        selectedCell.accessoryType = UITableViewCellAccessoryCheckmark;  // add checkmark to the cell the user tapped
         OSCProfile *profile = [[profilesManager getAllProfiles] objectAtIndex:indexPath.row];
-        [profilesManager setProfileToSelected: profile.name];   //  set 'isSelected' property of OSC profile object to YES
+        [profilesManager setProfileToSelected: profile.name];   //  set the profile associated with this cell's 'isSelected' property to YES
+        
+        /* Remove checkmark on the previously selected cell */
+        UITableViewCell *lastSelectedCell = [tableView cellForRowAtIndexPath: lastSelectedIndexPath];
+        lastSelectedCell.accessoryType = UITableViewCellAccessoryNone;   // remove checkmark from previously selectec ell
+        [tableView deselectRowAtIndexPath:lastSelectedIndexPath animated:YES];
     }
-
-    [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
 
