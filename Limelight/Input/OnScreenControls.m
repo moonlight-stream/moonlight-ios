@@ -78,6 +78,7 @@
 @synthesize _l3Button;
 @synthesize _level;
 @synthesize OSCButtonLayers;
+@synthesize _dPadBackground;
 
 static const float EDGE_WIDTH = .05;
 
@@ -204,10 +205,11 @@ static float L3_Y;
     _l1Button.name = @"l1Button";
     _l2Button.name = @"l2Button";
     _l3Button.name = @"l3Button";
-    _upButton.name = @"upButton";
-    _rightButton.name = @"rightButton";
-    _downButton.name = @"downButton";
-    _leftButton.name = @"leftButton";
+    /* using this naming convention for all four dPad buttons allows us to associate them with the dPad background layer created in 'LayoutOnScreenControls' subclass which lets us position and hide them as necessary */
+    _upButton.name = @"dPad";
+    _rightButton.name = @"dPad";
+    _downButton.name = @"dPad";
+    _leftButton.name = @"dPad";
     
     return self;
 }
@@ -299,25 +301,21 @@ static float L3_Y;
             break;
         case OnScreenControlsCustom:
             
-            [self setupComplexControls];    //Default postion for D-Pad set here
-            [self setDPadCenter];    //Custom position for D-Pad set here
+            [self setupComplexControls];    //  Default postion for D-Pad set here
+            [self setDPadCenter];    // Custom position for D-Pad set here
             [self drawButtons];
             [self drawStartSelect];
             [self drawBumpers];
             [self drawTriggers];
             [self drawSticks];
             
-            if ([[profilesManager getAllProfiles] count] == 0) { // No OSC profiles exist yet so create one called 'Default' and associate it Moonlight's legacy 'Full' OSC layout that's already been laid out on the screen at this point
-                [profilesManager saveProfileWithName:@"Default" andButtonLayers:nil];
+            if ([[profilesManager getAllProfiles] count] == 0) { // No saved OSC profiles exist yet so create one called 'Default' and associate it with Moonlight's legacy 'Full' OSC layout that's already been laid out on the screen at this point
+                [profilesManager saveProfileWithName:@"Default" andButtonLayers:self.OSCButtonLayers];
             }
-            else {  //User loaded an existing OSC profile so load it and lay it out on screen
-                [self layoutOSC];
+            else {
+                [self positionSelectedOSCLayout];
             }
-            [self setAnalogStickPositions];
-            
-            if ([_upButton.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //if user is on the OSC layout screen then remove the dPad's up, down, left, right buttons, since LayoutOnScreenControlsViewController draws its own dPad buttons
-                [self hideDPadButtons];
-            }
+
             break;
         default:
             Log(LOG_W, @"Unknown on-screen controls level: %d", (int)_level);
@@ -480,31 +478,47 @@ static float L3_Y;
     _yButton.contents = (id) yButtonImage.CGImage;
     [_view.layer addSublayer:_yButton];
     
-    
-    
     // create Down button
     UIImage* downButtonImage = [UIImage imageNamed:@"DownButton"];
     _downButton.frame = CGRectMake(D_PAD_CENTER_X - downButtonImage.size.width / 2, D_PAD_CENTER_Y + D_PAD_DIST, downButtonImage.size.width, downButtonImage.size.height);
     _downButton.contents = (id) downButtonImage.CGImage;
-    [_view.layer addSublayer:_downButton];
     
     // create Right button
     UIImage* rightButtonImage = [UIImage imageNamed:@"RightButton"];
     _rightButton.frame = CGRectMake(D_PAD_CENTER_X + D_PAD_DIST, D_PAD_CENTER_Y - rightButtonImage.size.height / 2, rightButtonImage.size.width, rightButtonImage.size.height);
     _rightButton.contents = (id) rightButtonImage.CGImage;
-    [_view.layer addSublayer:_rightButton];
-
+    
     // create Up button
     UIImage* upButtonImage = [UIImage imageNamed:@"UpButton"];
     _upButton.frame = CGRectMake(D_PAD_CENTER_X - upButtonImage.size.width / 2, D_PAD_CENTER_Y - D_PAD_DIST - upButtonImage.size.height, upButtonImage.size.width, upButtonImage.size.height);
     _upButton.contents = (id) upButtonImage.CGImage;
-    [_view.layer addSublayer:_upButton];
     
     // create Left button
     UIImage* leftButtonImage = [UIImage imageNamed:@"LeftButton"];
     _leftButton.frame = CGRectMake(D_PAD_CENTER_X - D_PAD_DIST - leftButtonImage.size.width, D_PAD_CENTER_Y - leftButtonImage.size.height / 2, leftButtonImage.size.width, leftButtonImage.size.height);
     _leftButton.contents = (id) leftButtonImage.CGImage;
-    [_view.layer addSublayer:_leftButton];
+    
+    //  create dPad background layer
+    _dPadBackground = [CALayer layer];
+    _dPadBackground.name = @"dPad";
+    _dPadBackground.frame = CGRectMake(self.D_PAD_CENTER_X,
+                                      self.D_PAD_CENTER_Y,
+                                      self._leftButton.frame.size.width * 2 + BUTTON_DIST,
+                                      self._leftButton.frame.size.width * 2 + BUTTON_DIST);
+    _dPadBackground.position = CGPointMake(self.D_PAD_CENTER_X, self.D_PAD_CENTER_Y);    //since dPadBackground's dimensions have change you need to reset its position again here
+    [self.OSCButtonLayers addObject:_dPadBackground];
+    [_view.layer addSublayer:_dPadBackground];
+    
+    [_dPadBackground addSublayer:_downButton];
+    [_dPadBackground addSublayer:_rightButton];
+    [_dPadBackground addSublayer:_upButton];
+    [_dPadBackground addSublayer:_leftButton];
+    
+    //  reposition each dPad button within their parent dPadBackground layer
+    _downButton.frame = CGRectMake(_dPadBackground.frame.size.width/3, _dPadBackground.frame.size.height/2 + D_PAD_DIST, downButtonImage.size.width, downButtonImage.size.height);
+    _rightButton.frame = CGRectMake(_dPadBackground.frame.size.width/2 + D_PAD_DIST, _dPadBackground.frame.size.height/3, rightButtonImage.size.width, rightButtonImage.size.height);
+    _upButton.frame = CGRectMake(_dPadBackground.frame.size.width/3, 0, upButtonImage.size.width, upButtonImage.size.height);
+    _leftButton.frame = CGRectMake(0, _dPadBackground.frame.size.height/3, leftButtonImage.size.width, leftButtonImage.size.height);
 }
 
 /**
@@ -513,10 +527,10 @@ static float L3_Y;
 - (void) setDPadCenter {
     OSCProfile *oscProfile = [profilesManager getSelectedProfile]; //returns the currently selected OSCProfile
     
-    for (NSData *buttonStateDataObject in oscProfile.buttonStates) {
-        OnScreenButtonState *buttonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateDataObject error:nil];
+    for (NSData *buttonStateEncoded in oscProfile.buttonStates) {
+        OnScreenButtonState *buttonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateEncoded error:nil];
             
-        if ([buttonState.name isEqualToString:@"dPadBackgroundForOSCLayoutScreen"]) {
+        if ([buttonState.name isEqualToString:@"dPad"]) {
             D_PAD_CENTER_X = buttonState.position.x;
             D_PAD_CENTER_Y = buttonState.position.y;
         }
@@ -529,8 +543,8 @@ static float L3_Y;
 - (void) setAnalogStickPositions {
     OSCProfile *oscProfile = [profilesManager getSelectedProfile]; 
     
-    for (NSData *buttonStateDataObject in oscProfile.buttonStates) {    //  iterate through each button associated with the currently selected OSC profile and set the analog stick positions and hide/unhide them accordingly
-        OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateDataObject error:nil];
+    for (NSData *buttonStateEncoded in oscProfile.buttonStates) {    //  iterate through each button associated with the currently selected OSC profile and set the analog stick positions and hide/unhide them accordingly
+        OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateEncoded error:nil];
         
         if ([onScreenButtonState.name isEqualToString:@"leftStickBackground"]) {
             LS_CENTER_X = onScreenButtonState.position.x;
@@ -557,42 +571,35 @@ static float L3_Y;
 }
 
 /**
- * Loads the OSC profile the user selected and lays out each button associated with the profile onto the screen
+ * Loads the selected OSC profile and lays out each button associated with the profile onto the screen
  */
-- (void) layoutOSC {
+- (void) positionSelectedOSCLayout {
     OSCProfile *oscProfile = [profilesManager getSelectedProfile];
     
-    for (NSData *buttonStateDataObject in oscProfile.buttonStates) {
+    for (NSData *buttonStateEncoded in oscProfile.buttonStates) {
         
-        OnScreenButtonState *buttonStateDecoded = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateDataObject error:nil];
+        OnScreenButtonState *buttonStateDecoded = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateEncoded error:nil];
         
-        if ([buttonStateDecoded.name isEqualToString:@"dPadBackgroundForOSCLayoutScreen"]) {
-         
-            if (buttonStateDecoded.isHidden) {
-                [self hideDPadButtons];
-            }
-        }
-        
-        for (CALayer *buttonLayer in self.OSCButtonLayers) {    //iterate through each button layer on screen and position and hide/unhide each accordingly
+        for (CALayer *buttonLayer in self.OSCButtonLayers) {    //iterate through each button layer on screen and position and hide/unhide each according to the instructions of its associated 'buttonState'
             
             if ([buttonLayer.name isEqualToString:buttonStateDecoded.name]) {
                 
-                if ([buttonLayer.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //if user is on the OSC layout screen then position ALL buttons including the dPad background and dPad buttons to the user's desired position
-                    
+                if ([buttonLayer.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"]) { //  if user is on the OSC layout screen then position ALL buttons including the dPad background and dPad buttons to the user's desired position
                     buttonLayer.position = buttonStateDecoded.position;
                     buttonLayer.hidden = buttonStateDecoded.isHidden;
                 }
-                else if ([buttonLayer.superlayer.name isEqualToString:@"VC:LayoutOnScreenControlsViewController"] == NO
-                         && [buttonLayer.name isEqualToString:@"upButton"] == NO
-                         && [buttonLayer.name isEqualToString:@"rightButton"] == NO
-                         && [buttonLayer.name isEqualToString:@"downButton"] == NO
-                         && [buttonLayer.name isEqualToString:@"leftButton"] == NO) {    //if user is on the game streaming screen, then move all buttons EXCEPT the dPad buttons to user's desired position since the dPad buttons have already been positioned appropriately on the game stream view by this point
-                    buttonLayer.position = buttonStateDecoded.position;
+                else {  //  user is on game stream view so special consideration must be made for that view's dPad buttons
+                    
+                    if ([buttonLayer.name isEqualToString:@"dPad"] == NO) {   //if buttonLayer is a dPad button don't reposition it. Each dPad button has already been appropriately positioned by the method 'drawButtons'
+                        buttonLayer.position = buttonStateDecoded.position;
+                    }
                     buttonLayer.hidden = buttonStateDecoded.isHidden;
                 }
             }
         }
     }
+    
+    [self setAnalogStickPositions];
 }
 
 - (void) drawStartSelect {

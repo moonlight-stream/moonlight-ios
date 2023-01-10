@@ -48,6 +48,7 @@ typedef NS_ENUM(NSInteger, OnScreenControlsLevel) {
 @property CALayer* _leftStick;
 @property CALayer* _rightStickBackground;
 @property CALayer* _rightStick;
+@property CALayer *_dPadBackground;    //parent layer that contains each individual dPad button so user can drag them around the screen together
 
 @property float D_PAD_CENTER_X;
 @property float D_PAD_CENTER_Y;
@@ -64,8 +65,9 @@ typedef NS_ENUM(NSInteger, OnScreenControlsLevel) {
 - (void) show;
 - (void) setupComplexControls;
 - (void) drawButtons;
-- (void) layoutOSC;
+- (void) positionSelectedOSCLayout;
 - (void) updateControls;
 - (OnScreenControlsLevel) getLevel;
+- (void) hideDPadButtons;
 
 @end

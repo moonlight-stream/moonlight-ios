@@ -16,14 +16,8 @@
 @end
 
 @implementation LayoutOnScreenControls {
-    CALayer *dPadBackground;    //parent layer that contains each individual dPad button so user can drag them around the screen together
-    CALayer *upButton;
-    CALayer *downButton;
-    CALayer *leftButton;
-    CALayer *rightButton;
     
     UIButton *trashCanButton;
-
 }
 
 @synthesize layerCurrentlyBeingTouched;
@@ -37,64 +31,15 @@
     self = [super initWithView:view controllerSup:controllerSupport streamConfig:streamConfig];
     self._level = oscLevel;
     
-    [super setupComplexControls];   //get coordinates for button positions
+//    [super setupComplexControls];   //get coordinates for button positions
     
-    [self drawButtons]; //get button widths
+//    [self drawButtons]; //get button widths
     
-    [self addDPadBackground];
-    [self addDPadButtonsToDPadBackgroundLayer];
+//    [self addDPad];
           
     layoutChanges = [[NSMutableArray alloc] init];  //will contain OSC button layout changes the user has made for this profile
         
     return self;
-}
-
-/* adds the layer used to contain each individual up, down, left, right dPad buttons. This layer allows the user to move the dPad around the screen as a single unit */
-- (void)addDPadBackground {
-    if (dPadBackground == nil) {
-        
-        dPadBackground = [CALayer layer];
-        dPadBackground.name = @"dPadBackgroundForOSCLayoutScreen";
-        dPadBackground.frame = CGRectMake(self.D_PAD_CENTER_X,
-                                          self.D_PAD_CENTER_Y,
-                                          self._leftButton.frame.size.width * 2.5,
-                                          self._leftButton.frame.size.height * 3);
-        dPadBackground.position = CGPointMake(self.D_PAD_CENTER_X, self.D_PAD_CENTER_Y);    //since dPadBackground's dimensions have change you need to reset its position again here
-
-        [self.OSCButtonLayers addObject:dPadBackground];
-        
-        [self._view.layer addSublayer:dPadBackground];
-    }
-}
-
-- (void) addDPadButtonsToDPadBackgroundLayer {
-    // create Down button
-    UIImage* downButtonImage = [UIImage imageNamed:@"DownButton"];
-    downButton = [CALayer layer];
-    downButton.frame = CGRectMake(dPadBackground.frame.size.width/3, dPadBackground.frame.size.height/1.7, downButtonImage.size.width, downButtonImage.size.height);
-    downButton.contents = (id) downButtonImage.CGImage;
-    [dPadBackground addSublayer:downButton];
-    
-    // create Right button
-    UIImage* rightButtonImage = [UIImage imageNamed:@"RightButton"];
-    rightButton = [CALayer layer];
-    rightButton.frame = CGRectMake(dPadBackground.frame.size.width/1.7, dPadBackground.frame.size.height/3, rightButtonImage.size.width, rightButtonImage.size.height);
-    rightButton.contents = (id) rightButtonImage.CGImage;
-    [dPadBackground addSublayer:rightButton];
-
-    // create Up button
-    UIImage* upButtonImage = [UIImage imageNamed:@"UpButton"];
-    upButton = [CALayer layer];
-    upButton.contents = (id) upButtonImage.CGImage;
-    [dPadBackground addSublayer:upButton];
-    upButton.frame = CGRectMake(dPadBackground.frame.size.width/3, upButton.frame.size.height, upButtonImage.size.width, upButtonImage.size.height);
-    
-    // create Left button
-    UIImage* leftButtonImage = [UIImage imageNamed:@"LeftButton"];
-    leftButton = [CALayer layer];
-    leftButton.frame = CGRectMake(leftButton.frame.size.width/1.7, dPadBackground.frame.size.height/3, leftButtonImage.size.width, leftButtonImage.size.height);
-    leftButton.contents = (id) leftButtonImage.CGImage;
-    [dPadBackground addSublayer:leftButton];
 }
 
 /* currently used to determine whether user is dragging an OSC button (of type CALayer) over the trash can with the intent of deleting that button*/
@@ -134,8 +79,8 @@
             return;
         }
         
-        if (touchedLayer == upButton || touchedLayer == downButton || touchedLayer == leftButton || touchedLayer == rightButton) { // don't let user move individual dPad buttons
-            layerCurrentlyBeingTouched = dPadBackground;
+        if (touchedLayer == super._upButton || touchedLayer == super._downButton || touchedLayer == super._leftButton || touchedLayer == super._rightButton) { // don't let user move individual dPad buttons
+            layerCurrentlyBeingTouched = super._dPadBackground;
             
         } else if (touchedLayer == self._rightStick) {  // only let user move right stick background, not the stick itself
             layerCurrentlyBeingTouched = self._rightStickBackground;
