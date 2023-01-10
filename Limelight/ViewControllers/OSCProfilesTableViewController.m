@@ -20,8 +20,6 @@ const double NAV_BAR_HEIGHT = 50;
 @end
 
 @implementation OSCProfilesTableViewController {
-    
-//    NSIndexPath *selectedIndexPath;
     OSCProfilesManager *profilesManager;
 }
 
@@ -56,10 +54,6 @@ const double NAV_BAR_HEIGHT = 50;
 
 /* Loads the OSC profile that user selected, dismisses this view, then tells the presenting view controller to lay out the on screen buttons according to the selected profile's instructions*/
 - (IBAction)loadTapped:(id)sender {
-//    if ([[profilesManager getAllProfiles] count] > 0) { //make sure profiles array isn't empty for some reason. app can crash if it is
-//        OSCProfile *profile = [[profilesManager getAllProfiles] objectAtIndex:selectedIndexPath.row];
-//        [profilesManager setProfileToSelected: profile.name];
-//    }
     [self dismissViewControllerAnimated:YES completion:nil];
 
     if (self.didDismissOSCProfilesTVC) {    //  tells the presenting view controller to lay out the on screen buttons according to the selected profile's instructions
@@ -90,7 +84,6 @@ const double NAV_BAR_HEIGHT = 50;
     
     if ([profile.name isEqualToString: [profilesManager getSelectedProfile].name]) { //if this cell contains the name of the currently selected OSC profile then add a checkmark to the right side of the cell
         cell.accessoryType = UITableViewCellAccessoryCheckmark;
-//        selectedIndexPath = indexPath;  //keeps track of which cell contains the currently selected OSC profile
     }
     else {
         cell.accessoryType = UITableViewCellAccessoryNone;
