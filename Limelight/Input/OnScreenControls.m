@@ -183,10 +183,10 @@ static float L3_Y;
     [self.OSCButtonLayers addObject:_l1Button];
     [self.OSCButtonLayers addObject:_l2Button];
     [self.OSCButtonLayers addObject:_l3Button];
-    [self.OSCButtonLayers addObject:_upButton];
-    [self.OSCButtonLayers addObject:_downButton];
-    [self.OSCButtonLayers addObject:_leftButton];
-    [self.OSCButtonLayers addObject:_rightButton];
+//    [self.OSCButtonLayers addObject:_upButton];
+//    [self.OSCButtonLayers addObject:_downButton];
+//    [self.OSCButtonLayers addObject:_leftButton];
+//    [self.OSCButtonLayers addObject:_rightButton];
     [self.OSCButtonLayers addObject:_leftStickBackground];
     [self.OSCButtonLayers addObject:_rightStickBackground];
 
@@ -206,10 +206,10 @@ static float L3_Y;
     _l2Button.name = @"l2Button";
     _l3Button.name = @"l3Button";
     /* using this naming convention for all four dPad buttons allows us to associate them with the dPad background layer created in 'LayoutOnScreenControls' subclass which lets us position and hide them as necessary */
-    _upButton.name = @"dPad";
-    _rightButton.name = @"dPad";
-    _downButton.name = @"dPad";
-    _leftButton.name = @"dPad";
+//    _upButton.name = @"dPad";
+//    _rightButton.name = @"dPad";
+//    _downButton.name = @"dPad";
+//    _leftButton.name = @"dPad";
     
     return self;
 }
@@ -315,7 +315,6 @@ static float L3_Y;
             else {
                 [self positionSelectedOSCLayout];
             }
-
             break;
         default:
             Log(LOG_W, @"Unknown on-screen controls level: %d", (int)_level);
@@ -509,6 +508,7 @@ static float L3_Y;
     [self.OSCButtonLayers addObject:_dPadBackground];
     [_view.layer addSublayer:_dPadBackground];
     
+    //  add dPad buttons to parent layer
     [_dPadBackground addSublayer:_downButton];
     [_dPadBackground addSublayer:_rightButton];
     [_dPadBackground addSublayer:_upButton];
