@@ -167,11 +167,11 @@
     return index;
 }
 
-- (void)saveProfileWithName:(NSString*)name andButtonLayers:(NSMutableArray *)buttonLayers {
+- (void) saveProfileWithName:(NSString*)name andButtonLayers:(NSMutableArray *)buttonLayers {
     /* iterate through each OSC button the user sees on screen, create an 'OnScreenButtonState' object from each button, encode the object, and then add the object to an array */
     NSMutableArray *buttonStatesEncoded = [[NSMutableArray alloc] init];
     for (CALayer *buttonLayer in buttonLayers) {
-
+        
         OnScreenButtonState *buttonState = [[OnScreenButtonState alloc] initWithButtonName:buttonLayer.name  isHidden:buttonLayer.isHidden andPosition:buttonLayer.position];
         NSData *buttonStateEncoded = [NSKeyedArchiver archivedDataWithRootObject:buttonState requiringSecureCoding:YES error:nil];
         [buttonStatesEncoded addObject: buttonStateEncoded];

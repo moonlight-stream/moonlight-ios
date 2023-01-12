@@ -124,9 +124,9 @@
     verticalGuideline.center = layerCurrentlyBeingTouched.position;
     
     /*
-     Telegraph to the user that either the horizontal or vertical guidelines line up with one of the buttons on screen by doing the following:
-     Change horizontal guideline color to white if its y-position is almost equal to that of one of the buttons on screen.
-     Change vertical guideline color to white if its x-position is almost equal to that of one of the buttons on screen.
+     Telegraph to the user that either the horizontal or vertical guidelines line up with one or more of the buttons on screen by doing the following:
+     -Change horizontal guideline color to white if its y-position is almost equal to that of one of the buttons on screen.
+     -Change vertical guideline color to white if its x-position is almost equal to that of one of the buttons on screen.
      */
     for (CALayer *button in self.OSCButtonLayers) {
         
@@ -137,7 +137,15 @@
                 horizontalGuideline.backgroundColor = [UIColor whiteColor];
                 break;
             }
-            
+        }
+        
+        //  change horizontal guideline back to blue if it doesn't line up with one of the on screen buttons
+        horizontalGuideline.backgroundColor = [UIColor blueColor];
+    }
+    for (CALayer *button in self.OSCButtonLayers) {
+        
+        if (layerCurrentlyBeingTouched != button) {
+
             if ((verticalGuideline.center.x < button.position.x + 1) &&
                 (verticalGuideline.center.x > button.position.x - 1)) {
                 verticalGuideline.backgroundColor = [UIColor whiteColor];
@@ -145,15 +153,14 @@
             }
         }
         
-        //  change vertical guidelines back to blue if they don't line up with one of the on screen buttons
-        horizontalGuideline.backgroundColor = [UIColor blueColor];
+        //  change vertical guideline back to blue if it doesn't line up with one of the on screen buttons
         verticalGuideline.backgroundColor = [UIColor blueColor];
     }
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
     layerCurrentlyBeingTouched = nil;
-    
+         
     horizontalGuideline.hidden = YES;
     verticalGuideline.hidden = YES;
 }
