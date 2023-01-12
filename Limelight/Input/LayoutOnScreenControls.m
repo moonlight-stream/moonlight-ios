@@ -169,7 +169,7 @@
      */
     for (CALayer *button in self.OSCButtonLayers) {
         
-        if (layerCurrentlyBeingTouched != button) {
+        if ((layerCurrentlyBeingTouched != button) && !button.isHidden) {
             if ((horizontalGuideline.center.y < button.position.y + 1) &&
                 (horizontalGuideline.center.y > button.position.y - 1)) {
                 horizontalGuideline.backgroundColor = [UIColor whiteColor];
@@ -182,7 +182,7 @@
     }
     for (CALayer *button in self.OSCButtonLayers) {
         
-        if (layerCurrentlyBeingTouched != button) {
+        if ((layerCurrentlyBeingTouched != button) && !button.isHidden) {
             if ((verticalGuideline.center.x < button.position.x + 1) &&
                 (verticalGuideline.center.x > button.position.x - 1)) {
                 verticalGuideline.backgroundColor = [UIColor whiteColor];
