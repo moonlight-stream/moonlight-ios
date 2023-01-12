@@ -42,7 +42,7 @@ const double NAV_BAR_HEIGHT = 50;
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear: animated];
     
-    if ([[profilesManager getAllProfiles] count] > 0) { //scroll to selected profile if user has any saved profiles
+    if ([[profilesManager getAllProfiles] count] > 0) { // scroll to selected profile if user has any saved profiles
         OSCProfile *selectedOSCProfile = [profilesManager getSelectedProfile];
         NSUInteger index = [[profilesManager getAllProfiles] indexOfObject:selectedOSCProfile];
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
@@ -52,23 +52,17 @@ const double NAV_BAR_HEIGHT = 50;
 
 #pragma mark - UIButton Actions
 
-/* Loads the OSC profile that user selected, dismisses this view, then tells the presenting view controller to lay out the on screen buttons according to the selected profile's instructions*/
+/* Loads the OSC profile that user selected, dismisses this view, then tells the presenting view controller to lay out the on screen buttons according to the selected profile's instructions */
 - (IBAction)loadTapped:(id)sender {
     [self dismissViewControllerAnimated:YES completion:nil];
 
-    if (self.didDismissOSCProfilesTVC) {    //  tells the presenting view controller to lay out the on screen buttons according to the selected profile's instructions
+    if (self.didDismissOSCProfilesTVC) {    // tells the presenting view controller to lay out the on screen buttons according to the selected profile's instructions
         self.didDismissOSCProfilesTVC();
     }
 }
 
 - (IBAction)cancelTapped:(id)sender {
     [self dismissViewControllerAnimated:YES completion:nil];
-    
-    if ([[profilesManager getAllProfiles] count] == 0) {    //if user deleted all profiles this will create another 'Default' profile with Moonlight's legacy 'Full' OSC layout
-        if (self.didDismissOSCProfilesTVC) {
-            self.didDismissOSCProfilesTVC();
-        }
-    }
 }
 
 #pragma mark - TableView DataSource
@@ -82,7 +76,7 @@ const double NAV_BAR_HEIGHT = 50;
     OSCProfile *profile = [[profilesManager getAllProfiles] objectAtIndex: indexPath.row];
     cell.name.text = profile.name;
     
-    if ([profile.name isEqualToString: [profilesManager getSelectedProfile].name]) { //if this cell contains the name of the currently selected OSC profile then add a checkmark to the right side of the cell
+    if ([profile.name isEqualToString: [profilesManager getSelectedProfile].name]) { // if this cell contains the name of the currently selected OSC profile then add a checkmark to the right side of the cell
         cell.accessoryType = UITableViewCellAccessoryCheckmark;
     }
     else {
@@ -96,9 +90,9 @@ const double NAV_BAR_HEIGHT = 50;
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
-    NSMutableArray *profiles = [profilesManager getAllProfiles];    //create new instance of array containing all profiles from persistent storage so that we can modify this array before we save it back to persistent storage
+    NSMutableArray *profiles = [profilesManager getAllProfiles];    // create new instance of array containing all profiles from persistent storage so that we can modify this array before we save it back to persistent storage
 
-    if ([[[profiles objectAtIndex:indexPath.row] name] isEqualToString:@"Default"]) {   //If user is attempting to delete the 'Default' profile then show a pop up telling user they can't do that and return out of this method
+    if ([[[profiles objectAtIndex:indexPath.row] name] isEqualToString:@"Default"]) {   // if user is attempting to delete the 'Default' profile then show a pop up telling user they can't do that and return out of this method
         UIAlertController *alertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: @"Deleting the 'Default' profile is not allowed" preferredStyle:UIAlertControllerStyleAlert];
         
         [alertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
@@ -111,8 +105,8 @@ const double NAV_BAR_HEIGHT = 50;
     
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         OSCProfile *profile = [profiles objectAtIndex:indexPath.row];
-        if (profile.isSelected) {   //if user is deleting the currently selected OSC profile then make the  profile at its previous index the currently selected profile
-            if (indexPath.row > 0) {    // check that row is greater than zero to avoid an out of bounds crash
+        if (profile.isSelected) {   // if user is deleting the currently selected OSC profile then make the  profile at its previous index the currently selected profile
+            if (indexPath.row > 0) {    // check that row is greater than zero to avoid an out of bounds crash. should not be possible right now since the 'Default' profile is always at row 0 and they're not allowed to delete it
                 OSCProfile *profile = [profiles objectAtIndex:indexPath.row - 1];
                 profile.isSelected = YES;
             }
@@ -120,15 +114,17 @@ const double NAV_BAR_HEIGHT = 50;
         
         [profiles removeObjectAtIndex:indexPath.row];
         
-        /* save OSC profiles array changes to persistent storage */
+        /* save OSC profiles array to persistent storage */
         NSMutableArray *profilesEncoded = [[NSMutableArray alloc] init];
-        for (OSCProfile *profileDecoded in profiles) {  //encode each OSC profile object and add them to an array
+        for (OSCProfile *profileDecoded in profiles) {  // encode each OSC profile object and add them to an array
             
             NSData *profileEncoded = [NSKeyedArchiver archivedDataWithRootObject:profileDecoded requiringSecureCoding:YES error:nil];
             [profilesEncoded addObject:profileEncoded];
         }
         
-        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:profilesEncoded requiringSecureCoding:YES error:nil];    //encode the array itself, NOT the objects in the array
+        
+        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:profilesEncoded
+                                             requiringSecureCoding:YES error:nil];  // encode the array itself, NOT the objects in the array
         [[NSUserDefaults standardUserDefaults] setObject:data forKey:@"OSCProfiles"];
         [[NSUserDefaults standardUserDefaults] synchronize];
         
@@ -138,7 +134,7 @@ const double NAV_BAR_HEIGHT = 50;
 
 #pragma mark - TableView Delegate
 
-/* When user taps a cell it moves the checkmark to that cell indicating to the user the profile associated with that cell is now the selected profile. Also sets the 'selectedIndexPath' variable to keep track of which cell is associated with the selected profile */
+/* When user taps a cell it moves the checkmark to that cell indicating to the user the profile associated with that cell is now the selected profile. It also sets that cell's associated OSCProfile object's 'isSelected' property to YES  */
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     NSIndexPath *selectedIndexPath = [NSIndexPath indexPathForRow:indexPath.row inSection:0];
@@ -149,11 +145,11 @@ const double NAV_BAR_HEIGHT = 50;
         UITableViewCell *selectedCell = [tableView cellForRowAtIndexPath: selectedIndexPath];
         selectedCell.accessoryType = UITableViewCellAccessoryCheckmark;  // add checkmark to the cell the user tapped
         OSCProfile *profile = [[profilesManager getAllProfiles] objectAtIndex:indexPath.row];
-        [profilesManager setProfileToSelected: profile.name];   //  set the profile associated with this cell's 'isSelected' property to YES
+        [profilesManager setProfileToSelected: profile.name];   // set the profile associated with this cell's 'isSelected' property to YES
         
         /* Remove checkmark on the previously selected cell  */
         UITableViewCell *lastSelectedCell = [tableView cellForRowAtIndexPath: lastSelectedIndexPath];
-        lastSelectedCell.accessoryType = UITableViewCellAccessoryNone;   // remove checkmark from previously selectec cell
+        lastSelectedCell.accessoryType = UITableViewCellAccessoryNone; 
         [tableView deselectRowAtIndexPath:lastSelectedIndexPath animated:YES];
     }
 }

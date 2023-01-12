@@ -13,6 +13,9 @@
 @class ControllerSupport;
 @class StreamConfiguration;
 
+static const float D_PAD_DIST = 10;
+static const float BUTTON_DIST = 20;
+
 @interface OnScreenControls : NSObject
 
 typedef NS_ENUM(NSInteger, OnScreenControlsLevel) {
@@ -48,7 +51,7 @@ typedef NS_ENUM(NSInteger, OnScreenControlsLevel) {
 @property CALayer* _leftStick;
 @property CALayer* _rightStickBackground;
 @property CALayer* _rightStick;
-@property CALayer *_dPadBackground;    //parent layer that contains each individual dPad button so user can drag them around the screen together
+@property CALayer *_dPadBackground;    // parent layer that contains each individual dPad button so user can drag them around the screen together
 
 @property float D_PAD_CENTER_X;
 @property float D_PAD_CENTER_Y;
@@ -65,9 +68,11 @@ typedef NS_ENUM(NSInteger, OnScreenControlsLevel) {
 - (void) show;
 - (void) setupComplexControls;
 - (void) drawButtons;
-- (void) positionSelectedOSCLayout;
 - (void) updateControls;
 - (OnScreenControlsLevel) getLevel;
+- (void) setDPadCenter;
+- (void) setAnalogStickPositions;
 - (void) hideDPadButtons;
+- (void) positionOSCButtons;
 
 @end

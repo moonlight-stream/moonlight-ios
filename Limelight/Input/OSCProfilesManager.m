@@ -25,42 +25,14 @@
 #pragma mark - Class Helper Methods
 
 /**
- * Returns the profile whose 'name' property has a value that is equal to the 'name' passed into the method
- */
-- (OSCProfile *) OSCProfileWithName:(NSString*)name {
-    // Get the encoded array of encoded OSC profiles from persistent storage
-    NSData *profilesArrayEncoded = [[NSUserDefaults standardUserDefaults] objectForKey:@"OSCProfiles"];
-    NSSet *classes = [NSSet setWithObjects:[NSString class], [NSMutableData class], [NSMutableArray class], [OSCProfile class], [OnScreenButtonState class], nil];
-    
-    // Decode the encoded array itself, NOT the objects contained in the array
-    NSMutableArray *profilesEncoded = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:profilesArrayEncoded error:nil];
-    
-    
-    /* Decode each OSC profile in the array. Iterate through the array and return the first OSC profile whose 'name' property equals the 'name' parameter passed into this method */
-    OSCProfile *profileDecoded;
-    for (NSData *profileEncoded in profilesEncoded) {
-        
-        profileDecoded = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:profileEncoded error:nil];
-        
-        if ([profileDecoded.name isEqualToString:name]) {
-            return profileDecoded;
-        }
-    }
-    
-    return nil;
-}
-
-/**
  * Returns an array of decoded 'OSCProfile'  objects retrieved from persistent storage
  */
-- (NSMutableArray *)getAllProfiles {
+- (NSMutableArray *) getAllProfiles {
     
-    // Get the encoded array of encoded OSC profiles from persistent storage
-    NSData *profilesArrayEncoded = [[NSUserDefaults standardUserDefaults] objectForKey: @"OSCProfiles"];
+    NSData *profilesArrayEncoded = [[NSUserDefaults standardUserDefaults] objectForKey: @"OSCProfiles"];    // Get the encoded array of encoded OSC profiles from persistent storage
     NSSet *classes = [NSSet setWithObjects:[NSString class], [NSMutableData class], [NSMutableArray class], [OSCProfile class], [OnScreenButtonState class], nil];
     
-    // Decode the encoded array itself, NOT the objects contained in the array
-    NSMutableArray *profilesEncoded = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:profilesArrayEncoded error:nil];
+    NSMutableArray *profilesEncoded = [NSKeyedUnarchiver unarchivedObjectOfClasses:classes fromData:profilesArrayEncoded error:nil];    // Decode the encoded array itself, NOT the objects contained in the array
     
     /* Decode each of the encoded profiles, place them into an array, then return the array */
     NSMutableArray *profilesDecoded = [[NSMutableArray alloc] init];
@@ -74,12 +46,29 @@
 }
 
 /**
+ * Returns the profile whose 'name' property has a value that is equal to the 'name' passed into the method
+ */
+- (OSCProfile *) OSCProfileWithName:(NSString*)name {
+    NSMutableArray *profiles = [self getAllProfiles];
+    
+    for (OSCProfile *profile in profiles) {
+                
+        if ([profile.name isEqualToString:name]) {
+            return profile;
+        }
+    }
+    
+    return nil;
+}
+
+/**
  * Returns an array of encoded 'OSCProfile' objects from the array of decoded 'OSCProfile' objects passed into this method
  */
 - (NSMutableArray *) encodedProfilesFromArray:(NSMutableArray *)profiles {
     
     NSMutableArray *profilesEncoded = [[NSMutableArray alloc] init];
-    for (OSCProfile *profile in profiles) {   //add encoded profiles back into an array
+    /* encode each profile and add them back into an array */
+    for (OSCProfile *profile in profiles) {   //
         
         NSData *profileEncoded = [NSKeyedArchiver archivedDataWithRootObject:profile requiringSecureCoding:YES error:nil];
         [profilesEncoded addObject:profileEncoded];
@@ -94,7 +83,7 @@
 - (void) replaceProfile:(OSCProfile*)oldProfile withProfile:(OSCProfile*)newProfile {
     NSMutableArray *profiles = [self getAllProfiles];
 
-    /* Set the new profile as the selected one. The reasoning for this is that this method is currently being used when the user saves over an existing profile with another one of the same name. The expected behavior is that the newly saved profile becomes the selected profile which will show on screen when they launch the game stream view */
+    /* Set the new profile as the selected one. The reasoning behind this is that this method is currently being used when the user saves over an existing profile with another profile that has the same name. The expected behavior is that the newly saved profile becomes the selected profile which will show on screen when they launch the game stream view */
     newProfile.isSelected = YES;
   
     /* Remove the old profile from the array and insert the new profile into its place */
@@ -102,7 +91,6 @@
     for (int i = 0; i < profiles.count; i++) {
         
         if ([[profiles[i] name] isEqualToString: oldProfile.name]) {
-            
             index = i;
         }
     }
@@ -120,7 +108,7 @@
 
 #pragma mark - Globally Accessible Methods
 
-- (OSCProfile *)getSelectedProfile {
+- (OSCProfile *) getSelectedProfile {
     NSMutableArray *profiles = [self getAllProfiles];
 
     for (OSCProfile *profile in profiles) {
@@ -135,7 +123,7 @@
 - (void) setProfileToSelected:(NSString *)name {
     NSMutableArray *profiles = [self getAllProfiles];
     
-    /* Iterate through each profile. If its name equals the value of the 'name' parameter passed into this method then set the profile's 'isSelected' property to YES, otherwise set the value to NO*/
+    /* Iterate through each profile. If its name equals the value of the 'name' parameter passed into this method then set the profile's 'isSelected' property to YES, otherwise set the value to NO */
     for (OSCProfile *profile in profiles) {
                 
         if ([profile.name isEqualToString:name]) {
@@ -148,7 +136,7 @@
     
     NSMutableArray *profilesEncoded = [self encodedProfilesFromArray:profiles];
         
-    /* Encode the array itself, NOT the objects inside the array*/
+    /* Encode the array itself, NOT the objects inside the array */
     NSData *data = [NSKeyedArchiver archivedDataWithRootObject:profilesEncoded requiringSecureCoding:YES error:nil];
     [[NSUserDefaults standardUserDefaults] setObject:data forKey:@"OSCProfiles"];
     [[NSUserDefaults standardUserDefaults] synchronize];
@@ -167,7 +155,7 @@
 }
 
 - (void) saveProfileWithName:(NSString*)name andButtonLayers:(NSMutableArray *)buttonLayers {
-    /* iterate through each OSC button the user sees on screen, create an 'OnScreenButtonState' object from each button, encode the object, and then add the object to an array */
+    /* iterate through each OSC button the user sees on screen, create an 'OnScreenButtonState' object from each button, encode each object, and then add each object to an array */
     NSMutableArray *buttonStatesEncoded = [[NSMutableArray alloc] init];
     for (CALayer *buttonLayer in buttonLayers) {
         
@@ -176,8 +164,8 @@
         [buttonStatesEncoded addObject: buttonStateEncoded];
     }
 
-    //create a new OSCProfile. Set the array of encoded button states created above to the 'buttonStates' property of the new profile, along with name. Set 'isSelected' to YES which will set this saved profile as the one that will show up in the game stream view
-    OSCProfile *newProfile = [[OSCProfile alloc] initWithName:name buttonStates:buttonStatesEncoded isSelected:YES];
+    OSCProfile *newProfile = [[OSCProfile alloc] initWithName:name buttonStates:buttonStatesEncoded isSelected:YES];        // create a new OSCProfile. Set the array of encoded button states created above to the 'buttonStates' property of the new profile, along with name. Set 'isSelected' argument to YES which will set this saved profile as the one that will show up in the game stream view
+
     
     /* set all saved OSCProfiles 'isSelected' property to NO since the new profile you're adding will be set as the selected profile */
     NSMutableArray *profiles = [self getAllProfiles];
@@ -187,11 +175,9 @@
     }
     
     if ([self profileNameAlreadyExist:name]) {  //if profile with 'name' already exists then overwrite it
-                        
         [self replaceProfile:[self OSCProfileWithName:name] withProfile:newProfile];
     }
     else {  //otherwise encode then add the new profile to the end of the OSCProfiles array
-                
         NSData *newProfileEncoded = [NSKeyedArchiver archivedDataWithRootObject:newProfile requiringSecureCoding:YES error:nil];
         NSMutableArray *profilesEncoded = [self encodedProfilesFromArray:profiles];
         [profilesEncoded addObject:newProfileEncoded];
@@ -210,7 +196,6 @@
     for (OSCProfile *profile in profiles) {
         
         if ([profile.name isEqualToString:name]) {
-            
             return YES;
         }
     }

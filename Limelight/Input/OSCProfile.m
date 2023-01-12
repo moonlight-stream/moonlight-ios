@@ -10,20 +10,18 @@
 
 @implementation OSCProfile
 
-+ (BOOL) supportsSecureCoding
-{
-    return YES;
-}
-
 - (id) initWithName:(NSString*)name buttonStates:(NSMutableArray*)buttonStates isSelected:(BOOL)isSelected {
     if ((self = [self init])) {
-        
         self.name = name;
         self.buttonStates = buttonStates;
         self.isSelected = isSelected;
     }
     
     return self;
+}
+
++ (BOOL) supportsSecureCoding {
+    return YES;
 }
 
 - (void) encodeWithCoder:(NSCoder*)encoder {
@@ -33,9 +31,7 @@
 }
 
 - (id) initWithCoder:(NSCoder*)decoder {
-    
     if (self = [super init]) {
-        
         self.name = [decoder decodeObjectForKey:@"name"];
         self.buttonStates = [decoder decodeObjectForKey:@"buttonStates"];
         self.isSelected = [decoder decodeBoolForKey:@"isSelected"];

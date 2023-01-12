@@ -597,6 +597,8 @@
 				FB89460D19F646E200339C8A /* StreamView.m */,
 				FB4678EB1A50C40900377732 /* OnScreenControls.h */,
 				FB4678EC1A50C40900377732 /* OnScreenControls.m */,
+				450B660329147B110057517C /* LayoutOnScreenControls.h */,
+				450B660429147B120057517C /* LayoutOnScreenControls.m */,
 				450B660C29147C2A0057517C /* OnScreenButtonState.h */,
 				450B660B29147C2A0057517C /* OnScreenButtonState.m */,
 				450112C929563A9600FD306F /* OSCProfile.h */,
@@ -613,8 +615,6 @@
 				9819CC13254F107A008A7C8E /* RelativeTouchHandler.m */,
 				9819CC20254F180F008A7C8E /* AbsoluteTouchHandler.h */,
 				9819CC21254F180F008A7C8E /* AbsoluteTouchHandler.m */,
-				450B660329147B110057517C /* LayoutOnScreenControls.h */,
-				450B660429147B120057517C /* LayoutOnScreenControls.m */,
 			);
 			path = Input;
 			sourceTree = "<group>";
