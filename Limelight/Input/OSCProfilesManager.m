@@ -25,7 +25,7 @@
 #pragma mark - Class Helper Methods
 
 /**
- * Returns the profile whose 'name' property has a value that is equal to the 'name' param
+ * Returns the profile whose 'name' property has a value that is equal to the 'name' passed into the method
  */
 - (OSCProfile *) OSCProfileWithName:(NSString*)name {
     // Get the encoded array of encoded OSC profiles from persistent storage
@@ -111,7 +111,7 @@
     
     NSMutableArray *profilesEncoded = [self encodedProfilesFromArray:profiles];
     
-    /* Encode the array itself, which contains encoded profiles. Save it to persistent storage */
+    /* Encode the array itself, NOT the objects in the array, which are already encoded. Save array to persistent storage */
     NSData *data = [NSKeyedArchiver archivedDataWithRootObject:profilesEncoded requiringSecureCoding:YES error:nil];
     [[NSUserDefaults standardUserDefaults] setObject:data forKey:@"OSCProfiles"];
     [[NSUserDefaults standardUserDefaults] synchronize];
@@ -155,7 +155,6 @@
 }
 
 - (NSInteger) getIndexOfSelectedProfile {
-    
     NSInteger index = 0;
     NSMutableArray *profiles = [self getAllProfiles];
     for (OSCProfile *profile in profiles) {

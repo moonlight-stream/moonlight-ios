@@ -189,10 +189,14 @@ static float L3_Y;
     [self.OSCButtonLayers addObject:_rightButton];
     [self.OSCButtonLayers addObject:_leftStickBackground];
     [self.OSCButtonLayers addObject:_rightStickBackground];
+    [self.OSCButtonLayers addObject:_leftStick];
+    [self.OSCButtonLayers addObject:_rightStick];
 
-    //Name every on screen button to reference them more easily when iterating through the OSC buttons
+    /* Name every on screen button to reference them more easily when iterating through the OSC buttons */
     _leftStickBackground.name = @"leftStickBackground";
     _rightStickBackground.name = @"rightStickBackground";
+    _leftStick.name = @"leftStick";
+    _rightStick.name = @"rightStick";
     _aButton.name = @"aButton";
     _bButton.name = @"bButton";
     _xButton.name = @"xButton";
@@ -302,13 +306,14 @@ static float L3_Y;
             
             [self setupComplexControls];    //  Default postion for D-Pad set here
             [self setDPadCenter];    // Custom position for D-Pad set here
+            [self setAnalogStickPositions]; //
             [self drawButtons];
             [self drawStartSelect];
             [self drawBumpers];
             [self drawTriggers];
             [self drawSticks];
             
-            if ([[profilesManager getAllProfiles] count] == 0) { // if no saved OSC profiles exist yet so create one called 'Default' and associate it with Moonlight's legacy 'Full' OSC layout that's already been laid out on the screen at this point
+            if ([[profilesManager getAllProfiles] count] == 0) { // if no saved OSC profiles exist yet then create one called 'Default' and associate it with Moonlight's legacy 'Full' OSC layout that's already been laid out on the screen at this point
                 [profilesManager saveProfileWithName:@"Default" andButtonLayers:self.OSCButtonLayers];
             }
             else {
@@ -542,7 +547,7 @@ static float L3_Y;
 }
 
 /**
- * Sets D-Pad position for class var
+ * Sets D-Pad position for class const var
  */
 - (void) setDPadCenter {
     OSCProfile *oscProfile = [profilesManager getSelectedProfile]; //returns the currently selected OSCProfile
@@ -558,34 +563,21 @@ static float L3_Y;
 }
 
 /**
- * Positions the analog stick layers according to the OSC layout profile's directions
+ * Sets analog stick positions for class const var
  */
 - (void) setAnalogStickPositions {
-    OSCProfile *oscProfile = [profilesManager getSelectedProfile]; 
+    OSCProfile *oscProfile = [profilesManager getSelectedProfile]; //returns the currently selected OSCProfile
     
-    for (NSData *buttonStateEncoded in oscProfile.buttonStates) {    //  iterate through each button associated with the currently selected OSC profile and set the analog stick positions and hide/unhide them accordingly
-        OnScreenButtonState *onScreenButtonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateEncoded error:nil];
-        
-        if ([onScreenButtonState.name isEqualToString:@"leftStickBackground"]) {
-            LS_CENTER_X = onScreenButtonState.position.x;
-            LS_CENTER_Y = onScreenButtonState.position.y;
-
-            _leftStickBackground.position = onScreenButtonState.position;
-            _leftStickBackground.hidden = onScreenButtonState.isHidden;
+    for (NSData *buttonStateEncoded in oscProfile.buttonStates) {
+        OnScreenButtonState *buttonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateEncoded error:nil];
             
-            _leftStick.position = _leftStickBackground.position;
-            _leftStick.hidden = onScreenButtonState.isHidden;
+        if ([buttonState.name isEqualToString:@"leftStickBackground"]) {
+            LS_CENTER_X = buttonState.position.x;
+            LS_CENTER_Y = buttonState.position.y;
         }
-        
-        if ([onScreenButtonState.name isEqualToString:@"rightStickBackground"]) {
-            RS_CENTER_X = onScreenButtonState.position.x;
-            RS_CENTER_Y = onScreenButtonState.position.y;
-
-            _rightStickBackground.position = onScreenButtonState.position;
-            _rightStickBackground.hidden = onScreenButtonState.isHidden;
-            
-            _rightStick.position = _rightStickBackground.position;
-            _rightStick.hidden = onScreenButtonState.isHidden;
+        if ([buttonState.name isEqualToString:@"rightStickBackground"]) {
+            RS_CENTER_X = buttonState.position.x;
+            RS_CENTER_Y = buttonState.position.y;
         }
     }
 }
@@ -604,13 +596,21 @@ static float L3_Y;
 
             if ([buttonLayer.name isEqualToString:buttonStateDecoded.name]) {
                 
-                buttonLayer.position = buttonStateDecoded.position;
-                buttonLayer.hidden = buttonStateDecoded.isHidden;
+                if ([buttonLayer.name isEqualToString:@"upButton"] == NO &&
+                    [buttonLayer.name isEqualToString:@"rightButton"] == NO &&
+                    [buttonLayer.name isEqualToString:@"downButton"] == NO &&
+                    [buttonLayer.name isEqualToString:@"leftButton"] == NO &&
+                    [buttonLayer.name isEqualToString:@"leftStick"] == NO &&
+                    [buttonLayer.name isEqualToString:@"rightStick"] == NO) {   //  Don't move these buttons since they've already been positioned in the 'drawButtons' and 'drawSticks' methods called before this method
+                    
+                    buttonLayer.position = buttonStateDecoded.position;
+                    buttonLayer.hidden = buttonStateDecoded.isHidden;
+                }
             }
         }
     }
     
-    [self setAnalogStickPositions];
+//    [self setAnalogStickPositions];
 }
 
 - (void) drawStartSelect {

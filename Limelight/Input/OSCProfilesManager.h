@@ -43,7 +43,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 /**
- * Saves a profile object that has a particular 'name' and an array of button layers (usually the button layers currently visible on screen during game streaming or the OSC layout customization view) to persistent storage
+ * Saves a profile object that has a particular 'name' and an array of button layers ( the button layers are the objects currently visible on screen during game streaming or the OSC layout customization view) to persistent storage
  */
 - (void) saveProfileWithName:(NSString*)name andButtonLayers:(NSMutableArray *)buttonLayers;
 
