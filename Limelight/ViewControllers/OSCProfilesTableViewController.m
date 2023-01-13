@@ -43,9 +43,7 @@ const double NAV_BAR_HEIGHT = 50;
     [super viewDidAppear: animated];
     
     if ([[profilesManager getAllProfiles] count] > 0) { // scroll to selected profile if user has any saved profiles
-        OSCProfile *selectedOSCProfile = [profilesManager getSelectedProfile];
-        NSUInteger index = [[profilesManager getAllProfiles] indexOfObject:selectedOSCProfile];
-        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:[profilesManager getIndexOfSelectedProfile] inSection:0];
         [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
     }
 }
