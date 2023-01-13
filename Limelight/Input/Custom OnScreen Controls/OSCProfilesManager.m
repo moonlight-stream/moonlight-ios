@@ -177,10 +177,10 @@
         profile.isSelected = NO;
     }
     
-    if ([self profileNameAlreadyExist:name]) {  //if profile with 'name' already exists then overwrite it
+    if ([self profileNameAlreadyExist:name]) {  // if profile with 'name' already exists then overwrite it
         [self replaceProfile:[self OSCProfileWithName:name] withProfile:newProfile];
     }
-    else {  //otherwise encode then add the new profile to the end of the OSCProfiles array
+    else {  // otherwise encode then add the new profile to the end of the OSCProfiles array
         NSData *newProfileEncoded = [NSKeyedArchiver archivedDataWithRootObject:newProfile requiringSecureCoding:YES error:nil];
         NSMutableArray *profilesEncoded = [self encodedProfilesFromArray:profiles];
         [profilesEncoded addObject:newProfileEncoded];

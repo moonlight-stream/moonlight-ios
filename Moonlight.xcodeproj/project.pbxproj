@@ -471,6 +471,7 @@
 		4570906F2971E63000DCAE4F /* Custom OnScreen Controls */ = {
 			isa = PBXGroup;
 			children = (
+				4573A43C29467F03000A036A /* Cells */,
 				450B65FD29147AB30057517C /* LayoutOnScreenControlsViewController.h */,
 				450B65FE29147AB40057517C /* LayoutOnScreenControlsViewController.m */,
 				45999AEC2935451D0073975D /* OSCProfilesTableViewController.h */,
@@ -690,7 +691,6 @@
 		FB89462319F646E200339C8A /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
-				4573A43C29467F03000A036A /* Cells */,
 				FBD3495119FF36FB002D2A60 /* SWRevealViewController.h */,
 				FBD3495219FF36FB002D2A60 /* SWRevealViewController.m */,
 				FB89462419F646E200339C8A /* MainFrameViewController.h */,

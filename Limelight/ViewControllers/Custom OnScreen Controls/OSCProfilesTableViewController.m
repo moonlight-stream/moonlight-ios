@@ -122,8 +122,6 @@ const double NAV_BAR_HEIGHT = 50;
             NSData *profileEncoded = [NSKeyedArchiver archivedDataWithRootObject:profileDecoded requiringSecureCoding:YES error:nil];
             [profilesEncoded addObject:profileEncoded];
         }
-        
-        
         NSData *data = [NSKeyedArchiver archivedDataWithRootObject:profilesEncoded
                                              requiringSecureCoding:YES error:nil];  // encode the array itself, NOT the objects in the array
         [[NSUserDefaults standardUserDefaults] setObject:data forKey:@"OSCProfiles"];

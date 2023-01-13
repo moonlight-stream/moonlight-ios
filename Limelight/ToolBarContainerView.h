@@ -10,8 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-/* Allows the ToolBar to accept touches on the small UIView 'tab' protruding from its bottom center*/
-
+/* Allows the ToolBar in the 'LayoutOnScreenControlsViewController' to accept touches on the small UIView 'tab' protruding from its bottom center*/
 @interface ToolBarContainerView : UIView
 
 @end

@@ -266,7 +266,7 @@ BOOL isCustomResolution(CGSize res) {
     tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(OSCSegmentControlTouched:)];  // detects when OSC segmented control button is re-selected
     [self.onscreenControlSelector addGestureRecognizer:tapGesture];
 
-    /* set reference to modal view controller which lets user layout OSC */
+    /* sets a reference to the correct 'LayoutOnScreenControlsViewController' depending on whether the user is on an iPhone or iPad */
     self.layoutOnScreenControlsVC = [[LayoutOnScreenControlsViewController alloc] init];
     BOOL isIPhone = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone);
     if (isIPhone) {
