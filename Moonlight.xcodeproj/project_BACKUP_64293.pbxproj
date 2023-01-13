@@ -1456,7 +1456,12 @@
 					"$(PROJECT_DIR)/libs/openssl/lib/iOS",
 					"$(PROJECT_DIR)/libs/SDL2/lib/iOS",
 				);
+<<<<<<< HEAD
+				MARKETING_VERSION = 8.3.1;
+				ONLY_ACTIVE_ARCH = YES;
+=======
 				MARKETING_VERSION = 8.4.1;
+>>>>>>> 1c90ee607af767ebdce240d0a8f3103a2d3af9b8
 				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";

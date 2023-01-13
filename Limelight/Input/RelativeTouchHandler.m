@@ -18,6 +18,7 @@ static const int REFERENCE_HEIGHT = 720;
     BOOL touchMoved;
     BOOL isDragging;
     NSTimer* dragTimer;
+    NSUInteger peakTouchCount;
     
 #if TARGET_OS_TV
     UIGestureRecognizer* remotePressRecognizer;
@@ -59,6 +60,7 @@ static const int REFERENCE_HEIGHT = 720;
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     touchMoved = false;
+    peakTouchCount = [[event allTouches] count];
     if ([[event allTouches] count] == 1) {
         UITouch *touch = [[event allTouches] anyObject];
         originalLocation = touchLocation = [touch locationInView:view];
@@ -126,7 +128,7 @@ static const int REFERENCE_HEIGHT = 720;
         isDragging = false;
         LiSendMouseButtonEvent(BUTTON_ACTION_RELEASE, BUTTON_LEFT);
     } else if (!touchMoved) {
-        if ([[event allTouches] count]  == 2) {
+        if (peakTouchCount == 2) {
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
                 Log(LOG_D, @"Sending right mouse button press");
                 
@@ -137,7 +139,7 @@ static const int REFERENCE_HEIGHT = 720;
                 
                 LiSendMouseButtonEvent(BUTTON_ACTION_RELEASE, BUTTON_RIGHT);
             });
-        } else if ([[event allTouches] count]  == 1) {
+        } else if (peakTouchCount == 1) {
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
                 if (!self->isDragging){
                     Log(LOG_D, @"Sending left mouse button press");
@@ -175,6 +177,7 @@ static const int REFERENCE_HEIGHT = 720;
         isDragging = false;
         LiSendMouseButtonEvent(BUTTON_ACTION_RELEASE, BUTTON_LEFT);
     }
+    peakTouchCount = 0;
 }
 
 #if TARGET_OS_TV

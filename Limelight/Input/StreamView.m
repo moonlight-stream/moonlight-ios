@@ -13,13 +13,14 @@
 #import "KeyboardSupport.h"
 #import "RelativeTouchHandler.h"
 #import "AbsoluteTouchHandler.h"
+#import "KeyboardInputField.h"
 
 static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
 @implementation StreamView {
     OnScreenControls* onScreenControls;
     
-    UITextField* keyInputField;
+    KeyboardInputField* keyInputField;
     BOOL isInputingText;
     
     float streamAspectRatio;
@@ -52,7 +53,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     
     TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
     
-    keyInputField = [[UITextField alloc] initWithFrame:CGRectZero];
+    keyInputField = [[KeyboardInputField alloc] initWithFrame:CGRectZero];
     [keyInputField setKeyboardType:UIKeyboardTypeDefault];
     [keyInputField setAutocorrectionType:UITextAutocorrectionTypeNo];
     [keyInputField setAutocapitalizationType:UITextAutocapitalizationTypeNone];
@@ -179,6 +180,13 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     [self startInteractionTimer];
     
     if (![onScreenControls handleTouchDownEvent:touches]) {
+        // We still inform the touch handler even if we're going trigger the
+        // keyboard activation gesture. This is important to ensure the touch
+        // handler has a consistent view of touch events to correctly suppress
+        // activation of one or two finger gestures when a three finger gesture
+        // is triggered.
+        [touchHandler touchesBegan:touches withEvent:event];
+        
         if ([[event allTouches] count] == 3) {
             if (isInputingText) {
                 Log(LOG_D, @"Closing the keyboard");
@@ -197,9 +205,6 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
                 
                 isInputingText = true;
             }
-        }
-        else {
-            [touchHandler touchesBegan:touches withEvent:event];
         }
     }
 }
