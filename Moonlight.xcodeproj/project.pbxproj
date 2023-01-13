@@ -453,6 +453,32 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4570906E2970F6A300DCAE4F /* Custom OnScreen Controls */ = {
+			isa = PBXGroup;
+			children = (
+				450B660C29147C2A0057517C /* OnScreenButtonState.h */,
+				450B660B29147C2A0057517C /* OnScreenButtonState.m */,
+				450112C929563A9600FD306F /* OSCProfile.h */,
+				450112C829563A9600FD306F /* OSCProfile.m */,
+				4505461029625AF300439FF7 /* OSCProfilesManager.h */,
+				4505461129625AF300439FF7 /* OSCProfilesManager.m */,
+				450B660329147B110057517C /* LayoutOnScreenControls.h */,
+				450B660429147B120057517C /* LayoutOnScreenControls.m */,
+			);
+			path = "Custom OnScreen Controls";
+			sourceTree = "<group>";
+		};
+		4570906F2971E63000DCAE4F /* Custom OnScreen Controls */ = {
+			isa = PBXGroup;
+			children = (
+				450B65FD29147AB30057517C /* LayoutOnScreenControlsViewController.h */,
+				450B65FE29147AB40057517C /* LayoutOnScreenControlsViewController.m */,
+				45999AEC2935451D0073975D /* OSCProfilesTableViewController.h */,
+				45999AED2935451D0073975D /* OSCProfilesTableViewController.m */,
+			);
+			path = "Custom OnScreen Controls";
+			sourceTree = "<group>";
+		};
 		4573A43C29467F03000A036A /* Cells */ = {
 			isa = PBXGroup;
 			children = (
@@ -601,14 +627,7 @@
 				FB89460D19F646E200339C8A /* StreamView.m */,
 				FB4678EB1A50C40900377732 /* OnScreenControls.h */,
 				FB4678EC1A50C40900377732 /* OnScreenControls.m */,
-				450B660329147B110057517C /* LayoutOnScreenControls.h */,
-				450B660429147B120057517C /* LayoutOnScreenControls.m */,
-				450B660C29147C2A0057517C /* OnScreenButtonState.h */,
-				450B660B29147C2A0057517C /* OnScreenButtonState.m */,
-				450112C929563A9600FD306F /* OSCProfile.h */,
-				450112C829563A9600FD306F /* OSCProfile.m */,
-				4505461029625AF300439FF7 /* OSCProfilesManager.h */,
-				4505461129625AF300439FF7 /* OSCProfilesManager.m */,
+				4570906E2970F6A300DCAE4F /* Custom OnScreen Controls */,
 				FB1A674B2131E65900507771 /* KeyboardSupport.h */,
 				FB1A674C2131E65900507771 /* KeyboardSupport.m */,
 				9897B6A0221260EF00966419 /* Controller.m */,
@@ -682,10 +701,7 @@
 				FBD3494F19FF2174002D2A60 /* SettingsViewController.m */,
 				FB4A23B61A9D3637004D2EF2 /* LoadingFrameViewController.h */,
 				FB4A23B71A9D3637004D2EF2 /* LoadingFrameViewController.m */,
-				450B65FD29147AB30057517C /* LayoutOnScreenControlsViewController.h */,
-				450B65FE29147AB40057517C /* LayoutOnScreenControlsViewController.m */,
-				45999AEC2935451D0073975D /* OSCProfilesTableViewController.h */,
-				45999AED2935451D0073975D /* OSCProfilesTableViewController.m */,
+				4570906F2971E63000DCAE4F /* Custom OnScreen Controls */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";

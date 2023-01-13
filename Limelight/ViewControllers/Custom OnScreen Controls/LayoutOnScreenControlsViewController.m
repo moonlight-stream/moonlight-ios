@@ -46,8 +46,8 @@
     /* Add swipe gesture to toolbar to allow user to swipe it up and off screen */
     UISwipeGestureRecognizer *swipeUp = [[UISwipeGestureRecognizer alloc]initWithTarget:self action:@selector(moveToolbar:)];
     swipeUp.direction = UISwipeGestureRecognizerDirectionUp;
-    [self.chevronView addGestureRecognizer:swipeUp];
-    [self.chevronImageView addGestureRecognizer:swipeUp];
+    [self.toolbarRootView addGestureRecognizer:swipeUp];
+    [self.toolbarRootView addGestureRecognizer:swipeUp];
 
     /* Add tap gesture to toolbar's chevron to allow user to tap it in order to move the toolbar on and off screen */
     UITapGestureRecognizer *singleFingerTap =
@@ -203,7 +203,7 @@
         textField.clearButtonMode = UITextFieldViewModeWhileEditing;
         textField.borderStyle = UITextBorderStyleNone;
     }];
-    [inputNameAlertController addAction:[UIAlertAction actionWithTitle:@"Save" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {   // add save button to pop up notification
+    [inputNameAlertController addAction:[UIAlertAction actionWithTitle:@"Save" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {   // add save button to allow user to save the on screen controller configuration
         NSArray *textFields = inputNameAlertController.textFields;
         UITextField *nameField = textFields[0];
         NSString *enteredProfileName = nameField.text;
@@ -218,10 +218,10 @@
             }]];
             [self presentViewController:alertController animated:YES completion:nil];
         }
-        else if ([enteredProfileName length] == 0) {    //if user entered no text and taps the 'Save' button let them know they can't do that
+        else if ([enteredProfileName length] == 0) {    // if user entered no text and taps the 'Save' button let them know they can't do that
             UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [NSString stringWithFormat:@"Profile name cannot be blank!"] preferredStyle:UIAlertControllerStyleAlert];
             
-            [savedAlertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) { //show pop up notification letting user know they must enter a name in the text field if they wish to save the controller profile
+            [savedAlertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) { // show pop up notification letting user know they must enter a name in the text field if they wish to save the controller profile
                 
                 [savedAlertController dismissViewControllerAnimated:NO completion:^{
                     [self presentViewController:inputNameAlertController animated:YES completion:nil];
@@ -232,11 +232,11 @@
         else if ([self->profilesManager profileNameAlreadyExist:enteredProfileName] == YES) {  // if the entered profile name already exists then let the user know. Offer to allow them to overwrite the existing profile
             UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [NSString stringWithFormat:@"Another profile with the name '%@' already exists! Do you want to overwrite it?", enteredProfileName] preferredStyle:UIAlertControllerStyleAlert];
             
-            [savedAlertController addAction:[UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {    //overwrite existing profile
+            [savedAlertController addAction:[UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {    // overwrite existing profile
                 [self->profilesManager saveProfileWithName: enteredProfileName andButtonLayers:self.layoutOSC.OSCButtonLayers];
             }]];
             
-            [savedAlertController addAction:[UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) { //don't overwrite the existing profile
+            [savedAlertController addAction:[UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) { // don't overwrite the existing profile
                 [savedAlertController dismissViewControllerAnimated:NO completion:nil];
             }]];
             [self presentViewController:savedAlertController animated:YES completion:nil];
@@ -245,7 +245,7 @@
             [self->profilesManager saveProfileWithName: enteredProfileName andButtonLayers:self.layoutOSC.OSCButtonLayers];
             [self->profilesManager setProfileToSelected: enteredProfileName];
             
-            UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [NSString stringWithFormat:@"%@ profile saved and set as your active in-game controller profile layout", enteredProfileName] preferredStyle:UIAlertControllerStyleAlert];  //Let user know this profile has been saved and is now the selected controller layout
+            UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [NSString stringWithFormat:@"%@ profile saved and set as your active in-game controller profile layout", enteredProfileName] preferredStyle:UIAlertControllerStyleAlert];  // Let user know this profile has been saved and is now the selected controller layout
             
             [savedAlertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
                 [savedAlertController dismissViewControllerAnimated:NO completion:nil];
@@ -253,7 +253,7 @@
             [self presentViewController:savedAlertController animated:YES completion:nil];
         }
     }]];
-    [inputNameAlertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) { //adds a button that allows user to decline the option to save the controller layout they currently see on screen 
+    [inputNameAlertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) { // adds a button that allows user to decline the option to save the controller layout they currently see on screen
         [inputNameAlertController dismissViewControllerAnimated:NO completion:nil];
     }]];
     [self presentViewController:inputNameAlertController animated:YES completion:nil];
@@ -272,12 +272,12 @@
     
     OSCProfilesTableViewController *vc = [storyboard   instantiateViewControllerWithIdentifier:@"OSCProfilesTableViewController"] ;
     
-    vc.didDismissOSCProfilesTVC = ^() {   // block that will be called when the modally presented 'OSCProfilesTableViewController' VC is dismissed. By the time the 'OSCProfilesTableViewController' VC is dismissed the user would have potentially selected a different OSC profile with a different layout and they want to see this layout on this 'LayoutOnScreenControlsViewController.' This code will load the profile and then hide/show and move each OSC button to their appropriate position
+    vc.didDismissOSCProfilesTVC = ^() {   // a block that will be called when the modally presented 'OSCProfilesTableViewController' VC is dismissed. By the time the 'OSCProfilesTableViewController' VC is dismissed the user would have potentially selected a different OSC profile with a different layout and they want to see this layout on this 'LayoutOnScreenControlsViewController.' This block of code will load the profile and then hide/show and move each OSC button to their appropriate position
         [self.layoutOSC updateControls];  // creates and saves a 'Default' OSC profile or loads the one the user selected on the previous screen
         
         [self addInnerAnalogSticksToOuterAnalogLayers];
         
-        [self.layoutOSC.layoutChanges removeAllObjects];  //since a new OSC profile is being loaded, this will remove all previous layout changes made from the array
+        [self.layoutOSC.layoutChanges removeAllObjects];  // since a new OSC profile is being loaded, this will remove all previous layout changes made from the array
         
         [self OSCLayoutChanged];    // fades the 'Undo Button' out
     };
@@ -285,7 +285,7 @@
 }
 
 
-#pragma mark - Touch Methods
+#pragma mark - Touch
 
 - (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     for (UITouch* touch in touches) {

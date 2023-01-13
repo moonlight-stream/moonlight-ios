@@ -41,12 +41,14 @@
     return self;
 }
 
+#pragma mark - Drawing
+
 /**
- * This method overrides the superclass's drawButtons method. The purpose of this method is to create a dPad parent layer, and add the four dPad buttons to it so that the user can drag the entire dPad around, directional buttons and all, as one unit as is the expected behavior. Note that we do not want the four dPad buttons to be child layers of a parent layer on the game stream view since the touch logic for the four dPad buttons on the game stream view is written assuming the dPad buttons are child layers of the game stream VC's 'view'
+ * This method overrides the superclass's drawButtons method. The purpose of this method is to create a dPad parent layer, and add the four dPad buttons to it so that the user can drag the entire dPad around, directional buttons and all, as one unit as is the expected behavior. Note that we do not want the four dPad buttons to be child layers of a CALayer parent layer on the game stream view since the touch logic implemented for the four dPad buttons on the game stream view is written assuming the dPad buttons are not children of another parent CALayer
  */
 - (void) drawButtons {
-    [super setDPadCenter];    // Custom position for D-Pad set here
-    [super setAnalogStickPositions]; // Custom position for analog sticks set here
+    [super setDPadCenter];    // Set custom position for D-Pad here
+    [super setAnalogStickPositions]; // Set custom position for analog sticks here
     [super drawButtons];
     
     UIImage* downButtonImage = [UIImage imageNamed:@"DownButton"];
@@ -61,7 +63,7 @@
                                       self.D_PAD_CENTER_Y,
                                       self._leftButton.frame.size.width * 2 + BUTTON_DIST,
                                       self._leftButton.frame.size.width * 2 + BUTTON_DIST);
-    self._dPadBackground.position = CGPointMake(self.D_PAD_CENTER_X, self.D_PAD_CENTER_Y);    // since dPadBackground's dimensions have change you need to reset its position again here
+    self._dPadBackground.position = CGPointMake(self.D_PAD_CENTER_X, self.D_PAD_CENTER_Y);    // since dPadBackground's dimensions have change after settings its width and height you need to reset its position again here
     [self.OSCButtonLayers addObject:self._dPadBackground];
     [_view.layer addSublayer:self._dPadBackground];
 
@@ -93,8 +95,11 @@
     [self._view addSubview: verticalGuideline];
 }
 
-/* used to determine whether user is dragging an OSC button (of type CALayer) over the trash can with the intent of deleting that button*/
-- (BOOL)isLayer:(CALayer *)layer hoveringOverButton:(UIButton *)button {
+
+#pragma mark - Queries
+
+/* used to determine whether user is dragging an OSC button (of type CALayer) over the trash can with the intent of hiding that button */
+- (BOOL) isLayer:(CALayer *)layer hoveringOverButton:(UIButton *)button {
     CGRect buttonConvertedRect = [self._view convertRect:button.imageView.frame fromView:button.superview];
     
     if (CGRectIntersectsRect(layer.frame, buttonConvertedRect)) {
@@ -105,18 +110,10 @@
     }
 }
 
-/* returns reference to button layer object given the button's name*/
-- (CALayer*)buttonLayerFromName: (NSString*)name {
-    for (CALayer *buttonLayer in self.OSCButtonLayers) {
-        
-        if ([buttonLayer.name isEqualToString:name]) {
-            return buttonLayer;
-        }
-    }
-    return nil;
-}
 
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+#pragma mark - Touch 
+
+- (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     for (UITouch* touch in touches) {
         
         CGPoint touchLocation = [touch locationInView:_view];
@@ -127,16 +124,19 @@
             return;
         }
         
-        if (touchedLayer == super._upButton || touchedLayer == super._downButton || touchedLayer == super._leftButton || touchedLayer == super._rightButton) { // don't let user move individual dPad buttons
+        if (touchedLayer == super._upButton ||
+            touchedLayer == super._downButton ||
+            touchedLayer == super._leftButton ||
+            touchedLayer == super._rightButton) { // don't let user move individual dPad buttons
             layerCurrentlyBeingTouched = super._dPadBackground;
-            
-        } else if (touchedLayer == self._rightStick) {  // only let user move right stick background, not the stick itself
+        }
+        else if (touchedLayer == self._rightStick) {  // only let user move right stick background, not the stick itself
             layerCurrentlyBeingTouched = self._rightStickBackground;
-            
-        } else if (touchedLayer == self._leftStick) {  // only let user move left stick background, not the stick itself
+        }
+        else if (touchedLayer == self._leftStick) {  // only let user move left stick background, not the stick itself
             layerCurrentlyBeingTouched = self._leftStickBackground;
-            
-        } else {    // let user move whatever other valid button they're touching
+        }
+        else {    // let user move whatever other valid button they're touching
             layerCurrentlyBeingTouched = touchedLayer;
         }
         
@@ -154,11 +154,12 @@
     }
 }
 
-- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+- (void) touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
     UITouch *touch = [touches anyObject];
     CGPoint touchLocation = [touch locationInView:_view];
     layerCurrentlyBeingTouched.position = touchLocation; // move object to touch location
     
+    /* have guidelines follow wherever the user is touching on the screen */
     horizontalGuideline.center = layerCurrentlyBeingTouched.position;
     verticalGuideline.center = layerCurrentlyBeingTouched.position;
     
@@ -195,14 +196,14 @@
     }
 }
 
-- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
+- (void) touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
     layerCurrentlyBeingTouched = nil;
          
     horizontalGuideline.hidden = YES;
     verticalGuideline.hidden = YES;
 }
 
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+- (void) touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
     layerCurrentlyBeingTouched = nil;
     
     horizontalGuideline.hidden = YES;

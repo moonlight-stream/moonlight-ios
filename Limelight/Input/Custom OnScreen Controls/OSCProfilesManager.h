@@ -11,6 +11,10 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+ This singleton object can be accessed from any class and provides methods to get and set on screen controller profile related data.
+ Note that the implementation file contains a number of 'Helper' methods. These helper methods are only used in this class's implementation file and help to reduce re-writing large blocks of code that are called multiple times throughout the file
+ */
 @interface OSCProfilesManager : NSObject
 
 
@@ -18,7 +22,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - Getters
 /**
- * Returns OSC Profile that is currently selected to be displayed on screen during game streaming
+ * Returns an array of decoded profile objects 
+ */
+- (NSMutableArray *) getAllProfiles;
+
+/**
+ * Returns the OSC Profile that is currently selected to be displayed on screen during game streaming
  */
 - (OSCProfile *) getSelectedProfile;
 
@@ -27,10 +36,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (NSInteger) getIndexOfSelectedProfile;
 
-/**
- * Returns an array of decoded profile objects
- */
-- (NSMutableArray *) getAllProfiles;
+
 
 
 #pragma mark - Setters

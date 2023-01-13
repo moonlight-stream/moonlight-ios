@@ -12,10 +12,13 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+ This view controller provides the user interface which allows the user to position on screen controller buttons and hide/unhide them. It also provides the user with the abilities to undo a change, save the on screen controller layout for later retrieval, and load previously saved controller layouts
+ */
 @interface LayoutOnScreenControlsViewController : UIViewController 
 
 
-@property LayoutOnScreenControls *layoutOSC;
+@property LayoutOnScreenControls *layoutOSC;    // object that contains a view which contains the on screen controller buttons that allows the user to drag and positions each button on the screen using touch
 @property int OSCSegmentSelected;
 
 @property (weak, nonatomic) IBOutlet UIButton *trashCanButton;
