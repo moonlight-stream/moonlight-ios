@@ -34,8 +34,8 @@
     
     profilesManager = [OSCProfilesManager sharedManager];
 
-    isToolbarHidden = NO;
-        
+    isToolbarHidden = NO;   // keeps track if the toolbar is hidden up above the screen so that we know whether to hide or show it when the user taps the toolbar's hide/show button
+            
     /* add curve to bottom of chevron tab view */
     UIBezierPath *maskPath = [UIBezierPath bezierPathWithRoundedRect:self.chevronView.bounds byRoundingCorners:(UIRectCornerBottomLeft | UIRectCornerBottomRight) cornerRadii:CGSizeMake(10.0, 10.0)];
     CAShapeLayer *maskLayer = [[CAShapeLayer alloc] init];
@@ -44,9 +44,8 @@
     self.chevronView.layer.mask = maskLayer;
     
     /* Add swipe gesture to toolbar to allow user to swipe it up and off screen */
-    UISwipeGestureRecognizer *swipeUp = [[UISwipeGestureRecognizer alloc]initWithTarget:self action:@selector(moveToolbar:)];
+    UISwipeGestureRecognizer *swipeUp = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(moveToolbar:)];
     swipeUp.direction = UISwipeGestureRecognizerDirectionUp;
-    [self.toolbarRootView addGestureRecognizer:swipeUp];
     [self.toolbarRootView addGestureRecognizer:swipeUp];
 
     /* Add tap gesture to toolbar's chevron to allow user to tap it in order to move the toolbar on and off screen */
@@ -54,19 +53,18 @@
       [[UITapGestureRecognizer alloc] initWithTarget:self
                                               action:@selector(moveToolbar:)];
     [self.chevronView addGestureRecognizer:singleFingerTap];
-    [self.chevronImageView addGestureRecognizer:singleFingerTap];
 
     self.layoutOSC = [[LayoutOnScreenControls alloc] initWithView:self.view controllerSup:nil streamConfig:nil oscLevel:OSCSegmentSelected];
     self.layoutOSC._level = 4;
     [self.layoutOSC show];
     
+    [self addInnerAnalogSticksToOuterAnalogLayers]; // allows inner and analog sticks to be dragged together around the screen together as one unit which is the expected behavior
+
+    self.undoButton.alpha = 0.3;
+    
     if ([[profilesManager getAllProfiles] count] == 0) { // if no saved OSC profiles exist yet then create one called 'Default' and associate it with Moonlight's legacy 'Full' OSC layout that's already been laid out on the screen at this point
         [profilesManager saveProfileWithName:@"Default" andButtonLayers:self.layoutOSC.OSCButtonLayers];
     }
-    
-    [self addInnerAnalogSticksToOuterAnalogLayers];
-
-    self.undoButton.alpha = 0.3;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OSCLayoutChanged) name:@"OSCLayoutChanged" object:nil];    // used to notifiy this view controller that the user made a change to the OSC layout so that the VC can either fade in or out its 'Undo button' which will signify to the user whether there are any OSC layout changes to undo
     
@@ -297,7 +295,8 @@
         if (layer == self.toolbarRootView.layer ||
             layer == self.chevronView.layer ||
             layer == self.chevronImageView.layer ||
-            layer == self.toolbarStackView.layer) {  // don't let user move toolbar and toolbar related stuff
+            layer == self.toolbarStackView.layer ||
+            layer == self.view.layer) {  // don't let user move toolbar, toolbar's chevron 'pull tab', or the layer associated with this VC's view
             return;
         }
     }
@@ -307,7 +306,8 @@
 - (void) touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
     [self.layoutOSC touchesMoved:touches withEvent:event];
     
-    if ([self.layoutOSC isLayer:self.layoutOSC.layerCurrentlyBeingTouched hoveringOverButton:trashCanButton]) { // check if user is dragging around a button and hovering it over the trash can button
+    if ([self.layoutOSC isLayer:self.layoutOSC.layerCurrentlyBeingTouched
+                        hoveringOverButton:trashCanButton]) { // check if user is dragging around a button and hovering it over the trash can button
         trashCanButton.tintColor = [UIColor redColor];
     }
     else {
@@ -321,7 +321,7 @@
         
         self.layoutOSC.layerCurrentlyBeingTouched.hidden = YES;
         
-        if ([self.layoutOSC.layerCurrentlyBeingTouched.name isEqualToString:@"dPad"]) { // if user is hiding dPad, then hide all four dPad button child layers as well since setting the 'hidden' property on a parent dPad CALayer is not hiding the four child CALayer dPad buttons as well
+        if ([self.layoutOSC.layerCurrentlyBeingTouched.name isEqualToString:@"dPad"]) { // if user is hiding dPad, then hide all four dPad button child layers as well since setting the 'hidden' property on a parent dPad CALayer doesn't automatically hide the four child CALayer dPad buttons
 
             self.layoutOSC._upButton.hidden = YES;
             self.layoutOSC._rightButton.hidden = YES;

@@ -472,6 +472,8 @@
 			isa = PBXGroup;
 			children = (
 				4573A43C29467F03000A036A /* Cells */,
+				45E9CBF329453CDC00C88D96 /* ToolBarContainerView.h */,
+				45E9CBF429453CDC00C88D96 /* ToolBarContainerView.m */,
 				450B65FD29147AB30057517C /* LayoutOnScreenControlsViewController.h */,
 				450B65FE29147AB40057517C /* LayoutOnScreenControlsViewController.m */,
 				45999AEC2935451D0073975D /* OSCProfilesTableViewController.h */,
@@ -575,8 +577,6 @@
 				FB290CFA19B2C406004C83CF /* Supporting Files */,
 				FB290D0219B2C406004C83CF /* AppDelegate.h */,
 				FB290D0319B2C406004C83CF /* AppDelegate.m */,
-				45E9CBF329453CDC00C88D96 /* ToolBarContainerView.h */,
-				45E9CBF429453CDC00C88D96 /* ToolBarContainerView.m */,
 				FBDE86DE19F7A837001C18A8 /* UIComputerView.h */,
 				FBDE86DF19F7A837001C18A8 /* UIComputerView.m */,
 				FBDE86E419F82297001C18A8 /* UIAppView.h */,

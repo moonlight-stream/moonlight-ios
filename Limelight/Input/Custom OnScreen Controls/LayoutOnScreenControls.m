@@ -110,34 +110,52 @@
     }
 }
 
+/* returns reference to button layer object given the button's name*/
+- (CALayer*)buttonLayerFromName: (NSString*)name {
+    for (CALayer *buttonLayer in self.OSCButtonLayers) {
+        
+        if ([buttonLayer.name isEqualToString:name]) {
+            return buttonLayer;
+        }
+    }
+    return nil;
+}
 
 #pragma mark - Touch 
 
 - (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    layerCurrentlyBeingTouched = nil;
+    
     for (UITouch* touch in touches) {
         
         CGPoint touchLocation = [touch locationInView:_view];
         touchLocation = [[touch view] convertPoint:touchLocation toView:nil];
-        CALayer *touchedLayer = [_view.layer hitTest:touchLocation];
-
-        if (touchedLayer == _view.layer) { // don't let user move the dark gray background
-            return;
-        }
+        CALayer *layer = [_view.layer hitTest:touchLocation];
         
-        if (touchedLayer == super._upButton ||
-            touchedLayer == super._downButton ||
-            touchedLayer == super._leftButton ||
-            touchedLayer == super._rightButton) { // don't let user move individual dPad buttons
+        /* Don't let user touch anything other than on screen control buttons, which are CALayer types. The reason is that 'LayoutOnScreenControls' should only be responsible for managing and letting users move on screen control buttons. Since this class's view is currently set to be set equal to the 'LayoutOnScreenControlsViewController' view it belongs to, we need to make sure touches on the VC's objects don't propagate down to 'LayoutOnScreenControls. Weird stuff can happen to the UI buttons and other objects on the VC, such as having them be dragged around the screen with the user's touches */
+        for (UIView *subview in self._view.subviews) {
+            
+            if (CGRectContainsPoint(subview.frame, touchLocation)) {
+                if (![subview isKindOfClass:[CALayer class]]) {
+                    return;
+                }
+            }
+        }
+   
+        if (layer == super._upButton ||
+            layer == super._downButton ||
+            layer == super._leftButton ||
+            layer == super._rightButton) { // don't let user move individual dPad buttons
             layerCurrentlyBeingTouched = super._dPadBackground;
         }
-        else if (touchedLayer == self._rightStick) {  // only let user move right stick background, not the stick itself
+        else if (layer == self._rightStick) {  // only let user move right stick background, not the stick itself
             layerCurrentlyBeingTouched = self._rightStickBackground;
         }
-        else if (touchedLayer == self._leftStick) {  // only let user move left stick background, not the stick itself
+        else if (layer == self._leftStick) {  // only let user move left stick background, not the stick itself
             layerCurrentlyBeingTouched = self._leftStickBackground;
         }
         else {    // let user move whatever other valid button they're touching
-            layerCurrentlyBeingTouched = touchedLayer;
+            layerCurrentlyBeingTouched = layer;
         }
         
         /* make guide lines visible and position them over the button the user is touching */
@@ -201,6 +219,8 @@
          
     horizontalGuideline.hidden = YES;
     verticalGuideline.hidden = YES;
+    horizontalGuideline.backgroundColor = [UIColor blueColor];
+    verticalGuideline.backgroundColor = [UIColor blueColor];
 }
 
 - (void) touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -208,6 +228,8 @@
     
     horizontalGuideline.hidden = YES;
     verticalGuideline.hidden = YES;
+    horizontalGuideline.backgroundColor = [UIColor blueColor];
+    verticalGuideline.backgroundColor = [UIColor blueColor];
 }
 
 
