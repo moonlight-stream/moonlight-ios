@@ -22,7 +22,7 @@
     UIView *verticalGuideline;
 }
 
-@synthesize layerCurrentlyBeingTouched;
+@synthesize layerBeingDragged;
 @synthesize _view;
 @synthesize layoutChanges;
 
@@ -124,15 +124,18 @@
 #pragma mark - Touch 
 
 - (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-    layerCurrentlyBeingTouched = nil;
+    /* Reset variables related to on screen controller button drag and drop routine. These variables should be reset in 'touchesCancelled' or 'touchesEnded' but these may not be called in unaccounted-for edge cases such as when the user opens various OS-level control center related views by dragging down from the top of the screen, or dragging up from the bottom of the screen. Since Apple likes to add new control centers and new ways of opening them (i.e. Dynamic Island on iPhone 14 Pro) it's best to reset these variables here when the user is beginning a new on screen controller button drag routine  */
+    layerBeingDragged = nil;
+    horizontalGuideline.backgroundColor = [UIColor blueColor];
+    verticalGuideline.backgroundColor = [UIColor blueColor];
     
-    for (UITouch* touch in touches) {
+    for (UITouch* touch in touches) {   // Process touch 
         
         CGPoint touchLocation = [touch locationInView:_view];
         touchLocation = [[touch view] convertPoint:touchLocation toView:nil];
         CALayer *layer = [_view.layer hitTest:touchLocation];
         
-        /* Don't let user touch anything other than on screen control buttons, which are CALayer types. The reason is that 'LayoutOnScreenControls' should only be responsible for managing and letting users move on screen control buttons. Since this class's view is currently set to be set equal to the 'LayoutOnScreenControlsViewController' view it belongs to, we need to make sure touches on the VC's objects don't propagate down to 'LayoutOnScreenControls. Weird stuff can happen to the UI buttons and other objects on the VC, such as having them be dragged around the screen with the user's touches */
+        /* Don't let user drag and move anything other than on screen controller buttons, which are CALayer types. The reason is that 'LayoutOnScreenControls' should only be responsible for managing and letting users move on screen controller buttons. Since this class's view is currently set to be set equal to the 'LayoutOnScreenControlsViewController' view it belongs to, we need to make sure touches on the VC's objects don't propagate down to 'LayoutOnScreenControls. Weird stuff can happen to the UI buttons (trash can button, undo button, save button, etc) and other objects that belong to that VC, such as them being dragged around the screen with the user's touches */
         for (UIView *subview in self._view.subviews) {
             
             if (CGRectContainsPoint(subview.frame, touchLocation)) {
@@ -142,53 +145,53 @@
             }
         }
    
-        if (layer == super._upButton ||
-            layer == super._downButton ||
-            layer == super._leftButton ||
-            layer == super._rightButton) { // don't let user move individual dPad buttons
-            layerCurrentlyBeingTouched = super._dPadBackground;
+        if (layer == self._upButton ||
+            layer == self._downButton ||
+            layer == self._leftButton ||
+            layer == self._rightButton) { // don't let user drag individual dPad buttons
+            layerBeingDragged = self._dPadBackground;
         }
-        else if (layer == self._rightStick) {  // only let user move right stick background, not the stick itself
-            layerCurrentlyBeingTouched = self._rightStickBackground;
+        else if (layer == self._rightStick) {  // only let user drag right stick's background, not the inner analog stick itself
+            layerBeingDragged = self._rightStickBackground;
         }
-        else if (layer == self._leftStick) {  // only let user move left stick background, not the stick itself
-            layerCurrentlyBeingTouched = self._leftStickBackground;
+        else if (layer == self._leftStick) {  // only let user drag left stick's background, not the inner analog stick itself
+            layerBeingDragged = self._leftStickBackground;
         }
-        else {    // let user move whatever other valid button they're touching
-            layerCurrentlyBeingTouched = layer;
+        else {    // let user drag whatever other valid button they're touching
+            layerBeingDragged = layer;
         }
+        
+        /* save the name and position of layer being touched in array in case user wants to undo the change later */
+        OnScreenButtonState *onScreenButtonState = [[OnScreenButtonState alloc] initWithButtonName:layerBeingDragged.name isHidden:layerBeingDragged.isHidden andPosition:layerBeingDragged.position];
+        [layoutChanges addObject:onScreenButtonState];
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"OSCLayoutChanged" object:self]; // lets the view controller know whether to fade the undo button in or out depending on whether there are any further OSC layout changes the user is allowed to undo
         
         /* make guide lines visible and position them over the button the user is touching */
-        horizontalGuideline.center = layerCurrentlyBeingTouched.position;
+        horizontalGuideline.center = layerBeingDragged.position;
         horizontalGuideline.hidden = NO;
-        verticalGuideline.center = layerCurrentlyBeingTouched.position;
+        verticalGuideline.center = layerBeingDragged.position;
         verticalGuideline.hidden = NO;
-        
-        /* save the name and position of layer being touched in array in case user wants to undo the move later */
-        OnScreenButtonState *onScreenButtonState = [[OnScreenButtonState alloc] initWithButtonName:layerCurrentlyBeingTouched.name isHidden:layerCurrentlyBeingTouched.isHidden andPosition:layerCurrentlyBeingTouched.position];
-        [layoutChanges addObject:onScreenButtonState];
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"OSCLayoutChanged" object:self]; // lets the view controller know whether to fade the undo button in or out depending on whether there are any further OSC layout changes the user is allowed to undo
     }
 }
 
 - (void) touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
     UITouch *touch = [touches anyObject];
     CGPoint touchLocation = [touch locationInView:_view];
-    layerCurrentlyBeingTouched.position = touchLocation; // move object to touch location
+    
+    layerBeingDragged.position = touchLocation; // move object to touch location
     
     /* have guidelines follow wherever the user is touching on the screen */
-    horizontalGuideline.center = layerCurrentlyBeingTouched.position;
-    verticalGuideline.center = layerCurrentlyBeingTouched.position;
+    horizontalGuideline.center = layerBeingDragged.position;
+    verticalGuideline.center = layerBeingDragged.position;
     
     /*
      Telegraph to the user whether the horizontal and/or vertical guidelines line up with one or more of the buttons on screen by doing the following:
      -Change horizontal guideline color to white if its y-position is almost equal to that of one of the buttons on screen.
      -Change vertical guideline color to white if its x-position is almost equal to that of one of the buttons on screen.
      */
-    for (CALayer *button in self.OSCButtonLayers) {
+    for (CALayer *button in self.OSCButtonLayers) { // horizontal guideline position check
         
-        if ((layerCurrentlyBeingTouched != button) && !button.isHidden) {
+        if ((layerBeingDragged != button) && !button.isHidden) {
             if ((horizontalGuideline.center.y < button.position.y + 1) &&
                 (horizontalGuideline.center.y > button.position.y - 1)) {
                 horizontalGuideline.backgroundColor = [UIColor whiteColor];
@@ -196,12 +199,11 @@
             }
         }
         
-        // change horizontal guideline back to blue if it doesn't line up with one of the on screen buttons
-        horizontalGuideline.backgroundColor = [UIColor blueColor];
+        horizontalGuideline.backgroundColor = [UIColor blueColor]; // change horizontal guideline back to blue if it doesn't line up with one of the on screen buttons
     }
-    for (CALayer *button in self.OSCButtonLayers) {
+    for (CALayer *button in self.OSCButtonLayers) { // vertical guideline position check
         
-        if ((layerCurrentlyBeingTouched != button) && !button.isHidden) {
+        if ((layerBeingDragged != button) && !button.isHidden) {
             if ((verticalGuideline.center.x < button.position.x + 1) &&
                 (verticalGuideline.center.x > button.position.x - 1)) {
                 verticalGuideline.backgroundColor = [UIColor whiteColor];
@@ -209,13 +211,12 @@
             }
         }
         
-        //  change vertical guideline back to blue if it doesn't line up with one of the on screen buttons
-        verticalGuideline.backgroundColor = [UIColor blueColor];
+        verticalGuideline.backgroundColor = [UIColor blueColor]; // change vertical guideline back to blue if it doesn't line up with one of the on screen buttons
     }
 }
 
 - (void) touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
-    layerCurrentlyBeingTouched = nil;
+    layerBeingDragged = nil;
          
     horizontalGuideline.hidden = YES;
     verticalGuideline.hidden = YES;
@@ -224,7 +225,7 @@
 }
 
 - (void) touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-    layerCurrentlyBeingTouched = nil;
+    layerBeingDragged = nil;
     
     horizontalGuideline.hidden = YES;
     verticalGuideline.hidden = YES;

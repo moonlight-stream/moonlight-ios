@@ -296,7 +296,7 @@
             layer == self.chevronView.layer ||
             layer == self.chevronImageView.layer ||
             layer == self.toolbarStackView.layer ||
-            layer == self.view.layer) {  // don't let user move toolbar, toolbar's chevron 'pull tab', or the layer associated with this VC's view
+            layer == self.view.layer) {  // don't let user move toolbar or toolbar UI buttons, toolbar's chevron 'pull tab', or the layer associated with this VC's view
             return;
         }
     }
@@ -306,7 +306,7 @@
 - (void) touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
     [self.layoutOSC touchesMoved:touches withEvent:event];
     
-    if ([self.layoutOSC isLayer:self.layoutOSC.layerCurrentlyBeingTouched
+    if ([self.layoutOSC isLayer:self.layoutOSC.layerBeingDragged
                         hoveringOverButton:trashCanButton]) { // check if user is dragging around a button and hovering it over the trash can button
         trashCanButton.tintColor = [UIColor redColor];
     }
@@ -316,12 +316,12 @@
 }
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-    if (self.layoutOSC.layerCurrentlyBeingTouched != nil &&
-        [self.layoutOSC isLayer:self.layoutOSC.layerCurrentlyBeingTouched hoveringOverButton:trashCanButton]) { // check if user wants to throw OSC button into the trash can
+    if (self.layoutOSC.layerBeingDragged != nil &&
+        [self.layoutOSC isLayer:self.layoutOSC.layerBeingDragged hoveringOverButton:trashCanButton]) { // check if user wants to throw OSC button into the trash can
         
-        self.layoutOSC.layerCurrentlyBeingTouched.hidden = YES;
+        self.layoutOSC.layerBeingDragged.hidden = YES;
         
-        if ([self.layoutOSC.layerCurrentlyBeingTouched.name isEqualToString:@"dPad"]) { // if user is hiding dPad, then hide all four dPad button child layers as well since setting the 'hidden' property on a parent dPad CALayer doesn't automatically hide the four child CALayer dPad buttons
+        if ([self.layoutOSC.layerBeingDragged.name isEqualToString:@"dPad"]) { // if user is hiding dPad, then hide all four dPad button child layers as well since setting the 'hidden' property on a parent dPad CALayer doesn't automatically hide the four child CALayer dPad buttons
 
             self.layoutOSC._upButton.hidden = YES;
             self.layoutOSC._rightButton.hidden = YES;

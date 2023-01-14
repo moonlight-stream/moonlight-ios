@@ -18,7 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property UIView* _view;
 @property NSMutableArray *layoutChanges;
-@property CALayer *layerCurrentlyBeingTouched;
+@property CALayer *layerBeingDragged;
 
 - (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport
        streamConfig:(StreamConfiguration*)streamConfig oscLevel:(int)oscLevel;
