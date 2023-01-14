@@ -135,7 +135,7 @@
         touchLocation = [[touch view] convertPoint:touchLocation toView:nil];
         CALayer *layer = [_view.layer hitTest:touchLocation];
         
-        /* Don't let user drag and move anything other than on screen controller buttons, which are CALayer types. The reason is that 'LayoutOnScreenControls' should only be responsible for managing and letting users move on screen controller buttons. Since this class's view is currently set to be set equal to the 'LayoutOnScreenControlsViewController' view it belongs to, we need to make sure touches on the VC's objects don't propagate down to 'LayoutOnScreenControls. Weird stuff can happen to the UI buttons (trash can button, undo button, save button, etc) and other objects that belong to that VC, such as them being dragged around the screen with the user's touches */
+        /* Don't let user drag and move anything other than on screen controller buttons, which are CALayer types. The reason is that 'LayoutOnScreenControls' should only be responsible for managing and letting users move on screen controller buttons. Since this class's view is currently set to be set equal to the 'LayoutOnScreenControlsViewController' view it belongs to, we need to make sure touches on the VC's objects don't propagate down to 'LayoutOnScreenControls'. Weird stuff can happen to the UI buttons that belong to that VC (trash can button, undo button, save button, etc), such as them being dragged around the screen with the user's touches */
         for (UIView *subview in self._view.subviews) {
             
             if (CGRectContainsPoint(subview.frame, touchLocation)) {
@@ -161,7 +161,7 @@
             layerBeingDragged = layer;
         }
         
-        /* save the name and position of layer being touched in array in case user wants to undo the change later */
+        /* save the name, position, and visibility of button being touched in array in case user wants to undo the change later */
         OnScreenButtonState *onScreenButtonState = [[OnScreenButtonState alloc] initWithButtonName:layerBeingDragged.name isHidden:layerBeingDragged.isHidden andPosition:layerBeingDragged.position];
         [layoutChanges addObject:onScreenButtonState];
         [[NSNotificationCenter defaultCenter] postNotificationName:@"OSCLayoutChanged" object:self]; // lets the view controller know whether to fade the undo button in or out depending on whether there are any further OSC layout changes the user is allowed to undo

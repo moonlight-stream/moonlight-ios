@@ -56,11 +56,11 @@
 
     self.layoutOSC = [[LayoutOnScreenControls alloc] initWithView:self.view controllerSup:nil streamConfig:nil oscLevel:OSCSegmentSelected];
     self.layoutOSC._level = 4;
-    [self.layoutOSC show];
+    [self.layoutOSC show];  // draw on screen controls
     
     [self addInnerAnalogSticksToOuterAnalogLayers]; // allows inner and analog sticks to be dragged together around the screen together as one unit which is the expected behavior
 
-    self.undoButton.alpha = 0.3;
+    self.undoButton.alpha = 0.3;    // no changes to undo yet, so fade out the undo button a bit
     
     if ([[profilesManager getAllProfiles] count] == 0) { // if no saved OSC profiles exist yet then create one called 'Default' and associate it with Moonlight's legacy 'Full' OSC layout that's already been laid out on the screen at this point
         [profilesManager saveProfileWithName:@"Default" andButtonLayers:self.layoutOSC.OSCButtonLayers];
@@ -83,7 +83,7 @@
               delay:0
               usingSpringWithDamping:0.7
               initialSpringVelocity:1.0
-              options:UIViewAnimationOptionCurveEaseIn animations:^{    // Animate the toolbar back down that same distance
+              options:UIViewAnimationOptionCurveEaseIn animations:^{ // Animate the toolbar back down that same distance
                 self.toolbarRootView.frame = CGRectMake(self.toolbarRootView.frame.origin.x, self.toolbarRootView.frame.origin.y + 25, self.toolbarRootView.frame.size.width, self.toolbarRootView.frame.size.height);
                 }
               completion:^(BOOL finished) {
@@ -161,7 +161,6 @@
 }
 
 - (IBAction) undoTapped:(id)sender {
-    
     if ([self.layoutOSC.layoutChanges count] > 0) { // check if there are layout changes to roll back to
         OnScreenButtonState *buttonState = [self.layoutOSC.layoutChanges lastObject];   //  Get the 'OnScreenButtonState' object that contains the name, position, and visiblity state of the button the user last moved
         
@@ -181,7 +180,7 @@
         
         [self.layoutOSC.layoutChanges removeLastObject];
         
-        [self OSCLayoutChanged];    // will fade the undo button in or out depending on whether there are any further changes to undo
+        [self OSCLayoutChanged]; // will fade the undo button in or out depending on whether there are any further changes to undo
     }
     else {  // there are no changes to undo. let user know there are no changes to undo
         UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@"Nothing to Undo"] message: @"There are no changes to undo" preferredStyle:UIAlertControllerStyleAlert];
@@ -322,7 +321,6 @@
         self.layoutOSC.layerBeingDragged.hidden = YES;
         
         if ([self.layoutOSC.layerBeingDragged.name isEqualToString:@"dPad"]) { // if user is hiding dPad, then hide all four dPad button child layers as well since setting the 'hidden' property on a parent dPad CALayer doesn't automatically hide the four child CALayer dPad buttons
-
             self.layoutOSC._upButton.hidden = YES;
             self.layoutOSC._rightButton.hidden = YES;
             self.layoutOSC._downButton.hidden = YES;
