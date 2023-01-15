@@ -62,6 +62,11 @@
 - (void) replaceProfile:(OSCProfile*)oldProfile withProfile:(OSCProfile*)newProfile {
     NSMutableArray *profiles = [self getAllProfiles];
 
+    for (OSCProfile *profile in profiles) { // set all profiles' 'isSelected' property to NO since the new profile we're saving over the old profile with will be the 'selected' profile
+        
+        profile.isSelected = NO;
+    }
+    
     /* Set the new profile as the selected one. The reasoning behind this is that this method is currently being used when the user saves over an existing profile with another profile that has the same name. The expected behavior is that the newly saved profile becomes the selected profile which will show on screen when they launch the game stream view */
     newProfile.isSelected = YES;
   
@@ -177,7 +182,8 @@
     }
     
     if ([self profileNameAlreadyExist:name]) {  // if a saved profile with the same 'name' already exists in persistent storage then overwrite it
-        [self replaceProfile:[self OSCProfileWithName:name] withProfile:newProfile];
+        OSCProfile *profileToReplace = [self OSCProfileWithName:name];
+        [self replaceProfile:profileToReplace withProfile:newProfile];
     }
     else {  // otherwise encode then add the new profile to the end of the OSCProfiles array
         NSData *newProfileEncoded = [NSKeyedArchiver archivedDataWithRootObject:newProfile requiringSecureCoding:YES error:nil];

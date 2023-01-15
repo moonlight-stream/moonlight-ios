@@ -178,7 +178,8 @@
             self.layoutOSC._leftButton.hidden = buttonState.isHidden;
         }
         
-        if ([buttonLayer.name isEqualToString:@"leftStickBackground"]) { // 
+        /* if user is showing or hiding the left or right analog sticks, then show or hide their corresponding inner analog stick child layers as well since setting the 'hidden' property on the parent analog stick doesn't automatically hide its child inner analog stick CALayer */
+        if ([buttonLayer.name isEqualToString:@"leftStickBackground"]) {
             self.layoutOSC._leftStick.hidden = buttonState.isHidden;
         }
         if ([buttonLayer.name isEqualToString:@"rightStickBackground"]) {
@@ -327,13 +328,14 @@
         
         self.layoutOSC.layerBeingDragged.hidden = YES;
         
-        if ([self.layoutOSC.layerBeingDragged.name isEqualToString:@"dPad"]) { // if user is hiding dPad, then hide all four dPad button child layers as well since setting the 'hidden' property on a parent dPad CALayer doesn't automatically hide the four child CALayer dPad buttons
+        if ([self.layoutOSC.layerBeingDragged.name isEqualToString:@"dPad"]) { // if user is hiding dPad, then hide all four dPad button child layers as well since setting the 'hidden' property on the parent dPad CALayer doesn't automatically hide the four child CALayer dPad buttons
             self.layoutOSC._upButton.hidden = YES;
             self.layoutOSC._rightButton.hidden = YES;
             self.layoutOSC._downButton.hidden = YES;
             self.layoutOSC._leftButton.hidden = YES;
         }
         
+        /* if user is hiding left or right analog sticks, then hide their corresponding inner analog stick child layers as well since setting the 'hidden' property on the parent analog stick doesn't automatically hide its child inner analog stick CALayer */
         if ([self.layoutOSC.layerBeingDragged.name isEqualToString:@"leftStickBackground"]) {
             self.layoutOSC._leftStick.hidden = YES;
         }
