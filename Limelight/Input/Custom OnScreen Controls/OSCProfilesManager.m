@@ -181,9 +181,8 @@
         profile.isSelected = NO;
     }
     
-    if ([self profileNameAlreadyExist:name]) {  // if a saved profile with the same 'name' already exists in persistent storage then overwrite it
-        OSCProfile *profileToReplace = [self OSCProfileWithName:name];
-        [self replaceProfile:profileToReplace withProfile:newProfile];
+    if ([self profileNameAlreadyExist:name]) {  // if a saved profile with the same 'name' already exists in persistent storage then overwrite it and save the change to persistent storage
+        [self replaceProfile:[self OSCProfileWithName:name] withProfile:newProfile];
     }
     else {  // otherwise encode then add the new profile to the end of the OSCProfiles array
         NSData *newProfileEncoded = [NSKeyedArchiver archivedDataWithRootObject:newProfile requiringSecureCoding:YES error:nil];
