@@ -67,7 +67,7 @@
     [self.OSCButtonLayers addObject:self._dPadBackground];
     [_view.layer addSublayer:self._dPadBackground];
 
-    //  add dPad buttons to parent layer
+    /*  add dPad buttons to parent layer */
     [self._dPadBackground addSublayer:self._downButton];
     [self._dPadBackground addSublayer:self._rightButton];
     [self._dPadBackground addSublayer:self._upButton];

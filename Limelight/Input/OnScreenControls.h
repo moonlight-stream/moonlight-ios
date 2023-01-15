@@ -72,7 +72,6 @@ typedef NS_ENUM(NSInteger, OnScreenControlsLevel) {
 - (OnScreenControlsLevel) getLevel;
 - (void) setDPadCenter;
 - (void) setAnalogStickPositions;
-- (void) hideDPadButtons;
 - (void) positionOSCButtons;
 
 @end

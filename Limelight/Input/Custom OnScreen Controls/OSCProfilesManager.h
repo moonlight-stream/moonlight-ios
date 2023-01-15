@@ -32,7 +32,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (OSCProfile *) getSelectedProfile;
 
 /**
- * Returns the index of the selected profile within the array it's in
+ * Returns the index of the 'selected' profile within the array it's in
  */
 - (NSInteger) getIndexOfSelectedProfile;
 
@@ -46,7 +46,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void) setProfileToSelected:(NSString *)name;
 
 /**
- * Saves a profile object with a particular 'name' and an array of button layers ( the button layers are the objects currently visible on screen on the OSC layout customization view) to persistent storage
+ * Saves a profile object with a particular 'name' and an array of button layers (the CALayer button layers are the objects currently visible on screen) to persistent storage
  */
 - (void) saveProfileWithName:(NSString*)name andButtonLayers:(NSMutableArray *)buttonLayers;
 

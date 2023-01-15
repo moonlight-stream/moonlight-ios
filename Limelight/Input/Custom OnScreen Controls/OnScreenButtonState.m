@@ -1,5 +1,5 @@
 //
-//  onScreenButtonState.m
+//  OnScreenButtonState.m
 //  Moonlight
 //
 //  Created by Long Le on 10/20/22.

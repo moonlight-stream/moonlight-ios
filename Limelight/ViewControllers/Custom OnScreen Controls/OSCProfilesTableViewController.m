@@ -52,7 +52,7 @@ const double NAV_BAR_HEIGHT = 50;
 
 #pragma mark - UIButton Actions
 
-/* Loads the OSC profile that user selected, dismisses this view, then tells the presenting view controller to lay out the on screen buttons according to the selected profile's instructions */
+/* Loads the OSC profile that user selected, dismisses this VC, then tells the presenting view controller to lay out the on screen buttons according to the selected profile's instructions */
 - (IBAction) loadTapped:(id)sender {
     [self dismissViewControllerAnimated:YES completion:nil];
 

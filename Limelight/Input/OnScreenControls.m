@@ -478,35 +478,27 @@ static float L3_Y;
     UIImage* downButtonImage = [UIImage imageNamed:@"DownButton"];
     _downButton.frame = CGRectMake(D_PAD_CENTER_X - downButtonImage.size.width / 2, D_PAD_CENTER_Y + D_PAD_DIST, downButtonImage.size.width, downButtonImage.size.height);
     _downButton.contents = (id) downButtonImage.CGImage;
+    _downButton.frame = CGRectMake(D_PAD_CENTER_X - downButtonImage.size.width / 2, D_PAD_CENTER_Y + D_PAD_DIST, downButtonImage.size.width, downButtonImage.size.height);
+    [_view.layer addSublayer:_downButton];
     
     // create Right button
     UIImage* rightButtonImage = [UIImage imageNamed:@"RightButton"];
     _rightButton.frame = CGRectMake(D_PAD_CENTER_X + D_PAD_DIST, D_PAD_CENTER_Y - rightButtonImage.size.height / 2, rightButtonImage.size.width, rightButtonImage.size.height);
     _rightButton.contents = (id) rightButtonImage.CGImage;
+    _rightButton.frame = CGRectMake(D_PAD_CENTER_X + D_PAD_DIST, D_PAD_CENTER_Y - rightButtonImage.size.height / 2, rightButtonImage.size.width, rightButtonImage.size.height);
+    [_view.layer addSublayer:_rightButton];
     
     // create Up button
     UIImage* upButtonImage = [UIImage imageNamed:@"UpButton"];
     _upButton.frame = CGRectMake(D_PAD_CENTER_X - upButtonImage.size.width / 2, D_PAD_CENTER_Y - D_PAD_DIST - upButtonImage.size.height, upButtonImage.size.width, upButtonImage.size.height);
     _upButton.contents = (id) upButtonImage.CGImage;
+    _upButton.frame = CGRectMake(D_PAD_CENTER_X - upButtonImage.size.width / 2, D_PAD_CENTER_Y - D_PAD_DIST - upButtonImage.size.height, upButtonImage.size.width, upButtonImage.size.height);
+    [_view.layer addSublayer:_upButton];
     
     // create Left button
     UIImage* leftButtonImage = [UIImage imageNamed:@"LeftButton"];
     _leftButton.frame = CGRectMake(D_PAD_CENTER_X - D_PAD_DIST - leftButtonImage.size.width, D_PAD_CENTER_Y - leftButtonImage.size.height / 2, leftButtonImage.size.width, leftButtonImage.size.height);
     _leftButton.contents = (id) leftButtonImage.CGImage;
-    
-    // create Down button
-    _downButton.frame = CGRectMake(D_PAD_CENTER_X - downButtonImage.size.width / 2, D_PAD_CENTER_Y + D_PAD_DIST, downButtonImage.size.width, downButtonImage.size.height);
-    [_view.layer addSublayer:_downButton];
-    
-    // create Right button
-    _rightButton.frame = CGRectMake(D_PAD_CENTER_X + D_PAD_DIST, D_PAD_CENTER_Y - rightButtonImage.size.height / 2, rightButtonImage.size.width, rightButtonImage.size.height);
-    [_view.layer addSublayer:_rightButton];
-
-    // create Up button
-    _upButton.frame = CGRectMake(D_PAD_CENTER_X - upButtonImage.size.width / 2, D_PAD_CENTER_Y - D_PAD_DIST - upButtonImage.size.height, upButtonImage.size.width, upButtonImage.size.height);
-    [_view.layer addSublayer:_upButton];
-    
-    // create Left button
     _leftButton.frame = CGRectMake(D_PAD_CENTER_X - D_PAD_DIST - leftButtonImage.size.width, D_PAD_CENTER_Y - leftButtonImage.size.height / 2, leftButtonImage.size.width, leftButtonImage.size.height);
     [_view.layer addSublayer:_leftButton];
 }
@@ -666,13 +658,6 @@ static float L3_Y;
     [_bButton removeFromSuperlayer];
     [_xButton removeFromSuperlayer];
     [_yButton removeFromSuperlayer];
-    [_upButton removeFromSuperlayer];
-    [_downButton removeFromSuperlayer];
-    [_leftButton removeFromSuperlayer];
-    [_rightButton removeFromSuperlayer];
-}
-
-- (void)hideDPadButtons {
     [_upButton removeFromSuperlayer];
     [_downButton removeFromSuperlayer];
     [_leftButton removeFromSuperlayer];
