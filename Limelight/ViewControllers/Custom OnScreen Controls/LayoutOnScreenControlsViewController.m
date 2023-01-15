@@ -178,6 +178,13 @@
             self.layoutOSC._leftButton.hidden = buttonState.isHidden;
         }
         
+        if ([buttonLayer.name isEqualToString:@"leftStickBackground"]) { // 
+            self.layoutOSC._leftStick.hidden = buttonState.isHidden;
+        }
+        if ([buttonLayer.name isEqualToString:@"rightStickBackground"]) {
+            self.layoutOSC._rightStick.hidden = buttonState.isHidden;
+        }
+        
         [self.layoutOSC.layoutChanges removeLastObject];
         
         [self OSCLayoutChanged]; // will fade the undo button in or out depending on whether there are any further changes to undo
@@ -325,6 +332,13 @@
             self.layoutOSC._rightButton.hidden = YES;
             self.layoutOSC._downButton.hidden = YES;
             self.layoutOSC._leftButton.hidden = YES;
+        }
+        
+        if ([self.layoutOSC.layerBeingDragged.name isEqualToString:@"leftStickBackground"]) {
+            self.layoutOSC._leftStick.hidden = YES;
+        }
+        if ([self.layoutOSC.layerBeingDragged.name isEqualToString:@"rightStickBackground"]) {
+            self.layoutOSC._rightStick.hidden = YES;
         }
         
         trashCanButton.tintColor = [UIColor colorWithRed:171.0/255.0 green:157.0/255.0 blue:255.0/255.0 alpha:1];
