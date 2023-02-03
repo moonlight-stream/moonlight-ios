@@ -202,7 +202,7 @@
             callback(host, nil);
         }
     } else if (!prohibitedAddress) {
-        callback(nil, @"Could not connect to host. Ensure GameStream is enabled in GeForce Experience on your PC.");
+        callback(nil, @"Could not connect to host.\n\nIf you're hosting using GeForce Experience, make sure you've enabled the toggle on the SHIELD tab.\n\nIf you're hosting using Sunshine, ensure it is running properly. If you're using a non-default port, you will need to include that here.");
     } else {
         callback(nil, prohibitedAddressMessage);
     }
