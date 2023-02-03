@@ -34,6 +34,11 @@
     self.serverCodecModeSupport = host.serverCodecModeSupport;
     self.serverCert = host.serverCert;
     
+    // Older clients stored a non-URL-escaped IPv6 string. Try to detect that and fix it up.
+    if (![self.ipv6Address containsString:@"["]) {
+        self.ipv6Address = [Utils addressAndPortToAddressPortString:self.ipv6Address port:47989];
+    }
+    
     // Ensure we don't use a stale cached pair state if we haven't pinned the cert yet
     self.pairState = host.serverCert ? [host.pairState intValue] : PairStateUnpaired;
     
