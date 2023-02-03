@@ -17,6 +17,7 @@
 - (void)setupWithVideoFormat:(int)videoFormat frameRate:(int)frameRate;
 - (void)start;
 - (void)stop;
+- (void)setHdrMode:(BOOL)enabled;
 
 - (int)submitDecodeBuffer:(unsigned char *)data length:(int)length bufferType:(int)bufferType frameType:(int)frameType pts:(unsigned int)pts;
 

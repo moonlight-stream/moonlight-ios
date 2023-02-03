@@ -309,6 +309,7 @@ void ClConnectionStatusUpdate(int status)
 
 void ClSetHdrMode(bool enabled)
 {
+    [renderer setHdrMode:enabled];
     [_callbacks setHdrMode:enabled];
 }
 
