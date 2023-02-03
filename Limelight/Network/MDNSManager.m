@@ -240,7 +240,7 @@ static NSString* NV_SERVICE_TYPE = @"_nvstream._tcp";
     [NSTimer scheduledTimerWithTimeInterval:2.0
                                      target:self
                                    selector:@selector(retryResolveTimerCallback:)
-                                   userInfo:nil
+                                   userInfo:sender
                                     repeats:NO];
 }
 
@@ -294,12 +294,12 @@ static NSString* NV_SERVICE_TYPE = @"_nvstream._tcp";
         return;
     }
     
-    Log(LOG_I, @"Retrying mDNS resolution");
-    for (NSNetService* service in services) {
-        if (service.hostName == nil) {
-            [service setDelegate:self];
-            [service resolveWithTimeout:5];
-        }
+    NSNetService* service = timer.userInfo;
+    Log(LOG_I, @"Retrying mDNS resolution for %@", service);
+    
+    if (service.hostName == nil) {
+        [service setDelegate:self];
+        [service resolveWithTimeout:5];
     }
 }
 
