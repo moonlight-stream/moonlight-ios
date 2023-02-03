@@ -73,6 +73,73 @@ NSString *const deviceName = @"roth";
 #endif
 }
 
++ (BOOL) parseAddressPortString:(NSString*)addressPort address:(NSRange*)address port:(NSRange*)port {
+    if (![addressPort containsString:@":"]) {
+        // If there's no port or IPv6 separator, the whole thing is an address
+        *address = NSMakeRange(0, [addressPort length]);
+        *port = NSMakeRange(NSNotFound, 0);
+        return TRUE;
+    }
+    
+    NSInteger locationOfOpeningBracket = [addressPort rangeOfString:@"["].location;
+    NSInteger locationOfClosingBracket = [addressPort rangeOfString:@"]"].location;
+    if (locationOfOpeningBracket != NSNotFound || locationOfClosingBracket != NSNotFound) {
+        // If we have brackets, it's an IPv6 address
+        if (locationOfOpeningBracket == NSNotFound || locationOfClosingBracket == NSNotFound ||
+            locationOfClosingBracket < locationOfOpeningBracket) {
+            // Invalid address format
+            return FALSE;
+        }
+        
+        // Cut at the brackets
+        *address = NSMakeRange(locationOfOpeningBracket + 1, locationOfClosingBracket - locationOfOpeningBracket - 1);
+    }
+    else {
+        // It's an IPv4 address, so just cut at the port separator
+        *address = NSMakeRange(0, [addressPort rangeOfString:@":"].location);
+    }
+    
+    NSUInteger remainingStringLocation = address->location + address->length;
+    NSRange remainingStringRange = NSMakeRange(remainingStringLocation, [addressPort length] - remainingStringLocation);
+    NSInteger locationOfPortSeparator = [addressPort rangeOfString:@":" options:0 range:remainingStringRange].location;
+    if (locationOfPortSeparator != NSNotFound) {
+        *port = NSMakeRange(locationOfPortSeparator + 1, [addressPort length] - locationOfPortSeparator - 1);
+    }
+    else {
+        *port = NSMakeRange(NSNotFound, 0);
+    }
+    
+    return TRUE;
+}
+
++ (NSString*) addressPortStringToAddress:(NSString*)addressPort {
+    NSRange addressRange, portRange;
+    if (![self parseAddressPortString:addressPort address:&addressRange port:&portRange]) {
+        return nil;
+    }
+    
+    return [addressPort substringWithRange:addressRange];
+}
+
++ (unsigned short) addressPortStringToPort:(NSString*)addressPort {
+    NSRange addressRange, portRange;
+    if (![self parseAddressPortString:addressPort address:&addressRange port:&portRange] || portRange.location == NSNotFound) {
+        return 47989;
+    }
+    
+    return [[addressPort substringWithRange:portRange] integerValue];
+}
+
++ (NSString*) addressAndPortToAddressPortString:(NSString*)address port:(unsigned short)port {
+    if ([address containsString:@":"]) {
+        // IPv6 addresses require escaping
+        return [NSString stringWithFormat:@"[%@]:%u", address, port];
+    }
+    else {
+        return [NSString stringWithFormat:@"%@:%u", address, port];
+    }
+}
+
 @end
 
 @implementation NSString (NSStringWithTrim)

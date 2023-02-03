@@ -39,10 +39,8 @@
 
 - (void)main {
     [CryptoManager generateKeyPairUsingSSL];
-    NSString* uniqueId = [IdManager getUniqueId];
     
-    HttpManager* hMan = [[HttpManager alloc] initWithHost:_config.host
-                                                 uniqueId:uniqueId
+    HttpManager* hMan = [[HttpManager alloc] initWithAddress:_config.host httpsPort:_config.httpsPort
                                                      serverCert:_config.serverCert];
     
     ServerInfoResponse* serverInfoResp = [[ServerInfoResponse alloc] init];
@@ -67,7 +65,8 @@
         return;
     }
     
-    if (_config.width > 4096 || _config.height > 4096) {
+    // Only perform this check on GFE (as indicated by MJOLNIR in state value)
+    if ((_config.width > 4096 || _config.height > 4096) && [serverState containsString:@"MJOLNIR"]) {
         // Pascal added support for 8K HEVC encoding support. Maxwell 2 could encode HEVC but only up to 4K.
         // We can't directly identify Pascal, but we can look for HEVC Main10 which was added in the same generation.
         NSString* codecSupport = [serverInfoResp getStringTag:@"ServerCodecModeSupport"];

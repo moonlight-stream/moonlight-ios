@@ -7,14 +7,14 @@
 //
 
 #import "AppListResponse.h"
+#import "TemporaryHost.h"
 
 #ifndef ConnectionHelper_h
 #define ConnectionHelper_h
 
-
 @interface ConnectionHelper : NSObject
 
-+(AppListResponse*) getAppListForHostWithHostIP:(NSString*) hostIP serverCert:(NSData*) serverCert uniqueID:(NSString*) uniqueId;
++(AppListResponse*) getAppListForHost:(TemporaryHost*)host;
 
 @end
 

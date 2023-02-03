@@ -72,16 +72,21 @@ static NSString* NV_SERVICE_TYPE = @"_nvstream._tcp";
     struct sockaddr* addr = (struct sockaddr*)[addrData bytes];
     if (addr->sa_family == AF_INET) {
         inet_ntop(addr->sa_family, &((struct sockaddr_in*)addr)->sin_addr, addrStr, sizeof(addrStr));
+        unsigned short port = ntohs(((struct sockaddr_in*)addr)->sin_port);
+        return [NSString stringWithFormat: @"%s:%u", addrStr, port];
     }
     else {
         struct sockaddr_in6* sin6 = (struct sockaddr_in6*)addr;
         inet_ntop(addr->sa_family, &sin6->sin6_addr, addrStr, sizeof(addrStr));
+        unsigned short port = ntohs(((struct sockaddr_in6*)addr)->sin6_port);
         if (sin6->sin6_scope_id != 0) {
             // Link-local addresses with scope IDs are special
-            return [NSString stringWithFormat: @"%s%%%u", addrStr, sin6->sin6_scope_id];
+            return [NSString stringWithFormat: @"[%s%%%u]:%u", addrStr, sin6->sin6_scope_id, port];
+        }
+        else {
+            return [NSString stringWithFormat: @"[%s]:%u", addrStr, port];
         }
     }
-    return [NSString stringWithFormat: @"%s", addrStr];
 }
 
 + (BOOL)isAddress:(uint8_t*)address inSubnet:(uint8_t*)subnet netmask:(int)bits {

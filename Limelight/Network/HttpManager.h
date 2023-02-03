@@ -9,10 +9,12 @@
 #import "HttpResponse.h"
 #import "HttpRequest.h"
 #import "StreamConfiguration.h"
+#import "TemporaryHost.h"
 
 @interface HttpManager : NSObject <NSURLSessionDelegate>
 
-- (id) initWithHost:(NSString*) host uniqueId:(NSString*) uniqueId serverCert:(NSData*) serverCert;
+- (id) initWithHost:(TemporaryHost*) host;
+- (id) initWithAddress:(NSString*) hostAddressPortString httpsPort:(unsigned short) httpsPort serverCert:(NSData*) serverCert;
 - (void) setServerCert:(NSData*) serverCert;
 - (NSURLRequest*) newPairRequest:(NSData*)salt clientCert:(NSData*)clientCert;
 - (NSURLRequest*) newUnpairRequest;

@@ -10,6 +10,7 @@
 #import "HttpRequest.h"
 #import "CryptoManager.h"
 #import "TemporaryApp.h"
+#import "ServerInfoResponse.h"
 
 #include <libxml2/libxml/xmlreader.h>
 #include <string.h>
@@ -23,8 +24,8 @@
 
 @implementation HttpManager {
     NSURLSession* _urlSession;
+    NSString* _urlSafeHostName;
     NSString* _baseHTTPURL;
-    NSString* _baseHTTPSURL;
     NSString* _uniqueId;
     NSString* _deviceName;
     NSData* _serverCert;
@@ -32,11 +33,11 @@
     NSData* _requestResp;
     dispatch_semaphore_t _requestLock;
     
+    TemporaryHost *_host; // May be nil
+    NSString* _baseHTTPSURL;
+    
     NSError* _error;
 }
-
-static const NSString* HTTP_PORT = @"47989";
-static const NSString* HTTPS_PORT = @"47984";
 
 + (NSData*) fixXmlVersion:(NSData*) xmlData {
     NSString* dataString = [[NSString alloc] initWithData:xmlData encoding:NSUTF8StringEncoding];
@@ -49,7 +50,13 @@ static const NSString* HTTPS_PORT = @"47984";
     _serverCert = serverCert;
 }
 
-- (id) initWithHost:(NSString*) host uniqueId:(NSString*) uniqueId serverCert:(NSData*) serverCert {
+- (id) initWithHost:(TemporaryHost*) host {
+    self = [self initWithAddress:host.activeAddress httpsPort:host.httpsPort serverCert:host.serverCert];
+    _host = host;
+    return self;
+}
+
+- (id) initWithAddress:(NSString*) hostAddressPortString httpsPort:(unsigned short)httpsPort serverCert:(NSData*) serverCert {
     self = [super init];
     // Use the same UID for all Moonlight clients to allow them
     // quit games started on another Moonlight client.
@@ -61,21 +68,64 @@ static const NSString* HTTPS_PORT = @"47984";
     NSURLSessionConfiguration* config = [NSURLSessionConfiguration ephemeralSessionConfiguration];
     _urlSession = [NSURLSession sessionWithConfiguration:config delegate:self delegateQueue:nil];
     
+    NSString* address = [Utils addressPortStringToAddress:hostAddressPortString];
+    unsigned short port = [Utils addressPortStringToPort:hostAddressPortString];
+    
     // If this is an IPv6 literal, we must properly enclose it in brackets
-    NSString* urlSafeHost;
-    if ([host containsString:@":"]) {
-        urlSafeHost = [NSString stringWithFormat:@"[%@]", host];
+    if ([address containsString:@":"]) {
+        _urlSafeHostName = [NSString stringWithFormat:@"[%@]", address];
     } else {
-        urlSafeHost = host;
+        _urlSafeHostName = address;
     }
     
-    _baseHTTPURL = [NSString stringWithFormat:@"http://%@:%@", urlSafeHost, HTTP_PORT];
-    _baseHTTPSURL = [NSString stringWithFormat:@"https://%@:%@", urlSafeHost, HTTPS_PORT];
+    _baseHTTPURL = [NSString stringWithFormat:@"http://%@:%u", _urlSafeHostName, port];
+    
+    if (httpsPort) {
+        _baseHTTPSURL = [NSString stringWithFormat:@"https://%@:%u", _urlSafeHostName, httpsPort];
+    }
     
     return self;
 }
 
+- (BOOL) ensureHttpsUrlPopulated:(bool)fastFail {
+    if (!_baseHTTPSURL) {
+        // Use the caller's provided port if one was specified
+        if (_host && _host.httpsPort != 0) {
+            _baseHTTPSURL = [NSString stringWithFormat:@"https://%@:%u", _urlSafeHostName, _host.httpsPort];
+        }
+        else {
+            // Query the host to retrieve the HTTPS port
+            ServerInfoResponse* serverInfoResponse = [[ServerInfoResponse alloc] init];
+            [self executeRequestSynchronously:[HttpRequest requestForResponse:serverInfoResponse withUrlRequest:[self newHttpServerInfoRequest:false]]];
+            TemporaryHost* dummyHost = [[TemporaryHost alloc] init];
+            if (![serverInfoResponse isStatusOk]) {
+                return NO;
+            }
+            [serverInfoResponse populateHost:dummyHost];
+            
+            // Pass the port back if the caller provided storage for it
+            if (_host) {
+                _host.httpsPort = dummyHost.httpsPort;
+            }
+            
+            _baseHTTPSURL = [NSString stringWithFormat:@"https://%@:%u", _urlSafeHostName, dummyHost.httpsPort];
+        }
+    }
+    
+    return YES;
+}
+
 - (void) executeRequestSynchronously:(HttpRequest*)request {
+    // This is a special case to handle failure of HTTPS port fetching
+    if (!request.request) {
+        if (request.response) {
+            request.response.statusCode = EHOSTDOWN;
+            request.response.statusMessage = @"Host is unreachable";
+        }
+        
+        return;
+    }
+    
     [_respData setLength:0];
     _error = nil;
     
@@ -174,11 +224,19 @@ static const NSString* HTTPS_PORT = @"47984";
 }
 
 - (NSURLRequest*) newPairChallenge {
+    if (![self ensureHttpsUrlPopulated:NO]) {
+        return nil;
+    }
+    
     NSString* urlString = [NSString stringWithFormat:@"%@/pair?uniqueid=%@&devicename=%@&updateState=1&phrase=pairchallenge", _baseHTTPSURL, _uniqueId, _deviceName];
     return [self createRequestFromString:urlString timeout:NORMAL_TIMEOUT_SEC];
 }
 
 - (NSURLRequest *)newAppListRequest {
+    if (![self ensureHttpsUrlPopulated:NO]) {
+        return nil;
+    }
+    
     NSString* urlString = [NSString stringWithFormat:@"%@/applist?uniqueid=%@", _baseHTTPSURL, _uniqueId];
     return [self createRequestFromString:urlString timeout:NORMAL_TIMEOUT_SEC];
 }
@@ -187,6 +245,10 @@ static const NSString* HTTPS_PORT = @"47984";
     if (_serverCert == nil) {
         // Use HTTP if the cert is not pinned yet
         return [self newHttpServerInfoRequest:fastFail];
+    }
+    
+    if (![self ensureHttpsUrlPopulated:fastFail]) {
+        return nil;
     }
     
     NSString* urlString = [NSString stringWithFormat:@"%@/serverinfo?uniqueid=%@", _baseHTTPSURL, _uniqueId];
@@ -203,6 +265,10 @@ static const NSString* HTTPS_PORT = @"47984";
 }
 
 - (NSURLRequest*) newLaunchRequest:(StreamConfiguration*)config {
+    if (![self ensureHttpsUrlPopulated:NO]) {
+        return nil;
+    }
+    
     // Using an FPS value over 60 causes SOPS to default to 720p60,
     // so force it to 0 to ensure the correct resolution is set. We
     // used to use 60 here but that locked the frame rate to 60 FPS
@@ -225,6 +291,10 @@ static const NSString* HTTPS_PORT = @"47984";
 }
 
 - (NSURLRequest*) newResumeRequest:(StreamConfiguration*)config {
+    if (![self ensureHttpsUrlPopulated:NO]) {
+        return nil;
+    }
+    
     NSString* urlString = [NSString stringWithFormat:@"%@/resume?uniqueid=%@&rikey=%@&rikeyid=%d&surroundAudioInfo=%d",
                            _baseHTTPSURL, _uniqueId,
                            [Utils bytesToHex:config.riKey], config.riKeyId,
@@ -235,11 +305,19 @@ static const NSString* HTTPS_PORT = @"47984";
 }
 
 - (NSURLRequest*) newQuitAppRequest {
+    if (![self ensureHttpsUrlPopulated:NO]) {
+        return nil;
+    }
+    
     NSString* urlString = [NSString stringWithFormat:@"%@/cancel?uniqueid=%@", _baseHTTPSURL, _uniqueId];
     return [self createRequestFromString:urlString timeout:LONG_TIMEOUT_SEC];
 }
 
 - (NSURLRequest*) newAppAssetRequestWithAppId:(NSString *)appId {
+    if (![self ensureHttpsUrlPopulated:NO]) {
+        return nil;
+    }
+    
     NSString* urlString = [NSString stringWithFormat:@"%@/appasset?uniqueid=%@&appid=%@&AssetType=2&AssetIdx=0", _baseHTTPSURL, _uniqueId, appId];
     return [self createRequestFromString:urlString timeout:NORMAL_TIMEOUT_SEC];
 }

@@ -168,7 +168,7 @@ static NSMutableSet* hostList;
         // Exempt this host from discovery while handling the applist query
         [self->_discMan pauseDiscoveryForHost:host];
         
-        AppListResponse* appListResp = [ConnectionHelper getAppListForHostWithHostIP:host.activeAddress serverCert:host.serverCert uniqueID:self->_uniqueId];
+        AppListResponse* appListResp = [ConnectionHelper getAppListForHost:host];
         
         [self->_discMan resumeDiscoveryForHost:host];
 
@@ -373,7 +373,7 @@ static NSMutableSet* hostList;
                 return;
             }
             
-            HttpManager* hMan = [[HttpManager alloc] initWithHost:host.activeAddress uniqueId:self->_uniqueId serverCert:host.serverCert];
+            HttpManager* hMan = [[HttpManager alloc] initWithHost:host];
             ServerInfoResponse* serverInfoResp = [[ServerInfoResponse alloc] init];
             
             // Exempt this host from discovery while handling the serverinfo request
@@ -593,6 +593,7 @@ static NSMutableSet* hostList;
 - (void) prepareToStreamApp:(TemporaryApp *)app {
     _streamConfig = [[StreamConfiguration alloc] init];
     _streamConfig.host = app.host.activeAddress;
+    _streamConfig.httpsPort = app.host.httpsPort;
     _streamConfig.appID = app.id;
     _streamConfig.appName = app.name;
     _streamConfig.serverCert = app.host.serverCert;
@@ -718,7 +719,7 @@ static NSMutableSet* hostList;
                                         Log(LOG_I, @"Quitting application: %@", currentApp.name);
                                         [self showLoadingFrame: ^{
                                             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                                                HttpManager* hMan = [[HttpManager alloc] initWithHost:app.host.activeAddress uniqueId:self->_uniqueId serverCert:app.host.serverCert];
+                                                HttpManager* hMan = [[HttpManager alloc] initWithHost:app.host];
                                                 HttpResponse* quitResponse = [[HttpResponse alloc] init];
                                                 HttpRequest* quitRequest = [HttpRequest requestForResponse: quitResponse withUrlRequest:[hMan newQuitAppRequest]];
                                                 

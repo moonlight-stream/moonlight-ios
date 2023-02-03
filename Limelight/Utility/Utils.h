@@ -27,6 +27,10 @@ FOUNDATION_EXPORT NSString *const deviceName;
 + (NSData*) hexToBytes:(NSString*) hex;
 + (void) addHelpOptionToDialog:(UIAlertController*)dialog;
 + (BOOL) isActiveNetworkVPN;
++ (BOOL) parseAddressPortString:(NSString*)addressPort address:(NSRange*)address port:(NSRange*)port;
++ (NSString*) addressPortStringToAddress:(NSString*)addressPort;
++ (unsigned short) addressPortStringToPort:(NSString*)addressPort;
++ (NSString*) addressAndPortToAddressPortString:(NSString*)address port:(unsigned short)port;
 
 @end
 

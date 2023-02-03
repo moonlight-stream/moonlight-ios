@@ -344,8 +344,9 @@ void ClSetHdrMode(bool enabled)
         videoStatsLock = [[NSLock alloc] init];
     }
     
+    NSString *rawAddress = [Utils addressPortStringToAddress:config.host];
     strncpy(_hostString,
-            [config.host cStringUsingEncoding:NSUTF8StringEncoding],
+            [rawAddress cStringUsingEncoding:NSUTF8StringEncoding],
             sizeof(_hostString));
     strncpy(_appVersionString,
             [config.appVersion cStringUsingEncoding:NSUTF8StringEncoding],
