@@ -584,9 +584,10 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         if (event.modifier != 0) {
             LiSendKeyboardEvent(event.modifierKeycode, KEY_ACTION_DOWN, event.modifier);
         }
-        LiSendKeyboardEvent(event.keycode, KEY_ACTION_DOWN, event.modifier);
+        // Let the host know these are not (necessarily) normalized to US English scancodes
+        LiSendKeyboardEvent2(event.keycode, KEY_ACTION_DOWN, event.modifier, SS_KBE_FLAG_NON_NORMALIZED);
         usleep(50 * 1000);
-        LiSendKeyboardEvent(event.keycode, KEY_ACTION_UP, event.modifier);
+        LiSendKeyboardEvent2(event.keycode, KEY_ACTION_UP, event.modifier, SS_KBE_FLAG_NON_NORMALIZED);
         if (event.modifier != 0) {
             LiSendKeyboardEvent(event.modifierKeycode, KEY_ACTION_UP, event.modifier);
         }
