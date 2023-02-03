@@ -76,6 +76,10 @@
         }
     }
     
+    // Populate the config's version fields from serverinfo
+    _config.appVersion = appversion;
+    _config.gfeVersion = gfeVersion;
+    
     // resumeApp and launchApp handle calling launchFailed
     NSString* sessionUrl;
     if ([serverState hasSuffix:@"_SERVER_BUSY"]) {
@@ -92,10 +96,6 @@
     
     // Populate RTSP session URL from launch/resume response
     _config.rtspSessionUrl = sessionUrl;
-    
-    // Populate the config's version fields from serverinfo
-    _config.appVersion = appversion;
-    _config.gfeVersion = gfeVersion;
     
     // Initializing the renderer must be done on the main thread
     dispatch_async(dispatch_get_main_queue(), ^{
