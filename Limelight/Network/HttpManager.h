@@ -26,8 +26,7 @@
 - (NSURLRequest*) newServerInfoRequest:(bool)fastFail;
 - (NSURLRequest*) newHttpServerInfoRequest:(bool)fastFail;
 - (NSURLRequest*) newHttpServerInfoRequest;
-- (NSURLRequest*) newLaunchRequest:(StreamConfiguration*)config;
-- (NSURLRequest*) newResumeRequest:(StreamConfiguration*)config;
+- (NSURLRequest*) newLaunchOrResumeRequest:(NSString*)verb config:(StreamConfiguration*)config;
 - (NSURLRequest*) newQuitAppRequest;
 - (NSURLRequest*) newAppAssetRequestWithAppId:(NSString*)appId;
 - (void) executeRequestSynchronously:(HttpRequest*)request;
