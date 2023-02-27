@@ -531,7 +531,7 @@ BOOL isCustomResolution(CGSize res) {
         UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"iPad" bundle:nil];
         vc = [storyboard instantiateViewControllerWithIdentifier:@"LayoutOnScreenControlsViewController"];
         vc.modalPresentationStyle = UIModalPresentationFullScreen;
-    }  
+    }
 
     switch ([segmentedControl selectedSegmentIndex]) {
             case 0:
