@@ -15,6 +15,7 @@
 		450B660F29147D4D0057517C /* iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 450B660E29147D4D0057517C /* iPhone.storyboard */; };
 		4573A445294683D1000A036A /* ProfileTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 4573A443294683D1000A036A /* ProfileTableViewCell.m */; };
 		4573A446294683D1000A036A /* ProfileTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4573A444294683D1000A036A /* ProfileTableViewCell.xib */; };
+		45875D9A29AD4EDB00F3A90A /* OnScreenButtonState.m in Sources */ = {isa = PBXBuildFile; fileRef = 450B660B29147C2A0057517C /* OnScreenButtonState.m */; };
 		45999AEE2935451D0073975D /* OSCProfilesTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 45999AED2935451D0073975D /* OSCProfilesTableViewController.m */; };
 		45E9CBF529453CDC00C88D96 /* ToolBarContainerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 45E9CBF429453CDC00C88D96 /* ToolBarContainerView.m */; };
 		693B3A9B218638CD00982F7B /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 693B3A9A218638CD00982F7B /* Settings.bundle */; };
@@ -1067,6 +1068,7 @@
 				9865DC38213287FE0005B9B9 /* LoadingFrameViewController.m in Sources */,
 				9865DC31213260F10005B9B9 /* mkcert.c in Sources */,
 				FB1A67E32132498A00507771 /* Limelight.xcdatamodeld in Sources */,
+				45875D9A29AD4EDB00F3A90A /* OnScreenButtonState.m in Sources */,
 				FB1A67DE2132460A00507771 /* Utils.m in Sources */,
 				FB1A67E02132460A00507771 /* Logger.m in Sources */,
 				FB1A67D52132460400507771 /* ControllerSupport.m in Sources */,
