@@ -393,7 +393,7 @@
                                                 </constraints>
                                                 <color key="tintColor" red="0.6705882353" green="0.61568627450000002" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                                <state key="normal" image="SquareArrowDown"/>
+                                                <state key="normal" image="SquareAndArrowDown"/>
                                                 <connections>
                                                     <action selector="saveTapped:" destination="YXP-lQ-L2x" eventType="touchUpInside" id="7ZN-jc-WxC"/>
                                                 </connections>
@@ -421,7 +421,7 @@
                                     <view alpha="0.90000000000000002" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="B2M-kv-L0a" userLabel="Chevron View">
                                         <rect key="frame" x="391" y="50" width="52" height="30"/>
                                         <subviews>
-                                            <imageView clipsSubviews="YES" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chevron.compact.up" translatesAutoresizingMaskIntoConstraints="NO" id="uyW-nk-lvy">
+                                            <imageView clipsSubviews="YES" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ChevronCompactUp" translatesAutoresizingMaskIntoConstraints="NO" id="uyW-nk-lvy">
                                                 <rect key="frame" x="0.0" y="0.0" width="52" height="30"/>
                                             </imageView>
                                         </subviews>
@@ -629,10 +629,10 @@
     </scenes>
     <resources>
         <image name="ArrowBackward" width="40" height="40"/>
-        <image name="SquareArrowDown" width="40" height="40"/>
+        <image name="ChevronCompactUp" width="35" height="10"/>
+        <image name="SquareAndArrowDown" width="40" height="40"/>
         <image name="SquaresArrowUp" width="40" height="40"/>
         <image name="Trash" width="40" height="40"/>
-        <image name="chevron.compact.up" width="9" height="3"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

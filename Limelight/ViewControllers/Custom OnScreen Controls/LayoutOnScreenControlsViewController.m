@@ -115,7 +115,7 @@
         completion:^(BOOL finished) {
             if (finished) {
                 self->isToolbarHidden = YES;
-                self.chevronImageView.image = [UIImage imageNamed:@"chevron.compact.down"];
+                self.chevronImageView.image = [UIImage imageNamed:@"ChevronCompactDown"];
             }
         }];
     }
@@ -126,7 +126,7 @@
         completion:^(BOOL finished) {
             if (finished) {
                 self->isToolbarHidden = NO;
-                self.chevronImageView.image = [UIImage imageNamed:@"chevron.compact.up"];
+                self.chevronImageView.image = [UIImage imageNamed:@"ChevronCompactUp"];
             }
         }];
     }
