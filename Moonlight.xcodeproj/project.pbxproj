@@ -15,7 +15,7 @@
 		450B660F29147D4D0057517C /* iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 450B660E29147D4D0057517C /* iPhone.storyboard */; };
 		4573A445294683D1000A036A /* ProfileTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 4573A443294683D1000A036A /* ProfileTableViewCell.m */; };
 		4573A446294683D1000A036A /* ProfileTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4573A444294683D1000A036A /* ProfileTableViewCell.xib */; };
-		45875D9A29AD4EDB00F3A90A /* OnScreenButtonState.m in Sources */ = {isa = PBXBuildFile; fileRef = 450B660B29147C2A0057517C /* OnScreenButtonState.m */; };
+		45875DA329AD505D00F3A90A /* LoadingFrameViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FB4A23B71A9D3637004D2EF2 /* LoadingFrameViewController.m */; };
 		45999AEE2935451D0073975D /* OSCProfilesTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 45999AED2935451D0073975D /* OSCProfilesTableViewController.m */; };
 		45E9CBF529453CDC00C88D96 /* ToolBarContainerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 45E9CBF429453CDC00C88D96 /* ToolBarContainerView.m */; };
 		693B3A9B218638CD00982F7B /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 693B3A9A218638CD00982F7B /* Settings.bundle */; };
@@ -32,7 +32,6 @@
 		9865DC31213260F10005B9B9 /* mkcert.c in Sources */ = {isa = PBXBuildFile; fileRef = FB89460719F646E200339C8A /* mkcert.c */; };
 		9865DC36213287F30005B9B9 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FB290D0319B2C406004C83CF /* AppDelegate.m */; };
 		9865DC37213287FE0005B9B9 /* StreamFrameViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FB89462719F646E200339C8A /* StreamFrameViewController.m */; };
-		9865DC38213287FE0005B9B9 /* LoadingFrameViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FB4A23B71A9D3637004D2EF2 /* LoadingFrameViewController.m */; };
 		9865DC3C2132922E0005B9B9 /* GameController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9865DC3B2132922E0005B9B9 /* GameController.framework */; };
 		9865DC3E21332D660005B9B9 /* MainFrameViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FB89462519F646E200339C8A /* MainFrameViewController.m */; };
 		988FCD41293B091B003050E2 /* KeyboardInputField.m in Sources */ = {isa = PBXBuildFile; fileRef = 988FCD40293B091B003050E2 /* KeyboardInputField.m */; };
@@ -77,7 +76,6 @@
 		FB1A67D3213245F800507771 /* TemporarySettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 98D5856F1C0ED0E800F6CC00 /* TemporarySettings.m */; };
 		FB1A67D52132460400507771 /* ControllerSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = FB89460B19F646E200339C8A /* ControllerSupport.m */; };
 		FB1A67D82132460400507771 /* StreamView.m in Sources */ = {isa = PBXBuildFile; fileRef = FB89460D19F646E200339C8A /* StreamView.m */; };
-		FB1A67DA2132460400507771 /* OnScreenControls.m in Sources */ = {isa = PBXBuildFile; fileRef = FB4678EC1A50C40900377732 /* OnScreenControls.m */; };
 		FB1A67DC2132460400507771 /* KeyboardSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = FB1A674C2131E65900507771 /* KeyboardSupport.m */; };
 		FB1A67DE2132460A00507771 /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = FB89462219F646E200339C8A /* Utils.m */; };
 		FB1A67E02132460A00507771 /* Logger.m in Sources */ = {isa = PBXBuildFile; fileRef = FBD1C8E11A8AD71400C6703C /* Logger.m */; };
@@ -1065,19 +1063,17 @@
 				FB1A681B213284FB00507771 /* ComputerScrollView.m in Sources */,
 				FB1A681C213284FB00507771 /* AppCollectionView.m in Sources */,
 				9865DC37213287FE0005B9B9 /* StreamFrameViewController.m in Sources */,
-				9865DC38213287FE0005B9B9 /* LoadingFrameViewController.m in Sources */,
 				9865DC31213260F10005B9B9 /* mkcert.c in Sources */,
 				FB1A67E32132498A00507771 /* Limelight.xcdatamodeld in Sources */,
-				45875D9A29AD4EDB00F3A90A /* OnScreenButtonState.m in Sources */,
 				FB1A67DE2132460A00507771 /* Utils.m in Sources */,
 				FB1A67E02132460A00507771 /* Logger.m in Sources */,
 				FB1A67D52132460400507771 /* ControllerSupport.m in Sources */,
 				FB1A67D82132460400507771 /* StreamView.m in Sources */,
 				9896219A23D56E8100211983 /* X1Kit.swift in Sources */,
-				FB1A67DA2132460400507771 /* OnScreenControls.m in Sources */,
 				FB1A67DC2132460400507771 /* KeyboardSupport.m in Sources */,
 				FB1A67CD213245F800507771 /* DataManager.m in Sources */,
 				FB1A67CF213245F800507771 /* TemporaryApp.m in Sources */,
+				45875DA329AD505D00F3A90A /* LoadingFrameViewController.m in Sources */,
 				FB1A67D1213245F800507771 /* TemporaryHost.m in Sources */,
 				FB1A67D3213245F800507771 /* TemporarySettings.m in Sources */,
 				FB1A67C3213245EA00507771 /* AppAssetManager.m in Sources */,
