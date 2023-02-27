@@ -15,6 +15,7 @@
 @property (atomic) PairState pairState;
 @property (atomic, nullable, retain) NSString * activeAddress;
 @property (atomic, nullable, retain) NSString * currentGame;
+@property (atomic) unsigned short httpsPort;
 
 @property (atomic, nullable, retain) NSData *serverCert;
 @property (atomic, nullable, retain) NSString *address;

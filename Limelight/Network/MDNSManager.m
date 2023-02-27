@@ -72,16 +72,21 @@ static NSString* NV_SERVICE_TYPE = @"_nvstream._tcp";
     struct sockaddr* addr = (struct sockaddr*)[addrData bytes];
     if (addr->sa_family == AF_INET) {
         inet_ntop(addr->sa_family, &((struct sockaddr_in*)addr)->sin_addr, addrStr, sizeof(addrStr));
+        unsigned short port = ntohs(((struct sockaddr_in*)addr)->sin_port);
+        return [NSString stringWithFormat: @"%s:%u", addrStr, port];
     }
     else {
         struct sockaddr_in6* sin6 = (struct sockaddr_in6*)addr;
         inet_ntop(addr->sa_family, &sin6->sin6_addr, addrStr, sizeof(addrStr));
+        unsigned short port = ntohs(((struct sockaddr_in6*)addr)->sin6_port);
         if (sin6->sin6_scope_id != 0) {
             // Link-local addresses with scope IDs are special
-            return [NSString stringWithFormat: @"%s%%%u", addrStr, sin6->sin6_scope_id];
+            return [NSString stringWithFormat: @"[%s%%%u]:%u", addrStr, sin6->sin6_scope_id, port];
+        }
+        else {
+            return [NSString stringWithFormat: @"[%s]:%u", addrStr, port];
         }
     }
-    return [NSString stringWithFormat: @"%s", addrStr];
 }
 
 + (BOOL)isAddress:(uint8_t*)address inSubnet:(uint8_t*)subnet netmask:(int)bits {
@@ -235,7 +240,7 @@ static NSString* NV_SERVICE_TYPE = @"_nvstream._tcp";
     [NSTimer scheduledTimerWithTimeInterval:2.0
                                      target:self
                                    selector:@selector(retryResolveTimerCallback:)
-                                   userInfo:nil
+                                   userInfo:sender
                                     repeats:NO];
 }
 
@@ -289,12 +294,12 @@ static NSString* NV_SERVICE_TYPE = @"_nvstream._tcp";
         return;
     }
     
-    Log(LOG_I, @"Retrying mDNS resolution");
-    for (NSNetService* service in services) {
-        if (service.hostName == nil) {
-            [service setDelegate:self];
-            [service resolveWithTimeout:5];
-        }
+    NSNetService* service = timer.userInfo;
+    Log(LOG_I, @"Retrying mDNS resolution for %@", service);
+    
+    if (service.hostName == nil) {
+        [service setDelegate:self];
+        [service resolveWithTimeout:5];
     }
 }
 

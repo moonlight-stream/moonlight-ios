@@ -11,12 +11,16 @@
 
 #define TAG_HOSTNAME @"hostname"
 #define TAG_EXTERNAL_IP @"ExternalIP"
+#define TAG_HTTPS_PORT @"HttpsPort"
 #define TAG_LOCAL_IP @"LocalIP"
 #define TAG_UNIQUE_ID @"uniqueid"
 #define TAG_MAC_ADDRESS @"mac"
 #define TAG_PAIR_STATUS @"PairStatus"
 #define TAG_STATE @"state"
 #define TAG_CURRENT_GAME @"currentgame"
+
+// Sunshine extension
+#define TAG_EXTERNAL_PORT @"ExternalPort"
 
 @interface ServerInfoResponse : HttpResponse <Response>
 

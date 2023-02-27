@@ -39,10 +39,8 @@
 
 - (void)main {
     [CryptoManager generateKeyPairUsingSSL];
-    NSString* uniqueId = [IdManager getUniqueId];
     
-    HttpManager* hMan = [[HttpManager alloc] initWithHost:_config.host
-                                                 uniqueId:uniqueId
+    HttpManager* hMan = [[HttpManager alloc] initWithAddress:_config.host httpsPort:_config.httpsPort
                                                      serverCert:_config.serverCert];
     
     ServerInfoResponse* serverInfoResp = [[ServerInfoResponse alloc] init];
@@ -67,7 +65,8 @@
         return;
     }
     
-    if (_config.width > 4096 || _config.height > 4096) {
+    // Only perform this check on GFE (as indicated by MJOLNIR in state value)
+    if ((_config.width > 4096 || _config.height > 4096) && [serverState containsString:@"MJOLNIR"]) {
         // Pascal added support for 8K HEVC encoding support. Maxwell 2 could encode HEVC but only up to 4K.
         // We can't directly identify Pascal, but we can look for HEVC Main10 which was added in the same generation.
         NSString* codecSupport = [serverInfoResp getStringTag:@"ServerCodecModeSupport"];
@@ -76,6 +75,10 @@
             return;
         }
     }
+    
+    // Populate the config's version fields from serverinfo
+    _config.appVersion = appversion;
+    _config.gfeVersion = gfeVersion;
     
     // resumeApp and launchApp handle calling launchFailed
     NSString* sessionUrl;
@@ -94,10 +97,6 @@
     // Populate RTSP session URL from launch/resume response
     _config.rtspSessionUrl = sessionUrl;
     
-    // Populate the config's version fields from serverinfo
-    _config.appVersion = appversion;
-    _config.gfeVersion = gfeVersion;
-    
     // Initializing the renderer must be done on the main thread
     dispatch_async(dispatch_get_main_queue(), ^{
         VideoDecoderRenderer* renderer = [[VideoDecoderRenderer alloc] initWithView:self->_renderView callbacks:self->_callbacks streamAspectRatio:(float)self->_config.width / (float)self->_config.height useFramePacing:self->_config.useFramePacing];
@@ -114,7 +113,7 @@
 
 - (BOOL) launchApp:(HttpManager*)hMan receiveSessionUrl:(NSString**)sessionUrl {
     HttpResponse* launchResp = [[HttpResponse alloc] init];
-    [hMan executeRequestSynchronously:[HttpRequest requestForResponse:launchResp withUrlRequest:[hMan newLaunchRequest:_config]]];
+    [hMan executeRequestSynchronously:[HttpRequest requestForResponse:launchResp withUrlRequest:[hMan newLaunchOrResumeRequest:@"launch" config:_config]]];
     NSString *gameSession = [launchResp getStringTag:@"gamesession"];
     if (![launchResp isStatusOk]) {
         [_callbacks launchFailed:launchResp.statusMessage];
@@ -132,7 +131,7 @@
 
 - (BOOL) resumeApp:(HttpManager*)hMan receiveSessionUrl:(NSString**)sessionUrl {
     HttpResponse* resumeResp = [[HttpResponse alloc] init];
-    [hMan executeRequestSynchronously:[HttpRequest requestForResponse:resumeResp withUrlRequest:[hMan newResumeRequest:_config]]];
+    [hMan executeRequestSynchronously:[HttpRequest requestForResponse:resumeResp withUrlRequest:[hMan newLaunchOrResumeRequest:@"resume" config:_config]]];
     NSString* resume = [resumeResp getStringTag:@"resume"];
     if (![resumeResp isStatusOk]) {
         [_callbacks launchFailed:resumeResp.statusMessage];

@@ -474,10 +474,22 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     }
     
     CGPoint currentScrollTranslation = [gesture translationInView:self];
-    short translationDeltaY = ((currentScrollTranslation.y - lastScrollTranslation.y) / self.bounds.size.height) * 120; // WHEEL_DELTA
-    if (translationDeltaY != 0) {
-        LiSendHighResScrollEvent(translationDeltaY * 20);
-        lastScrollTranslation = currentScrollTranslation;
+    
+    {
+        short translationDeltaY = ((currentScrollTranslation.y - lastScrollTranslation.y) / self.bounds.size.height) * 120; // WHEEL_DELTA
+        if (translationDeltaY != 0) {
+            LiSendHighResScrollEvent(translationDeltaY * 20);
+            lastScrollTranslation = currentScrollTranslation;
+        }
+    }
+
+    {
+        short translationDeltaX = ((currentScrollTranslation.x - lastScrollTranslation.x) / self.bounds.size.width) * 120; // WHEEL_DELTA
+        if (translationDeltaX != 0) {
+            // Direction is reversed from vertical scrolling
+            LiSendHighResHScrollEvent(-translationDeltaX * 20);
+            lastScrollTranslation = currentScrollTranslation;
+        }
     }
 }
 
@@ -497,9 +509,20 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     // Using velocityInView is 0 for discrete scroll events
     // when scrolling very slowly, but translationInView does work.
     CGPoint currentScrollTranslation = [gesture translationInView:self];
-    short translationDeltaY = currentScrollTranslation.y - lastScrollTranslation.y;
-    if (translationDeltaY != 0) {
-        LiSendScrollEvent(translationDeltaY > 0 ? 1 : -1);
+    
+    {
+        short translationDeltaY = currentScrollTranslation.y - lastScrollTranslation.y;
+        if (translationDeltaY != 0) {
+            LiSendScrollEvent(translationDeltaY > 0 ? 1 : -1);
+        }
+    }
+
+    {
+        short translationDeltaX = currentScrollTranslation.x - lastScrollTranslation.x;
+        if (translationDeltaX != 0) {
+            // Direction is reversed from vertical scrolling
+            LiSendHScrollEvent(translationDeltaX < 0 ? 1 : -1);
+        }
     }
     
     lastScrollTranslation = currentScrollTranslation;
@@ -584,9 +607,10 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         if (event.modifier != 0) {
             LiSendKeyboardEvent(event.modifierKeycode, KEY_ACTION_DOWN, event.modifier);
         }
-        LiSendKeyboardEvent(event.keycode, KEY_ACTION_DOWN, event.modifier);
+        // Let the host know these are not (necessarily) normalized to US English scancodes
+        LiSendKeyboardEvent2(event.keycode, KEY_ACTION_DOWN, event.modifier, SS_KBE_FLAG_NON_NORMALIZED);
         usleep(50 * 1000);
-        LiSendKeyboardEvent(event.keycode, KEY_ACTION_UP, event.modifier);
+        LiSendKeyboardEvent2(event.keycode, KEY_ACTION_UP, event.modifier, SS_KBE_FLAG_NON_NORMALIZED);
         if (event.modifier != 0) {
             LiSendKeyboardEvent(event.modifierKeycode, KEY_ACTION_UP, event.modifier);
         }

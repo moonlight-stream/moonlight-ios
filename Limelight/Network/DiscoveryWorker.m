@@ -103,8 +103,8 @@ static const float POLL_RATE = 2.0f; // Poll every 2 seconds
             ServerInfoResponse* serverInfoResp = [self requestInfoAtAddress:address cert:_host.serverCert];
             receivedResponse = [self checkResponse:serverInfoResp];
             if (receivedResponse) {
-                [serverInfoResp populateHost:_host];
                 _host.activeAddress = address;
+                [serverInfoResp populateHost:_host];
                 
                 // Update the database using the response
                 DataManager *dataManager = [[DataManager alloc] init];
@@ -126,9 +126,7 @@ static const float POLL_RATE = 2.0f; // Poll every 2 seconds
 }
 
 - (ServerInfoResponse*) requestInfoAtAddress:(NSString*)address cert:(NSData*)cert {
-    HttpManager* hMan = [[HttpManager alloc] initWithHost:address
-                                                 uniqueId:_uniqueId
-                                                     serverCert:cert];
+    HttpManager* hMan = [[HttpManager alloc] initWithAddress:address httpsPort:0 serverCert:cert];
     ServerInfoResponse* response = [[ServerInfoResponse alloc] init];
     [hMan executeRequestSynchronously:[HttpRequest requestForResponse:response
                                                        withUrlRequest:[hMan newServerInfoRequest:true]

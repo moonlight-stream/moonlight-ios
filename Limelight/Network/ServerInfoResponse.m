@@ -23,17 +23,58 @@
     host.mac = [[self getStringTag:TAG_MAC_ADDRESS] trim];
     host.currentGame = [[self getStringTag:TAG_CURRENT_GAME] trim];
     
+    NSInteger httpsPort;
+    if ([self getIntTag:TAG_HTTPS_PORT value:&httpsPort]) {
+        host.httpsPort = (unsigned short)httpsPort;
+    }
+    else {
+        // Use the default if it's not specified
+        host.httpsPort = 47984;
+    }
+    
     // We might get an IPv4 loopback address if we're using GS IPv6 Forwarder
     NSString *lanAddr = [[self getStringTag:TAG_LOCAL_IP] trim];
     if (![lanAddr hasPrefix:@"127."]) {
-        host.localAddress = lanAddr;
+        unsigned short localPort;
+        
+        // If we reached this host through this port, store our port there
+        if (host.activeAddress && [lanAddr isEqualToString:[Utils addressPortStringToAddress:host.activeAddress]]) {
+            localPort = [Utils addressPortStringToPort:host.activeAddress];
+        }
+        else if (host.localAddress) {
+            // If there's an existing local address, use the port from that
+            localPort = [Utils addressPortStringToPort:host.localAddress];
+        }
+        else {
+            // If all else fails, use 47989
+            localPort = 47989;
+        }
+        
+        host.localAddress = [Utils addressAndPortToAddressPortString:lanAddr port:localPort];
+    }
+    
+    // This is a Sunshine extension for WAN port remapping
+    NSInteger externalHttpPort;
+    if (![self getIntTag:TAG_EXTERNAL_PORT value:&externalHttpPort]) {
+        // Use our active port if it's not specified
+        if (host.activeAddress) {
+            externalHttpPort = [Utils addressPortStringToPort:host.activeAddress];
+        }
+        else {
+            // Otherwise use the default
+            externalHttpPort = 47989;
+        }
     }
     
     // Modern GFE versions don't actually give us a WAN address anymore
     // so we leave the one that we populated from mDNS discovery via STUN.
     NSString *wanAddr = [[self getStringTag:TAG_EXTERNAL_IP] trim];
     if (wanAddr) {
-        host.externalAddress = wanAddr;
+        host.externalAddress = [Utils addressAndPortToAddressPortString:wanAddr port:externalHttpPort];
+    }
+    else if (host.externalAddress) {
+        // If we have an external address (via STUN) already, we still need to populate the port
+        host.externalAddress = [Utils addressAndPortToAddressPortString:[Utils addressPortStringToAddress:host.externalAddress] port:externalHttpPort];
     }
     
     NSString *state = [[self getStringTag:TAG_STATE] trim];

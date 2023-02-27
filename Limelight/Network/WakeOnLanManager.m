@@ -38,29 +38,32 @@ static const int ports[numPorts] = {
     NSData* wolPayload = [WakeOnLanManager createPayload:host];
     
     for (int i = 0; i < 5; i++) {
-        const char* address;
+        NSString* address;
         struct addrinfo hints, *res, *curr;
         
         // try all ip addresses
         if (i == 0 && host.localAddress != nil) {
-            address = [host.localAddress UTF8String];
+            address = host.localAddress;
         } else if (i == 1 && host.externalAddress != nil) {
-            address = [host.externalAddress UTF8String];
+            address = host.externalAddress;
         } else if (i == 2 && host.address != nil) {
-            address = [host.address UTF8String];
+            address = host.address;
         } else if (i == 3 && host.ipv6Address != nil) {
-            address = [host.ipv6Address UTF8String];
+            address = host.ipv6Address;
         } else if (i == 4) {
-            address = "255.255.255.255";
+            address = @"255.255.255.255";
         } else {
             // Requested address wasn't present
             continue;
         }
         
+        // Get the raw address from the address+port string
+        NSString* rawAddress = [Utils addressPortStringToAddress:address];
+        
         memset(&hints, 0, sizeof(hints));
         hints.ai_family = AF_UNSPEC;
         hints.ai_flags = AI_ADDRCONFIG;
-        if (getaddrinfo(address, NULL, &hints, &res) != 0 || res == NULL) {
+        if (getaddrinfo([rawAddress UTF8String], NULL, &hints, &res) != 0 || res == NULL) {
             // Failed to resolve address
             Log(LOG_E, @"Failed to resolve WOL address");
             continue;
