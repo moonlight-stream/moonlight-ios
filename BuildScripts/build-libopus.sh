@@ -39,8 +39,8 @@ if [ "${DEBUG}" == "true" ]; then
     OPT_LDFLAGS=""
     OPT_CONFIG_ARGS="--enable-assertions --disable-asm"
 else
-    OPT_CFLAGS="-Ofast -flto -g"
-    OPT_LDFLAGS="-flto"
+    OPT_CFLAGS="-O3 -g"
+    OPT_LDFLAGS=""
     OPT_CONFIG_ARGS=""
 fi
 
@@ -113,7 +113,7 @@ do
 
 	mkdir -p "${INTERDIR}/${PLATFORM}${SDKVERSION}-${ARCH}.sdk"
 
-	./configure --enable-float-approx --disable-shared --enable-static --with-pic --disable-extra-programs --disable-doc ${EXTRA_CONFIG} \
+	./configure --disable-shared --enable-static --with-pic --disable-extra-programs --disable-doc ${EXTRA_CONFIG} \
     --prefix="${INTERDIR}/${PLATFORM}${SDKVERSION}-${ARCH}.sdk" \
     LDFLAGS="$LDFLAGS ${OPT_LDFLAGS} -fPIE ${MINVERSIONDEF} -L${OUTPUTDIR}/lib" \
     CFLAGS="$CFLAGS ${EXTRA_CFLAGS} ${OPT_CFLAGS} -fPIE ${MINVERSIONDEF} -I${OUTPUTDIR}/include -isysroot ${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer/SDKs/${PLATFORM}${SDKVERSION}.sdk" \
