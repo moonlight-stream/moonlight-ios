@@ -1,0 +1,5 @@
+1. Pull latest https://github.com/x2on/OpenSSL-for-iPhone
+2. Patch build-libssl.sh to adjust IOS_MIN_SDK_VERSION and TVOS_MIN_SDK_VERSION
+3. ./build-libssl.sh --disable-bitcode --targets="ios-sim-cross-x86_64 ios-sim-cross-arm64 ios-cross-arm64 tvos-sim-cross-x86_64 tvos-sim-cross-arm64 tvos-cross-arm64"
+4. ./create-xcframework.sh
+5. Copy OpenSSL.xcframework into moonlight-ios/libs
