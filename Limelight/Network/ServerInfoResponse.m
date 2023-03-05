@@ -85,6 +85,9 @@
         host.currentGame = @"0";
     }
     
+    // GFE uses the Mjolnir codename in their state enum values
+    host.isNvidiaServerSoftware = [state containsString:@"MJOLNIR"];
+    
     NSInteger pairStatus;
     if ([self getIntTag:TAG_PAIR_STATUS value:&pairStatus]) {
         host.pairState = pairStatus ? PairStatePaired : PairStateUnpaired;

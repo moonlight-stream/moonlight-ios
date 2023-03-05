@@ -16,6 +16,7 @@
 @property (atomic, nullable, retain) NSString * activeAddress;
 @property (atomic, nullable, retain) NSString * currentGame;
 @property (atomic) unsigned short httpsPort;
+@property (atomic) BOOL isNvidiaServerSoftware;
 
 @property (atomic, nullable, retain) NSData *serverCert;
 @property (atomic, nullable, retain) NSString *address;

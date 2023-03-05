@@ -32,6 +32,10 @@ FOUNDATION_EXPORT NSString *const deviceName;
 + (unsigned short) addressPortStringToPort:(NSString*)addressPort;
 + (NSString*) addressAndPortToAddressPortString:(NSString*)address port:(unsigned short)port;
 
+#if !TARGET_OS_TV
++ (void) launchUrl:(NSString*)urlString;
+#endif
+
 @end
 
 @interface NSString (NSStringWithTrim)
