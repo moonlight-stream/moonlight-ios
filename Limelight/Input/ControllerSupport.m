@@ -33,6 +33,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     
     float accumulatedDeltaX;
     float accumulatedDeltaY;
+    float accumulatedScrollX;
     float accumulatedScrollY;
     
     OnScreenControls *_osc;
@@ -455,6 +456,18 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     // in iPadOS 15 where discrete scroll events are dropped. tvOS only supports
     // GCMouse for mice, so we will have to just use it and hope for the best.
 #if TARGET_OS_TV
+    mouse.mouseInput.scroll.xAxis.valueChangedHandler = ^(GCControllerAxisInput * _Nonnull axis, float value) {
+        self->accumulatedScrollX += value;
+        
+        short truncatedScrollX = (short)self->accumulatedScrollX;
+        
+        if (truncatedScrollX != 0) {
+            // Direction is reversed from vertical scrolling
+            LiSendHighResHScrollEvent(-truncatedScrollX * 20);
+            
+            self->accumulatedScrollX -= truncatedScrollX;
+        }
+    };
     mouse.mouseInput.scroll.yAxis.valueChangedHandler = ^(GCControllerAxisInput * _Nonnull axis, float value) {
         self->accumulatedScrollY += value;
         
