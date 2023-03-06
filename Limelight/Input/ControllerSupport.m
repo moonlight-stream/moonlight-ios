@@ -425,6 +425,11 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     for (GCControllerButtonInput* auxButton in mouse.mouseInput.auxiliaryButtons) {
         auxButton.pressedChangedHandler = nil;
     }
+    
+#if TARGET_OS_TV
+    mouse.mouseInput.scroll.xAxis.valueChangedHandler = nil;
+    mouse.mouseInput.scroll.yAxis.valueChangedHandler = nil;
+#endif
 }
 
 -(void) registerMouseCallbacks:(GCMouse*) mouse API_AVAILABLE(ios(14.0)) {
