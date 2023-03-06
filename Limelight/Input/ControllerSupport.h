@@ -11,16 +11,17 @@
 
 @class OnScreenControls;
 
-@protocol InputPresenceDelegate <NSObject>
+@protocol ControllerSupportDelegate <NSObject>
 
 - (void) gamepadPresenceChanged;
 - (void) mousePresenceChanged;
+- (void) streamExitRequested;
 
 @end
 
 @interface ControllerSupport : NSObject
 
--(id) initWithConfig:(StreamConfiguration*)streamConfig presenceDelegate:(id<InputPresenceDelegate>)delegate;
+-(id) initWithConfig:(StreamConfiguration*)streamConfig delegate:(id<ControllerSupportDelegate>)delegate;
 
 -(void) initAutoOnScreenControlMode:(OnScreenControls*)osc;
 -(void) cleanup;

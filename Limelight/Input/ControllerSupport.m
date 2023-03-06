@@ -29,7 +29,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     
     NSLock *_controllerStreamLock;
     NSMutableDictionary *_controllers;
-    id<InputPresenceDelegate> _presenceDelegate;
+    id<ControllerSupportDelegate> _delegate;
     
     float accumulatedDeltaX;
     float accumulatedDeltaY;
@@ -200,13 +200,28 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
 
 -(void) updateFinished:(Controller*)controller
 {
+    BOOL exitRequested = NO;
+    
     [_controllerStreamLock lock];
     @synchronized(controller) {
+        // Handle Start+Select+L1+R1 gamepad quit combo
+        if (controller.lastButtonFlags == (PLAY_FLAG | BACK_FLAG | LB_FLAG | RB_FLAG)) {
+            controller.lastButtonFlags = 0;
+            exitRequested = YES;
+        }
+        
         // Player 1 is always present for OSC
         LiSendMultiControllerEvent(_multiController ? controller.playerIndex : 0,
                                    (_multiController ? _controllerNumbers : 1) | (_oscEnabled ? 1 : 0), controller.lastButtonFlags, controller.lastLeftTrigger, controller.lastRightTrigger, controller.lastLeftStickX, controller.lastLeftStickY, controller.lastRightStickX, controller.lastRightStickY);
     }
     [_controllerStreamLock unlock];
+    
+    if (exitRequested) {
+        // Invoke the delegate callback on the main thread
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self->_delegate streamExitRequested];
+        });
+    }
 }
 
 +(BOOL) hasKeyboardOrMouse {
@@ -645,7 +660,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     return _controllers.count;
 }
 
--(id) initWithConfig:(StreamConfiguration*)streamConfig presenceDelegate:(id<InputPresenceDelegate>)delegate
+-(id) initWithConfig:(StreamConfiguration*)streamConfig delegate:(id<ControllerSupportDelegate>)delegate
 {
     self = [super init];
     
@@ -654,7 +669,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     _controllerNumbers = 0;
     _multiController = streamConfig.multiController;
     _swapABXYButtons = streamConfig.swapABXYButtons;
-    _presenceDelegate = delegate;
+    _delegate = delegate;
 
     _player0osc = [[Controller alloc] init];
     _player0osc.playerIndex = 0;
@@ -697,7 +712,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
         [self updateAutoOnScreenControlMode];
         
         // Notify the delegate
-        [self->_presenceDelegate gamepadPresenceChanged];
+        [self->_delegate gamepadPresenceChanged];
     }];
     _controllerDisconnectObserver = [[NSNotificationCenter defaultCenter] addObserverForName:GCControllerDidDisconnectNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
         Log(LOG_I, @"Controller disconnected!");
@@ -729,7 +744,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
         [self updateAutoOnScreenControlMode];
         
         // Notify the delegate
-        [self->_presenceDelegate gamepadPresenceChanged];
+        [self->_delegate gamepadPresenceChanged];
     }];
     
     if (@available(iOS 14.0, tvOS 14.0, *)) {
@@ -745,7 +760,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
             [self updateAutoOnScreenControlMode];
             
             // Notify the delegate
-            [self->_presenceDelegate mousePresenceChanged];
+            [self->_delegate mousePresenceChanged];
         }];
         _mouseDisconnectObserver = [[NSNotificationCenter defaultCenter] addObserverForName:GCMouseDidDisconnectNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
             Log(LOG_I, @"Mouse disconnected!");
@@ -759,7 +774,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
             [self updateAutoOnScreenControlMode];
             
             // Notify the delegate
-            [self->_presenceDelegate mousePresenceChanged];
+            [self->_delegate mousePresenceChanged];
         }];
         _keyboardConnectObserver = [[NSNotificationCenter defaultCenter] addObserverForName:GCKeyboardDidConnectNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
             Log(LOG_I, @"Keyboard connected!");

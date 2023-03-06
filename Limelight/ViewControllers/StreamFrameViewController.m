@@ -104,7 +104,7 @@
     [_spinner startAnimating];
     _spinner.center = CGPointMake(self.view.frame.size.width / 2, self.view.frame.size.height / 2 - _stageLabel.frame.size.height - _spinner.frame.size.height);
     
-    _controllerSupport = [[ControllerSupport alloc] initWithConfig:self.streamConfig presenceDelegate:self];
+    _controllerSupport = [[ControllerSupport alloc] initWithConfig:self.streamConfig delegate:self];
     _inactivityTimer = nil;
     
     _streamView = [[StreamView alloc] initWithFrame:self.view.frame];
@@ -613,6 +613,12 @@
         [self setNeedsUpdateOfPrefersPointerLocked];
     }
 #endif
+}
+
+- (void) streamExitRequested {
+    Log(LOG_I, @"Gamepad combo requested stream exit");
+    
+    [self returnToMainFrame];
 }
 
 - (void)userInteractionBegan {
