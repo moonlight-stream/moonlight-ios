@@ -17,6 +17,35 @@
 		4573A446294683D1000A036A /* ProfileTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4573A444294683D1000A036A /* ProfileTableViewCell.xib */; };
 		457A2DFB29C0E0BA00B6396B /* X1Kit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457A2DFA29C0E0BA00B6396B /* X1Kit.swift */; };
 		457A2DFC29C0E0BA00B6396B /* X1Kit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457A2DFA29C0E0BA00B6396B /* X1Kit.swift */; };
+		457A2E8229C0FE1B00B6396B /* CMakeLists.txt in Resources */ = {isa = PBXBuildFile; fileRef = 457A2E5429C0FE1B00B6396B /* CMakeLists.txt */; };
+		457A2E8329C0FE1B00B6396B /* FindMbedTLS.cmake in Resources */ = {isa = PBXBuildFile; fileRef = 457A2E5629C0FE1B00B6396B /* FindMbedTLS.cmake */; };
+		457A2E8429C0FE1B00B6396B /* .gitmodules in Resources */ = {isa = PBXBuildFile; fileRef = 457A2E5729C0FE1B00B6396B /* .gitmodules */; };
+		457A2E8529C0FE1B00B6396B /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 457A2E5829C0FE1B00B6396B /* README.md */; };
+		457A2E8629C0FE1B00B6396B /* appveyor.yml in Resources */ = {isa = PBXBuildFile; fileRef = 457A2E5929C0FE1B00B6396B /* appveyor.yml */; };
+		457A2E8729C0FE1B00B6396B /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 457A2E5A29C0FE1B00B6396B /* .gitignore */; };
+		457A2E8829C0FE1B00B6396B /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 457A2E5B29C0FE1B00B6396B /* LICENSE.txt */; };
+		457A2E8929C0FE1B00B6396B /* rs.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E5E29C0FE1B00B6396B /* rs.c */; };
+		457A2E8A29C0FE1B00B6396B /* PlatformCrypto.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E6229C0FE1B00B6396B /* PlatformCrypto.c */; };
+		457A2E8B29C0FE1B00B6396B /* ControlStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E6429C0FE1B00B6396B /* ControlStream.c */; };
+		457A2E8C29C0FE1B00B6396B /* SimpleStun.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E6629C0FE1B00B6396B /* SimpleStun.c */; };
+		457A2E8D29C0FE1B00B6396B /* InputStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E6729C0FE1B00B6396B /* InputStream.c */; };
+		457A2E8E29C0FE1B00B6396B /* RtpAudioQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E6829C0FE1B00B6396B /* RtpAudioQueue.c */; };
+		457A2E8F29C0FE1B00B6396B /* ConnectionTester.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E6A29C0FE1B00B6396B /* ConnectionTester.c */; };
+		457A2E9029C0FE1B00B6396B /* RtspConnection.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E6B29C0FE1B00B6396B /* RtspConnection.c */; };
+		457A2E9129C0FE1B00B6396B /* PlatformSockets.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E6D29C0FE1B00B6396B /* PlatformSockets.c */; };
+		457A2E9229C0FE1B00B6396B /* Platform.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E6F29C0FE1B00B6396B /* Platform.c */; };
+		457A2E9329C0FE1B00B6396B /* VideoStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E7029C0FE1B00B6396B /* VideoStream.c */; };
+		457A2E9429C0FE1B00B6396B /* RtpVideoQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E7329C0FE1B00B6396B /* RtpVideoQueue.c */; };
+		457A2E9529C0FE1B00B6396B /* Connection.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E7429C0FE1B00B6396B /* Connection.c */; };
+		457A2E9629C0FE1B00B6396B /* VideoDepacketizer.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E7529C0FE1B00B6396B /* VideoDepacketizer.c */; };
+		457A2E9729C0FE1B00B6396B /* FakeCallbacks.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E7629C0FE1B00B6396B /* FakeCallbacks.c */; };
+		457A2E9829C0FE1B00B6396B /* SdpGenerator.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E7829C0FE1B00B6396B /* SdpGenerator.c */; };
+		457A2E9929C0FE1B00B6396B /* RtspParser.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E7929C0FE1B00B6396B /* RtspParser.c */; };
+		457A2E9A29C0FE1B00B6396B /* Misc.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E7A29C0FE1B00B6396B /* Misc.c */; };
+		457A2E9B29C0FE1B00B6396B /* AudioStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E7C29C0FE1B00B6396B /* AudioStream.c */; };
+		457A2E9C29C0FE1B00B6396B /* RecorderCallbacks.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E7E29C0FE1B00B6396B /* RecorderCallbacks.c */; };
+		457A2E9D29C0FE1B00B6396B /* LinkedBlockingQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E7F29C0FE1B00B6396B /* LinkedBlockingQueue.c */; };
+		457A2E9E29C0FE1B00B6396B /* ByteBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E8129C0FE1B00B6396B /* ByteBuffer.c */; };
 		45875DA329AD505D00F3A90A /* LoadingFrameViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FB4A23B71A9D3637004D2EF2 /* LoadingFrameViewController.m */; };
 		45999AEE2935451D0073975D /* OSCProfilesTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 45999AED2935451D0073975D /* OSCProfilesTableViewController.m */; };
 		45E9CBF529453CDC00C88D96 /* ToolBarContainerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 45E9CBF429453CDC00C88D96 /* ToolBarContainerView.m */; };
@@ -30,7 +59,6 @@
 		9827E7A32514366900F25707 /* HapticContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 9827E7A22514366900F25707 /* HapticContext.m */; };
 		9827E7A42514366900F25707 /* HapticContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 9827E7A22514366900F25707 /* HapticContext.m */; };
 		9832D1361BBCD5C50036EF48 /* TemporaryApp.m in Sources */ = {isa = PBXBuildFile; fileRef = 9832D1351BBCD5C50036EF48 /* TemporaryApp.m */; };
-		9865DC30213260B40005B9B9 /* libmoonlight-common-tv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FB1A68152132509400507771 /* libmoonlight-common-tv.a */; };
 		9865DC31213260F10005B9B9 /* mkcert.c in Sources */ = {isa = PBXBuildFile; fileRef = FB89460719F646E200339C8A /* mkcert.c */; };
 		9865DC36213287F30005B9B9 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FB290D0319B2C406004C83CF /* AppDelegate.m */; };
 		9865DC37213287FE0005B9B9 /* StreamFrameViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FB89462719F646E200339C8A /* StreamFrameViewController.m */; };
@@ -42,7 +70,6 @@
 		9897B6A1221260EF00966419 /* Controller.m in Sources */ = {isa = PBXBuildFile; fileRef = 9897B6A0221260EF00966419 /* Controller.m */; };
 		9897B6A62212732C00966419 /* Controller.m in Sources */ = {isa = PBXBuildFile; fileRef = 9897B6A0221260EF00966419 /* Controller.m */; };
 		98B9CE6D27B2144B00B473C4 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 98B9CE6C27B2144B00B473C4 /* AVKit.framework */; };
-		98CFB82F1CAD481B0048EF74 /* libmoonlight-common.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98AB2E841CAD46840089BB98 /* libmoonlight-common.a */; };
 		98D5856D1C0EA79600F6CC00 /* TemporaryHost.m in Sources */ = {isa = PBXBuildFile; fileRef = 98D5856C1C0EA79600F6CC00 /* TemporaryHost.m */; };
 		98D585701C0ED0E800F6CC00 /* TemporarySettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 98D5856F1C0ED0E800F6CC00 /* TemporarySettings.m */; };
 		DC1F5A07206436B20037755F /* ConnectionHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = DC1F5A06206436B20037755F /* ConnectionHelper.m */; };
@@ -142,37 +169,6 @@
 		FBDE86E619F82297001C18A8 /* UIAppView.m in Sources */ = {isa = PBXBuildFile; fileRef = FBDE86E519F82297001C18A8 /* UIAppView.m */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		98AB2E831CAD46840089BB98 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 98AB2E7F1CAD46830089BB98 /* moonlight-common.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = FB290E2E19B37A4E004C83CF;
-			remoteInfo = "moonlight-common";
-		};
-		98AB2E851CAD468B0089BB98 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 98AB2E7F1CAD46830089BB98 /* moonlight-common.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = FB290E2D19B37A4E004C83CF;
-			remoteInfo = "moonlight-common";
-		};
-		FB1A68142132509400507771 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 98AB2E7F1CAD46830089BB98 /* moonlight-common.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = FB1A67EF21324EE300507771;
-			remoteInfo = "moonlight-common-tv";
-		};
-		FB1A68162132509800507771 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 98AB2E7F1CAD46830089BB98 /* moonlight-common.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = FB1A67EE21324EE300507771;
-			remoteInfo = "moonlight-common-tv";
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXFileReference section */
 		450112C829563A9600FD306F /* OSCProfile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OSCProfile.m; sourceTree = "<group>"; };
 		450112C929563A9600FD306F /* OSCProfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSCProfile.h; sourceTree = "<group>"; };
@@ -189,6 +185,49 @@
 		4573A443294683D1000A036A /* ProfileTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ProfileTableViewCell.m; sourceTree = "<group>"; };
 		4573A444294683D1000A036A /* ProfileTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ProfileTableViewCell.xib; sourceTree = "<group>"; };
 		457A2DFA29C0E0BA00B6396B /* X1Kit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = X1Kit.swift; sourceTree = "<group>"; };
+		457A2E5429C0FE1B00B6396B /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
+		457A2E5629C0FE1B00B6396B /* FindMbedTLS.cmake */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = FindMbedTLS.cmake; sourceTree = "<group>"; };
+		457A2E5729C0FE1B00B6396B /* .gitmodules */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitmodules; sourceTree = "<group>"; };
+		457A2E5829C0FE1B00B6396B /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		457A2E5929C0FE1B00B6396B /* appveyor.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.yaml; path = appveyor.yml; sourceTree = "<group>"; };
+		457A2E5A29C0FE1B00B6396B /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		457A2E5B29C0FE1B00B6396B /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
+		457A2E5D29C0FE1B00B6396B /* rs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rs.h; sourceTree = "<group>"; };
+		457A2E5E29C0FE1B00B6396B /* rs.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rs.c; sourceTree = "<group>"; };
+		457A2E6029C0FE1B00B6396B /* RtpVideoQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RtpVideoQueue.h; sourceTree = "<group>"; };
+		457A2E6129C0FE1B00B6396B /* PlatformThreads.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlatformThreads.h; sourceTree = "<group>"; };
+		457A2E6229C0FE1B00B6396B /* PlatformCrypto.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = PlatformCrypto.c; sourceTree = "<group>"; };
+		457A2E6329C0FE1B00B6396B /* Input.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Input.h; sourceTree = "<group>"; };
+		457A2E6429C0FE1B00B6396B /* ControlStream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ControlStream.c; sourceTree = "<group>"; };
+		457A2E6529C0FE1B00B6396B /* Rtsp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Rtsp.h; sourceTree = "<group>"; };
+		457A2E6629C0FE1B00B6396B /* SimpleStun.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SimpleStun.c; sourceTree = "<group>"; };
+		457A2E6729C0FE1B00B6396B /* InputStream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = InputStream.c; sourceTree = "<group>"; };
+		457A2E6829C0FE1B00B6396B /* RtpAudioQueue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = RtpAudioQueue.c; sourceTree = "<group>"; };
+		457A2E6929C0FE1B00B6396B /* Limelight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Limelight.h; sourceTree = "<group>"; };
+		457A2E6A29C0FE1B00B6396B /* ConnectionTester.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ConnectionTester.c; sourceTree = "<group>"; };
+		457A2E6B29C0FE1B00B6396B /* RtspConnection.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = RtspConnection.c; sourceTree = "<group>"; };
+		457A2E6C29C0FE1B00B6396B /* ByteBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ByteBuffer.h; sourceTree = "<group>"; };
+		457A2E6D29C0FE1B00B6396B /* PlatformSockets.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = PlatformSockets.c; sourceTree = "<group>"; };
+		457A2E6E29C0FE1B00B6396B /* LinkedBlockingQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkedBlockingQueue.h; sourceTree = "<group>"; };
+		457A2E6F29C0FE1B00B6396B /* Platform.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Platform.c; sourceTree = "<group>"; };
+		457A2E7029C0FE1B00B6396B /* VideoStream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = VideoStream.c; sourceTree = "<group>"; };
+		457A2E7129C0FE1B00B6396B /* Limelight-internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Limelight-internal.h"; sourceTree = "<group>"; };
+		457A2E7229C0FE1B00B6396B /* PlatformCrypto.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlatformCrypto.h; sourceTree = "<group>"; };
+		457A2E7329C0FE1B00B6396B /* RtpVideoQueue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = RtpVideoQueue.c; sourceTree = "<group>"; };
+		457A2E7429C0FE1B00B6396B /* Connection.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Connection.c; sourceTree = "<group>"; };
+		457A2E7529C0FE1B00B6396B /* VideoDepacketizer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = VideoDepacketizer.c; sourceTree = "<group>"; };
+		457A2E7629C0FE1B00B6396B /* FakeCallbacks.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FakeCallbacks.c; sourceTree = "<group>"; };
+		457A2E7729C0FE1B00B6396B /* Video.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Video.h; sourceTree = "<group>"; };
+		457A2E7829C0FE1B00B6396B /* SdpGenerator.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SdpGenerator.c; sourceTree = "<group>"; };
+		457A2E7929C0FE1B00B6396B /* RtspParser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = RtspParser.c; sourceTree = "<group>"; };
+		457A2E7A29C0FE1B00B6396B /* Misc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Misc.c; sourceTree = "<group>"; };
+		457A2E7B29C0FE1B00B6396B /* RtpAudioQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RtpAudioQueue.h; sourceTree = "<group>"; };
+		457A2E7C29C0FE1B00B6396B /* AudioStream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = AudioStream.c; sourceTree = "<group>"; };
+		457A2E7D29C0FE1B00B6396B /* Platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Platform.h; sourceTree = "<group>"; };
+		457A2E7E29C0FE1B00B6396B /* RecorderCallbacks.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = RecorderCallbacks.c; sourceTree = "<group>"; };
+		457A2E7F29C0FE1B00B6396B /* LinkedBlockingQueue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = LinkedBlockingQueue.c; sourceTree = "<group>"; };
+		457A2E8029C0FE1B00B6396B /* PlatformSockets.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlatformSockets.h; sourceTree = "<group>"; };
+		457A2E8129C0FE1B00B6396B /* ByteBuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ByteBuffer.c; sourceTree = "<group>"; };
 		45999AEC2935451D0073975D /* OSCProfilesTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OSCProfilesTableViewController.h; sourceTree = "<group>"; };
 		45999AED2935451D0073975D /* OSCProfilesTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OSCProfilesTableViewController.m; sourceTree = "<group>"; };
 		45E9CBF329453CDC00C88D96 /* ToolBarContainerView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ToolBarContainerView.h; sourceTree = "<group>"; };
@@ -221,7 +260,6 @@
 		9890CF6A203B7EE1006C4B06 /* libxml2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.tbd; path = usr/lib/libxml2.tbd; sourceTree = SDKROOT; };
 		9897B6A0221260EF00966419 /* Controller.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Controller.m; sourceTree = "<group>"; };
 		9897B6A32212610800966419 /* Controller.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Controller.h; sourceTree = "<group>"; };
-		98AB2E7F1CAD46830089BB98 /* moonlight-common.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "moonlight-common.xcodeproj"; path = "moonlight-common/moonlight-common.xcodeproj"; sourceTree = "<group>"; };
 		98B9CE6C27B2144B00B473C4 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS15.2.sdk/System/Library/Frameworks/AVKit.framework; sourceTree = DEVELOPER_DIR; };
 		98D5856B1C0EA79600F6CC00 /* TemporaryHost.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TemporaryHost.h; path = Database/TemporaryHost.h; sourceTree = "<group>"; };
 		98D5856C1C0EA79600F6CC00 /* TemporaryHost.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TemporaryHost.m; path = Database/TemporaryHost.m; sourceTree = "<group>"; };
@@ -418,7 +456,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9865DC30213260B40005B9B9 /* libmoonlight-common-tv.a in Frameworks */,
 				9865DC3C2132922E0005B9B9 /* GameController.framework in Frameworks */,
 				FB1A67EA21324DF300507771 /* libxml2.tbd in Frameworks */,
 				FB1A67E821324DE300507771 /* libopus.a in Frameworks */,
@@ -435,7 +472,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				9890CF6B203B7EE1006C4B06 /* libxml2.tbd in Frameworks */,
-				98CFB82F1CAD481B0048EF74 /* libmoonlight-common.a in Frameworks */,
 				FB8946ED19F6AFE800339C8A /* libopus.a in Frameworks */,
 				FB8946EB19F6AFE100339C8A /* libcrypto.a in Frameworks */,
 				FB8946EC19F6AFE400339C8A /* libssl.a in Frameworks */,
@@ -524,13 +560,94 @@
 			path = X1Kit;
 			sourceTree = "<group>";
 		};
-		98AB2E801CAD46830089BB98 /* Products */ = {
+		457A2E5129C0FE1B00B6396B /* moonlight-common */ = {
 			isa = PBXGroup;
 			children = (
-				98AB2E841CAD46840089BB98 /* libmoonlight-common.a */,
-				FB1A68152132509400507771 /* libmoonlight-common-tv.a */,
+				457A2E5229C0FE1B00B6396B /* moonlight-common-c */,
 			);
-			name = Products;
+			path = "moonlight-common";
+			sourceTree = SOURCE_ROOT;
+		};
+		457A2E5229C0FE1B00B6396B /* moonlight-common-c */ = {
+			isa = PBXGroup;
+			children = (
+				457A2E5329C0FE1B00B6396B /* enet */,
+				457A2E5429C0FE1B00B6396B /* CMakeLists.txt */,
+				457A2E5529C0FE1B00B6396B /* cmake */,
+				457A2E5729C0FE1B00B6396B /* .gitmodules */,
+				457A2E5829C0FE1B00B6396B /* README.md */,
+				457A2E5929C0FE1B00B6396B /* appveyor.yml */,
+				457A2E5A29C0FE1B00B6396B /* .gitignore */,
+				457A2E5B29C0FE1B00B6396B /* LICENSE.txt */,
+				457A2E5C29C0FE1B00B6396B /* reedsolomon */,
+				457A2E5F29C0FE1B00B6396B /* src */,
+			);
+			path = "moonlight-common-c";
+			sourceTree = "<group>";
+		};
+		457A2E5329C0FE1B00B6396B /* enet */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = enet;
+			sourceTree = "<group>";
+		};
+		457A2E5529C0FE1B00B6396B /* cmake */ = {
+			isa = PBXGroup;
+			children = (
+				457A2E5629C0FE1B00B6396B /* FindMbedTLS.cmake */,
+			);
+			path = cmake;
+			sourceTree = "<group>";
+		};
+		457A2E5C29C0FE1B00B6396B /* reedsolomon */ = {
+			isa = PBXGroup;
+			children = (
+				457A2E5D29C0FE1B00B6396B /* rs.h */,
+				457A2E5E29C0FE1B00B6396B /* rs.c */,
+			);
+			path = reedsolomon;
+			sourceTree = "<group>";
+		};
+		457A2E5F29C0FE1B00B6396B /* src */ = {
+			isa = PBXGroup;
+			children = (
+				457A2E6029C0FE1B00B6396B /* RtpVideoQueue.h */,
+				457A2E6129C0FE1B00B6396B /* PlatformThreads.h */,
+				457A2E6229C0FE1B00B6396B /* PlatformCrypto.c */,
+				457A2E6329C0FE1B00B6396B /* Input.h */,
+				457A2E6429C0FE1B00B6396B /* ControlStream.c */,
+				457A2E6529C0FE1B00B6396B /* Rtsp.h */,
+				457A2E6629C0FE1B00B6396B /* SimpleStun.c */,
+				457A2E6729C0FE1B00B6396B /* InputStream.c */,
+				457A2E6829C0FE1B00B6396B /* RtpAudioQueue.c */,
+				457A2E6929C0FE1B00B6396B /* Limelight.h */,
+				457A2E6A29C0FE1B00B6396B /* ConnectionTester.c */,
+				457A2E6B29C0FE1B00B6396B /* RtspConnection.c */,
+				457A2E6C29C0FE1B00B6396B /* ByteBuffer.h */,
+				457A2E6D29C0FE1B00B6396B /* PlatformSockets.c */,
+				457A2E6E29C0FE1B00B6396B /* LinkedBlockingQueue.h */,
+				457A2E6F29C0FE1B00B6396B /* Platform.c */,
+				457A2E7029C0FE1B00B6396B /* VideoStream.c */,
+				457A2E7129C0FE1B00B6396B /* Limelight-internal.h */,
+				457A2E7229C0FE1B00B6396B /* PlatformCrypto.h */,
+				457A2E7329C0FE1B00B6396B /* RtpVideoQueue.c */,
+				457A2E7429C0FE1B00B6396B /* Connection.c */,
+				457A2E7529C0FE1B00B6396B /* VideoDepacketizer.c */,
+				457A2E7629C0FE1B00B6396B /* FakeCallbacks.c */,
+				457A2E7729C0FE1B00B6396B /* Video.h */,
+				457A2E7829C0FE1B00B6396B /* SdpGenerator.c */,
+				457A2E7929C0FE1B00B6396B /* RtspParser.c */,
+				457A2E7A29C0FE1B00B6396B /* Misc.c */,
+				457A2E7B29C0FE1B00B6396B /* RtpAudioQueue.h */,
+				457A2E7C29C0FE1B00B6396B /* AudioStream.c */,
+				457A2E7D29C0FE1B00B6396B /* Platform.h */,
+				457A2E7E29C0FE1B00B6396B /* RecorderCallbacks.c */,
+				457A2E7F29C0FE1B00B6396B /* LinkedBlockingQueue.c */,
+				457A2E8029C0FE1B00B6396B /* PlatformSockets.h */,
+				457A2E8129C0FE1B00B6396B /* ByteBuffer.c */,
+			);
+			path = src;
 			sourceTree = "<group>";
 		};
 		FB1A67542132419700507771 /* Moonlight TV */ = {
@@ -549,7 +666,6 @@
 			isa = PBXGroup;
 			children = (
 				457A2BAE29C0D97400B6396B /* X1Kit */,
-				98AB2E7F1CAD46830089BB98 /* moonlight-common.xcodeproj */,
 				FB290CF919B2C406004C83CF /* Moonlight */,
 				FB1A67542132419700507771 /* Moonlight TV */,
 				FB290CF019B2C406004C83CF /* Frameworks */,
@@ -590,6 +706,7 @@
 		FB290CF919B2C406004C83CF /* Moonlight */ = {
 			isa = PBXGroup;
 			children = (
+				457A2E5129C0FE1B00B6396B /* moonlight-common */,
 				D4746EEA1CBC740C006FB401 /* Moonlight-Bridging-Header.h */,
 				FB89460419F646E200339C8A /* Crypto */,
 				FB89460919F646E200339C8A /* Input */,
@@ -955,7 +1072,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				FB1A68172132509800507771 /* PBXTargetDependency */,
 			);
 			name = "Moonlight TV";
 			productName = "Moonlight TV";
@@ -973,7 +1089,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				98AB2E861CAD468B0089BB98 /* PBXTargetDependency */,
 			);
 			name = Moonlight;
 			productName = Limelight;
@@ -1016,12 +1131,6 @@
 			mainGroup = FB290CE519B2C406004C83CF;
 			productRefGroup = FB290CEF19B2C406004C83CF /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = 98AB2E801CAD46830089BB98 /* Products */;
-					ProjectRef = 98AB2E7F1CAD46830089BB98 /* moonlight-common.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				FB290CED19B2C406004C83CF /* Moonlight */,
@@ -1029,23 +1138,6 @@
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXReferenceProxy section */
-		98AB2E841CAD46840089BB98 /* libmoonlight-common.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = "libmoonlight-common.a";
-			remoteRef = 98AB2E831CAD46840089BB98 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		FB1A68152132509400507771 /* libmoonlight-common-tv.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = "libmoonlight-common-tv.a";
-			remoteRef = FB1A68142132509400507771 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		FB1A67512132419700507771 /* Resources */ = {
@@ -1065,10 +1157,17 @@
 			files = (
 				FB290E7919B37D81004C83CF /* iPad.storyboard in Resources */,
 				FB290CFE19B2C406004C83CF /* InfoPlist.strings in Resources */,
+				457A2E8529C0FE1B00B6396B /* README.md in Resources */,
 				FB290D0919B2C406004C83CF /* Images.xcassets in Resources */,
+				457A2E8729C0FE1B00B6396B /* .gitignore in Resources */,
+				457A2E8829C0FE1B00B6396B /* LICENSE.txt in Resources */,
+				457A2E8429C0FE1B00B6396B /* .gitmodules in Resources */,
 				FB89463819F6473800339C8A /* Launch Screen.xib in Resources */,
+				457A2E8329C0FE1B00B6396B /* FindMbedTLS.cmake in Resources */,
+				457A2E8229C0FE1B00B6396B /* CMakeLists.txt in Resources */,
 				450B660F29147D4D0057517C /* iPhone.storyboard in Resources */,
 				4573A446294683D1000A036A /* ProfileTableViewCell.xib in Resources */,
+				457A2E8629C0FE1B00B6396B /* appveyor.yml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1132,12 +1231,19 @@
 			buildActionMask = 2147483647;
 			files = (
 				FB290D0719B2C406004C83CF /* Limelight.xcdatamodeld in Sources */,
+				457A2E9229C0FE1B00B6396B /* Platform.c in Sources */,
 				9819CC22254F180F008A7C8E /* AbsoluteTouchHandler.m in Sources */,
 				9819CC14254F107A008A7C8E /* RelativeTouchHandler.m in Sources */,
+				457A2E9429C0FE1B00B6396B /* RtpVideoQueue.c in Sources */,
 				FB1A674D2131E65900507771 /* KeyboardSupport.m in Sources */,
+				457A2E8D29C0FE1B00B6396B /* InputStream.c in Sources */,
 				FB89463219F646E200339C8A /* VideoDecoderRenderer.m in Sources */,
+				457A2E9B29C0FE1B00B6396B /* AudioStream.c in Sources */,
 				FB290D0419B2C406004C83CF /* AppDelegate.m in Sources */,
+				457A2E9E29C0FE1B00B6396B /* ByteBuffer.c in Sources */,
+				457A2E9529C0FE1B00B6396B /* Connection.c in Sources */,
 				FB9AFD401A7E127D00872C98 /* AppListResponse.m in Sources */,
+				457A2E8C29C0FE1B00B6396B /* SimpleStun.c in Sources */,
 				FB89463419F646E200339C8A /* Utils.m in Sources */,
 				FBDE86E619F82297001C18A8 /* UIAppView.m in Sources */,
 				FB89462F19F646E200339C8A /* Connection.m in Sources */,
@@ -1148,6 +1254,8 @@
 				9897B6A1221260EF00966419 /* Controller.m in Sources */,
 				FB89462919F646E200339C8A /* mkcert.c in Sources */,
 				FB9AFD281A7C84ED00872C98 /* HttpResponse.m in Sources */,
+				457A2E8A29C0FE1B00B6396B /* PlatformCrypto.c in Sources */,
+				457A2E9C29C0FE1B00B6396B /* RecorderCallbacks.c in Sources */,
 				FBDE86E019F7A837001C18A8 /* UIComputerView.m in Sources */,
 				450B65FF29147AB40057517C /* LayoutOnScreenControlsViewController.m in Sources */,
 				FB89463019F646E200339C8A /* StreamConfiguration.m in Sources */,
@@ -1165,46 +1273,46 @@
 				FB1D599A1BBCCD7E00F482CA /* AppCollectionView.m in Sources */,
 				FB89463619F646E200339C8A /* StreamFrameViewController.m in Sources */,
 				9827E7A32514366900F25707 /* HapticContext.m in Sources */,
+				457A2E9A29C0FE1B00B6396B /* Misc.c in Sources */,
 				9832D1361BBCD5C50036EF48 /* TemporaryApp.m in Sources */,
 				4505461229625AF300439FF7 /* OSCProfilesManager.m in Sources */,
 				450B660529147B120057517C /* LayoutOnScreenControls.m in Sources */,
 				98D585701C0ED0E800F6CC00 /* TemporarySettings.m in Sources */,
 				FB89462819F646E200339C8A /* CryptoManager.m in Sources */,
+				457A2E8F29C0FE1B00B6396B /* ConnectionTester.c in Sources */,
+				457A2E9D29C0FE1B00B6396B /* LinkedBlockingQueue.c in Sources */,
 				DC1F5A07206436B20037755F /* ConnectionHelper.m in Sources */,
+				457A2E9329C0FE1B00B6396B /* VideoStream.c in Sources */,
+				457A2E8B29C0FE1B00B6396B /* ControlStream.c in Sources */,
 				FB89462E19F646E200339C8A /* PairManager.m in Sources */,
 				45E9CBF529453CDC00C88D96 /* ToolBarContainerView.m in Sources */,
+				457A2E9129C0FE1B00B6396B /* PlatformSockets.c in Sources */,
 				FB9AFD371A7E02DB00872C98 /* HttpRequest.m in Sources */,
 				FB4678ED1A50C40900377732 /* OnScreenControls.m in Sources */,
 				FB290D0019B2C406004C83CF /* main.m in Sources */,
+				457A2E9929C0FE1B00B6396B /* RtspParser.c in Sources */,
 				FBD3494319FC9C04002D2A60 /* AppAssetManager.m in Sources */,
+				457A2E8929C0FE1B00B6396B /* rs.c in Sources */,
 				FB6549561A57907E001C8F39 /* DiscoveryWorker.m in Sources */,
 				FB89462A19F646E200339C8A /* ControllerSupport.m in Sources */,
+				457A2E8E29C0FE1B00B6396B /* RtpAudioQueue.c in Sources */,
 				FB9AFD3D1A7E111600872C98 /* AppAssetResponse.m in Sources */,
 				FBD349621A0089F6002D2A60 /* DataManager.m in Sources */,
 				457A2DFB29C0E0BA00B6396B /* X1Kit.swift in Sources */,
+				457A2E9729C0FE1B00B6396B /* FakeCallbacks.c in Sources */,
 				450112CA29563A9600FD306F /* OSCProfile.m in Sources */,
 				FB4A23B81A9D3637004D2EF2 /* LoadingFrameViewController.m in Sources */,
 				4573A445294683D1000A036A /* ProfileTableViewCell.m in Sources */,
 				FB9AFD3A1A7E05CE00872C98 /* ServerInfoResponse.m in Sources */,
 				FB89463119F646E200339C8A /* StreamManager.m in Sources */,
+				457A2E9029C0FE1B00B6396B /* RtspConnection.c in Sources */,
 				988FCD41293B091B003050E2 /* KeyboardInputField.m in Sources */,
+				457A2E9829C0FE1B00B6396B /* SdpGenerator.c in Sources */,
+				457A2E9629C0FE1B00B6396B /* VideoDepacketizer.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		98AB2E861CAD468B0089BB98 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "moonlight-common";
-			targetProxy = 98AB2E851CAD468B0089BB98 /* PBXContainerItemProxy */;
-		};
-		FB1A68172132509800507771 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "moonlight-common-tv";
-			targetProxy = FB1A68162132509800507771 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		FB1A675E2132419700507771 /* Main.storyboard */ = {

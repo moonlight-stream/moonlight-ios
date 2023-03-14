@@ -1,0 +1,48 @@
+clone_depth: 1
+
+environment:
+  matrix:
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      CMAKE_ARGS: -DCMAKE_SYSTEM_VERSION=10.0.18362.0 -A Win32
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      CMAKE_ARGS: -DCMAKE_SYSTEM_VERSION=10.0.18362.0 -A x64
+    - APPVEYOR_BUILD_WORKER_IMAGE: macOS
+      BUILD_TARGET: macos
+      CMAKE_ARGS: -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+      CC: clang
+      CXX: clang++
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+      CC: gcc
+      CXX: g++
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+      CC: clang
+      CXX: clang++
+      CMAKE_ARGS: -DUSE_MBEDTLS=ON
+      PREBUILD_CMD: sudo apt install -y libmbedtls-dev
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+      CC: gcc
+      CXX: g++
+      CMAKE_ARGS: -DUSE_MBEDTLS=ON
+      PREBUILD_CMD: sudo apt install -y libmbedtls-dev
+
+before_build:
+  - 'git submodule update --init --recursive'
+  - sh: 'eval "$PREBUILD_CMD"'
+
+build_script:
+  - 'mkdir build_debug'
+  - 'cd build_debug'
+  - sh: 'cmake $CMAKE_ARGS -DCMAKE_BUILD_TYPE=Debug ..'
+  - cmd: 'cmake %CMAKE_ARGS% -DCMAKE_BUILD_TYPE=Debug ..'
+  - sh: 'cmake --build .'
+  - cmd: 'cmake --build . --config Debug'
+  - 'cd ..'
+  - 'mkdir build_release'
+  - 'cd build_release'
+  - sh: 'cmake $CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release ..'
+  - cmd: 'cmake %CMAKE_ARGS% -DCMAKE_BUILD_TYPE=Release ..'
+  - sh: 'cmake --build .'
+  - cmd: 'cmake --build . --config Release'
+
+deploy: off

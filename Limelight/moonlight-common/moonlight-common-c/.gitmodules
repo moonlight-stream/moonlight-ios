@@ -1,0 +1,3 @@
+[submodule "enet"]
+	path = enet
+	url = https://github.com/cgutman/enet.git
