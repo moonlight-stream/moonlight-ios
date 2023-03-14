@@ -15,8 +15,8 @@
 		450B660F29147D4D0057517C /* iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 450B660E29147D4D0057517C /* iPhone.storyboard */; };
 		4573A445294683D1000A036A /* ProfileTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 4573A443294683D1000A036A /* ProfileTableViewCell.m */; };
 		4573A446294683D1000A036A /* ProfileTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4573A444294683D1000A036A /* ProfileTableViewCell.xib */; };
-		457A2BB229C0D97400B6396B /* X1Kit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457A2BB129C0D97400B6396B /* X1Kit.swift */; };
-		457A2BB329C0D97400B6396B /* X1Kit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457A2BB129C0D97400B6396B /* X1Kit.swift */; };
+		457A2DFB29C0E0BA00B6396B /* X1Kit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457A2DFA29C0E0BA00B6396B /* X1Kit.swift */; };
+		457A2DFC29C0E0BA00B6396B /* X1Kit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457A2DFA29C0E0BA00B6396B /* X1Kit.swift */; };
 		45875DA329AD505D00F3A90A /* LoadingFrameViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FB4A23B71A9D3637004D2EF2 /* LoadingFrameViewController.m */; };
 		45999AEE2935451D0073975D /* OSCProfilesTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 45999AED2935451D0073975D /* OSCProfilesTableViewController.m */; };
 		45E9CBF529453CDC00C88D96 /* ToolBarContainerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 45E9CBF429453CDC00C88D96 /* ToolBarContainerView.m */; };
@@ -188,7 +188,7 @@
 		4573A442294683D1000A036A /* ProfileTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ProfileTableViewCell.h; sourceTree = "<group>"; };
 		4573A443294683D1000A036A /* ProfileTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ProfileTableViewCell.m; sourceTree = "<group>"; };
 		4573A444294683D1000A036A /* ProfileTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ProfileTableViewCell.xib; sourceTree = "<group>"; };
-		457A2BB129C0D97400B6396B /* X1Kit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = X1Kit.swift; sourceTree = "<group>"; };
+		457A2DFA29C0E0BA00B6396B /* X1Kit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = X1Kit.swift; sourceTree = "<group>"; };
 		45999AEC2935451D0073975D /* OSCProfilesTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OSCProfilesTableViewController.h; sourceTree = "<group>"; };
 		45999AED2935451D0073975D /* OSCProfilesTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OSCProfilesTableViewController.m; sourceTree = "<group>"; };
 		45E9CBF329453CDC00C88D96 /* ToolBarContainerView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ToolBarContainerView.h; sourceTree = "<group>"; };
@@ -494,24 +494,32 @@
 		457A2BAE29C0D97400B6396B /* X1Kit */ = {
 			isa = PBXGroup;
 			children = (
-				457A2BAF29C0D97400B6396B /* Sources */,
+				457A2BBD29C0E07300B6396B /* X1Kit */,
 			);
 			name = X1Kit;
 			path = ../../Desktop/X1Kit/X1Kit;
 			sourceTree = "<group>";
 		};
-		457A2BAF29C0D97400B6396B /* Sources */ = {
+		457A2BBD29C0E07300B6396B /* X1Kit */ = {
 			isa = PBXGroup;
 			children = (
-				457A2BB029C0D97400B6396B /* X1Kit */,
+				457A2BBE29C0E07300B6396B /* Sources */,
+			);
+			path = X1Kit;
+			sourceTree = "<group>";
+		};
+		457A2BBE29C0E07300B6396B /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				457A2BBF29C0E07300B6396B /* X1Kit */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
 		};
-		457A2BB029C0D97400B6396B /* X1Kit */ = {
+		457A2BBF29C0E07300B6396B /* X1Kit */ = {
 			isa = PBXGroup;
 			children = (
-				457A2BB129C0D97400B6396B /* X1Kit.swift */,
+				457A2DFA29C0E0BA00B6396B /* X1Kit.swift */,
 			);
 			path = X1Kit;
 			sourceTree = "<group>";
@@ -1089,6 +1097,7 @@
 				FB1A67DC2132460400507771 /* KeyboardSupport.m in Sources */,
 				FB1A67CD213245F800507771 /* DataManager.m in Sources */,
 				FB1A67CF213245F800507771 /* TemporaryApp.m in Sources */,
+				457A2DFC29C0E0BA00B6396B /* X1Kit.swift in Sources */,
 				45875DA329AD505D00F3A90A /* LoadingFrameViewController.m in Sources */,
 				FB1A67D1213245F800507771 /* TemporaryHost.m in Sources */,
 				FB1A67D3213245F800507771 /* TemporarySettings.m in Sources */,
@@ -1107,7 +1116,6 @@
 				FB1A67B9213245D500507771 /* AppAssetResponse.m in Sources */,
 				FB1A67BB213245D500507771 /* AppListResponse.m in Sources */,
 				9819CC1D254F1730008A7C8E /* RelativeTouchHandler.m in Sources */,
-				457A2BB329C0D97400B6396B /* X1Kit.swift in Sources */,
 				FB1A67AB213245C500507771 /* CryptoManager.m in Sources */,
 				FB1A67AF213245C500507771 /* IdManager.m in Sources */,
 				988FCD42293B091B003050E2 /* KeyboardInputField.m in Sources */,
@@ -1171,9 +1179,9 @@
 				FBD3494319FC9C04002D2A60 /* AppAssetManager.m in Sources */,
 				FB6549561A57907E001C8F39 /* DiscoveryWorker.m in Sources */,
 				FB89462A19F646E200339C8A /* ControllerSupport.m in Sources */,
-				457A2BB229C0D97400B6396B /* X1Kit.swift in Sources */,
 				FB9AFD3D1A7E111600872C98 /* AppAssetResponse.m in Sources */,
 				FBD349621A0089F6002D2A60 /* DataManager.m in Sources */,
+				457A2DFB29C0E0BA00B6396B /* X1Kit.swift in Sources */,
 				450112CA29563A9600FD306F /* OSCProfile.m in Sources */,
 				FB4A23B81A9D3637004D2EF2 /* LoadingFrameViewController.m in Sources */,
 				4573A445294683D1000A036A /* ProfileTableViewCell.m in Sources */,
