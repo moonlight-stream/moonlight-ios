@@ -17,35 +17,60 @@
 		4573A446294683D1000A036A /* ProfileTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4573A444294683D1000A036A /* ProfileTableViewCell.xib */; };
 		457A2DFB29C0E0BA00B6396B /* X1Kit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457A2DFA29C0E0BA00B6396B /* X1Kit.swift */; };
 		457A2DFC29C0E0BA00B6396B /* X1Kit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457A2DFA29C0E0BA00B6396B /* X1Kit.swift */; };
-		457A2E8229C0FE1B00B6396B /* CMakeLists.txt in Resources */ = {isa = PBXBuildFile; fileRef = 457A2E5429C0FE1B00B6396B /* CMakeLists.txt */; };
-		457A2E8329C0FE1B00B6396B /* FindMbedTLS.cmake in Resources */ = {isa = PBXBuildFile; fileRef = 457A2E5629C0FE1B00B6396B /* FindMbedTLS.cmake */; };
-		457A2E8429C0FE1B00B6396B /* .gitmodules in Resources */ = {isa = PBXBuildFile; fileRef = 457A2E5729C0FE1B00B6396B /* .gitmodules */; };
-		457A2E8529C0FE1B00B6396B /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 457A2E5829C0FE1B00B6396B /* README.md */; };
-		457A2E8629C0FE1B00B6396B /* appveyor.yml in Resources */ = {isa = PBXBuildFile; fileRef = 457A2E5929C0FE1B00B6396B /* appveyor.yml */; };
-		457A2E8729C0FE1B00B6396B /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 457A2E5A29C0FE1B00B6396B /* .gitignore */; };
-		457A2E8829C0FE1B00B6396B /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 457A2E5B29C0FE1B00B6396B /* LICENSE.txt */; };
-		457A2E8929C0FE1B00B6396B /* rs.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E5E29C0FE1B00B6396B /* rs.c */; };
-		457A2E8A29C0FE1B00B6396B /* PlatformCrypto.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E6229C0FE1B00B6396B /* PlatformCrypto.c */; };
-		457A2E8B29C0FE1B00B6396B /* ControlStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E6429C0FE1B00B6396B /* ControlStream.c */; };
-		457A2E8C29C0FE1B00B6396B /* SimpleStun.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E6629C0FE1B00B6396B /* SimpleStun.c */; };
-		457A2E8D29C0FE1B00B6396B /* InputStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E6729C0FE1B00B6396B /* InputStream.c */; };
-		457A2E8E29C0FE1B00B6396B /* RtpAudioQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E6829C0FE1B00B6396B /* RtpAudioQueue.c */; };
-		457A2E8F29C0FE1B00B6396B /* ConnectionTester.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E6A29C0FE1B00B6396B /* ConnectionTester.c */; };
-		457A2E9029C0FE1B00B6396B /* RtspConnection.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E6B29C0FE1B00B6396B /* RtspConnection.c */; };
-		457A2E9129C0FE1B00B6396B /* PlatformSockets.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E6D29C0FE1B00B6396B /* PlatformSockets.c */; };
-		457A2E9229C0FE1B00B6396B /* Platform.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E6F29C0FE1B00B6396B /* Platform.c */; };
-		457A2E9329C0FE1B00B6396B /* VideoStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E7029C0FE1B00B6396B /* VideoStream.c */; };
-		457A2E9429C0FE1B00B6396B /* RtpVideoQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E7329C0FE1B00B6396B /* RtpVideoQueue.c */; };
-		457A2E9529C0FE1B00B6396B /* Connection.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E7429C0FE1B00B6396B /* Connection.c */; };
-		457A2E9629C0FE1B00B6396B /* VideoDepacketizer.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E7529C0FE1B00B6396B /* VideoDepacketizer.c */; };
-		457A2E9729C0FE1B00B6396B /* FakeCallbacks.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E7629C0FE1B00B6396B /* FakeCallbacks.c */; };
-		457A2E9829C0FE1B00B6396B /* SdpGenerator.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E7829C0FE1B00B6396B /* SdpGenerator.c */; };
-		457A2E9929C0FE1B00B6396B /* RtspParser.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E7929C0FE1B00B6396B /* RtspParser.c */; };
-		457A2E9A29C0FE1B00B6396B /* Misc.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E7A29C0FE1B00B6396B /* Misc.c */; };
-		457A2E9B29C0FE1B00B6396B /* AudioStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E7C29C0FE1B00B6396B /* AudioStream.c */; };
-		457A2E9C29C0FE1B00B6396B /* RecorderCallbacks.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E7E29C0FE1B00B6396B /* RecorderCallbacks.c */; };
-		457A2E9D29C0FE1B00B6396B /* LinkedBlockingQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E7F29C0FE1B00B6396B /* LinkedBlockingQueue.c */; };
-		457A2E9E29C0FE1B00B6396B /* ByteBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A2E8129C0FE1B00B6396B /* ByteBuffer.c */; };
+		457A303A29C10D2700B6396B /* enet.dsp in Resources */ = {isa = PBXBuildFile; fileRef = 457A301129C10D2600B6396B /* enet.dsp */; };
+		457A303B29C10D2700B6396B /* callbacks.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A301229C10D2600B6396B /* callbacks.c */; };
+		457A303C29C10D2700B6396B /* compress.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A301329C10D2700B6396B /* compress.c */; };
+		457A303D29C10D2700B6396B /* ChangeLog in Resources */ = {isa = PBXBuildFile; fileRef = 457A301429C10D2700B6396B /* ChangeLog */; };
+		457A303E29C10D2700B6396B /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 457A301529C10D2700B6396B /* LICENSE */; };
+		457A303F29C10D2700B6396B /* list.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A301629C10D2700B6396B /* list.c */; };
+		457A304029C10D2700B6396B /* peer.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A301729C10D2700B6396B /* peer.c */; };
+		457A304229C10D2700B6396B /* enet_dll.cbp in Resources */ = {isa = PBXBuildFile; fileRef = 457A301929C10D2700B6396B /* enet_dll.cbp */; };
+		457A304329C10D2700B6396B /* Doxyfile in Resources */ = {isa = PBXBuildFile; fileRef = 457A301A29C10D2700B6396B /* Doxyfile */; };
+		457A304429C10D2700B6396B /* unix.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A301B29C10D2700B6396B /* unix.c */; };
+		457A304529C10D2700B6396B /* README in Resources */ = {isa = PBXBuildFile; fileRef = 457A301C29C10D2700B6396B /* README */; };
+		457A304629C10D2700B6396B /* FAQ.dox in Resources */ = {isa = PBXBuildFile; fileRef = 457A301E29C10D2700B6396B /* FAQ.dox */; };
+		457A304729C10D2700B6396B /* mainpage.dox in Resources */ = {isa = PBXBuildFile; fileRef = 457A301F29C10D2700B6396B /* mainpage.dox */; };
+		457A304829C10D2700B6396B /* license.dox in Resources */ = {isa = PBXBuildFile; fileRef = 457A302029C10D2700B6396B /* license.dox */; };
+		457A304929C10D2700B6396B /* tutorial.dox in Resources */ = {isa = PBXBuildFile; fileRef = 457A302129C10D2700B6396B /* tutorial.dox */; };
+		457A304A29C10D2700B6396B /* design.dox in Resources */ = {isa = PBXBuildFile; fileRef = 457A302229C10D2700B6396B /* design.dox */; };
+		457A304B29C10D2700B6396B /* install.dox in Resources */ = {isa = PBXBuildFile; fileRef = 457A302329C10D2700B6396B /* install.dox */; };
+		457A304C29C10D2700B6396B /* packet.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A302429C10D2700B6396B /* packet.c */; };
+		457A304D29C10D2700B6396B /* premake4.lua in Resources */ = {isa = PBXBuildFile; fileRef = 457A302529C10D2700B6396B /* premake4.lua */; };
+		457A304E29C10D2700B6396B /* DoxygenLayout.xml in Resources */ = {isa = PBXBuildFile; fileRef = 457A302629C10D2700B6396B /* DoxygenLayout.xml */; };
+		457A304F29C10D2700B6396B /* host.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A302729C10D2700B6396B /* host.c */; };
+		457A305029C10D2700B6396B /* configure.ac in Resources */ = {isa = PBXBuildFile; fileRef = 457A302829C10D2700B6396B /* configure.ac */; };
+		457A305129C10D2700B6396B /* .keep in Resources */ = {isa = PBXBuildFile; fileRef = 457A302A29C10D2700B6396B /* .keep */; };
+		457A305229C10D2700B6396B /* Makefile.am in Resources */ = {isa = PBXBuildFile; fileRef = 457A302B29C10D2700B6396B /* Makefile.am */; };
+		457A305329C10D2700B6396B /* protocol.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A302C29C10D2700B6396B /* protocol.c */; };
+		457A305429C10D2700B6396B /* libenet.pc.in in Resources */ = {isa = PBXBuildFile; fileRef = 457A303829C10D2700B6396B /* libenet.pc.in */; };
+		457A305529C10D2700B6396B /* win32.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A303929C10D2700B6396B /* win32.c */; };
+		457A308C29C1101100B6396B /* CMakeLists.txt in Resources */ = {isa = PBXBuildFile; fileRef = 457A306029C1101000B6396B /* CMakeLists.txt */; };
+		457A308D29C1101100B6396B /* appveyor.yml in Resources */ = {isa = PBXBuildFile; fileRef = 457A306129C1101000B6396B /* appveyor.yml */; };
+		457A308E29C1101100B6396B /* FindMbedTLS.cmake in Resources */ = {isa = PBXBuildFile; fileRef = 457A306329C1101000B6396B /* FindMbedTLS.cmake */; };
+		457A308F29C1101100B6396B /* rs.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A306629C1101000B6396B /* rs.c */; };
+		457A309029C1101100B6396B /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 457A306729C1101000B6396B /* README.md */; };
+		457A309129C1101100B6396B /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 457A306829C1101000B6396B /* LICENSE.txt */; };
+		457A309229C1101100B6396B /* PlatformCrypto.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A306C29C1101000B6396B /* PlatformCrypto.c */; };
+		457A309329C1101100B6396B /* ControlStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A306E29C1101000B6396B /* ControlStream.c */; };
+		457A309429C1101100B6396B /* SimpleStun.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A307029C1101000B6396B /* SimpleStun.c */; };
+		457A309529C1101100B6396B /* InputStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A307129C1101000B6396B /* InputStream.c */; };
+		457A309629C1101100B6396B /* RtpAudioQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A307229C1101000B6396B /* RtpAudioQueue.c */; };
+		457A309729C1101100B6396B /* ConnectionTester.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A307429C1101000B6396B /* ConnectionTester.c */; };
+		457A309829C1101100B6396B /* RtspConnection.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A307529C1101000B6396B /* RtspConnection.c */; };
+		457A309929C1101100B6396B /* PlatformSockets.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A307729C1101000B6396B /* PlatformSockets.c */; };
+		457A309A29C1101100B6396B /* Platform.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A307929C1101000B6396B /* Platform.c */; };
+		457A309B29C1101100B6396B /* VideoStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A307A29C1101000B6396B /* VideoStream.c */; };
+		457A309C29C1101100B6396B /* RtpVideoQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A307D29C1101100B6396B /* RtpVideoQueue.c */; };
+		457A309D29C1101100B6396B /* Connection.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A307E29C1101100B6396B /* Connection.c */; };
+		457A309E29C1101100B6396B /* VideoDepacketizer.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A307F29C1101100B6396B /* VideoDepacketizer.c */; };
+		457A309F29C1101100B6396B /* FakeCallbacks.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A308029C1101100B6396B /* FakeCallbacks.c */; };
+		457A30A029C1101100B6396B /* SdpGenerator.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A308229C1101100B6396B /* SdpGenerator.c */; };
+		457A30A129C1101100B6396B /* RtspParser.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A308329C1101100B6396B /* RtspParser.c */; };
+		457A30A229C1101100B6396B /* Misc.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A308429C1101100B6396B /* Misc.c */; };
+		457A30A329C1101100B6396B /* AudioStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A308629C1101100B6396B /* AudioStream.c */; };
+		457A30A429C1101100B6396B /* RecorderCallbacks.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A308829C1101100B6396B /* RecorderCallbacks.c */; };
+		457A30A529C1101100B6396B /* LinkedBlockingQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A308929C1101100B6396B /* LinkedBlockingQueue.c */; };
+		457A30A629C1101100B6396B /* ByteBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 457A308B29C1101100B6396B /* ByteBuffer.c */; };
 		45875DA329AD505D00F3A90A /* LoadingFrameViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FB4A23B71A9D3637004D2EF2 /* LoadingFrameViewController.m */; };
 		45999AEE2935451D0073975D /* OSCProfilesTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 45999AED2935451D0073975D /* OSCProfilesTableViewController.m */; };
 		45E9CBF529453CDC00C88D96 /* ToolBarContainerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 45E9CBF429453CDC00C88D96 /* ToolBarContainerView.m */; };
@@ -185,49 +210,83 @@
 		4573A443294683D1000A036A /* ProfileTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ProfileTableViewCell.m; sourceTree = "<group>"; };
 		4573A444294683D1000A036A /* ProfileTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ProfileTableViewCell.xib; sourceTree = "<group>"; };
 		457A2DFA29C0E0BA00B6396B /* X1Kit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = X1Kit.swift; sourceTree = "<group>"; };
-		457A2E5429C0FE1B00B6396B /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
-		457A2E5629C0FE1B00B6396B /* FindMbedTLS.cmake */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = FindMbedTLS.cmake; sourceTree = "<group>"; };
-		457A2E5729C0FE1B00B6396B /* .gitmodules */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitmodules; sourceTree = "<group>"; };
-		457A2E5829C0FE1B00B6396B /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		457A2E5929C0FE1B00B6396B /* appveyor.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.yaml; path = appveyor.yml; sourceTree = "<group>"; };
-		457A2E5A29C0FE1B00B6396B /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
-		457A2E5B29C0FE1B00B6396B /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
-		457A2E5D29C0FE1B00B6396B /* rs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rs.h; sourceTree = "<group>"; };
-		457A2E5E29C0FE1B00B6396B /* rs.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rs.c; sourceTree = "<group>"; };
-		457A2E6029C0FE1B00B6396B /* RtpVideoQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RtpVideoQueue.h; sourceTree = "<group>"; };
-		457A2E6129C0FE1B00B6396B /* PlatformThreads.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlatformThreads.h; sourceTree = "<group>"; };
-		457A2E6229C0FE1B00B6396B /* PlatformCrypto.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = PlatformCrypto.c; sourceTree = "<group>"; };
-		457A2E6329C0FE1B00B6396B /* Input.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Input.h; sourceTree = "<group>"; };
-		457A2E6429C0FE1B00B6396B /* ControlStream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ControlStream.c; sourceTree = "<group>"; };
-		457A2E6529C0FE1B00B6396B /* Rtsp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Rtsp.h; sourceTree = "<group>"; };
-		457A2E6629C0FE1B00B6396B /* SimpleStun.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SimpleStun.c; sourceTree = "<group>"; };
-		457A2E6729C0FE1B00B6396B /* InputStream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = InputStream.c; sourceTree = "<group>"; };
-		457A2E6829C0FE1B00B6396B /* RtpAudioQueue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = RtpAudioQueue.c; sourceTree = "<group>"; };
-		457A2E6929C0FE1B00B6396B /* Limelight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Limelight.h; sourceTree = "<group>"; };
-		457A2E6A29C0FE1B00B6396B /* ConnectionTester.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ConnectionTester.c; sourceTree = "<group>"; };
-		457A2E6B29C0FE1B00B6396B /* RtspConnection.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = RtspConnection.c; sourceTree = "<group>"; };
-		457A2E6C29C0FE1B00B6396B /* ByteBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ByteBuffer.h; sourceTree = "<group>"; };
-		457A2E6D29C0FE1B00B6396B /* PlatformSockets.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = PlatformSockets.c; sourceTree = "<group>"; };
-		457A2E6E29C0FE1B00B6396B /* LinkedBlockingQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkedBlockingQueue.h; sourceTree = "<group>"; };
-		457A2E6F29C0FE1B00B6396B /* Platform.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Platform.c; sourceTree = "<group>"; };
-		457A2E7029C0FE1B00B6396B /* VideoStream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = VideoStream.c; sourceTree = "<group>"; };
-		457A2E7129C0FE1B00B6396B /* Limelight-internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Limelight-internal.h"; sourceTree = "<group>"; };
-		457A2E7229C0FE1B00B6396B /* PlatformCrypto.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlatformCrypto.h; sourceTree = "<group>"; };
-		457A2E7329C0FE1B00B6396B /* RtpVideoQueue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = RtpVideoQueue.c; sourceTree = "<group>"; };
-		457A2E7429C0FE1B00B6396B /* Connection.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Connection.c; sourceTree = "<group>"; };
-		457A2E7529C0FE1B00B6396B /* VideoDepacketizer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = VideoDepacketizer.c; sourceTree = "<group>"; };
-		457A2E7629C0FE1B00B6396B /* FakeCallbacks.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FakeCallbacks.c; sourceTree = "<group>"; };
-		457A2E7729C0FE1B00B6396B /* Video.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Video.h; sourceTree = "<group>"; };
-		457A2E7829C0FE1B00B6396B /* SdpGenerator.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SdpGenerator.c; sourceTree = "<group>"; };
-		457A2E7929C0FE1B00B6396B /* RtspParser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = RtspParser.c; sourceTree = "<group>"; };
-		457A2E7A29C0FE1B00B6396B /* Misc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Misc.c; sourceTree = "<group>"; };
-		457A2E7B29C0FE1B00B6396B /* RtpAudioQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RtpAudioQueue.h; sourceTree = "<group>"; };
-		457A2E7C29C0FE1B00B6396B /* AudioStream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = AudioStream.c; sourceTree = "<group>"; };
-		457A2E7D29C0FE1B00B6396B /* Platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Platform.h; sourceTree = "<group>"; };
-		457A2E7E29C0FE1B00B6396B /* RecorderCallbacks.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = RecorderCallbacks.c; sourceTree = "<group>"; };
-		457A2E7F29C0FE1B00B6396B /* LinkedBlockingQueue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = LinkedBlockingQueue.c; sourceTree = "<group>"; };
-		457A2E8029C0FE1B00B6396B /* PlatformSockets.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlatformSockets.h; sourceTree = "<group>"; };
-		457A2E8129C0FE1B00B6396B /* ByteBuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ByteBuffer.c; sourceTree = "<group>"; };
+		457A301129C10D2600B6396B /* enet.dsp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = enet.dsp; sourceTree = "<group>"; };
+		457A301229C10D2600B6396B /* callbacks.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = callbacks.c; sourceTree = "<group>"; };
+		457A301329C10D2700B6396B /* compress.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = compress.c; sourceTree = "<group>"; };
+		457A301429C10D2700B6396B /* ChangeLog */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ChangeLog; sourceTree = "<group>"; };
+		457A301529C10D2700B6396B /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		457A301629C10D2700B6396B /* list.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = list.c; sourceTree = "<group>"; };
+		457A301729C10D2700B6396B /* peer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = peer.c; sourceTree = "<group>"; };
+		457A301929C10D2700B6396B /* enet_dll.cbp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = enet_dll.cbp; sourceTree = "<group>"; };
+		457A301A29C10D2700B6396B /* Doxyfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Doxyfile; sourceTree = "<group>"; };
+		457A301B29C10D2700B6396B /* unix.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = unix.c; sourceTree = "<group>"; };
+		457A301C29C10D2700B6396B /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
+		457A301E29C10D2700B6396B /* FAQ.dox */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = FAQ.dox; sourceTree = "<group>"; };
+		457A301F29C10D2700B6396B /* mainpage.dox */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mainpage.dox; sourceTree = "<group>"; };
+		457A302029C10D2700B6396B /* license.dox */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = license.dox; sourceTree = "<group>"; };
+		457A302129C10D2700B6396B /* tutorial.dox */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = tutorial.dox; sourceTree = "<group>"; };
+		457A302229C10D2700B6396B /* design.dox */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = design.dox; sourceTree = "<group>"; };
+		457A302329C10D2700B6396B /* install.dox */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = install.dox; sourceTree = "<group>"; };
+		457A302429C10D2700B6396B /* packet.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = packet.c; sourceTree = "<group>"; };
+		457A302529C10D2700B6396B /* premake4.lua */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = premake4.lua; sourceTree = "<group>"; };
+		457A302629C10D2700B6396B /* DoxygenLayout.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = DoxygenLayout.xml; sourceTree = "<group>"; };
+		457A302729C10D2700B6396B /* host.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = host.c; sourceTree = "<group>"; };
+		457A302829C10D2700B6396B /* configure.ac */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = configure.ac; sourceTree = "<group>"; };
+		457A302A29C10D2700B6396B /* .keep */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .keep; sourceTree = "<group>"; };
+		457A302B29C10D2700B6396B /* Makefile.am */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Makefile.am; sourceTree = "<group>"; };
+		457A302C29C10D2700B6396B /* protocol.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = protocol.c; sourceTree = "<group>"; };
+		457A302F29C10D2700B6396B /* time.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = time.h; sourceTree = "<group>"; };
+		457A303029C10D2700B6396B /* protocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = protocol.h; sourceTree = "<group>"; };
+		457A303129C10D2700B6396B /* types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = types.h; sourceTree = "<group>"; };
+		457A303229C10D2700B6396B /* enet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = enet.h; sourceTree = "<group>"; };
+		457A303329C10D2700B6396B /* callbacks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = callbacks.h; sourceTree = "<group>"; };
+		457A303429C10D2700B6396B /* win32.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = win32.h; sourceTree = "<group>"; };
+		457A303529C10D2700B6396B /* list.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = list.h; sourceTree = "<group>"; };
+		457A303629C10D2700B6396B /* utility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utility.h; sourceTree = "<group>"; };
+		457A303729C10D2700B6396B /* unix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = unix.h; sourceTree = "<group>"; };
+		457A303829C10D2700B6396B /* libenet.pc.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = libenet.pc.in; sourceTree = "<group>"; };
+		457A303929C10D2700B6396B /* win32.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = win32.c; sourceTree = "<group>"; };
+		457A306029C1101000B6396B /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
+		457A306129C1101000B6396B /* appveyor.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.yaml; path = appveyor.yml; sourceTree = "<group>"; };
+		457A306329C1101000B6396B /* FindMbedTLS.cmake */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = FindMbedTLS.cmake; sourceTree = "<group>"; };
+		457A306529C1101000B6396B /* rs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rs.h; sourceTree = "<group>"; };
+		457A306629C1101000B6396B /* rs.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rs.c; sourceTree = "<group>"; };
+		457A306729C1101000B6396B /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		457A306829C1101000B6396B /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
+		457A306A29C1101000B6396B /* RtpVideoQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RtpVideoQueue.h; sourceTree = "<group>"; };
+		457A306B29C1101000B6396B /* PlatformThreads.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlatformThreads.h; sourceTree = "<group>"; };
+		457A306C29C1101000B6396B /* PlatformCrypto.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = PlatformCrypto.c; sourceTree = "<group>"; };
+		457A306D29C1101000B6396B /* Input.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Input.h; sourceTree = "<group>"; };
+		457A306E29C1101000B6396B /* ControlStream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ControlStream.c; sourceTree = "<group>"; };
+		457A306F29C1101000B6396B /* Rtsp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Rtsp.h; sourceTree = "<group>"; };
+		457A307029C1101000B6396B /* SimpleStun.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SimpleStun.c; sourceTree = "<group>"; };
+		457A307129C1101000B6396B /* InputStream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = InputStream.c; sourceTree = "<group>"; };
+		457A307229C1101000B6396B /* RtpAudioQueue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = RtpAudioQueue.c; sourceTree = "<group>"; };
+		457A307329C1101000B6396B /* Limelight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Limelight.h; sourceTree = "<group>"; };
+		457A307429C1101000B6396B /* ConnectionTester.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ConnectionTester.c; sourceTree = "<group>"; };
+		457A307529C1101000B6396B /* RtspConnection.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = RtspConnection.c; sourceTree = "<group>"; };
+		457A307629C1101000B6396B /* ByteBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ByteBuffer.h; sourceTree = "<group>"; };
+		457A307729C1101000B6396B /* PlatformSockets.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = PlatformSockets.c; sourceTree = "<group>"; };
+		457A307829C1101000B6396B /* LinkedBlockingQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinkedBlockingQueue.h; sourceTree = "<group>"; };
+		457A307929C1101000B6396B /* Platform.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Platform.c; sourceTree = "<group>"; };
+		457A307A29C1101000B6396B /* VideoStream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = VideoStream.c; sourceTree = "<group>"; };
+		457A307B29C1101000B6396B /* Limelight-internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Limelight-internal.h"; sourceTree = "<group>"; };
+		457A307C29C1101000B6396B /* PlatformCrypto.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlatformCrypto.h; sourceTree = "<group>"; };
+		457A307D29C1101100B6396B /* RtpVideoQueue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = RtpVideoQueue.c; sourceTree = "<group>"; };
+		457A307E29C1101100B6396B /* Connection.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Connection.c; sourceTree = "<group>"; };
+		457A307F29C1101100B6396B /* VideoDepacketizer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = VideoDepacketizer.c; sourceTree = "<group>"; };
+		457A308029C1101100B6396B /* FakeCallbacks.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FakeCallbacks.c; sourceTree = "<group>"; };
+		457A308129C1101100B6396B /* Video.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Video.h; sourceTree = "<group>"; };
+		457A308229C1101100B6396B /* SdpGenerator.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SdpGenerator.c; sourceTree = "<group>"; };
+		457A308329C1101100B6396B /* RtspParser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = RtspParser.c; sourceTree = "<group>"; };
+		457A308429C1101100B6396B /* Misc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Misc.c; sourceTree = "<group>"; };
+		457A308529C1101100B6396B /* RtpAudioQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RtpAudioQueue.h; sourceTree = "<group>"; };
+		457A308629C1101100B6396B /* AudioStream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = AudioStream.c; sourceTree = "<group>"; };
+		457A308729C1101100B6396B /* Platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Platform.h; sourceTree = "<group>"; };
+		457A308829C1101100B6396B /* RecorderCallbacks.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = RecorderCallbacks.c; sourceTree = "<group>"; };
+		457A308929C1101100B6396B /* LinkedBlockingQueue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = LinkedBlockingQueue.c; sourceTree = "<group>"; };
+		457A308A29C1101100B6396B /* PlatformSockets.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlatformSockets.h; sourceTree = "<group>"; };
+		457A308B29C1101100B6396B /* ByteBuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ByteBuffer.c; sourceTree = "<group>"; };
 		45999AEC2935451D0073975D /* OSCProfilesTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OSCProfilesTableViewController.h; sourceTree = "<group>"; };
 		45999AED2935451D0073975D /* OSCProfilesTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OSCProfilesTableViewController.m; sourceTree = "<group>"; };
 		45E9CBF329453CDC00C88D96 /* ToolBarContainerView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ToolBarContainerView.h; sourceTree = "<group>"; };
@@ -560,92 +619,158 @@
 			path = X1Kit;
 			sourceTree = "<group>";
 		};
-		457A2E5129C0FE1B00B6396B /* moonlight-common */ = {
+		457A300429C10C8E00B6396B /* moonlight-common */ = {
 			isa = PBXGroup;
 			children = (
-				457A2E5229C0FE1B00B6396B /* moonlight-common-c */,
+				457A300529C10C8E00B6396B /* moonlight-common-c */,
 			);
 			path = "moonlight-common";
-			sourceTree = SOURCE_ROOT;
+			sourceTree = "<group>";
 		};
-		457A2E5229C0FE1B00B6396B /* moonlight-common-c */ = {
+		457A300529C10C8E00B6396B /* moonlight-common-c */ = {
 			isa = PBXGroup;
 			children = (
-				457A2E5329C0FE1B00B6396B /* enet */,
-				457A2E5429C0FE1B00B6396B /* CMakeLists.txt */,
-				457A2E5529C0FE1B00B6396B /* cmake */,
-				457A2E5729C0FE1B00B6396B /* .gitmodules */,
-				457A2E5829C0FE1B00B6396B /* README.md */,
-				457A2E5929C0FE1B00B6396B /* appveyor.yml */,
-				457A2E5A29C0FE1B00B6396B /* .gitignore */,
-				457A2E5B29C0FE1B00B6396B /* LICENSE.txt */,
-				457A2E5C29C0FE1B00B6396B /* reedsolomon */,
-				457A2E5F29C0FE1B00B6396B /* src */,
+				457A306129C1101000B6396B /* appveyor.yml */,
+				457A306229C1101000B6396B /* cmake */,
+				457A306029C1101000B6396B /* CMakeLists.txt */,
+				457A306829C1101000B6396B /* LICENSE.txt */,
+				457A306729C1101000B6396B /* README.md */,
+				457A306429C1101000B6396B /* reedsolomon */,
+				457A306929C1101000B6396B /* src */,
+				457A300F29C10CEC00B6396B /* enet */,
 			);
 			path = "moonlight-common-c";
 			sourceTree = "<group>";
 		};
-		457A2E5329C0FE1B00B6396B /* enet */ = {
+		457A300F29C10CEC00B6396B /* enet */ = {
 			isa = PBXGroup;
 			children = (
+				457A301229C10D2600B6396B /* callbacks.c */,
+				457A301429C10D2700B6396B /* ChangeLog */,
+				457A301329C10D2700B6396B /* compress.c */,
+				457A302829C10D2700B6396B /* configure.ac */,
+				457A301D29C10D2700B6396B /* docs */,
+				457A301A29C10D2700B6396B /* Doxyfile */,
+				457A302629C10D2700B6396B /* DoxygenLayout.xml */,
+				457A301929C10D2700B6396B /* enet_dll.cbp */,
+				457A301129C10D2600B6396B /* enet.dsp */,
+				457A302729C10D2700B6396B /* host.c */,
+				457A302D29C10D2700B6396B /* include */,
+				457A303829C10D2700B6396B /* libenet.pc.in */,
+				457A301529C10D2700B6396B /* LICENSE */,
+				457A301629C10D2700B6396B /* list.c */,
+				457A302929C10D2700B6396B /* m4 */,
+				457A302B29C10D2700B6396B /* Makefile.am */,
+				457A302429C10D2700B6396B /* packet.c */,
+				457A301729C10D2700B6396B /* peer.c */,
+				457A302529C10D2700B6396B /* premake4.lua */,
+				457A302C29C10D2700B6396B /* protocol.c */,
+				457A301C29C10D2700B6396B /* README */,
+				457A301B29C10D2700B6396B /* unix.c */,
+				457A303929C10D2700B6396B /* win32.c */,
 			);
 			path = enet;
 			sourceTree = "<group>";
 		};
-		457A2E5529C0FE1B00B6396B /* cmake */ = {
+		457A301D29C10D2700B6396B /* docs */ = {
 			isa = PBXGroup;
 			children = (
-				457A2E5629C0FE1B00B6396B /* FindMbedTLS.cmake */,
+				457A301E29C10D2700B6396B /* FAQ.dox */,
+				457A301F29C10D2700B6396B /* mainpage.dox */,
+				457A302029C10D2700B6396B /* license.dox */,
+				457A302129C10D2700B6396B /* tutorial.dox */,
+				457A302229C10D2700B6396B /* design.dox */,
+				457A302329C10D2700B6396B /* install.dox */,
+			);
+			path = docs;
+			sourceTree = "<group>";
+		};
+		457A302929C10D2700B6396B /* m4 */ = {
+			isa = PBXGroup;
+			children = (
+				457A302A29C10D2700B6396B /* .keep */,
+			);
+			path = m4;
+			sourceTree = "<group>";
+		};
+		457A302D29C10D2700B6396B /* include */ = {
+			isa = PBXGroup;
+			children = (
+				457A302E29C10D2700B6396B /* enet */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		457A302E29C10D2700B6396B /* enet */ = {
+			isa = PBXGroup;
+			children = (
+				457A302F29C10D2700B6396B /* time.h */,
+				457A303029C10D2700B6396B /* protocol.h */,
+				457A303129C10D2700B6396B /* types.h */,
+				457A303229C10D2700B6396B /* enet.h */,
+				457A303329C10D2700B6396B /* callbacks.h */,
+				457A303429C10D2700B6396B /* win32.h */,
+				457A303529C10D2700B6396B /* list.h */,
+				457A303629C10D2700B6396B /* utility.h */,
+				457A303729C10D2700B6396B /* unix.h */,
+			);
+			path = enet;
+			sourceTree = "<group>";
+		};
+		457A306229C1101000B6396B /* cmake */ = {
+			isa = PBXGroup;
+			children = (
+				457A306329C1101000B6396B /* FindMbedTLS.cmake */,
 			);
 			path = cmake;
 			sourceTree = "<group>";
 		};
-		457A2E5C29C0FE1B00B6396B /* reedsolomon */ = {
+		457A306429C1101000B6396B /* reedsolomon */ = {
 			isa = PBXGroup;
 			children = (
-				457A2E5D29C0FE1B00B6396B /* rs.h */,
-				457A2E5E29C0FE1B00B6396B /* rs.c */,
+				457A306529C1101000B6396B /* rs.h */,
+				457A306629C1101000B6396B /* rs.c */,
 			);
 			path = reedsolomon;
 			sourceTree = "<group>";
 		};
-		457A2E5F29C0FE1B00B6396B /* src */ = {
+		457A306929C1101000B6396B /* src */ = {
 			isa = PBXGroup;
 			children = (
-				457A2E6029C0FE1B00B6396B /* RtpVideoQueue.h */,
-				457A2E6129C0FE1B00B6396B /* PlatformThreads.h */,
-				457A2E6229C0FE1B00B6396B /* PlatformCrypto.c */,
-				457A2E6329C0FE1B00B6396B /* Input.h */,
-				457A2E6429C0FE1B00B6396B /* ControlStream.c */,
-				457A2E6529C0FE1B00B6396B /* Rtsp.h */,
-				457A2E6629C0FE1B00B6396B /* SimpleStun.c */,
-				457A2E6729C0FE1B00B6396B /* InputStream.c */,
-				457A2E6829C0FE1B00B6396B /* RtpAudioQueue.c */,
-				457A2E6929C0FE1B00B6396B /* Limelight.h */,
-				457A2E6A29C0FE1B00B6396B /* ConnectionTester.c */,
-				457A2E6B29C0FE1B00B6396B /* RtspConnection.c */,
-				457A2E6C29C0FE1B00B6396B /* ByteBuffer.h */,
-				457A2E6D29C0FE1B00B6396B /* PlatformSockets.c */,
-				457A2E6E29C0FE1B00B6396B /* LinkedBlockingQueue.h */,
-				457A2E6F29C0FE1B00B6396B /* Platform.c */,
-				457A2E7029C0FE1B00B6396B /* VideoStream.c */,
-				457A2E7129C0FE1B00B6396B /* Limelight-internal.h */,
-				457A2E7229C0FE1B00B6396B /* PlatformCrypto.h */,
-				457A2E7329C0FE1B00B6396B /* RtpVideoQueue.c */,
-				457A2E7429C0FE1B00B6396B /* Connection.c */,
-				457A2E7529C0FE1B00B6396B /* VideoDepacketizer.c */,
-				457A2E7629C0FE1B00B6396B /* FakeCallbacks.c */,
-				457A2E7729C0FE1B00B6396B /* Video.h */,
-				457A2E7829C0FE1B00B6396B /* SdpGenerator.c */,
-				457A2E7929C0FE1B00B6396B /* RtspParser.c */,
-				457A2E7A29C0FE1B00B6396B /* Misc.c */,
-				457A2E7B29C0FE1B00B6396B /* RtpAudioQueue.h */,
-				457A2E7C29C0FE1B00B6396B /* AudioStream.c */,
-				457A2E7D29C0FE1B00B6396B /* Platform.h */,
-				457A2E7E29C0FE1B00B6396B /* RecorderCallbacks.c */,
-				457A2E7F29C0FE1B00B6396B /* LinkedBlockingQueue.c */,
-				457A2E8029C0FE1B00B6396B /* PlatformSockets.h */,
-				457A2E8129C0FE1B00B6396B /* ByteBuffer.c */,
+				457A308629C1101100B6396B /* AudioStream.c */,
+				457A308B29C1101100B6396B /* ByteBuffer.c */,
+				457A307629C1101000B6396B /* ByteBuffer.h */,
+				457A307E29C1101100B6396B /* Connection.c */,
+				457A307429C1101000B6396B /* ConnectionTester.c */,
+				457A306E29C1101000B6396B /* ControlStream.c */,
+				457A308029C1101100B6396B /* FakeCallbacks.c */,
+				457A306D29C1101000B6396B /* Input.h */,
+				457A307129C1101000B6396B /* InputStream.c */,
+				457A307B29C1101000B6396B /* Limelight-internal.h */,
+				457A307329C1101000B6396B /* Limelight.h */,
+				457A308929C1101100B6396B /* LinkedBlockingQueue.c */,
+				457A307829C1101000B6396B /* LinkedBlockingQueue.h */,
+				457A308429C1101100B6396B /* Misc.c */,
+				457A307929C1101000B6396B /* Platform.c */,
+				457A308729C1101100B6396B /* Platform.h */,
+				457A306C29C1101000B6396B /* PlatformCrypto.c */,
+				457A307C29C1101000B6396B /* PlatformCrypto.h */,
+				457A307729C1101000B6396B /* PlatformSockets.c */,
+				457A308A29C1101100B6396B /* PlatformSockets.h */,
+				457A306B29C1101000B6396B /* PlatformThreads.h */,
+				457A308829C1101100B6396B /* RecorderCallbacks.c */,
+				457A307229C1101000B6396B /* RtpAudioQueue.c */,
+				457A308529C1101100B6396B /* RtpAudioQueue.h */,
+				457A307D29C1101100B6396B /* RtpVideoQueue.c */,
+				457A306A29C1101000B6396B /* RtpVideoQueue.h */,
+				457A306F29C1101000B6396B /* Rtsp.h */,
+				457A307529C1101000B6396B /* RtspConnection.c */,
+				457A308329C1101100B6396B /* RtspParser.c */,
+				457A308229C1101100B6396B /* SdpGenerator.c */,
+				457A307029C1101000B6396B /* SimpleStun.c */,
+				457A308129C1101100B6396B /* Video.h */,
+				457A307F29C1101100B6396B /* VideoDepacketizer.c */,
+				457A307A29C1101000B6396B /* VideoStream.c */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -667,6 +792,7 @@
 			children = (
 				457A2BAE29C0D97400B6396B /* X1Kit */,
 				FB290CF919B2C406004C83CF /* Moonlight */,
+				457A300429C10C8E00B6396B /* moonlight-common */,
 				FB1A67542132419700507771 /* Moonlight TV */,
 				FB290CF019B2C406004C83CF /* Frameworks */,
 				FB290CEF19B2C406004C83CF /* Products */,
@@ -706,7 +832,6 @@
 		FB290CF919B2C406004C83CF /* Moonlight */ = {
 			isa = PBXGroup;
 			children = (
-				457A2E5129C0FE1B00B6396B /* moonlight-common */,
 				D4746EEA1CBC740C006FB401 /* Moonlight-Bridging-Header.h */,
 				FB89460419F646E200339C8A /* Crypto */,
 				FB89460919F646E200339C8A /* Input */,
@@ -1155,19 +1280,35 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				457A304629C10D2700B6396B /* FAQ.dox in Resources */,
+				457A304B29C10D2700B6396B /* install.dox in Resources */,
+				457A305129C10D2700B6396B /* .keep in Resources */,
+				457A304729C10D2700B6396B /* mainpage.dox in Resources */,
+				457A304529C10D2700B6396B /* README in Resources */,
+				457A304A29C10D2700B6396B /* design.dox in Resources */,
+				457A304329C10D2700B6396B /* Doxyfile in Resources */,
 				FB290E7919B37D81004C83CF /* iPad.storyboard in Resources */,
+				457A303D29C10D2700B6396B /* ChangeLog in Resources */,
+				457A304929C10D2700B6396B /* tutorial.dox in Resources */,
 				FB290CFE19B2C406004C83CF /* InfoPlist.strings in Resources */,
-				457A2E8529C0FE1B00B6396B /* README.md in Resources */,
+				457A304829C10D2700B6396B /* license.dox in Resources */,
+				457A308C29C1101100B6396B /* CMakeLists.txt in Resources */,
+				457A309029C1101100B6396B /* README.md in Resources */,
+				457A304E29C10D2700B6396B /* DoxygenLayout.xml in Resources */,
+				457A305029C10D2700B6396B /* configure.ac in Resources */,
+				457A305429C10D2700B6396B /* libenet.pc.in in Resources */,
 				FB290D0919B2C406004C83CF /* Images.xcassets in Resources */,
-				457A2E8729C0FE1B00B6396B /* .gitignore in Resources */,
-				457A2E8829C0FE1B00B6396B /* LICENSE.txt in Resources */,
-				457A2E8429C0FE1B00B6396B /* .gitmodules in Resources */,
+				457A309129C1101100B6396B /* LICENSE.txt in Resources */,
+				457A304D29C10D2700B6396B /* premake4.lua in Resources */,
+				457A303A29C10D2700B6396B /* enet.dsp in Resources */,
+				457A308E29C1101100B6396B /* FindMbedTLS.cmake in Resources */,
 				FB89463819F6473800339C8A /* Launch Screen.xib in Resources */,
-				457A2E8329C0FE1B00B6396B /* FindMbedTLS.cmake in Resources */,
-				457A2E8229C0FE1B00B6396B /* CMakeLists.txt in Resources */,
+				457A303E29C10D2700B6396B /* LICENSE in Resources */,
 				450B660F29147D4D0057517C /* iPhone.storyboard in Resources */,
+				457A305229C10D2700B6396B /* Makefile.am in Resources */,
 				4573A446294683D1000A036A /* ProfileTableViewCell.xib in Resources */,
-				457A2E8629C0FE1B00B6396B /* appveyor.yml in Resources */,
+				457A308D29C1101100B6396B /* appveyor.yml in Resources */,
+				457A304229C10D2700B6396B /* enet_dll.cbp in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1231,40 +1372,49 @@
 			buildActionMask = 2147483647;
 			files = (
 				FB290D0719B2C406004C83CF /* Limelight.xcdatamodeld in Sources */,
-				457A2E9229C0FE1B00B6396B /* Platform.c in Sources */,
 				9819CC22254F180F008A7C8E /* AbsoluteTouchHandler.m in Sources */,
+				457A304C29C10D2700B6396B /* packet.c in Sources */,
 				9819CC14254F107A008A7C8E /* RelativeTouchHandler.m in Sources */,
-				457A2E9429C0FE1B00B6396B /* RtpVideoQueue.c in Sources */,
 				FB1A674D2131E65900507771 /* KeyboardSupport.m in Sources */,
-				457A2E8D29C0FE1B00B6396B /* InputStream.c in Sources */,
 				FB89463219F646E200339C8A /* VideoDecoderRenderer.m in Sources */,
-				457A2E9B29C0FE1B00B6396B /* AudioStream.c in Sources */,
 				FB290D0419B2C406004C83CF /* AppDelegate.m in Sources */,
-				457A2E9E29C0FE1B00B6396B /* ByteBuffer.c in Sources */,
-				457A2E9529C0FE1B00B6396B /* Connection.c in Sources */,
 				FB9AFD401A7E127D00872C98 /* AppListResponse.m in Sources */,
-				457A2E8C29C0FE1B00B6396B /* SimpleStun.c in Sources */,
+				457A309829C1101100B6396B /* RtspConnection.c in Sources */,
+				457A309F29C1101100B6396B /* FakeCallbacks.c in Sources */,
 				FB89463419F646E200339C8A /* Utils.m in Sources */,
 				FBDE86E619F82297001C18A8 /* UIAppView.m in Sources */,
 				FB89462F19F646E200339C8A /* Connection.m in Sources */,
+				457A309729C1101100B6396B /* ConnectionTester.c in Sources */,
 				450B660D29147C2A0057517C /* OnScreenButtonState.m in Sources */,
+				457A304429C10D2700B6396B /* unix.c in Sources */,
+				457A309D29C1101100B6396B /* Connection.c in Sources */,
 				FB9AFD321A7D867C00872C98 /* AppAssetRetriever.m in Sources */,
+				457A309C29C1101100B6396B /* RtpVideoQueue.c in Sources */,
 				FB4678FF1A565DAC00377732 /* WakeOnLanManager.m in Sources */,
 				FB53E1431BE5DC4400CD6ECE /* IdManager.m in Sources */,
 				9897B6A1221260EF00966419 /* Controller.m in Sources */,
+				457A303F29C10D2700B6396B /* list.c in Sources */,
+				457A309B29C1101100B6396B /* VideoStream.c in Sources */,
 				FB89462919F646E200339C8A /* mkcert.c in Sources */,
 				FB9AFD281A7C84ED00872C98 /* HttpResponse.m in Sources */,
-				457A2E8A29C0FE1B00B6396B /* PlatformCrypto.c in Sources */,
-				457A2E9C29C0FE1B00B6396B /* RecorderCallbacks.c in Sources */,
 				FBDE86E019F7A837001C18A8 /* UIComputerView.m in Sources */,
+				457A309429C1101100B6396B /* SimpleStun.c in Sources */,
+				457A30A429C1101100B6396B /* RecorderCallbacks.c in Sources */,
+				457A304F29C10D2700B6396B /* host.c in Sources */,
+				457A30A029C1101100B6396B /* SdpGenerator.c in Sources */,
+				457A304029C10D2700B6396B /* peer.c in Sources */,
 				450B65FF29147AB40057517C /* LayoutOnScreenControlsViewController.m in Sources */,
 				FB89463019F646E200339C8A /* StreamConfiguration.m in Sources */,
+				457A309A29C1101100B6396B /* Platform.c in Sources */,
 				FBD3495319FF36FB002D2A60 /* SWRevealViewController.m in Sources */,
 				FB1D59971BBCCB6400F482CA /* ComputerScrollView.m in Sources */,
+				457A309229C1101100B6396B /* PlatformCrypto.c in Sources */,
 				FBD3495019FF2174002D2A60 /* SettingsViewController.m in Sources */,
 				FB89462C19F646E200339C8A /* HttpManager.m in Sources */,
 				FB89462D19F646E200339C8A /* MDNSManager.m in Sources */,
 				FB89462B19F646E200339C8A /* StreamView.m in Sources */,
+				457A309529C1101100B6396B /* InputStream.c in Sources */,
+				457A30A629C1101100B6396B /* ByteBuffer.c in Sources */,
 				45999AEE2935451D0073975D /* OSCProfilesTableViewController.m in Sources */,
 				FB4678FA1A55FFAD00377732 /* DiscoveryManager.m in Sources */,
 				98D5856D1C0EA79600F6CC00 /* TemporaryHost.m in Sources */,
@@ -1273,42 +1423,42 @@
 				FB1D599A1BBCCD7E00F482CA /* AppCollectionView.m in Sources */,
 				FB89463619F646E200339C8A /* StreamFrameViewController.m in Sources */,
 				9827E7A32514366900F25707 /* HapticContext.m in Sources */,
-				457A2E9A29C0FE1B00B6396B /* Misc.c in Sources */,
 				9832D1361BBCD5C50036EF48 /* TemporaryApp.m in Sources */,
+				457A30A529C1101100B6396B /* LinkedBlockingQueue.c in Sources */,
 				4505461229625AF300439FF7 /* OSCProfilesManager.m in Sources */,
 				450B660529147B120057517C /* LayoutOnScreenControls.m in Sources */,
+				457A30A129C1101100B6396B /* RtspParser.c in Sources */,
+				457A309929C1101100B6396B /* PlatformSockets.c in Sources */,
 				98D585701C0ED0E800F6CC00 /* TemporarySettings.m in Sources */,
 				FB89462819F646E200339C8A /* CryptoManager.m in Sources */,
-				457A2E8F29C0FE1B00B6396B /* ConnectionTester.c in Sources */,
-				457A2E9D29C0FE1B00B6396B /* LinkedBlockingQueue.c in Sources */,
 				DC1F5A07206436B20037755F /* ConnectionHelper.m in Sources */,
-				457A2E9329C0FE1B00B6396B /* VideoStream.c in Sources */,
-				457A2E8B29C0FE1B00B6396B /* ControlStream.c in Sources */,
 				FB89462E19F646E200339C8A /* PairManager.m in Sources */,
 				45E9CBF529453CDC00C88D96 /* ToolBarContainerView.m in Sources */,
-				457A2E9129C0FE1B00B6396B /* PlatformSockets.c in Sources */,
 				FB9AFD371A7E02DB00872C98 /* HttpRequest.m in Sources */,
 				FB4678ED1A50C40900377732 /* OnScreenControls.m in Sources */,
 				FB290D0019B2C406004C83CF /* main.m in Sources */,
-				457A2E9929C0FE1B00B6396B /* RtspParser.c in Sources */,
+				457A309629C1101100B6396B /* RtpAudioQueue.c in Sources */,
 				FBD3494319FC9C04002D2A60 /* AppAssetManager.m in Sources */,
-				457A2E8929C0FE1B00B6396B /* rs.c in Sources */,
+				457A308F29C1101100B6396B /* rs.c in Sources */,
 				FB6549561A57907E001C8F39 /* DiscoveryWorker.m in Sources */,
+				457A30A229C1101100B6396B /* Misc.c in Sources */,
 				FB89462A19F646E200339C8A /* ControllerSupport.m in Sources */,
-				457A2E8E29C0FE1B00B6396B /* RtpAudioQueue.c in Sources */,
 				FB9AFD3D1A7E111600872C98 /* AppAssetResponse.m in Sources */,
 				FBD349621A0089F6002D2A60 /* DataManager.m in Sources */,
+				457A303B29C10D2700B6396B /* callbacks.c in Sources */,
 				457A2DFB29C0E0BA00B6396B /* X1Kit.swift in Sources */,
-				457A2E9729C0FE1B00B6396B /* FakeCallbacks.c in Sources */,
+				457A305529C10D2700B6396B /* win32.c in Sources */,
+				457A309E29C1101100B6396B /* VideoDepacketizer.c in Sources */,
 				450112CA29563A9600FD306F /* OSCProfile.m in Sources */,
 				FB4A23B81A9D3637004D2EF2 /* LoadingFrameViewController.m in Sources */,
+				457A303C29C10D2700B6396B /* compress.c in Sources */,
 				4573A445294683D1000A036A /* ProfileTableViewCell.m in Sources */,
 				FB9AFD3A1A7E05CE00872C98 /* ServerInfoResponse.m in Sources */,
+				457A305329C10D2700B6396B /* protocol.c in Sources */,
 				FB89463119F646E200339C8A /* StreamManager.m in Sources */,
-				457A2E9029C0FE1B00B6396B /* RtspConnection.c in Sources */,
 				988FCD41293B091B003050E2 /* KeyboardInputField.m in Sources */,
-				457A2E9829C0FE1B00B6396B /* SdpGenerator.c in Sources */,
-				457A2E9629C0FE1B00B6396B /* VideoDepacketizer.c in Sources */,
+				457A309329C1101100B6396B /* ControlStream.c in Sources */,
+				457A30A329C1101100B6396B /* AudioStream.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1550,8 +1700,9 @@
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
-					"$(PROJECT_DIR)/moonlight-common/moonlight-common-c/src",
+					"$(PROJECT_DIR)/moonlight-common/moonlight-common-c/src/**",
 					"$(SDKROOT)/usr/include/libxml2/**",
+					"$(SRCROOT)/moonlight-common/moonlight-common-c/enet/**",
 					"$(PROJECT_DIR)/libs/**",
 				);
 				INFOPLIST_FILE = "Limelight/Limelight-Info.plist";
@@ -1591,8 +1742,9 @@
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
-					"$(PROJECT_DIR)/moonlight-common/moonlight-common-c/src",
+					"$(PROJECT_DIR)/moonlight-common/moonlight-common-c/src/**",
 					"$(SDKROOT)/usr/include/libxml2/**",
+					"$(SRCROOT)/moonlight-common/moonlight-common-c/enet/**",
 					"$(PROJECT_DIR)/libs/**",
 				);
 				INFOPLIST_FILE = "Limelight/Limelight-Info.plist";

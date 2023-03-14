@@ -20,6 +20,8 @@
 @implementation LayoutOnScreenControlsViewController {
     BOOL isToolbarHidden;
     OSCProfilesManager *profilesManager;
+    __weak IBOutlet NSLayoutConstraint *toolbarTopConstraintiPhone;
+    __weak IBOutlet NSLayoutConstraint *toolbarTopConstraintiPad;
 }
 
 @synthesize trashCanButton;
@@ -108,9 +110,13 @@
 
 /* animates the toolbar up and off the screen or back down onto the screen */
 - (void) moveToolbar:(UISwipeGestureRecognizer *)sender {
+    BOOL isPad = [[UIDevice currentDevice].model hasPrefix:@"iPad"];
+    NSLayoutConstraint *toolbarTopConstraint = isPad ? self->toolbarTopConstraintiPad : self->toolbarTopConstraintiPhone;
     if (isToolbarHidden == NO) {
         [UIView animateWithDuration:0.2 animations:^{   // animates toolbar up and off screen
-            self.toolbarRootView.frame = CGRectMake(self.toolbarRootView.frame.origin.x, self.toolbarRootView.frame.origin.y - self.toolbarRootView.frame.size.height, self.toolbarRootView.frame.size.width, self.toolbarRootView.frame.size.height);
+            toolbarTopConstraint.constant -= self.toolbarRootView.frame.size.height;
+            [self.view layoutIfNeeded];
+
         }
         completion:^(BOOL finished) {
             if (finished) {
@@ -121,7 +127,8 @@
     }
     else {
         [UIView animateWithDuration:0.2 animations:^{   // animates the toolbar back down into the screen
-            self.toolbarRootView.frame = CGRectMake(self.toolbarRootView.frame.origin.x, self.toolbarRootView.frame.origin.y + self.toolbarRootView.frame.size.height, self.toolbarRootView.frame.size.width, self.toolbarRootView.frame.size.height);
+            toolbarTopConstraint.constant += self.toolbarRootView.frame.size.height;
+            [self.view layoutIfNeeded];
         }
         completion:^(BOOL finished) {
             if (finished) {

@@ -421,8 +421,9 @@
                                     <view alpha="0.90000000000000002" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="B2M-kv-L0a" userLabel="Chevron View">
                                         <rect key="frame" x="391" y="50" width="52" height="30"/>
                                         <subviews>
-                                            <imageView clipsSubviews="YES" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ChevronCompactUp" translatesAutoresizingMaskIntoConstraints="NO" id="uyW-nk-lvy">
+                                            <imageView clipsSubviews="YES" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ChevronCompactUp" translatesAutoresizingMaskIntoConstraints="NO" id="uyW-nk-lvy">
                                                 <rect key="frame" x="0.0" y="0.0" width="52" height="30"/>
+                                                <color key="tintColor" red="0.6705882353" green="0.61568627450000002" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             </imageView>
                                         </subviews>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -462,10 +463,9 @@
                         <constraints>
                             <constraint firstItem="tSG-Qp-sZx" firstAttribute="leading" secondItem="bPg-9I-jqW" secondAttribute="leading" id="4gb-Hq-MyL"/>
                             <constraint firstItem="0dc-Qb-Sdw" firstAttribute="top" secondItem="l77-ae-uMh" secondAttribute="bottom" constant="5" id="Faf-YK-zIP"/>
-                            <constraint firstItem="tSG-Qp-sZx" firstAttribute="top" secondItem="l77-ae-uMh" secondAttribute="bottom" id="MWl-zv-edR"/>
+                            <constraint firstItem="tSG-Qp-sZx" firstAttribute="top" secondItem="l77-ae-uMh" secondAttribute="bottom" id="MWl-zv-edR" userLabel="Toolbar Top Constraint iPad"/>
                             <constraint firstItem="0dc-Qb-Sdw" firstAttribute="leading" secondItem="bPg-9I-jqW" secondAttribute="leadingMargin" constant="10" id="fuD-Dp-bKq"/>
                             <constraint firstAttribute="trailing" secondItem="tSG-Qp-sZx" secondAttribute="trailing" id="g69-IP-O46"/>
-                            <constraint firstItem="tSG-Qp-sZx" firstAttribute="top" secondItem="l77-ae-uMh" secondAttribute="bottom" id="prz-hX-PaV"/>
                         </constraints>
                     </view>
                     <connections>
@@ -473,6 +473,7 @@
                         <outlet property="chevronView" destination="B2M-kv-L0a" id="Wlu-RD-EYM"/>
                         <outlet property="toolbarRootView" destination="tSG-Qp-sZx" id="c1q-EJ-JCF"/>
                         <outlet property="toolbarStackView" destination="opF-ga-G7E" id="2q0-ei-cxr"/>
+                        <outlet property="toolbarTopConstraintiPad" destination="MWl-zv-edR" id="FfH-yc-OAC"/>
                         <outlet property="trashCanButton" destination="8d0-ax-LUG" id="DzG-Kp-HSl"/>
                         <outlet property="undoButton" destination="7N9-ms-EQx" id="ndb-oh-Bia"/>
                     </connections>

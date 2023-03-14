@@ -172,18 +172,6 @@ typedef struct _DECODE_UNIT {
 
     // Head of the buffer chain (never NULL)
     PLENTRY bufferList;
-
-    // Determines if this frame is SDR or HDR
-    //
-    // Note: This is not currently parsed from the actual bitstream, so if your
-    // client has access to a bitstream parser, prefer that over this field.
-    bool hdrActive;
-
-    // Provides the colorspace of this frame (see COLORSPACE_* defines above)
-    //
-    // Note: This is not currently parsed from the actual bitstream, so if your
-    // client has access to a bitstream parser, prefer that over this field.
-    uint8_t colorspace;
 } DECODE_UNIT, *PDECODE_UNIT;
 
 // Specifies that the audio stream should be encoded in stereo (default)
