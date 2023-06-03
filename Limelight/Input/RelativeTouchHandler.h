@@ -12,7 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface RelativeTouchHandler : UIResponder
 
--(id)initWithView:(StreamView*)view;
+-(id)initWithView:(StreamView*)view sensitivityMultiplier:(float)sensitivityMultiplier;
 
 @end
 

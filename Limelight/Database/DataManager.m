@@ -58,6 +58,7 @@
                            width:(NSInteger)width
                      audioConfig:(NSInteger)audioConfig
                 onscreenControls:(NSInteger)onscreenControls
+        relativeTouchSensitivity:(float)relativeTouchSensitivity
                    optimizeGames:(BOOL)optimizeGames
                  multiController:(BOOL)multiController
                  swapABXYButtons:(BOOL)swapABXYButtons
@@ -87,6 +88,7 @@
         settingsToSave.btMouseSupport = btMouseSupport;
         settingsToSave.absoluteTouchMode = absoluteTouchMode;
         settingsToSave.statsOverlay = statsOverlay;
+        settingsToSave.relativeTouchSensitivity = [NSNumber numberWithFloat:relativeTouchSensitivity];
         
         [self saveData];
     }];

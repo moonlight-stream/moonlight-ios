@@ -62,14 +62,14 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     
 #if TARGET_OS_TV
     // tvOS requires RelativeTouchHandler to manage Apple Remote input
-    self->touchHandler = [[RelativeTouchHandler alloc] initWithView:self];
+    self->touchHandler = [[RelativeTouchHandler alloc] initWithView:self sensitivityMultiplier:streamConfig.relativeTouchSensitivity];
 #else
     // iOS uses RelativeTouchHandler or AbsoluteTouchHandler depending on user preference
     if (settings.absoluteTouchMode) {
         self->touchHandler = [[AbsoluteTouchHandler alloc] initWithView:self];
     }
     else {
-        self->touchHandler = [[RelativeTouchHandler alloc] initWithView:self];
+        self->touchHandler = [[RelativeTouchHandler alloc] initWithView:self sensitivityMultiplier:streamConfig.relativeTouchSensitivity];
     }
     
     onScreenControls = [[OnScreenControls alloc] initWithView:self controllerSup:controllerSupport streamConfig:streamConfig];

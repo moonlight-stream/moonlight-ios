@@ -18,6 +18,7 @@
 @property (nonatomic, retain) NSNumber * width;
 @property (nonatomic, retain) NSNumber * audioConfig;
 @property (nonatomic, retain) NSNumber * onscreenControls;
+@property (nonatomic, retain) NSNumber * relativeTouchSensitivity;
 @property (nonatomic, retain) NSString * uniqueId;
 @property (nonatomic) BOOL useHevc;
 @property (nonatomic) BOOL useFramePacing;

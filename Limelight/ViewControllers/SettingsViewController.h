@@ -16,6 +16,8 @@
 @property (strong, nonatomic) IBOutlet UISegmentedControl *resolutionSelector;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *touchModeSelector;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *onscreenControlSelector;
+@property (strong, nonatomic) IBOutlet UILabel *touchpadSensitivityLabel;
+@property (strong, nonatomic) IBOutlet UISlider *touchpadSensitivitySlider;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *optimizeSettingsSelector;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *multiControllerSelector;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *swapABXYButtonsSelector;
@@ -26,6 +28,7 @@
 @property (strong, nonatomic) IBOutlet UISegmentedControl *btMouseSelector;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *statsOverlaySelector;
 @property (strong, nonatomic) IBOutlet UIScrollView *scrollView;
+@property UIImpactFeedbackGenerator *impactFeedbackGenerator;
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability"
@@ -38,3 +41,11 @@
 - (void) saveSettings;
 
 @end
+
+/// Performs linear interpolation between [0, 1] and [a, b] through t.
+///
+/// Source: https://stackoverflow.com/a/1820951
+UIKIT_STATIC_INLINE float lerpf(float a, float b, float t)
+{
+    return a + (b - a) * t;
+}
