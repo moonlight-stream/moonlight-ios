@@ -13,9 +13,12 @@
 #import <VideoToolbox/VideoToolbox.h>
 #import <AVFoundation/AVFoundation.h>
 
+
 @implementation SettingsViewController {
     NSInteger _bitrate;
     NSInteger _lastSelectedResolutionIndex;
+    NSInteger previouslySelectedSegmentIndex;
+    UITapGestureRecognizer *tapGesture;
 }
 
 @dynamic overrideUserInterfaceStyle;
@@ -81,11 +84,12 @@ CGSize resolutionTable[RESOLUTION_TABLE_SIZE];
         // indicators. Ignore any views we don't recognize.
         if (![view isKindOfClass:[UILabel class]] &&
             ![view isKindOfClass:[UISegmentedControl class]] &&
-            ![view isKindOfClass:[UISlider class]]) {
+            ![view isKindOfClass:[UISlider class]] &&
+            ![view isKindOfClass:[UIButton class]]) {
             continue;
         }
         
-        CGFloat currentViewY = view.frame.origin.y + view.frame.size.height;
+        CGFloat currentViewY = view.frame.origin.y;
         if (currentViewY > highestViewY) {
             highestViewY = currentViewY;
         }
@@ -258,6 +262,22 @@ BOOL isCustomResolution(CGSize res) {
     [self.bitrateSlider addTarget:self action:@selector(bitrateSliderMoved) forControlEvents:UIControlEventValueChanged];
     [self updateBitrateText];
     [self updateCustomResolutionText];
+    
+    tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(OSCSegmentControlReselected:)];  // detects when OSC segmented control button is re-selected
+    [self.onscreenControlSelector addGestureRecognizer:tapGesture];
+
+    /* sets a reference to the correct 'LayoutOnScreenControlsViewController' depending on whether the user is on an iPhone or iPad */
+    self.layoutOnScreenControlsVC = [[LayoutOnScreenControlsViewController alloc] init];
+    BOOL isIPhone = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone);
+    if (isIPhone) {
+        UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"iPhone" bundle:nil];
+        self.layoutOnScreenControlsVC = [storyboard instantiateViewControllerWithIdentifier:@"LayoutOnScreenControlsViewController"];
+    }
+    else {
+        UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"iPad" bundle:nil];
+        self.layoutOnScreenControlsVC = [storyboard instantiateViewControllerWithIdentifier:@"LayoutOnScreenControlsViewController"];
+        self.layoutOnScreenControlsVC.modalPresentationStyle = UIModalPresentationFullScreen;
+    }
 }
 
 - (void) touchModeChanged {
@@ -497,9 +517,60 @@ BOOL isCustomResolution(CGSize res) {
 
 
 #pragma mark - Navigation
+/* detects a tap on the 'Custom' segment of the OnScreen Controls 'UISegmentControl' object. It will load the appropriate VC if the 'Custom' segment is tapped */
+- (IBAction)OSCSegmentedControlsTapped:(id)sender {
+    UISegmentedControl *segmentedControl = (UISegmentedControl*) sender;
+    
+    LayoutOnScreenControlsViewController *vc = [[LayoutOnScreenControlsViewController alloc] init];
+    BOOL isIPhone = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone);
+    if (isIPhone) {
+        UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"iPhone" bundle:nil];
+        vc = [storyboard instantiateViewControllerWithIdentifier:@"LayoutOnScreenControlsViewController"];
+    }
+    else {
+        UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"iPad" bundle:nil];
+        vc = [storyboard instantiateViewControllerWithIdentifier:@"LayoutOnScreenControlsViewController"];
+        vc.modalPresentationStyle = UIModalPresentationFullScreen;
+    }
 
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    switch ([segmentedControl selectedSegmentIndex]) {
+            case 0:
+                break;
+            case 1:
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+            case 4:
+                if (self.layoutOnScreenControlsVC.isBeingPresented == NO) {
+                    [self presentViewController:self.layoutOnScreenControlsVC animated:YES completion:nil];
+                }
+                break;
+        }
 }
 
+/* Used to detect when user taps on an on screen control UISegmentedControl button, even if that button is already selected */
+- (void)OSCSegmentControlReselected:(id)sender {
+
+    CGPoint point = [tapGesture locationInView:self.onscreenControlSelector];
+    NSUInteger segmentSize = self.onscreenControlSelector.bounds.size.width / self.onscreenControlSelector.numberOfSegments;
+    
+    
+    NSUInteger touchedSegment = point.x / segmentSize;  // Warning: If you are using segments not equally sized, you have to adapt the code here
+    
+    if (self.onscreenControlSelector.selectedSegmentIndex != touchedSegment) {  // normal behavior, previously unselected button is selected
+        self.onscreenControlSelector.selectedSegmentIndex = touchedSegment;
+        
+    } else {    // already selected button is tapped again
+        if (self.onscreenControlSelector.selectedSegmentIndex == 4) {
+            if (self.layoutOnScreenControlsVC.isBeingPresented == NO) {
+                [self presentViewController:self.layoutOnScreenControlsVC animated:YES completion:nil];
+            }
+        }
+    }
+    
+    [self OSCSegmentedControlsTapped:self.onscreenControlSelector]; // must call selector because the UIControlEventValueChanged can't work together with UITapGestureRecognizer
+}
 
 @end
