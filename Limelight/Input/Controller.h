@@ -25,6 +25,11 @@
 @property (nonatomic)                   short lastRightStickX;
 @property (nonatomic)                   short lastRightStickY;
 
+@property (nonatomic)                   float lastPrimaryTouchX;
+@property (nonatomic)                   float lastPrimaryTouchY;
+@property (nonatomic)                   float lastSecondaryTouchX;
+@property (nonatomic)                   float lastSecondaryTouchY;
+
 @property (nonatomic)                   HapticContext* _Nullable lowFreqMotor;
 @property (nonatomic)                   HapticContext* _Nullable highFreqMotor;
 @property (nonatomic)                   HapticContext* _Nullable leftTriggerMotor;
