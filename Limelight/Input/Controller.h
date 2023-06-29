@@ -35,6 +35,11 @@
 @property (nonatomic)                   HapticContext* _Nullable leftTriggerMotor;
 @property (nonatomic)                   HapticContext* _Nullable rightTriggerMotor;
 
+@property (nonatomic)                   NSTimer* _Nullable accelTimer;
+@property (nonatomic)                   GCAcceleration lastAccelSample;
+@property (nonatomic)                   NSTimer* _Nullable gyroTimer;
+@property (nonatomic)                   GCRotationRate lastGyroSample;
+
 @property (nonatomic)                   BOOL reportedArrival;
 
 @end

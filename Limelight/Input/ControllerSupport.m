@@ -89,7 +89,90 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
 
 - (void) setMotionEventState:(uint16_t)controllerNumber motionType:(uint8_t)motionType reportRateHz:(uint16_t)reportRateHz
 {
-    
+    if (@available(iOS 14.0, tvOS 14.0, *)) {
+        Controller* controller = [_controllers objectForKey:[NSNumber numberWithInteger:controllerNumber]];
+        if (controller == nil) {
+            // No connected controller for this player
+            return;
+        }
+        
+        if (controller.gamepad.motion == nil) {
+            // No motion supported for this controller
+            return;
+        }
+        
+        switch (motionType) {
+            case LI_MOTION_TYPE_ACCEL:
+                [controller.accelTimer invalidate];
+                controller.accelTimer = nil;
+                                                                
+                if (reportRateHz && controller.gamepad.motion.hasGravityAndUserAcceleration) {
+                    // Reset the last motion sample
+                    GCAcceleration emptyAccelSample = {};
+                    controller.lastAccelSample = emptyAccelSample;
+                    
+                    dispatch_sync(dispatch_get_main_queue(), ^{
+                        controller.accelTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / reportRateHz repeats:YES block:^(NSTimer *timer) {
+                            // Don't send duplicate samples
+                            GCAcceleration lastAccelSample = controller.lastAccelSample;
+                            GCAcceleration accelSample = controller.gamepad.motion.acceleration;
+                            if (memcmp(&accelSample, &lastAccelSample, sizeof(accelSample)) == 0) {
+                                return;
+                            }
+                            controller.lastAccelSample = accelSample;
+                            
+                            // Convert g to m/s^2
+                            LiSendControllerMotionEvent((uint8_t)controllerNumber,
+                                                        LI_MOTION_TYPE_ACCEL,
+                                                        accelSample.x * 9.80665f,
+                                                        accelSample.y * 9.80665f,
+                                                        accelSample.z * 9.80665f);
+                        }];
+                    });
+                }
+                break;
+                
+            case LI_MOTION_TYPE_GYRO:
+                [controller.gyroTimer invalidate];
+                controller.gyroTimer = nil;
+                
+                if (reportRateHz && controller.gamepad.motion.hasRotationRate) {
+                    // Reset the last motion sample
+                    GCRotationRate emptyGyroSample = {};
+                    controller.lastGyroSample = emptyGyroSample;
+                    
+                    dispatch_sync(dispatch_get_main_queue(), ^{
+                        controller.gyroTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 / reportRateHz repeats:YES block:^(NSTimer *timer) {
+                            // Don't send duplicate samples
+                            GCRotationRate lastGyroSample = controller.lastGyroSample;
+                            GCRotationRate gyroSample = controller.gamepad.motion.rotationRate;
+                            if (memcmp(&gyroSample, &lastGyroSample, sizeof(gyroSample)) == 0) {
+                                return;
+                            }
+                            controller.lastGyroSample = gyroSample;
+                            
+                            // Convert rad/s to deg/s
+                            LiSendControllerMotionEvent((uint8_t)controllerNumber,
+                                                        LI_MOTION_TYPE_GYRO,
+                                                        gyroSample.x * 57.2957795f,
+                                                        gyroSample.y * 57.2957795f,
+                                                        gyroSample.z * 57.2957795f);
+                        }];
+                    });
+                }
+                break;
+        }
+        
+        // Set the motion sensor state if they require manual activation
+        if (controller.gamepad.motion.sensorsRequireManualActivation) {
+            if (controller.gyroTimer || controller.accelTimer) {
+                controller.gamepad.motion.sensorsActive = YES;
+            }
+            else {
+                controller.gamepad.motion.sensorsActive = NO;
+            }
+        }
+    }
 }
 
 -(void) updateLeftStick:(Controller*)controller x:(short)x y:(short)y
@@ -305,6 +388,20 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     [controller.rightTriggerMotor cleanup];
 }
 
+-(void) cleanupControllerMotion:(Controller*) controller
+{
+    if (@available(iOS 14.0, tvOS 14.0, *)) {
+        // Stop sensor sampling timers
+        [controller.gyroTimer invalidate];
+        [controller.accelTimer invalidate];
+        
+        // Disable motion sensors if they require manual activation
+        if (controller.gamepad && controller.gamepad.motion && controller.gamepad.motion.sensorsRequireManualActivation) {
+            controller.gamepad.motion.sensorsActive = NO;
+        }
+    }
+}
+
 -(void) reportControllerArrival:(GCController*) controller
 {
     if (controller == nil || controller.extendedGamepad == nil) {
@@ -415,6 +512,16 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
             }
             if ([controller.haptics.supportedLocalities containsObject:GCHapticsLocalityTriggers]) {
                 capabilities |= LI_CCAP_TRIGGER_RUMBLE;
+            }
+        }
+        
+        // Detect supported motion sensors
+        if (controller.motion) {
+            if (controller.motion.hasGravityAndUserAcceleration) {
+                capabilities |= LI_CCAP_ACCEL;
+            }
+            if (controller.motion.hasRotationRate) {
+                capabilities |= LI_CCAP_GYRO;
             }
         }
         
@@ -987,6 +1094,9 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
         // Stop haptics on this controller
         [self cleanupControllerHaptics:limeController];
         
+        // Stop motion reports on this controller
+        [self cleanupControllerMotion:limeController];
+        
         limeController.gamepad = nil;
         
         // Inform the server of the updated active gamepads before removing this controller
@@ -1066,6 +1176,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     
     for (Controller* controller in [_controllers allValues]) {
         [self cleanupControllerHaptics:controller];
+        [self cleanupControllerMotion:controller];
     }
     [_controllers removeAllObjects];
     
