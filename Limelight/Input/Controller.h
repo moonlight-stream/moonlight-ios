@@ -30,4 +30,6 @@
 @property (nonatomic)                   HapticContext* _Nullable leftTriggerMotor;
 @property (nonatomic)                   HapticContext* _Nullable rightTriggerMotor;
 
+@property (nonatomic)                   BOOL reportedArrival;
+
 @end

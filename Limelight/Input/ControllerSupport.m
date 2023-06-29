@@ -219,6 +219,11 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     }
 }
 
+-(uint16_t) getActiveGamepadMask
+{
+    return (_multiController ? _controllerNumbers : 1) | (_oscEnabled ? 1 : 0);
+}
+
 -(void) updateFinished:(Controller*)controller
 {
     BOOL exitRequested = NO;
@@ -231,9 +236,14 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
             exitRequested = YES;
         }
         
+        if (!controller.reportedArrival && controller.gamepad) {
+            [self reportControllerArrival:controller.gamepad];
+            controller.reportedArrival = YES;
+        }
+        
         // Player 1 is always present for OSC
-        LiSendMultiControllerEvent(_multiController ? controller.playerIndex : 0,
-                                   (_multiController ? _controllerNumbers : 1) | (_oscEnabled ? 1 : 0), controller.lastButtonFlags, controller.lastLeftTrigger, controller.lastRightTrigger, controller.lastLeftStickX, controller.lastLeftStickY, controller.lastRightStickX, controller.lastRightStickY);
+        LiSendMultiControllerEvent(_multiController ? controller.playerIndex : 0, [self getActiveGamepadMask],
+                                   controller.lastButtonFlags, controller.lastLeftTrigger, controller.lastRightTrigger, controller.lastLeftStickX, controller.lastLeftStickY, controller.lastRightStickX, controller.lastRightStickY);
     }
     [_controllerStreamLock unlock];
     
@@ -293,6 +303,122 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     [controller.leftTriggerMotor cleanup];
     [controller.rightTriggerMotor cleanup];
 }
+
+-(void) reportControllerArrival:(GCController*) controller
+{
+    if (controller == nil || controller.extendedGamepad == nil) {
+        return;
+    }
+    
+    uint8_t type = LI_CTYPE_UNKNOWN;
+    uint16_t capabilities = 0;
+    uint32_t supportedButtonFlags = 0;
+    
+    // Start is always present
+    supportedButtonFlags |= PLAY_FLAG;
+    
+    // Detect buttons present in the GCExtendedGamepad profile
+    if (controller.extendedGamepad.dpad) {
+        supportedButtonFlags |= UP_FLAG | DOWN_FLAG | LEFT_FLAG | RIGHT_FLAG;
+    }
+    if (controller.extendedGamepad.leftShoulder) {
+        supportedButtonFlags |= LB_FLAG;
+    }
+    if (controller.extendedGamepad.rightShoulder) {
+        supportedButtonFlags |= RB_FLAG;
+    }
+    if (@available(iOS 13.0, tvOS 13.0, *)) {
+        if (controller.extendedGamepad.buttonOptions) {
+            supportedButtonFlags |= BACK_FLAG;
+        }
+    }
+    if (@available(iOS 14.0, tvOS 14.0, *)) {
+        if (controller.extendedGamepad.buttonHome) {
+            supportedButtonFlags |= SPECIAL_FLAG;
+        }
+    }
+    if (controller.extendedGamepad.buttonA) {
+        supportedButtonFlags |= A_FLAG;
+    }
+    if (controller.extendedGamepad.buttonB) {
+        supportedButtonFlags |= B_FLAG;
+    }
+    if (controller.extendedGamepad.buttonX) {
+        supportedButtonFlags |= X_FLAG;
+    }
+    if (controller.extendedGamepad.buttonY) {
+        supportedButtonFlags |= Y_FLAG;
+    }
+    if (@available(iOS 12.1, tvOS 12.1, *)) {
+        if (controller.extendedGamepad.leftThumbstickButton) {
+            supportedButtonFlags |= LS_CLK_FLAG;
+        }
+        if (controller.extendedGamepad.rightThumbstickButton) {
+            supportedButtonFlags |= RS_CLK_FLAG;
+        }
+    }
+    
+    if (@available(iOS 14.0, tvOS 14.0, *)) {
+        if ([controller.extendedGamepad isKindOfClass:[GCXboxGamepad class]]) {
+            GCXboxGamepad* xboxGamepad = (GCXboxGamepad*)controller.extendedGamepad;
+            
+            if (xboxGamepad.paddleButton1) {
+                supportedButtonFlags |= PADDLE1_FLAG;
+            }
+            if (xboxGamepad.paddleButton2) {
+                supportedButtonFlags |= PADDLE2_FLAG;
+            }
+            if (xboxGamepad.paddleButton3) {
+                supportedButtonFlags |= PADDLE3_FLAG;
+            }
+            if (xboxGamepad.paddleButton4) {
+                supportedButtonFlags |= PADDLE4_FLAG;
+            }
+            
+            if (@available(iOS 15.0, tvOS 15.0, *)) {
+                if (xboxGamepad.buttonShare) {
+                    supportedButtonFlags |= MISC_FLAG;
+                }
+            }
+            
+            type = LI_CTYPE_XBOX;
+        }
+        else if ([controller.extendedGamepad isKindOfClass:[GCDualShockGamepad class]]) {
+            GCDualShockGamepad* dualShockGamepad = (GCDualShockGamepad*)controller.extendedGamepad;
+            
+            if (dualShockGamepad.touchpadButton) {
+                supportedButtonFlags |= TOUCHPAD_FLAG;
+                capabilities |= LI_CCAP_TOUCHPAD;
+            }
+                        
+            type = LI_CTYPE_PS;
+        }
+        
+        if (@available(iOS 14.5, tvOS 14.5, *)) {
+            if ([controller.extendedGamepad isKindOfClass:[GCDualSenseGamepad class]]) {
+                GCDualSenseGamepad* dualSenseGamepad = (GCDualSenseGamepad*)controller.extendedGamepad;
+                
+                if (dualSenseGamepad.touchpadButton) {
+                    supportedButtonFlags |= TOUCHPAD_FLAG;
+                    capabilities |= LI_CCAP_TOUCHPAD;
+                }
+                                
+                type = LI_CTYPE_PS;
+            }
+        }
+        
+        // Detect supported haptics localities
+        if (controller.haptics) {
+            if ([controller.haptics.supportedLocalities containsObject:GCHapticsLocalityHandles]) {
+                capabilities |= LI_CCAP_RUMBLE;
+            }
+            if ([controller.haptics.supportedLocalities containsObject:GCHapticsLocalityTriggers]) {
+                capabilities |= LI_CCAP_TRIGGER_RUMBLE;
+            }
+        }
+        
+        LiSendControllerArrivalEvent(controller.playerIndex, [self getActiveGamepadMask], type, supportedButtonFlags, capabilities);
+    }
 }
 
 -(void) registerControllerCallbacks:(GCController*) controller
@@ -391,6 +517,47 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
                     // Home/Guide button is optional (only present on Xbox One S and PS4 gamepads)
                     if (gamepad.buttonHome != nil) {
                         UPDATE_BUTTON_FLAG(limeController, SPECIAL_FLAG, gamepad.buttonHome.pressed);
+                    }
+                    
+                    // iOS 14 adds specific profiles for DualShock and Xbox gamepads with additional buttons
+                    if ([gamepad isKindOfClass:[GCXboxGamepad class]]) {
+                        GCXboxGamepad* xboxGamepad = (GCXboxGamepad*)gamepad;
+                        
+                        if (xboxGamepad.paddleButton1) {
+                            UPDATE_BUTTON_FLAG(limeController, PADDLE1_FLAG, xboxGamepad.paddleButton1.pressed);
+                        }
+                        if (xboxGamepad.paddleButton2) {
+                            UPDATE_BUTTON_FLAG(limeController, PADDLE2_FLAG, xboxGamepad.paddleButton2.pressed);
+                        }
+                        if (xboxGamepad.paddleButton3) {
+                            UPDATE_BUTTON_FLAG(limeController, PADDLE3_FLAG, xboxGamepad.paddleButton3.pressed);
+                        }
+                        if (xboxGamepad.paddleButton4) {
+                            UPDATE_BUTTON_FLAG(limeController, PADDLE4_FLAG, xboxGamepad.paddleButton4.pressed);
+                        }
+                        
+                        if (@available(iOS 15.0, tvOS 15.0, *)) {
+                            if (xboxGamepad.buttonShare) {
+                                UPDATE_BUTTON_FLAG(limeController, MISC_FLAG, xboxGamepad.buttonShare.pressed);
+                            }
+                        }
+                    }
+                    else if ([gamepad isKindOfClass:[GCDualShockGamepad class]]) {
+                        GCDualShockGamepad* dualShockGamepad = (GCDualShockGamepad*)gamepad;
+                        
+                        if (dualShockGamepad.touchpadButton) {
+                            UPDATE_BUTTON_FLAG(limeController, MISC_FLAG, dualShockGamepad.touchpadButton.pressed);
+                        }
+                    }
+                    
+                    if (@available(iOS 14.5, tvOS 14.5, *)) {
+                        if ([gamepad isKindOfClass:[GCDualSenseGamepad class]]) {
+                            GCDualSenseGamepad* dualSenseGamepad = (GCDualSenseGamepad*)gamepad;
+                            
+                            if (dualSenseGamepad.touchpadButton) {
+                                UPDATE_BUTTON_FLAG(limeController, MISC_FLAG, dualSenseGamepad.touchpadButton.pressed);
+                            }
+                        }
                     }
                 }
                 
@@ -738,6 +905,9 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
         
         // Register callbacks on the new controller
         [self registerControllerCallbacks:controller];
+        
+        // Report the controller arrival to the host
+        [self reportControllerArrival:controller];
         
         // Re-evaluate the on-screen control mode
         [self updateAutoOnScreenControlMode];
