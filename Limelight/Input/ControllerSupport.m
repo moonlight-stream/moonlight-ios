@@ -236,6 +236,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
             exitRequested = YES;
         }
         
+        // Report the controller arrival to the host if we haven't done so yet
         if (!controller.reportedArrival && controller.gamepad) {
             [self reportControllerArrival:controller.gamepad];
             controller.reportedArrival = YES;
@@ -390,7 +391,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
                 supportedButtonFlags |= TOUCHPAD_FLAG;
                 capabilities |= LI_CCAP_TOUCHPAD;
             }
-                        
+
             type = LI_CTYPE_PS;
         }
         
@@ -402,7 +403,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
                     supportedButtonFlags |= TOUCHPAD_FLAG;
                     capabilities |= LI_CCAP_TOUCHPAD;
                 }
-                                
+                
                 type = LI_CTYPE_PS;
             }
         }
@@ -546,7 +547,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
                         GCDualShockGamepad* dualShockGamepad = (GCDualShockGamepad*)gamepad;
                         
                         if (dualShockGamepad.touchpadButton) {
-                            UPDATE_BUTTON_FLAG(limeController, MISC_FLAG, dualShockGamepad.touchpadButton.pressed);
+                            UPDATE_BUTTON_FLAG(limeController, TOUCHPAD_FLAG, dualShockGamepad.touchpadButton.pressed);
                         }
                     }
                     
@@ -555,7 +556,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
                             GCDualSenseGamepad* dualSenseGamepad = (GCDualSenseGamepad*)gamepad;
                             
                             if (dualSenseGamepad.touchpadButton) {
-                                UPDATE_BUTTON_FLAG(limeController, MISC_FLAG, dualSenseGamepad.touchpadButton.pressed);
+                                UPDATE_BUTTON_FLAG(limeController, TOUCHPAD_FLAG, dualSenseGamepad.touchpadButton.pressed);
                             }
                         }
                     }
@@ -882,6 +883,9 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
         if ([ControllerSupport isSupportedGamepad:controller]) {
             [self assignController:controller];
             [self registerControllerCallbacks:controller];
+            
+            // Note: We cannot report controller arrival to the host here,
+            // because the connection has not been established yet.
         }
     }
     
