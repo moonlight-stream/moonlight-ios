@@ -16,5 +16,7 @@
 
 +(HapticContext*) createContextForHighFreqMotor:(GCController*)gamepad;
 +(HapticContext*) createContextForLowFreqMotor:(GCController*)gamepad;
++(HapticContext*) createContextForLeftTrigger:(GCController*)gamepad;
++(HapticContext*) createContextForRightTrigger:(GCController*)gamepad;
 
 @end

@@ -313,6 +313,16 @@ void ClSetHdrMode(bool enabled)
     [_callbacks setHdrMode:enabled];
 }
 
+void ClRumbleTriggers(uint16_t controllerNumber, uint16_t leftTriggerMotor, uint16_t rightTriggerMotor)
+{
+    [_callbacks rumbleTriggers:controllerNumber leftTrigger:leftTriggerMotor rightTrigger:rightTriggerMotor];
+}
+
+void ClSetMotionEventState(uint16_t controllerNumber, uint8_t motionType, uint16_t reportRateHz)
+{
+    [_callbacks setMotionEventState:controllerNumber motionType:motionType reportRateHz:reportRateHz];
+}
+
 -(void) terminate
 {
     // Interrupt any action blocking LiStartConnection(). This is
@@ -455,6 +465,8 @@ void ClSetHdrMode(bool enabled)
     _clCallbacks.rumble = ClRumble;
     _clCallbacks.connectionStatusUpdate = ClConnectionStatusUpdate;
     _clCallbacks.setHdrMode = ClSetHdrMode;
+    _clCallbacks.rumbleTriggers = ClRumbleTriggers;
+    _clCallbacks.setMotionEventState = ClSetMotionEventState;
 
     return self;
 }

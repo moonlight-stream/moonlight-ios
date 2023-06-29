@@ -89,6 +89,11 @@
         return nil;
     }
     
+    if (![[gamepad.haptics supportedLocalities] containsObject:locality]) {
+        Log(LOG_W, @"Controller %d does not support haptic locality: %@", gamepad.playerIndex, locality);
+        return nil;
+    }
+    
     _playerIndex = gamepad.playerIndex;
     _hapticEngine = [gamepad.haptics createEngineWithLocality:locality];
     
@@ -138,6 +143,24 @@
 +(HapticContext*) createContextForLowFreqMotor:(GCController*)gamepad {
     if (@available(iOS 14.0, tvOS 14.0, *)) {
         return [[HapticContext alloc] initWithGamepad:gamepad locality:GCHapticsLocalityLeftHandle];
+    }
+    else {
+        return nil;
+    }
+}
+
++(HapticContext*) createContextForLeftTrigger:(GCController*)gamepad {
+    if (@available(iOS 14.0, tvOS 14.0, *)) {
+        return [[HapticContext alloc] initWithGamepad:gamepad locality:GCHapticsLocalityLeftTrigger];
+    }
+    else {
+        return nil;
+    }
+}
+
++(HapticContext*) createContextForRightTrigger:(GCController*)gamepad {
+    if (@available(iOS 14.0, tvOS 14.0, *)) {
+        return [[HapticContext alloc] initWithGamepad:gamepad locality:GCHapticsLocalityRightTrigger];
     }
     else {
         return nil;

@@ -71,6 +71,27 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     [controller.highFreqMotor setMotorAmplitude:highFreqMotor];
 }
 
+-(void) rumbleTriggers:(uint16_t)controllerNumber leftTrigger:(uint16_t)leftTrigger rightTrigger:(uint16_t)rightTrigger
+{
+    Controller* controller = [_controllers objectForKey:[NSNumber numberWithInteger:controllerNumber]];
+    if (controller == nil && controllerNumber == 0 && _oscEnabled) {
+        // No physical controller, but we have on-screen controls
+        controller = _player0osc;
+    }
+    if (controller == nil) {
+        // No connected controller for this player
+        return;
+    }
+    
+    [controller.leftTriggerMotor setMotorAmplitude:leftTrigger];
+    [controller.rightTriggerMotor setMotorAmplitude:rightTrigger];
+}
+
+- (void) setMotionEventState:(uint16_t)controllerNumber motionType:(uint8_t)motionType reportRateHz:(uint16_t)reportRateHz
+{
+    
+}
+
 -(void) updateLeftStick:(Controller*)controller x:(short)x y:(short)y
 {
     @synchronized(controller) {
@@ -261,12 +282,17 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
 {
     controller.lowFreqMotor = [HapticContext createContextForLowFreqMotor:controller.gamepad];
     controller.highFreqMotor = [HapticContext createContextForHighFreqMotor:controller.gamepad];
+    controller.leftTriggerMotor = [HapticContext createContextForLeftTrigger:controller.gamepad];
+    controller.rightTriggerMotor = [HapticContext createContextForRightTrigger:controller.gamepad];
 }
 
 -(void) cleanupControllerHaptics:(Controller*) controller
 {
     [controller.lowFreqMotor cleanup];
     [controller.highFreqMotor cleanup];
+    [controller.leftTriggerMotor cleanup];
+    [controller.rightTriggerMotor cleanup];
+}
 }
 
 -(void) registerControllerCallbacks:(GCController*) controller

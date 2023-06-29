@@ -27,5 +27,7 @@
 
 @property (nonatomic)                   HapticContext* _Nullable lowFreqMotor;
 @property (nonatomic)                   HapticContext* _Nullable highFreqMotor;
+@property (nonatomic)                   HapticContext* _Nullable leftTriggerMotor;
+@property (nonatomic)                   HapticContext* _Nullable rightTriggerMotor;
 
 @end
