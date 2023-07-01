@@ -533,17 +533,20 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
 {
     // If we went from a touch to no touch, generate a touch up event
     if ((controller.lastPrimaryTouchX || controller.lastPrimaryTouchY) && (!primaryTouch.xAxis.value && !primaryTouch.yAxis.value)) {
-        LiSendTouchEvent(LI_TOUCH_EVENT_UP, 0, primaryTouch.xAxis.value, primaryTouch.yAxis.value, 1.0f);
+        LiSendControllerTouchEvent(controller.playerIndex, LI_TOUCH_EVENT_UP, 0,
+                                   primaryTouch.xAxis.value, primaryTouch.yAxis.value, 1.0f);
     }
     else if (primaryTouch.xAxis.value || primaryTouch.yAxis.value) {
         // If we went from no touch to a touch, generate a touch down event
         if (!controller.lastPrimaryTouchX && !controller.lastPrimaryTouchY) {
-            LiSendTouchEvent(LI_TOUCH_EVENT_DOWN, 0, primaryTouch.xAxis.value, primaryTouch.yAxis.value, 1.0f);
+            LiSendControllerTouchEvent(controller.playerIndex, LI_TOUCH_EVENT_DOWN, 0,
+                                       primaryTouch.xAxis.value, primaryTouch.yAxis.value, 1.0f);
         }
         else if (controller.lastPrimaryTouchX != primaryTouch.xAxis.value ||
                  controller.lastPrimaryTouchY != primaryTouch.yAxis.value) {
             // Otherwise it's just a move
-            LiSendTouchEvent(LI_TOUCH_EVENT_MOVE, 0, primaryTouch.xAxis.value, primaryTouch.yAxis.value, 1.0f);
+            LiSendControllerTouchEvent(controller.playerIndex, LI_TOUCH_EVENT_MOVE, 0,
+                                       primaryTouch.xAxis.value, primaryTouch.yAxis.value, 1.0f);
         }
     }
     controller.lastPrimaryTouchX = primaryTouch.xAxis.value;
@@ -552,17 +555,20 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     
     // If we went from a touch to no touch, generate a touch up event
     if ((controller.lastSecondaryTouchX || controller.lastSecondaryTouchY) && (!secondaryTouch.xAxis.value && !secondaryTouch.yAxis.value)) {
-        LiSendTouchEvent(LI_TOUCH_EVENT_UP, 1, secondaryTouch.xAxis.value, secondaryTouch.yAxis.value, 1.0f);
+        LiSendControllerTouchEvent(controller.playerIndex, LI_TOUCH_EVENT_UP, 1,
+                                   secondaryTouch.xAxis.value, secondaryTouch.yAxis.value, 1.0f);
     }
     else if (secondaryTouch.xAxis.value || secondaryTouch.yAxis.value) {
         // If we went from no touch to a touch, generate a touch down event
         if (!controller.lastSecondaryTouchX && !controller.lastSecondaryTouchY) {
-            LiSendTouchEvent(LI_TOUCH_EVENT_DOWN, 1, secondaryTouch.xAxis.value, secondaryTouch.yAxis.value, 1.0f);
+            LiSendControllerTouchEvent(controller.playerIndex, LI_TOUCH_EVENT_DOWN, 1,
+                                       secondaryTouch.xAxis.value, secondaryTouch.yAxis.value, 1.0f);
         }
         else if (controller.lastSecondaryTouchX != secondaryTouch.xAxis.value ||
                  controller.lastSecondaryTouchY != secondaryTouch.yAxis.value) {
             // Otherwise it's just a move
-            LiSendTouchEvent(LI_TOUCH_EVENT_MOVE, 1, secondaryTouch.xAxis.value, secondaryTouch.yAxis.value, 1.0f);
+            LiSendControllerTouchEvent(controller.playerIndex, LI_TOUCH_EVENT_MOVE, 1,
+                                       secondaryTouch.xAxis.value, secondaryTouch.yAxis.value, 1.0f);
         }
     }
     controller.lastSecondaryTouchX = secondaryTouch.xAxis.value;
