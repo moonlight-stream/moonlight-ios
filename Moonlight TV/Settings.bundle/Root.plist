@@ -182,6 +182,50 @@
 		</dict>
 		<dict>
 			<key>Type</key>
+			<string>PSMultiValueSpecifier</string>
+			<key>Title</key>
+			<string>Touchpad Sensitivity</string>
+			<key>Key</key>
+			<string>relativeTouchSensitivity</string>
+			<key>DefaultValue</key>
+			<real>1</real>
+			<key>Values</key>
+			<array>
+				<real>6</real>
+				<real>5</real>
+				<real>4</real>
+				<real>3</real>
+				<real>2</real>
+				<real>1.5</real>
+				<real>1</real>
+				<real>0.75</real>
+				<real>0.5</real>
+				<real>0.333</real>
+				<real>0.25</real>
+				<real>0.2</real>
+				<real>0.166</real>
+				<real>0</real>
+			</array>
+			<key>Titles</key>
+			<array>
+				<string>6x</string>
+				<string>5x</string>
+				<string>4x</string>
+				<string>3x</string>
+				<string>2x</string>
+				<string>1.5x</string>
+				<string>1x</string>
+				<string>0.75x</string>
+				<string>1/2</string>
+				<string>1/3</string>
+				<string>1/4</string>
+				<string>1/5</string>
+				<string>1/6</string>
+				<string>0x (Frozen mouse)</string>
+			</array>
+		</dict>
+		<dict>
+			<key>Type</key>
 			<string>PSGroupSpecifier</string>
 			<key>Title</key>
 			<string>Video Options</string>

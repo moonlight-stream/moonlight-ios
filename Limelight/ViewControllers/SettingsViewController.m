@@ -16,6 +16,7 @@
 @implementation SettingsViewController {
     NSInteger _bitrate;
     NSInteger _lastSelectedResolutionIndex;
+    float _touchpadSensitivityPreviousValue;
 }
 
 @dynamic overrideUserInterfaceStyle;
@@ -54,6 +55,11 @@ const int RESOLUTION_TABLE_SIZE = 5;
 const int RESOLUTION_TABLE_CUSTOM_INDEX = RESOLUTION_TABLE_SIZE - 1;
 CGSize resolutionTable[RESOLUTION_TABLE_SIZE];
 
+static NSString* touchpadSensitivityFormat = @"Touchpad Sensitivity: %.2fx";
+
+/// The maximum allowable relative touch sensitivity multipler, as stored on Core Data.
+const float RELATIVE_TOUCH_SENSITIVITY_MAX_MULTIPLIER = 6.0;
+
 -(int)getSliderValueForBitrate:(NSInteger)bitrate {
     int i;
     
@@ -65,6 +71,30 @@ CGSize resolutionTable[RESOLUTION_TABLE_SIZE];
     
     // Return the last entry in the table
     return i - 1;
+}
+
+/// Converts the relativeTouchSensitivity as stored on Core Data to touchpadSensitivitySlider's value.
+-(float)getSliderValueForTouchpadSensitivity:(float)sensitivity {
+    float sliderMidpoint = (self.touchpadSensitivitySlider.maximumValue + self.touchpadSensitivitySlider.minimumValue) / 2.0;
+
+    if (sensitivity > RELATIVE_TOUCH_SENSITIVITY_MAX_MULTIPLIER) {
+        // Clamp to RELATIVE_TOUCH_SENSITIVITY_MAX_MULTIPLIER
+        return self.touchpadSensitivitySlider.maximumValue;
+    } else if (sensitivity >= 1) {
+        // Linearly interpolate from [1..RELATIVE_TOUCH_SENSITIVITY_MAX_MULTIPLIER]
+        // to [sliderMidpoint..sliderMax]
+        return lerpf(
+                     sliderMidpoint,
+                     self.touchpadSensitivitySlider.maximumValue,
+                     (sensitivity - 1) / (RELATIVE_TOUCH_SENSITIVITY_MAX_MULTIPLIER - 1)
+        );
+    } else if (sensitivity >= 0) {
+        // Linearly interpolate from [0..1) to [sliderMin..sliderMidpoint)
+        return sensitivity * sliderMidpoint;
+    } else {
+        // Clamp to 0x
+        return self.touchpadSensitivitySlider.minimumValue;
+    }
 }
 
 // This view is rooted at a ScrollView. To make it scrollable,
@@ -136,6 +166,8 @@ BOOL isCustomResolution(CGSize res) {
     
     DataManager* dataMan = [[DataManager alloc] init];
     TemporarySettings* currentSettings = [dataMan getSettings];
+    
+    _touchpadSensitivityPreviousValue = 1.0;
     
     // Ensure we pick a bitrate that falls exactly onto a slider notch
     _bitrate = bitrateTable[[self getSliderValueForBitrate:[currentSettings.bitrate intValue]]];
@@ -252,12 +284,17 @@ BOOL isCustomResolution(CGSize res) {
     [self.framerateSelector addTarget:self action:@selector(updateBitrate) forControlEvents:UIControlEventValueChanged];
     [self.onscreenControlSelector setSelectedSegmentIndex:onscreenControls];
     [self.onscreenControlSelector setEnabled:!currentSettings.absoluteTouchMode];
+    [self.touchpadSensitivitySlider setValue:[self getSliderValueForTouchpadSensitivity:currentSettings.relativeTouchSensitivity.floatValue]];
+    [self.touchpadSensitivitySlider addTarget:self action:@selector(touchpadSensitivitySliderMoved) forControlEvents:UIControlEventValueChanged];
+    [self.touchpadSensitivitySlider addTarget:self action:@selector(touchpadSensitivitySliderTouchStart) forControlEvents:UIControlEventTouchDown];
+    [self.touchpadSensitivitySlider addTarget:self action:@selector(touchpadSensitivitySliderTouchEnd) forControlEvents:UIControlEventTouchUpInside];
+    [self.touchpadSensitivitySlider addTarget:self action:@selector(touchpadSensitivitySliderTouchEnd) forControlEvents:UIControlEventTouchUpOutside];
     [self.bitrateSlider setMinimumValue:0];
     [self.bitrateSlider setMaximumValue:(sizeof(bitrateTable) / sizeof(*bitrateTable)) - 1];
     [self.bitrateSlider setValue:[self getSliderValueForBitrate:_bitrate] animated:YES];
-    [self.bitrateSlider addTarget:self action:@selector(bitrateSliderMoved) forControlEvents:UIControlEventValueChanged];
     [self updateBitrateText];
     [self updateCustomResolutionText];
+    [self updateTouchpadSensitivityText];
 }
 
 - (void) touchModeChanged {
@@ -423,6 +460,40 @@ BOOL isCustomResolution(CGSize res) {
     [self.bitrateLabel setText:[NSString stringWithFormat:bitrateFormat, _bitrate / 1000.]];
 }
 
+- (void) touchpadSensitivitySliderTouchStart {
+    self.impactFeedbackGenerator = [[UIImpactFeedbackGenerator alloc] initWithStyle:UIImpactFeedbackStyleLight];
+    [self.impactFeedbackGenerator prepare];
+}
+
+- (void) touchpadSensitivitySliderTouchEnd {
+    self.impactFeedbackGenerator = NULL;
+}
+
+- (void) touchpadSensitivitySliderMoved {
+    float value = self.touchpadSensitivitySlider.value;
+    float sliderMidpoint = (self.touchpadSensitivitySlider.maximumValue + self.touchpadSensitivitySlider.minimumValue) / 2.0;
+    float sliderRange = self.touchpadSensitivitySlider.maximumValue - self.touchpadSensitivitySlider.minimumValue;
+    float sliderSnapThresholdRadius = sliderRange * 0.02;
+    if (
+        value >= (sliderMidpoint - sliderSnapThresholdRadius) &&
+        value <= (sliderMidpoint + sliderSnapThresholdRadius)
+    ) {
+        [self.touchpadSensitivitySlider setValue:sliderMidpoint];
+        
+        if (_touchpadSensitivityPreviousValue != sliderMidpoint) {
+            [self.impactFeedbackGenerator impactOccurred];
+            // Keep the generator in a prepared state
+            [self.impactFeedbackGenerator prepare];
+        }
+    }
+    [self updateTouchpadSensitivityText];
+    _touchpadSensitivityPreviousValue = self.touchpadSensitivitySlider.value;
+}
+
+- (void) updateTouchpadSensitivityText {
+    [self.touchpadSensitivityLabel setText:[NSString stringWithFormat:touchpadSensitivityFormat, [self getChosenRelativeTouchSensitivity]]];
+}
+
 - (NSInteger) getChosenFrameRate {
     switch ([self.framerateSelector selectedSegmentIndex]) {
         case 0:
@@ -456,12 +527,34 @@ BOOL isCustomResolution(CGSize res) {
     return resolutionTable[[self.resolutionSelector selectedSegmentIndex]].width;
 }
 
+/// Converts the touchpadSensitivitySlider's current value to the relativeTouchSensitivity as stored on Core Data
+- (float) getChosenRelativeTouchSensitivity {
+    float sliderValue = self.touchpadSensitivitySlider.value;
+    float sliderMax = self.touchpadSensitivitySlider.maximumValue;
+    float sliderMin = self.touchpadSensitivitySlider.minimumValue;
+    float sliderMidpoint = (sliderMax + sliderMin) / 2.0;
+    
+    if (sliderValue >= sliderMidpoint) {
+        // Linearly interpolate from [sliderMidpoint..sliderMax]
+        // to [1..RELATIVE_TOUCH_SENSITIVITY_MAX_MULTIPLIER]
+        return lerpf(
+                     1,
+                     RELATIVE_TOUCH_SENSITIVITY_MAX_MULTIPLIER,
+                     (sliderValue - sliderMidpoint) / (sliderMax - sliderMidpoint)
+        );
+    } else {
+        // Linearly interpolate from [sliderMin..sliderMidpoint) to [0..1)
+        return lerpf(0, 1, (sliderValue - sliderMin) / (sliderMidpoint - sliderMin));
+    }
+}
+
 - (void) saveSettings {
     DataManager* dataMan = [[DataManager alloc] init];
     NSInteger framerate = [self getChosenFrameRate];
     NSInteger height = [self getChosenStreamHeight];
     NSInteger width = [self getChosenStreamWidth];
     NSInteger onscreenControls = [self.onscreenControlSelector selectedSegmentIndex];
+    float relativeTouchSensitivity = [self getChosenRelativeTouchSensitivity];
     BOOL optimizeGames = [self.optimizeSettingsSelector selectedSegmentIndex] == 1;
     BOOL multiController = [self.multiControllerSelector selectedSegmentIndex] == 1;
     BOOL swapABXYButtons = [self.swapABXYButtonsSelector selectedSegmentIndex] == 1;
@@ -478,6 +571,7 @@ BOOL isCustomResolution(CGSize res) {
                                width:width
                          audioConfig:2 // Stereo
                     onscreenControls:onscreenControls
+            relativeTouchSensitivity:relativeTouchSensitivity
                        optimizeGames:optimizeGames
                      multiController:multiController
                      swapABXYButtons:swapABXYButtons

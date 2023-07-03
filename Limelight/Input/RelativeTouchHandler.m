@@ -26,11 +26,13 @@ static const int REFERENCE_HEIGHT = 720;
 #endif
     
     UIView* view;
+    float sensitivityMultiplier;
 }
 
-- (id)initWithView:(StreamView*)view {
+- (id)initWithView:(StreamView*)view sensitivityMultiplier:(float)sensitivityMultiplier{
     self = [self init];
     self->view = view;
+    self->sensitivityMultiplier = sensitivityMultiplier;
     
 #if TARGET_OS_TV
     remotePressRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(remoteButtonPressed:)];
@@ -88,8 +90,8 @@ static const int REFERENCE_HEIGHT = 720;
         if (touchLocation.x != currentLocation.x ||
             touchLocation.y != currentLocation.y)
         {
-            int deltaX = (currentLocation.x - touchLocation.x) * (REFERENCE_WIDTH / view.bounds.size.width);
-            int deltaY = (currentLocation.y - touchLocation.y) * (REFERENCE_HEIGHT / view.bounds.size.height);
+            int deltaX = (currentLocation.x - touchLocation.x) * (REFERENCE_WIDTH / view.bounds.size.width) * sensitivityMultiplier;
+            int deltaY = (currentLocation.y - touchLocation.y) * (REFERENCE_HEIGHT / view.bounds.size.height) * sensitivityMultiplier;
             
             if (deltaX != 0 || deltaY != 0) {
                 LiSendMouseMoveEvent(deltaX, deltaY);

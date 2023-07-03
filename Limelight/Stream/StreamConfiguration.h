@@ -28,6 +28,7 @@
 @property int audioConfiguration;
 @property BOOL enableHdr;
 @property BOOL multiController;
+@property float relativeTouchSensitivity;
 @property BOOL allowHevc;
 @property BOOL useFramePacing;
 @property NSData* serverCert;

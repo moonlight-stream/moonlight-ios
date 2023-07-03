@@ -17,8 +17,9 @@
                        framerate:(NSInteger)framerate
                           height:(NSInteger)height
                            width:(NSInteger)width
-                audioConfig:(NSInteger)audioConfig
+                     audioConfig:(NSInteger)audioConfig
                 onscreenControls:(NSInteger)onscreenControls
+        relativeTouchSensitivity:(float)relativeTouchSensitivity
                    optimizeGames:(BOOL)optimizeGames
                  multiController:(BOOL)multiController
                  swapABXYButtons:(BOOL)swapABXYButtons
