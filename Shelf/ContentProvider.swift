@@ -43,13 +43,11 @@ func urlForImage(named name: String) -> URL? {
 func urlForCachedImage(uuid: String, appId: String) -> URL? {
     let appGroupIdentifier = "group.MoonlightTV"
        let url = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier)
-    NSLog("######## LOAD IMAGE URL= \(url)")
 
     var cachesURL = url!.appendingPathComponent("Library", isDirectory: true).appendingPathComponent("Caches", isDirectory: true)
     let imageName = "\(uuid)-\(appId)"
     cachesURL = cachesURL.appendingPathComponent(imageName).appendingPathExtension("png")
     
-    NSLog("######## cachesURL= \(cachesURL)")
 
     if FileManager.default.fileExists(atPath: cachesURL.path) {
         return cachesURL
@@ -81,9 +79,7 @@ class ContentProvider: TVTopShelfContentProvider {
               item.title = appDict["name"] as? String
 
                 item.setImageURL(urlForImage(named: "NoAppImage"), for: [.screenScale1x, .screenScale2x])
-                NSLog("######## SET EMPTY IMAGE")
             if let cachedImageURL = urlForCachedImage(uuid: hostUUID, appId: appId) {
-                NSLog("######## LOAD IMAGE \(cachedImageURL)")
                       item.setImageURL(cachedImageURL, for: [.screenScale1x, .screenScale2x])
                     } else {
                       item.setImageURL(urlForImage(named: "NoAppImage"), for: [.screenScale1x, .screenScale2x])
