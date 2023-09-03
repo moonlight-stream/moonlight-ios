@@ -38,6 +38,10 @@
 		98D5856D1C0EA79600F6CC00 /* TemporaryHost.m in Sources */ = {isa = PBXBuildFile; fileRef = 98D5856C1C0EA79600F6CC00 /* TemporaryHost.m */; };
 		98D585701C0ED0E800F6CC00 /* TemporarySettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 98D5856F1C0ED0E800F6CC00 /* TemporarySettings.m */; };
 		DC1F5A07206436B20037755F /* ConnectionHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = DC1F5A06206436B20037755F /* ConnectionHelper.m */; };
+		DD65E6482AA13C5F002304D6 /* NoAppImage.png in Resources */ = {isa = PBXBuildFile; fileRef = DD65E6472AA13C5F002304D6 /* NoAppImage.png */; };
+		DDB750742A9D3DE000526F05 /* TVServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DDB750732A9D3DE000526F05 /* TVServices.framework */; };
+		DDB750772A9D3DE000526F05 /* ContentProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB750762A9D3DE000526F05 /* ContentProvider.swift */; };
+		DDB7507B2A9D3DE000526F05 /* Shelf.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = DDB750722A9D3DE000526F05 /* Shelf.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		FB1A674D2131E65900507771 /* KeyboardSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = FB1A674C2131E65900507771 /* KeyboardSupport.m */; };
 		FB1A67602132419700507771 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FB1A675E2132419700507771 /* Main.storyboard */; };
 		FB1A67622132419A00507771 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FB1A67612132419A00507771 /* Assets.xcassets */; };
@@ -147,6 +151,13 @@
 			remoteGlobalIDString = FB290E2D19B37A4E004C83CF;
 			remoteInfo = "moonlight-common";
 		};
+		DDB750792A9D3DE000526F05 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FB290CE619B2C406004C83CF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DDB750712A9D3DE000526F05;
+			remoteInfo = Shelf;
+		};
 		FB1A68142132509400507771 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 98AB2E7F1CAD46830089BB98 /* moonlight-common.xcodeproj */;
@@ -162,6 +173,20 @@
 			remoteInfo = "moonlight-common-tv";
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		DDB7507F2A9D3DE000526F05 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				DDB7507B2A9D3DE000526F05 /* Shelf.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		566E9D2B2770B23A00EF7BFE /* Moonlight v1.7.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Moonlight v1.7.xcdatamodel"; sourceTree = "<group>"; };
@@ -203,6 +228,13 @@
 		D4746EEA1CBC740C006FB401 /* Moonlight-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "Moonlight-Bridging-Header.h"; path = "Input/Moonlight-Bridging-Header.h"; sourceTree = "<group>"; };
 		DC1F5A05206436B10037755F /* ConnectionHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionHelper.h; sourceTree = "<group>"; };
 		DC1F5A06206436B20037755F /* ConnectionHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionHelper.m; sourceTree = "<group>"; };
+		DD4F2B122A9EB91E00C98CC2 /* Moonlight TV.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Moonlight TV.entitlements"; sourceTree = "<group>"; };
+		DD4F2B132A9EB95600C98CC2 /* Shelf.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Shelf.entitlements; sourceTree = "<group>"; };
+		DD65E6472AA13C5F002304D6 /* NoAppImage.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = NoAppImage.png; sourceTree = SOURCE_ROOT; };
+		DDB750722A9D3DE000526F05 /* Shelf.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = Shelf.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		DDB750732A9D3DE000526F05 /* TVServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = TVServices.framework; path = Library/Frameworks/TVServices.framework; sourceTree = DEVELOPER_DIR; };
+		DDB750762A9D3DE000526F05 /* ContentProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentProvider.swift; sourceTree = "<group>"; };
+		DDB750782A9D3DE000526F05 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FB1A674B2131E65900507771 /* KeyboardSupport.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KeyboardSupport.h; sourceTree = "<group>"; };
 		FB1A674C2131E65900507771 /* KeyboardSupport.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KeyboardSupport.m; sourceTree = "<group>"; };
 		FB1A67532132419700507771 /* Moonlight TV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Moonlight TV.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -388,6 +420,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		DDB7506F2A9D3DE000526F05 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DDB750742A9D3DE000526F05 /* TVServices.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FB1A67502132419700507771 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -441,9 +481,21 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		DDB750752A9D3DE000526F05 /* Shelf */ = {
+			isa = PBXGroup;
+			children = (
+				DD65E6472AA13C5F002304D6 /* NoAppImage.png */,
+				DD4F2B132A9EB95600C98CC2 /* Shelf.entitlements */,
+				DDB750762A9D3DE000526F05 /* ContentProvider.swift */,
+				DDB750782A9D3DE000526F05 /* Info.plist */,
+			);
+			path = Shelf;
+			sourceTree = "<group>";
+		};
 		FB1A67542132419700507771 /* Moonlight TV */ = {
 			isa = PBXGroup;
 			children = (
+				DD4F2B122A9EB91E00C98CC2 /* Moonlight TV.entitlements */,
 				FB1A675E2132419700507771 /* Main.storyboard */,
 				FB1A67612132419A00507771 /* Assets.xcassets */,
 				FB1A67632132419A00507771 /* Info.plist */,
@@ -460,6 +512,7 @@
 				98AB2E7F1CAD46830089BB98 /* moonlight-common.xcodeproj */,
 				FB290CF919B2C406004C83CF /* Moonlight */,
 				FB1A67542132419700507771 /* Moonlight TV */,
+				DDB750752A9D3DE000526F05 /* Shelf */,
 				FB290CF019B2C406004C83CF /* Frameworks */,
 				FB290CEF19B2C406004C83CF /* Products */,
 			);
@@ -470,6 +523,7 @@
 			children = (
 				FB290CEE19B2C406004C83CF /* Moonlight.app */,
 				FB1A67532132419700507771 /* Moonlight TV.app */,
+				DDB750722A9D3DE000526F05 /* Shelf.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -492,6 +546,7 @@
 				FB290CF319B2C406004C83CF /* CoreGraphics.framework */,
 				FB290CF519B2C406004C83CF /* UIKit.framework */,
 				FB290CF719B2C406004C83CF /* CoreData.framework */,
+				DDB750732A9D3DE000526F05 /* TVServices.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -851,6 +906,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		DDB750712A9D3DE000526F05 /* Shelf */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DDB7507C2A9D3DE000526F05 /* Build configuration list for PBXNativeTarget "Shelf" */;
+			buildPhases = (
+				DDB7506E2A9D3DE000526F05 /* Sources */,
+				DDB7506F2A9D3DE000526F05 /* Frameworks */,
+				DDB750702A9D3DE000526F05 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Shelf;
+			productName = Shelf;
+			productReference = DDB750722A9D3DE000526F05 /* Shelf.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		FB1A67522132419700507771 /* Moonlight TV */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = FB1A67682132419A00507771 /* Build configuration list for PBXNativeTarget "Moonlight TV" */;
@@ -858,11 +930,13 @@
 				FB1A674F2132419700507771 /* Sources */,
 				FB1A67502132419700507771 /* Frameworks */,
 				FB1A67512132419700507771 /* Resources */,
+				DDB7507F2A9D3DE000526F05 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				FB1A68172132509800507771 /* PBXTargetDependency */,
+				DDB7507A2A9D3DE000526F05 /* PBXTargetDependency */,
 			);
 			name = "Moonlight TV";
 			productName = "Moonlight TV";
@@ -893,10 +967,14 @@
 		FB290CE619B2C406004C83CF /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 0730;
+				LastSwiftUpdateCheck = 1430;
 				LastUpgradeCheck = 1400;
 				ORGANIZATIONNAME = "Moonlight Game Streaming Project";
 				TargetAttributes = {
+					DDB750712A9D3DE000526F05 = {
+						CreatedOnToolsVersion = 14.3.1;
+						LastSwiftMigration = 1430;
+					};
 					FB1A67522132419700507771 = {
 						CreatedOnToolsVersion = 9.4.1;
 						LastSwiftMigration = 1140;
@@ -908,12 +986,11 @@
 						};
 					};
 					FB290CED19B2C406004C83CF = {
-						DevelopmentTeam = DM46QST4M7;
 						LastSwiftMigration = 1140;
 					};
 				};
 			};
-			buildConfigurationList = FB290CE919B2C406004C83CF /* Build configuration list for PBXProject "Moonlight" */;
+			buildConfigurationList = FB290CE919B2C406004C83CF /* Build configuration list for PBXProject "Moonlight macOS" */;
 			compatibilityVersion = "Xcode 8.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -934,6 +1011,7 @@
 			targets = (
 				FB290CED19B2C406004C83CF /* Moonlight */,
 				FB1A67522132419700507771 /* Moonlight TV */,
+				DDB750712A9D3DE000526F05 /* Shelf */,
 			);
 		};
 /* End PBXProject section */
@@ -956,6 +1034,14 @@
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
+		DDB750702A9D3DE000526F05 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DD65E6482AA13C5F002304D6 /* NoAppImage.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FB1A67512132419700507771 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -982,6 +1068,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		DDB7506E2A9D3DE000526F05 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DDB750772A9D3DE000526F05 /* ContentProvider.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FB1A674F2132419700507771 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1099,6 +1193,11 @@
 			name = "moonlight-common";
 			targetProxy = 98AB2E851CAD468B0089BB98 /* PBXContainerItemProxy */;
 		};
+		DDB7507A2A9D3DE000526F05 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DDB750712A9D3DE000526F05 /* Shelf */;
+			targetProxy = DDB750792A9D3DE000526F05 /* PBXContainerItemProxy */;
+		};
 		FB1A68172132509800507771 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = "moonlight-common-tv";
@@ -1126,9 +1225,95 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		DDB7507D2A9D3DE000526F05 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = Shelf/Shelf.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = JA65HS529K;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Shelf/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Shelf;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2023 Moonlight Game Streaming Project. All rights reserved.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.Moonlight-dev122445.Shelf";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "Limelight/Input/Moonlight-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 16.4;
+			};
+			name = Debug;
+		};
+		DDB7507E2A9D3DE000526F05 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = Shelf/Shelf.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = JA65HS529K;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Shelf/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Shelf;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2023 Moonlight Game Streaming Project. All rights reserved.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.Moonlight-dev122445.Shelf";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "Limelight/Input/Moonlight-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 16.4;
+			};
+			name = Release;
+		};
 		FB1A67662132419A00507771 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = "Launch Image";
 				CLANG_ANALYZER_NONNULL = YES;
@@ -1136,10 +1321,11 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = "Moonlight TV/Moonlight TV.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = DM46QST4M7;
+				DEVELOPMENT_TEAM = JA65HS529K;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -1161,7 +1347,7 @@
 				);
 				MARKETING_VERSION = 8.5.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.Moonlight";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.Moonlight-dev122445";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
 				SWIFT_OBJC_BRIDGING_HEADER = "Limelight/Input/Moonlight-Bridging-Header.h";
@@ -1176,6 +1362,7 @@
 		FB1A67672132419A00507771 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = "Launch Image";
 				CLANG_ANALYZER_NONNULL = YES;
@@ -1183,11 +1370,12 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = "Moonlight TV/Moonlight TV.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = DM46QST4M7;
+				DEVELOPMENT_TEAM = JA65HS529K;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -1337,6 +1525,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = JA65HS529K;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Limelight/Limelight-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
@@ -1357,7 +1546,7 @@
 					"$(PROJECT_DIR)/libs/SDL2/lib/iOS",
 				);
 				MARKETING_VERSION = 8.5.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.MoonlightiOS-dev";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SKIP_INSTALL = NO;
@@ -1415,6 +1604,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		DDB7507C2A9D3DE000526F05 /* Build configuration list for PBXNativeTarget "Shelf" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DDB7507D2A9D3DE000526F05 /* Debug */,
+				DDB7507E2A9D3DE000526F05 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		FB1A67682132419A00507771 /* Build configuration list for PBXNativeTarget "Moonlight TV" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -1424,7 +1622,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		FB290CE919B2C406004C83CF /* Build configuration list for PBXProject "Moonlight" */ = {
+		FB290CE919B2C406004C83CF /* Build configuration list for PBXProject "Moonlight macOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FB290D1E19B2C406004C83CF /* Debug */,

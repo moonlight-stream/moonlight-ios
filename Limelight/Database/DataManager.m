@@ -108,6 +108,46 @@
     }];
 }
 
+#if TARGET_OS_TV
+
+- (NSDictionary *)dictionaryFromApp:(App *)app {
+    return @{@"hostUUID": app.host.uuid, @"hostName": app.host.name, @"name": app.name, @"id": app.id };
+}
+
+- (void)moveAppUpInList:(NSString *)appId {
+    NSUserDefaults *sharedDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.MoonlightTV"];
+    NSString *json = [sharedDefaults objectForKey:@"appList"];
+    NSArray *apps = [NSJSONSerialization JSONObjectWithData:[json dataUsingEncoding:NSUTF8StringEncoding] options:0 error:nil];
+    
+    NSMutableArray *newList = [NSMutableArray arrayWithArray:apps];
+    
+    __block NSUInteger targetIndex = NSNotFound;
+    __block NSUInteger firstIndexForHostApps = NSNotFound;
+    __block NSString *hostUUID = nil;
+
+    [newList enumerateObjectsUsingBlock:^(NSDictionary *app, NSUInteger idx, BOOL * _Nonnull stop) {
+        if ([app[@"id"] isEqualToString:appId]) {
+            targetIndex = idx;
+            hostUUID = app[@"hostUUID"];
+        }
+    }];
+
+    [newList enumerateObjectsUsingBlock:^(NSDictionary *app, NSUInteger idx, BOOL * _Nonnull stop) {
+        if ([app[@"hostUUID"] isEqualToString:hostUUID] && firstIndexForHostApps == NSNotFound) {
+            firstIndexForHostApps = idx;
+        }
+    }];
+    
+    if (targetIndex != NSNotFound && firstIndexForHostApps != NSNotFound) {
+            // Move target app to the first position within the host's apps
+            NSDictionary *targetApp = newList[targetIndex];
+            [newList removeObjectAtIndex:targetIndex];
+            [newList insertObject:targetApp atIndex:firstIndexForHostApps];
+    }
+        
+}
+#endif
+
 - (void) updateAppsForExistingHost:(TemporaryHost *)host {
     [_managedObjectContext performBlockAndWait:^{
         Host* parent = [self getHostForTemporaryHost:host withHostRecords:[self fetchRecords:@"Host"]];
@@ -177,6 +217,8 @@
         if (managedHost != nil) {
             [self->_managedObjectContext deleteObject:managedHost];
             [self saveData];
+            
+            
         }
     }];
 }
@@ -186,8 +228,73 @@
     if ([_managedObjectContext hasChanges] && ![_managedObjectContext save:&error]) {
         Log(LOG_E, @"Unable to save hosts to database: %@", error);
     }
-
     [_appDelegate saveContext];
+    
+
+#if TARGET_OS_TV
+    // Save hosts/apps for Top Shelf
+    NSArray *hosts = [self fetchRecords:@"Host"];
+    NSUserDefaults *sharedDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.MoonlightTV"];
+    NSString *existingJson = [sharedDefaults objectForKey:@"appList"];
+
+    NSArray *existingApps;
+    if (existingJson != nil) {
+        existingApps = [NSJSONSerialization JSONObjectWithData:[existingJson dataUsingEncoding:NSUTF8StringEncoding] options:0 error:nil];
+    } else {
+        existingApps = [NSArray array];
+    }
+
+    NSMutableArray *mutableExistingApps = [existingApps mutableCopy];
+    NSMutableSet *currentHostUUIDs = [NSMutableSet set];
+
+    for (Host* host in hosts) {
+        
+        [currentHostUUIDs addObject:host.uuid];
+        
+        if ([host.appList count]>0) {
+            NSMutableDictionary *hostAppMap = [NSMutableDictionary dictionary];
+            for (NSDictionary *app in existingApps) {
+                hostAppMap[app[@"hostUUID"]] = app;
+            }
+            
+            NSMutableSet *currentAppIds = [NSMutableSet set];
+            
+            for (App *app in host.appList) {
+                [currentAppIds addObject:app.id];
+                NSDictionary *newAppDict = [self dictionaryFromApp:app];
+                NSUInteger existingIndex = [mutableExistingApps indexOfObjectPassingTest:^BOOL(NSDictionary *dict, NSUInteger idx, BOOL *stop) {
+                    return [dict[@"id"] isEqualToString:app.id];
+                }];
+                
+                if (existingIndex != NSNotFound) {
+                    mutableExistingApps[existingIndex] = newAppDict;
+                } else {
+                    [mutableExistingApps addObject:newAppDict];
+                }
+            }
+                        
+            // Removing apps not in source list for this host
+            NSIndexSet *indexesToDelete = [mutableExistingApps indexesOfObjectsPassingTest:^BOOL(NSDictionary *dict, NSUInteger idx, BOOL *stop) {
+                return ![currentAppIds containsObject:dict[@"id"]] && [dict[@"hostUUID"] isEqualToString:host.uuid];
+            }];
+            [mutableExistingApps removeObjectsAtIndexes:indexesToDelete];
+        }
+    }
+    
+    // Remove apps belonging to hosts that are no longer there
+    NSIndexSet *indexesToDelete = [mutableExistingApps indexesOfObjectsPassingTest:^BOOL(NSDictionary *dict, NSUInteger idx, BOOL *stop) {
+        return ![currentHostUUIDs containsObject:dict[@"hostUUID"]];
+    }];
+    [mutableExistingApps removeObjectsAtIndexes:indexesToDelete];
+
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:mutableExistingApps options:0 error:&error];
+    if (jsonData) {
+        NSString *jsonStr = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+        [sharedDefaults setObject:jsonStr forKey:@"appList"];
+        [sharedDefaults synchronize];
+    }
+
+#endif
 }
 
 - (NSArray*) getHosts {
