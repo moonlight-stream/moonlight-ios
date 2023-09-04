@@ -41,19 +41,20 @@ func urlForImage(named name: String) -> URL? {
 }
 
 func urlForCachedImage(uuid: String, appId: String) -> URL? {
-    let appGroupIdentifier = "group.MoonlightTV"
-       let url = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier)
+  let appGroupIdentifier = "group.MoonlightTV"
+  let url = FileManager.default.containerURL(
+    forSecurityApplicationGroupIdentifier: appGroupIdentifier)
 
-    var cachesURL = url!.appendingPathComponent("Library", isDirectory: true).appendingPathComponent("Caches", isDirectory: true)
-    let imageName = "\(uuid)-\(appId)"
-    cachesURL = cachesURL.appendingPathComponent(imageName).appendingPathExtension("png")
-    
+  var cachesURL = url!.appendingPathComponent("Library", isDirectory: true).appendingPathComponent(
+    "Caches", isDirectory: true)
+  let imageName = "\(uuid)-\(appId)"
+  cachesURL = cachesURL.appendingPathComponent(imageName).appendingPathExtension("png")
 
-    if FileManager.default.fileExists(atPath: cachesURL.path) {
-        return cachesURL
-    }
-    
-    return nil
+  if FileManager.default.fileExists(atPath: cachesURL.path) {
+    return cachesURL
+  }
+
+  return nil
 }
 
 class ContentProvider: TVTopShelfContentProvider {
@@ -78,13 +79,15 @@ class ContentProvider: TVTopShelfContentProvider {
               let item = TVTopShelfSectionedItem(identifier: appId)
               item.title = appDict["name"] as? String
 
-                item.setImageURL(urlForImage(named: "NoAppImage"), for: [.screenScale1x, .screenScale2x])
-            if let cachedImageURL = urlForCachedImage(uuid: hostUUID, appId: appId) {
-                      item.setImageURL(cachedImageURL, for: [.screenScale1x, .screenScale2x])
-                    } else {
-                      item.setImageURL(urlForImage(named: "NoAppImage"), for: [.screenScale1x, .screenScale2x])
-                    }
-                
+              item.setImageURL(
+                urlForImage(named: "NoAppImage"), for: [.screenScale1x, .screenScale2x])
+              if let cachedImageURL = urlForCachedImage(uuid: hostUUID, appId: appId) {
+                item.setImageURL(cachedImageURL, for: [.screenScale1x, .screenScale2x])
+              } else {
+                item.setImageURL(
+                  urlForImage(named: "NoAppImage"), for: [.screenScale1x, .screenScale2x])
+              }
+
               if hostSections[hostName] == nil {
                 hostSections[hostName] = []
               }
