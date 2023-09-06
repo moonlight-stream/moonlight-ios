@@ -149,7 +149,6 @@
         NSString *jsonStr = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
         [sharedDefaults setObject:jsonStr forKey:@"appList"];
         [sharedDefaults synchronize];
-    }        
 }
 #endif
 
