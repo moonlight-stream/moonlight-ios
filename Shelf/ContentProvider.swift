@@ -42,25 +42,28 @@ func urlForImage(named name: String) -> URL? {
 
 func urlForCachedImage(uuid: String, appId: String) -> URL? {
   let appGroupIdentifier = "group.MoonlightTV"
-  let url = FileManager.default.containerURL(
-    forSecurityApplicationGroupIdentifier: appGroupIdentifier)
-
-  var cachesURL = url!.appendingPathComponent("Library", isDirectory: true).appendingPathComponent(
-    "Caches", isDirectory: true)
   let imageName = "\(uuid)-\(appId)"
-  cachesURL = cachesURL.appendingPathComponent(imageName).appendingPathExtension("png")
 
-  if FileManager.default.fileExists(atPath: cachesURL.path) {
-    return cachesURL
+  guard
+    let url = FileManager.default.containerURL(
+      forSecurityApplicationGroupIdentifier: appGroupIdentifier)
+  else {
+    return nil
   }
 
-  return nil
+  let cachesURL =
+    url
+    .appendingPathComponent("Library", isDirectory: true)
+    .appendingPathComponent("Caches", isDirectory: true)
+    .appendingPathComponent(imageName)
+    .appendingPathExtension("png")
+
+  return FileManager.default.fileExists(atPath: cachesURL.path) ? cachesURL : nil
 }
 
 class ContentProvider: TVTopShelfContentProvider {
 
   override func loadTopShelfContent(completionHandler: @escaping (TVTopShelfContent?) -> Void) {
-
     var hostSections: [String: [TVTopShelfSectionedItem]] = [:]
 
     if let sharedDefaults = UserDefaults(suiteName: "group.MoonlightTV"),
@@ -79,44 +82,42 @@ class ContentProvider: TVTopShelfContentProvider {
               let item = TVTopShelfSectionedItem(identifier: appId)
               item.title = appDict["name"] as? String
 
-              item.setImageURL(
-                urlForImage(named: "NoAppImage"), for: [.screenScale1x, .screenScale2x])
+              let defaultImageURL = urlForImage(named: "NoAppImage")
+              item.setImageURL(defaultImageURL, for: [.screenScale1x, .screenScale2x])
+
               if let cachedImageURL = urlForCachedImage(uuid: hostUUID, appId: appId) {
                 item.setImageURL(cachedImageURL, for: [.screenScale1x, .screenScale2x])
-              } else {
-                item.setImageURL(
-                  urlForImage(named: "NoAppImage"), for: [.screenScale1x, .screenScale2x])
               }
 
-              if hostSections[hostName] == nil {
-                hostSections[hostName] = []
+              hostSections[hostName, default: []].append(item)
+
+              if let actionURL = URL(string: "moonlight://appClicked?app=\(appId)&UUID=\(hostUUID)")
+              {
+                let action = TVTopShelfAction(url: actionURL)
+                item.playAction = action
+                item.displayAction = action
               }
-
-              hostSections[hostName]?.append(item)
-
-              let action = TVTopShelfAction(
-                url: URL(
-                  string: "moonlight://appClicked?app=\(appId)&UUID=\(hostUUID)")!)
-              item.playAction = action
-              item.displayAction = action
             }
           }
         }
+        var sectionedItemCollections: [TVTopShelfItemCollection<TVTopShelfSectionedItem>] = []
+
+        for (hostName, items) in hostSections {
+          let itemCollection = TVTopShelfItemCollection<TVTopShelfSectionedItem>(items: items)
+          itemCollection.title = "Moonlight: \(hostName)"
+          sectionedItemCollections.append(itemCollection)
+        }
+
+        let sectionedContent = TVTopShelfSectionedContent(sections: sectionedItemCollections)
+        completionHandler(sectionedContent)
+
       } catch {
         print("appList deserialization failed: \(error)")
+        completionHandler(nil)
       }
+    } else {
+      completionHandler(nil)
     }
 
-    var sectionedItemCollections: [TVTopShelfItemCollection<TVTopShelfSectionedItem>] = []
-
-    for (hostName, items) in hostSections {
-      let itemCollection = TVTopShelfItemCollection<TVTopShelfSectionedItem>(items: items)
-      itemCollection.title = "Moonlight: \(hostName)"
-      sectionedItemCollections.append(itemCollection)
-    }
-
-    let sectionedContent = TVTopShelfSectionedContent(sections: sectionedItemCollections)
-
-    completionHandler(sectionedContent)
   }
 }

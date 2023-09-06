@@ -144,7 +144,12 @@
             [newList removeObjectAtIndex:targetIndex];
             [newList insertObject:targetApp atIndex:firstIndexForHostApps];
     }
-        
+    
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:newList options:0 error:nil];
+        NSString *jsonStr = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+        [sharedDefaults setObject:jsonStr forKey:@"appList"];
+        [sharedDefaults synchronize];
+    }        
 }
 #endif
 
