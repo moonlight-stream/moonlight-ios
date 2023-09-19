@@ -47,7 +47,7 @@ static VideoDecoderRenderer* renderer;
 
 int DrDecoderSetup(int videoFormat, int width, int height, int redrawRate, void* context, int drFlags)
 {
-    [renderer setupWithVideoFormat:videoFormat frameRate:redrawRate];
+    [renderer setupWithVideoFormat:videoFormat width:width height:height frameRate:redrawRate];
     lastFrameNumber = 0;
     activeVideoFormat = videoFormat;
     memset(&currentVideoStats, 0, sizeof(currentVideoStats));
@@ -94,6 +94,15 @@ void DrStop(void)
             }
             else {
                 return @"HEVC Main 10 SDR";
+            }
+        case VIDEO_FORMAT_AV1_MAIN8:
+            return @"AV1";
+        case VIDEO_FORMAT_AV1_MAIN10:
+            if (LiGetCurrentHostDisplayHdrMode()) {
+                return @"AV1 10-bit HDR";
+            }
+            else {
+                return @"AV1 10-bit SDR";
             }
         default:
             return @"UNKNOWN";
