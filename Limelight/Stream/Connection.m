@@ -358,19 +358,19 @@ void ClSetMotionEventState(uint16_t controllerNumber, uint8_t motionType, uint16
     NSString *rawAddress = [Utils addressPortStringToAddress:config.host];
     strncpy(_hostString,
             [rawAddress cStringUsingEncoding:NSUTF8StringEncoding],
-            sizeof(_hostString));
+            sizeof(_hostString) - 1);
     strncpy(_appVersionString,
             [config.appVersion cStringUsingEncoding:NSUTF8StringEncoding],
-            sizeof(_appVersionString));
+            sizeof(_appVersionString) - 1);
     if (config.gfeVersion != nil) {
         strncpy(_gfeVersionString,
                 [config.gfeVersion cStringUsingEncoding:NSUTF8StringEncoding],
-                sizeof(_gfeVersionString));
+                sizeof(_gfeVersionString) - 1);
     }
     if (config.rtspSessionUrl != nil) {
         strncpy(_rtspSessionUrl,
                 [config.rtspSessionUrl cStringUsingEncoding:NSUTF8StringEncoding],
-                sizeof(_rtspSessionUrl));
+                sizeof(_rtspSessionUrl) - 1);
     }
 
     LiInitializeServerInformation(&_serverInfo);
@@ -382,6 +382,7 @@ void ClSetMotionEventState(uint16_t controllerNumber, uint8_t motionType, uint16
     if (config.rtspSessionUrl != nil) {
         _serverInfo.rtspSessionUrl = _rtspSessionUrl;
     }
+    _serverInfo.serverCodecModeSupport = config.serverCodecModeSupport;
 
     renderer = myRenderer;
     _callbacks = callbacks;
@@ -391,17 +392,18 @@ void ClSetMotionEventState(uint16_t controllerNumber, uint8_t motionType, uint16
     _streamConfig.height = config.height;
     _streamConfig.fps = config.frameRate;
     _streamConfig.bitrate = config.bitRate;
-    _streamConfig.enableHdr = config.enableHdr;
+    _streamConfig.supportedVideoFormats = config.supportedVideoFormats;
     _streamConfig.audioConfiguration = config.audioConfiguration;
     
     // TODO: If/when video encryption is added, we'll probably want to
     // limit that to devices that support the ARMv8 AES instructions.
     _streamConfig.encryptionFlags = ENCFLG_AUDIO;
     
-    // Use some of the HEVC encoding efficiency improvements to
+    // Use some of the encoding efficiency improvements to
     // reduce bandwidth usage while still gaining some image
     // quality improvement.
     _streamConfig.hevcBitratePercentageMultiplier = 75;
+    _streamConfig.av1BitratePercentageMultiplier = 65;
     
     if ([Utils isActiveNetworkVPN]) {
         // Force remote streaming mode when a VPN is connected
@@ -413,30 +415,6 @@ void ClSetMotionEventState(uint16_t controllerNumber, uint8_t motionType, uint16
         _streamConfig.streamingRemotely = STREAM_CFG_AUTO;
         _streamConfig.packetSize = 1392;
     }
-    
-    // HDR implies HEVC allowed
-    if (config.enableHdr) {
-        config.allowHevc = YES;
-    }
-    
-    // Streaming at resolutions above 4K requires HEVC
-    if (config.width > 4096 || config.height > 4096) {
-        config.allowHevc = YES;
-    }
-
-    // On iOS 11, we can use HEVC if the server supports encoding it
-    // and this device has hardware decode for it (A9 and later).
-    // Additionally, iPhone X had a bug which would cause video
-    // to freeze after a few minutes with HEVC prior to iOS 11.3.
-    // As a result, we will only use HEVC on iOS 11.3 or later.
-    if (@available(iOS 11.3, tvOS 11.3, *)) {
-        _streamConfig.supportsHevc =
-            config.allowHevc &&
-            VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC);
-    }
-    
-    // HEVC must be supported when HDR is enabled
-    assert(!_streamConfig.enableHdr || _streamConfig.supportsHevc);
 
     memcpy(_streamConfig.remoteInputAesKey, [config.riKey bytes], [config.riKey length]);
     memset(_streamConfig.remoteInputAesIv, 0, 16);
