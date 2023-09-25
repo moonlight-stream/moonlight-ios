@@ -285,6 +285,7 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
         // No frame data to submit for these NALUs
         return DR_OK;
     }
+#if defined(__IPHONE_16_0) || defined(__TVOS_16_0)
     else if ((videoFormat & VIDEO_FORMAT_MASK_AV1) && frameType == FRAME_TYPE_IDR) {
         // AV1 doesn't have a special format description function like H.264 and HEVC have, so we just use the generic one
         // TODO: Is this correct?
@@ -294,6 +295,7 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
             formatDesc = NULL;
         }
     }
+#endif
     
     if (formatDesc == NULL) {
         // Can't decode if we haven't gotten our parameter sets yet
