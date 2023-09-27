@@ -155,8 +155,8 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
                             LiSendControllerMotionEvent((uint8_t)controllerNumber,
                                                         LI_MOTION_TYPE_GYRO,
                                                         gyroSample.x * 57.2957795f,
-                                                        gyroSample.y * 57.2957795f,
-                                                        gyroSample.z * 57.2957795f);
+                                                        gyroSample.z * 57.2957795f,
+                                                        gyroSample.y * -57.2957795f);
                         }];
                     });
                 }
