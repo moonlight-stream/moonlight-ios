@@ -124,9 +124,9 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
                             // Convert g to m/s^2
                             LiSendControllerMotionEvent((uint8_t)controllerNumber,
                                                         LI_MOTION_TYPE_ACCEL,
-                                                        accelSample.x * 9.80665f,
-                                                        accelSample.y * 9.80665f,
-                                                        accelSample.z * 9.80665f);
+                                                        accelSample.x * -9.80665f,
+                                                        accelSample.y * -9.80665f,
+                                                        accelSample.z * -9.80665f);
                         }];
                     });
                 }
@@ -359,15 +359,12 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
         if (controller.extendedGamepad != NULL) {
             // Re-enable system gestures on the gamepad buttons now
             if (@available(iOS 14.0, tvOS 14.0, *)) {
-                for (GCControllerElement* element in controller.extendedGamepad.allElements) {
+                for (GCControllerElement* element in controller.physicalInputProfile.allElements) {
                     element.preferredSystemGestureState = GCSystemGestureStateEnabled;
                 }
             }
             
             controller.extendedGamepad.valueChangedHandler = NULL;
-        }
-        else if (controller.gamepad != NULL) {
-            controller.gamepad.valueChangedHandler = NULL;
         }
     }
 }
@@ -457,50 +454,42 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     }
     
     if (@available(iOS 14.0, tvOS 14.0, *)) {
+        // Xbox One/Series controller
+        if (controller.physicalInputProfile.buttons[GCInputXboxPaddleOne]) {
+            supportedButtonFlags |= PADDLE1_FLAG;
+        }
+        if (controller.physicalInputProfile.buttons[GCInputXboxPaddleTwo]) {
+            supportedButtonFlags |= PADDLE2_FLAG;
+        }
+        if (controller.physicalInputProfile.buttons[GCInputXboxPaddleThree]) {
+            supportedButtonFlags |= PADDLE3_FLAG;
+        }
+        if (controller.physicalInputProfile.buttons[GCInputXboxPaddleFour]) {
+            supportedButtonFlags |= PADDLE4_FLAG;
+        }
+        if (@available(iOS 15.0, tvOS 15.0, *)) {
+            if (controller.physicalInputProfile.buttons[GCInputButtonShare]) {
+                supportedButtonFlags |= MISC_FLAG;
+            }
+        }
+        
+        // DualShock/DualSense controller
+        if (controller.physicalInputProfile.buttons[GCInputDualShockTouchpadButton]) {
+            supportedButtonFlags |= TOUCHPAD_FLAG;
+        }
+        if (controller.physicalInputProfile.dpads[GCInputDualShockTouchpadOne]) {
+            capabilities |= LI_CCAP_TOUCHPAD;
+        }
+        
         if ([controller.extendedGamepad isKindOfClass:[GCXboxGamepad class]]) {
-            GCXboxGamepad* xboxGamepad = (GCXboxGamepad*)controller.extendedGamepad;
-            
-            if (xboxGamepad.paddleButton1) {
-                supportedButtonFlags |= PADDLE1_FLAG;
-            }
-            if (xboxGamepad.paddleButton2) {
-                supportedButtonFlags |= PADDLE2_FLAG;
-            }
-            if (xboxGamepad.paddleButton3) {
-                supportedButtonFlags |= PADDLE3_FLAG;
-            }
-            if (xboxGamepad.paddleButton4) {
-                supportedButtonFlags |= PADDLE4_FLAG;
-            }
-            
-            if (@available(iOS 15.0, tvOS 15.0, *)) {
-                if (xboxGamepad.buttonShare) {
-                    supportedButtonFlags |= MISC_FLAG;
-                }
-            }
-            
             type = LI_CTYPE_XBOX;
         }
         else if ([controller.extendedGamepad isKindOfClass:[GCDualShockGamepad class]]) {
-            GCDualShockGamepad* dualShockGamepad = (GCDualShockGamepad*)controller.extendedGamepad;
-            
-            if (dualShockGamepad.touchpadButton) {
-                supportedButtonFlags |= TOUCHPAD_FLAG;
-                capabilities |= LI_CCAP_TOUCHPAD;
-            }
-
             type = LI_CTYPE_PS;
         }
         
         if (@available(iOS 14.5, tvOS 14.5, *)) {
             if ([controller.extendedGamepad isKindOfClass:[GCDualSenseGamepad class]]) {
-                GCDualSenseGamepad* dualSenseGamepad = (GCDualSenseGamepad*)controller.extendedGamepad;
-                
-                if (dualSenseGamepad.touchpadButton) {
-                    supportedButtonFlags |= TOUCHPAD_FLAG;
-                    capabilities |= LI_CCAP_TOUCHPAD;
-                }
-                
                 type = LI_CTYPE_PS;
             }
         }
@@ -529,50 +518,43 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     }
 }
 
--(void) handleControllerTouchpad:(Controller*)controller primaryTouch:(GCControllerDirectionPad*)primaryTouch secondaryTouch:(GCControllerDirectionPad*)secondaryTouch
+-(void) handleControllerTouchpad:(Controller*)controller touch:(GCControllerDirectionPad*)touch index:(int)index
 {
-    // If we went from a touch to no touch, generate a touch up event
-    if ((controller.lastPrimaryTouchX || controller.lastPrimaryTouchY) && (!primaryTouch.xAxis.value && !primaryTouch.yAxis.value)) {
-        LiSendControllerTouchEvent(controller.playerIndex, LI_TOUCH_EVENT_UP, 0,
-                                   primaryTouch.xAxis.value, primaryTouch.yAxis.value, 1.0f);
-    }
-    else if (primaryTouch.xAxis.value || primaryTouch.yAxis.value) {
-        // If we went from no touch to a touch, generate a touch down event
-        if (!controller.lastPrimaryTouchX && !controller.lastPrimaryTouchY) {
-            LiSendControllerTouchEvent(controller.playerIndex, LI_TOUCH_EVENT_DOWN, 0,
-                                       primaryTouch.xAxis.value, primaryTouch.yAxis.value, 1.0f);
-        }
-        else if (controller.lastPrimaryTouchX != primaryTouch.xAxis.value ||
-                 controller.lastPrimaryTouchY != primaryTouch.yAxis.value) {
-            // Otherwise it's just a move
-            LiSendControllerTouchEvent(controller.playerIndex, LI_TOUCH_EVENT_MOVE, 0,
-                                       primaryTouch.xAxis.value, primaryTouch.yAxis.value, 1.0f);
-        }
-    }
-    controller.lastPrimaryTouchX = primaryTouch.xAxis.value;
-    controller.lastPrimaryTouchY = primaryTouch.yAxis.value;
+    controller_touch_context_t context = index == 0 ? controller.primaryTouch : controller.secondaryTouch;
     
+    // This magic is courtesy of SDL
+    float normalizedX = (1.0f + touch.xAxis.value) * 0.5f;
+    float normalizedY = 1.0f - (1.0f + touch.yAxis.value) * 0.5f;
     
     // If we went from a touch to no touch, generate a touch up event
-    if ((controller.lastSecondaryTouchX || controller.lastSecondaryTouchY) && (!secondaryTouch.xAxis.value && !secondaryTouch.yAxis.value)) {
-        LiSendControllerTouchEvent(controller.playerIndex, LI_TOUCH_EVENT_UP, 1,
-                                   secondaryTouch.xAxis.value, secondaryTouch.yAxis.value, 1.0f);
+    if ((context.lastX || context.lastY) && (!touch.xAxis.value && !touch.yAxis.value)) {
+        LiSendControllerTouchEvent(controller.playerIndex, LI_TOUCH_EVENT_UP, index, normalizedX, normalizedY, 1.0f);
     }
-    else if (secondaryTouch.xAxis.value || secondaryTouch.yAxis.value) {
+    else if (touch.xAxis.value || touch.yAxis.value) {
         // If we went from no touch to a touch, generate a touch down event
-        if (!controller.lastSecondaryTouchX && !controller.lastSecondaryTouchY) {
-            LiSendControllerTouchEvent(controller.playerIndex, LI_TOUCH_EVENT_DOWN, 1,
-                                       secondaryTouch.xAxis.value, secondaryTouch.yAxis.value, 1.0f);
+        if (!context.lastX && !context.lastY) {
+            LiSendControllerTouchEvent(controller.playerIndex, LI_TOUCH_EVENT_DOWN, index, normalizedX, normalizedY, 1.0f);
         }
-        else if (controller.lastSecondaryTouchX != secondaryTouch.xAxis.value ||
-                 controller.lastSecondaryTouchY != secondaryTouch.yAxis.value) {
+        else if (context.lastX != touch.xAxis.value || context.lastY != touch.yAxis.value) {
             // Otherwise it's just a move
-            LiSendControllerTouchEvent(controller.playerIndex, LI_TOUCH_EVENT_MOVE, 1,
-                                       secondaryTouch.xAxis.value, secondaryTouch.yAxis.value, 1.0f);
+            LiSendControllerTouchEvent(controller.playerIndex, LI_TOUCH_EVENT_MOVE, index, normalizedX, normalizedY, 1.0f);
         }
     }
-    controller.lastSecondaryTouchX = secondaryTouch.xAxis.value;
-    controller.lastSecondaryTouchY = secondaryTouch.yAxis.value;
+    
+    // We have to assign the whole struct because this is a property rather than a standard
+    // field that we could modify through a pointer.
+    if (index == 0) {
+        controller.primaryTouch = (controller_touch_context_t) {
+            touch.xAxis.value,
+            touch.yAxis.value
+        };
+    }
+    else {
+        controller.secondaryTouch = (controller_touch_context_t) {
+            touch.xAxis.value,
+            touch.yAxis.value
+        };
+    }
 }
 
 -(void) registerControllerCallbacks:(GCController*) controller
@@ -614,7 +596,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
             // Disable system gestures on the gamepad to avoid interfering
             // with in-game controller actions
             if (@available(iOS 14.0, tvOS 14.0, *)) {
-                for (GCControllerElement* element in controller.extendedGamepad.allElements) {
+                for (GCControllerElement* element in controller.physicalInputProfile.allElements) {
                     element.preferredSystemGestureState = GCSystemGestureStateDisabled;
                 }
             }
@@ -673,53 +655,38 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
                         UPDATE_BUTTON_FLAG(limeController, SPECIAL_FLAG, gamepad.buttonHome.pressed);
                     }
                     
-                    // iOS 14 adds specific profiles for DualShock and Xbox gamepads with additional buttons
-                    if ([gamepad isKindOfClass:[GCXboxGamepad class]]) {
-                        GCXboxGamepad* xboxGamepad = (GCXboxGamepad*)gamepad;
-                        
-                        if (xboxGamepad.paddleButton1) {
-                            UPDATE_BUTTON_FLAG(limeController, PADDLE1_FLAG, xboxGamepad.paddleButton1.pressed);
-                        }
-                        if (xboxGamepad.paddleButton2) {
-                            UPDATE_BUTTON_FLAG(limeController, PADDLE2_FLAG, xboxGamepad.paddleButton2.pressed);
-                        }
-                        if (xboxGamepad.paddleButton3) {
-                            UPDATE_BUTTON_FLAG(limeController, PADDLE3_FLAG, xboxGamepad.paddleButton3.pressed);
-                        }
-                        if (xboxGamepad.paddleButton4) {
-                            UPDATE_BUTTON_FLAG(limeController, PADDLE4_FLAG, xboxGamepad.paddleButton4.pressed);
-                        }
-                        
-                        if (@available(iOS 15.0, tvOS 15.0, *)) {
-                            if (xboxGamepad.buttonShare) {
-                                UPDATE_BUTTON_FLAG(limeController, MISC_FLAG, xboxGamepad.buttonShare.pressed);
-                            }
-                        }
+                    // Xbox One/Series controllers
+                    if (gamepad.controller.physicalInputProfile.buttons[GCInputXboxPaddleOne]) {
+                        UPDATE_BUTTON_FLAG(limeController, PADDLE1_FLAG, gamepad.controller.physicalInputProfile.buttons[GCInputXboxPaddleOne].pressed);
                     }
-                    else if ([gamepad isKindOfClass:[GCDualShockGamepad class]]) {
-                        GCDualShockGamepad* dualShockGamepad = (GCDualShockGamepad*)gamepad;
-                        
-                        if (dualShockGamepad.touchpadButton) {
-                            UPDATE_BUTTON_FLAG(limeController, TOUCHPAD_FLAG, dualShockGamepad.touchpadButton.pressed);
+                    if (gamepad.controller.physicalInputProfile.buttons[GCInputXboxPaddleTwo]) {
+                        UPDATE_BUTTON_FLAG(limeController, PADDLE2_FLAG, gamepad.controller.physicalInputProfile.buttons[GCInputXboxPaddleTwo].pressed);
+                    }
+                    if (gamepad.controller.physicalInputProfile.buttons[GCInputXboxPaddleThree]) {
+                        UPDATE_BUTTON_FLAG(limeController, PADDLE3_FLAG, gamepad.controller.physicalInputProfile.buttons[GCInputXboxPaddleThree].pressed);
+                    }
+                    if (gamepad.controller.physicalInputProfile.buttons[GCInputXboxPaddleFour]) {
+                        UPDATE_BUTTON_FLAG(limeController, PADDLE4_FLAG, gamepad.controller.physicalInputProfile.buttons[GCInputXboxPaddleFour].pressed);
+                    }
+                    if (@available(iOS 15.0, tvOS 15.0, *)) {
+                        if (gamepad.controller.physicalInputProfile.buttons[GCInputButtonShare]) {
+                            UPDATE_BUTTON_FLAG(limeController, MISC_FLAG, gamepad.controller.physicalInputProfile.buttons[GCInputButtonShare].pressed);
                         }
-                        
-                        [self handleControllerTouchpad:limeController
-                                          primaryTouch:dualShockGamepad.touchpadPrimary
-                                        secondaryTouch:dualShockGamepad.touchpadSecondary];
                     }
                     
-                    if (@available(iOS 14.5, tvOS 14.5, *)) {
-                        if ([gamepad isKindOfClass:[GCDualSenseGamepad class]]) {
-                            GCDualSenseGamepad* dualSenseGamepad = (GCDualSenseGamepad*)gamepad;
-                            
-                            if (dualSenseGamepad.touchpadButton) {
-                                UPDATE_BUTTON_FLAG(limeController, TOUCHPAD_FLAG, dualSenseGamepad.touchpadButton.pressed);
-                            }
-                            
-                            [self handleControllerTouchpad:limeController
-                                              primaryTouch:dualSenseGamepad.touchpadPrimary
-                                            secondaryTouch:dualSenseGamepad.touchpadSecondary];
-                        }
+                    // DualShock/DualSense controllers
+                    if (gamepad.controller.physicalInputProfile.buttons[GCInputDualShockTouchpadButton]) {
+                        UPDATE_BUTTON_FLAG(limeController, TOUCHPAD_FLAG, gamepad.controller.physicalInputProfile.buttons[GCInputDualShockTouchpadButton].pressed);
+                    }
+                    if (gamepad.controller.physicalInputProfile.dpads[GCInputDualShockTouchpadOne]) {
+                        [self handleControllerTouchpad:limeController
+                                                 touch:gamepad.controller.physicalInputProfile.dpads[GCInputDualShockTouchpadOne]
+                                                 index:0];
+                    }
+                    if (gamepad.controller.physicalInputProfile.dpads[GCInputDualShockTouchpadTwo]) {
+                        [self handleControllerTouchpad:limeController
+                                                 touch:gamepad.controller.physicalInputProfile.dpads[GCInputDualShockTouchpadTwo]
+                                                 index:1];
                     }
                 }
                 
@@ -735,33 +702,6 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
                 [self updateLeftStick:limeController x:leftStickX y:leftStickY];
                 [self updateRightStick:limeController x:rightStickX y:rightStickY];
                 [self updateTriggers:limeController left:leftTrigger right:rightTrigger];
-                [self updateFinished:limeController];
-            };
-        }
-        else if (controller.gamepad != NULL) {
-            controller.gamepad.valueChangedHandler = ^(GCGamepad *gamepad, GCControllerElement *element) {
-                Controller* limeController = [self->_controllers objectForKey:[NSNumber numberWithInteger:gamepad.controller.playerIndex]];
-                if (self->_swapABXYButtons) {
-                    UPDATE_BUTTON_FLAG(limeController, B_FLAG, gamepad.buttonA.pressed);
-                    UPDATE_BUTTON_FLAG(limeController, A_FLAG, gamepad.buttonB.pressed);
-                    UPDATE_BUTTON_FLAG(limeController, Y_FLAG, gamepad.buttonX.pressed);
-                    UPDATE_BUTTON_FLAG(limeController, X_FLAG, gamepad.buttonY.pressed);
-                }
-                else {
-                    UPDATE_BUTTON_FLAG(limeController, A_FLAG, gamepad.buttonA.pressed);
-                    UPDATE_BUTTON_FLAG(limeController, B_FLAG, gamepad.buttonB.pressed);
-                    UPDATE_BUTTON_FLAG(limeController, X_FLAG, gamepad.buttonX.pressed);
-                    UPDATE_BUTTON_FLAG(limeController, Y_FLAG, gamepad.buttonY.pressed);
-                }
-                
-                UPDATE_BUTTON_FLAG(limeController, UP_FLAG, gamepad.dpad.up.pressed);
-                UPDATE_BUTTON_FLAG(limeController, DOWN_FLAG, gamepad.dpad.down.pressed);
-                UPDATE_BUTTON_FLAG(limeController, LEFT_FLAG, gamepad.dpad.left.pressed);
-                UPDATE_BUTTON_FLAG(limeController, RIGHT_FLAG, gamepad.dpad.right.pressed);
-                
-                UPDATE_BUTTON_FLAG(limeController, LB_FLAG, gamepad.leftShoulder.pressed);
-                UPDATE_BUTTON_FLAG(limeController, RB_FLAG, gamepad.rightShoulder.pressed);
-                
                 [self updateFinished:limeController];
             };
         }
@@ -888,10 +828,6 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
                 }
                 break;
             }
-            else if (controller.gamepad != NULL) {
-                level = OnScreenControlsLevelAutoGCGamepad;
-                break;
-            }
         }
     }
     
@@ -967,7 +903,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
 }
 
 +(bool) isSupportedGamepad:(GCController*) controller {
-    return controller.extendedGamepad != nil || controller.gamepad != nil;
+    return controller.extendedGamepad != nil;
 }
 
 #pragma clang diagnostic pop
