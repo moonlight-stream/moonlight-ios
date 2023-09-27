@@ -8,34 +8,17 @@
 
 #import "OnScreenControls.h"
 #import "StreamView.h"
-#import "ControllerSupport.h"
 #import "Controller.h"
 #include "Limelight.h"
+#import "OnScreenButtonState.h"
+#import "OSCProfilesManager.h"
+
 
 #define UPDATE_BUTTON(x, y) (buttonFlags = \
 (y) ? (buttonFlags | (x)) : (buttonFlags & ~(x)))
 
 @implementation OnScreenControls {
-    CALayer* _aButton;
-    CALayer* _bButton;
-    CALayer* _xButton;
-    CALayer* _yButton;
-    CALayer* _upButton;
-    CALayer* _downButton;
-    CALayer* _leftButton;
-    CALayer* _rightButton;
-    CALayer* _leftStickBackground;
-    CALayer* _leftStick;
-    CALayer* _rightStickBackground;
-    CALayer* _rightStick;
-    CALayer* _startButton;
-    CALayer* _selectButton;
-    CALayer* _r1Button;
-    CALayer* _r2Button;
-    CALayer* _r3Button;
-    CALayer* _l1Button;
-    CALayer* _l2Button;
-    CALayer* _l3Button;
+
     
     UITouch* _aTouch;
     UITouch* _bTouch;
@@ -62,25 +45,47 @@
     BOOL _iPad;
     CGRect _controlArea;
     UIView* _view;
-    OnScreenControlsLevel _level;
     BOOL _visible;
     
     ControllerSupport *_controllerSupport;
     Controller *_controller;
     NSMutableArray* _deadTouches;
     BOOL _swapABXY;
+    OSCProfilesManager *profilesManager;
 }
+
+@synthesize D_PAD_CENTER_X;
+@synthesize D_PAD_CENTER_Y;
+@synthesize _leftStickBackground;
+@synthesize _leftStick;
+@synthesize _rightStickBackground;
+@synthesize _rightStick;
+@synthesize _upButton;
+@synthesize _downButton;
+@synthesize _leftButton;
+@synthesize _rightButton;
+@synthesize _aButton;
+@synthesize _bButton;
+@synthesize _xButton;
+@synthesize _yButton;
+@synthesize _startButton;
+@synthesize _selectButton;
+@synthesize _r1Button;
+@synthesize _r2Button;
+@synthesize _r3Button;
+@synthesize _l1Button;
+@synthesize _l2Button;
+@synthesize _l3Button;
+@synthesize _level;
+@synthesize OSCButtonLayers;
+@synthesize _dPadBackground;
 
 static const float EDGE_WIDTH = .05;
 
 //static const float BUTTON_SIZE = 50;
-static const float BUTTON_DIST = 20;
 static float BUTTON_CENTER_X;
 static float BUTTON_CENTER_Y;
 
-static const float D_PAD_DIST = 10;
-static float D_PAD_CENTER_X;
-static float D_PAD_CENTER_Y;
 
 static const float DEAD_ZONE_PADDING = 15;
 
@@ -115,10 +120,19 @@ static float L3_Y;
 - (id) initWithView:(UIView*)view controllerSup:(ControllerSupport*)controllerSupport streamConfig:(StreamConfiguration*)streamConfig {
     self = [self init];
     _view = view;
-    _controllerSupport = controllerSupport;
+    
+    profilesManager = [OSCProfilesManager sharedManager];
+    
+    self.OSCButtonLayers = [[NSMutableArray alloc] init];
+
+    if (controllerSupport) {
+        _controllerSupport = controllerSupport;
+    }
     _controller = [controllerSupport getOscController];
     _deadTouches = [[NSMutableArray alloc] init];
-    _swapABXY = streamConfig.swapABXYButtons;
+    if (streamConfig) {
+        _swapABXY = streamConfig.swapABXYButtons;
+    }
     
     _iPad = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad);
     _controlArea = CGRectMake(0, 0, _view.frame.size.width, _view.frame.size.height);
@@ -133,7 +147,7 @@ static float L3_Y;
         _controlArea.origin.x = _controlArea.size.width * EDGE_WIDTH;
         _controlArea.size.width -= _controlArea.origin.x * 2;
     }
-    
+
     _aButton = [CALayer layer];
     _bButton = [CALayer layer];
     _xButton = [CALayer layer];
@@ -154,6 +168,49 @@ static float L3_Y;
     _rightStickBackground = [CALayer layer];
     _leftStick = [CALayer layer];
     _rightStick = [CALayer layer];
+        
+    [self.OSCButtonLayers addObject:_aButton];
+    [self.OSCButtonLayers addObject:_bButton];
+    [self.OSCButtonLayers addObject:_xButton];
+    [self.OSCButtonLayers addObject:_yButton];
+    [self.OSCButtonLayers addObject:_startButton];
+    [self.OSCButtonLayers addObject:_selectButton];
+    [self.OSCButtonLayers addObject:_r1Button];
+    [self.OSCButtonLayers addObject:_r2Button];
+    [self.OSCButtonLayers addObject:_r3Button];
+    [self.OSCButtonLayers addObject:_l1Button];
+    [self.OSCButtonLayers addObject:_l2Button];
+    [self.OSCButtonLayers addObject:_l3Button];
+    [self.OSCButtonLayers addObject:_upButton];
+    [self.OSCButtonLayers addObject:_downButton];
+    [self.OSCButtonLayers addObject:_leftButton];
+    [self.OSCButtonLayers addObject:_rightButton];
+    [self.OSCButtonLayers addObject:_leftStickBackground];
+    [self.OSCButtonLayers addObject:_rightStickBackground];
+    [self.OSCButtonLayers addObject:_leftStick];
+    [self.OSCButtonLayers addObject:_rightStick];
+
+    /* Name button layers to allow us to more easily associate them with 'OnScreenButtonState' objects by comparing their name properties */
+    _leftStickBackground.name = @"leftStickBackground";
+    _rightStickBackground.name = @"rightStickBackground";
+    _leftStick.name = @"leftStick";
+    _rightStick.name = @"rightStick";
+    _aButton.name = @"aButton";
+    _bButton.name = @"bButton";
+    _xButton.name = @"xButton";
+    _yButton.name = @"yButton";
+    _startButton.name = @"startButton";
+    _selectButton.name = @"selectButton";
+    _r1Button.name = @"r1Button";
+    _r2Button.name = @"r2Button";
+    _r3Button.name = @"r3Button";
+    _l1Button.name = @"l1Button";
+    _l2Button.name = @"l2Button";
+    _l3Button.name = @"l3Button";
+    _upButton.name = @"upButton";
+    _rightButton.name = @"rightButton";
+    _downButton.name = @"downButton";
+    _leftButton.name = @"leftButton";
     
     return self;
 }
@@ -179,7 +236,7 @@ static float L3_Y;
 }
 
 - (void) updateControls {
-    switch (_level) {
+    switch (self._level) {
         case OnScreenControlsLevelOff:
             [self hideButtons];
             [self hideBumpers];
@@ -224,8 +281,8 @@ static float L3_Y;
             [self hideSticks];
             break;
         case OnScreenControlsLevelSimple:
+                        
             [self setupSimpleControls];
-            
             [self hideTriggers];
             [self hideL3R3];
             [self hideBumpers];
@@ -234,14 +291,27 @@ static float L3_Y;
             [self drawButtons];
             break;
         case OnScreenControlsLevelFull:
-            [self setupComplexControls];
             
+            [self setupComplexControls];
             [self drawButtons];
             [self drawStartSelect];
             [self drawBumpers];
             [self drawTriggers];
             [self drawSticks];
             [self hideL3R3]; // Full controls don't need these they have the sticks
+            break;
+        case OnScreenControlsCustom:
+            
+            [self setupComplexControls];    // Default postion for D-Pad set here
+            [self setDPadCenter];    // Custom position for D-Pad set here
+            [self setAnalogStickPositions]; // Custom position for analog sticks set here
+            [self drawButtons];
+            [self drawStartSelect];
+            [self drawBumpers];
+            [self drawTriggers];
+            [self drawSticks];
+            [self positionOSCButtons];
+
             break;
         default:
             Log(LOG_W, @"Unknown on-screen controls level: %d", (int)_level);
@@ -408,25 +478,94 @@ static float L3_Y;
     UIImage* downButtonImage = [UIImage imageNamed:@"DownButton"];
     _downButton.frame = CGRectMake(D_PAD_CENTER_X - downButtonImage.size.width / 2, D_PAD_CENTER_Y + D_PAD_DIST, downButtonImage.size.width, downButtonImage.size.height);
     _downButton.contents = (id) downButtonImage.CGImage;
+    _downButton.frame = CGRectMake(D_PAD_CENTER_X - downButtonImage.size.width / 2, D_PAD_CENTER_Y + D_PAD_DIST, downButtonImage.size.width, downButtonImage.size.height);
     [_view.layer addSublayer:_downButton];
     
     // create Right button
     UIImage* rightButtonImage = [UIImage imageNamed:@"RightButton"];
     _rightButton.frame = CGRectMake(D_PAD_CENTER_X + D_PAD_DIST, D_PAD_CENTER_Y - rightButtonImage.size.height / 2, rightButtonImage.size.width, rightButtonImage.size.height);
     _rightButton.contents = (id) rightButtonImage.CGImage;
+    _rightButton.frame = CGRectMake(D_PAD_CENTER_X + D_PAD_DIST, D_PAD_CENTER_Y - rightButtonImage.size.height / 2, rightButtonImage.size.width, rightButtonImage.size.height);
     [_view.layer addSublayer:_rightButton];
     
     // create Up button
     UIImage* upButtonImage = [UIImage imageNamed:@"UpButton"];
     _upButton.frame = CGRectMake(D_PAD_CENTER_X - upButtonImage.size.width / 2, D_PAD_CENTER_Y - D_PAD_DIST - upButtonImage.size.height, upButtonImage.size.width, upButtonImage.size.height);
     _upButton.contents = (id) upButtonImage.CGImage;
+    _upButton.frame = CGRectMake(D_PAD_CENTER_X - upButtonImage.size.width / 2, D_PAD_CENTER_Y - D_PAD_DIST - upButtonImage.size.height, upButtonImage.size.width, upButtonImage.size.height);
     [_view.layer addSublayer:_upButton];
     
     // create Left button
     UIImage* leftButtonImage = [UIImage imageNamed:@"LeftButton"];
     _leftButton.frame = CGRectMake(D_PAD_CENTER_X - D_PAD_DIST - leftButtonImage.size.width, D_PAD_CENTER_Y - leftButtonImage.size.height / 2, leftButtonImage.size.width, leftButtonImage.size.height);
     _leftButton.contents = (id) leftButtonImage.CGImage;
+    _leftButton.frame = CGRectMake(D_PAD_CENTER_X - D_PAD_DIST - leftButtonImage.size.width, D_PAD_CENTER_Y - leftButtonImage.size.height / 2, leftButtonImage.size.width, leftButtonImage.size.height);
     [_view.layer addSublayer:_leftButton];
+}
+
+/**
+ * Sets D-Pad position for class const var
+ */
+- (void) setDPadCenter {
+    OSCProfile *oscProfile = [profilesManager getSelectedProfile]; //returns the currently selected OSCProfile
+    
+    for (NSData *buttonStateEncoded in oscProfile.buttonStates) {
+        OnScreenButtonState *buttonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateEncoded error:nil];
+            
+        if ([buttonState.name isEqualToString:@"dPad"]) {
+            D_PAD_CENTER_X = buttonState.position.x;
+            D_PAD_CENTER_Y = buttonState.position.y;
+        }
+    }
+}
+
+/**
+ * Sets analog stick positions for class const var
+ */
+- (void) setAnalogStickPositions {
+    OSCProfile *oscProfile = [profilesManager getSelectedProfile]; // returns the currently selected OSCProfile
+    
+    for (NSData *buttonStateEncoded in oscProfile.buttonStates) {
+        OnScreenButtonState *buttonState = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateEncoded error:nil];
+            
+        if ([buttonState.name isEqualToString:@"leftStickBackground"]) {
+            LS_CENTER_X = buttonState.position.x;
+            LS_CENTER_Y = buttonState.position.y;
+        }
+        if ([buttonState.name isEqualToString:@"rightStickBackground"]) {
+            RS_CENTER_X = buttonState.position.x;
+            RS_CENTER_Y = buttonState.position.y;
+        }
+    }
+}
+
+/**
+ * Loads the selected OSC profile and lays out each button associated with that profile onto the screen
+ */
+- (void) positionOSCButtons {
+    OSCProfile *oscProfile = [profilesManager getSelectedProfile];
+    
+    for (NSData *buttonStateEncoded in oscProfile.buttonStates) {
+        
+        OnScreenButtonState *buttonStateDecoded = [NSKeyedUnarchiver unarchivedObjectOfClass:[OnScreenButtonState class] fromData:buttonStateEncoded error:nil];
+        
+        for (CALayer *buttonLayer in self.OSCButtonLayers) {    // iterate through each button layer on screen and position and hide/unhide each according to the instructions of its associated 'buttonState'
+
+            if ([buttonLayer.name isEqualToString:buttonStateDecoded.name]) {
+                
+                if ([buttonLayer.name isEqualToString:@"upButton"] == NO &&
+                    [buttonLayer.name isEqualToString:@"rightButton"] == NO &&
+                    [buttonLayer.name isEqualToString:@"downButton"] == NO &&
+                    [buttonLayer.name isEqualToString:@"leftButton"] == NO &&
+                    [buttonLayer.name isEqualToString:@"leftStick"] == NO &&
+                    [buttonLayer.name isEqualToString:@"rightStick"] == NO) {   // Don't move these buttons since they've already been positioned correctly in the 'drawButtons' and 'drawSticks' methods called before this method is called. The 'buttonStateDecoded' object associated with these buttons contains positions relative to a parent CALayer which only exists on 'LayoutOnScreenControls'. These positions relative to the parent layers would translate incorrectly when placed on the game stream VC's 'view' layer
+                    
+                    buttonLayer.position = buttonStateDecoded.position;
+                }
+                buttonLayer.hidden = buttonStateDecoded.isHidden;
+            }
+        }
+    }
 }
 
 - (void) drawStartSelect {
@@ -981,5 +1120,6 @@ static float L3_Y;
             && touchLocation.y > deadZoneStartY && touchLocation.y < deadZoneEndY);
     
 }
+
 
 @end
