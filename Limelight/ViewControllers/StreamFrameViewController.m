@@ -538,6 +538,12 @@
     [_controllerSupport setMotionEventState:controllerNumber motionType:motionType reportRateHz:reportRateHz];
 }
 
+- (void) setControllerLed:(uint16_t)controllerNumber r:(uint8_t)r g:(uint8_t)g b:(uint8_t)b {
+    Log(LOG_I, @"Set controller LED on gamepad %d: l%02x%02x%02x", controllerNumber, r, g, b);
+    
+    [_controllerSupport setControllerLed:controllerNumber r:r g:g b:b];
+}
+
 - (void)connectionStatusUpdate:(int)status {
     Log(LOG_W, @"Connection status update: %d", status);
 

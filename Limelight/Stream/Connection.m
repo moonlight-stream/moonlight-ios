@@ -345,6 +345,11 @@ void ClSetMotionEventState(uint16_t controllerNumber, uint8_t motionType, uint16
     [_callbacks setMotionEventState:controllerNumber motionType:motionType reportRateHz:reportRateHz];
 }
 
+void ClSetControllerLED(uint16_t controllerNumber, uint8_t r, uint8_t g, uint8_t b)
+{
+    [_callbacks setControllerLed:controllerNumber r:r g:g b:b];
+}
+
 -(void) terminate
 {
     // Interrupt any action blocking LiStartConnection(). This is
@@ -467,6 +472,7 @@ void ClSetMotionEventState(uint16_t controllerNumber, uint8_t motionType, uint16
     _clCallbacks.setHdrMode = ClSetHdrMode;
     _clCallbacks.rumbleTriggers = ClRumbleTriggers;
     _clCallbacks.setMotionEventState = ClSetMotionEventState;
+    _clCallbacks.setControllerLED = ClSetControllerLED;
 
     return self;
 }

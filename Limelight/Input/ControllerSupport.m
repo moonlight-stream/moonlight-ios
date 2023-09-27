@@ -175,6 +175,23 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     }
 }
 
+-(void) setControllerLed:(uint16_t)controllerNumber r:(uint8_t)r g:(uint8_t)g b:(uint8_t)b {
+    if (@available(iOS 14.0, tvOS 14.0, *)) {
+        Controller* controller = [_controllers objectForKey:[NSNumber numberWithInteger:controllerNumber]];
+        if (controller == nil) {
+            // No connected controller for this player
+            return;
+        }
+        
+        if (controller.gamepad.light == nil) {
+            // No LED control supported for this controller
+            return;
+        }
+        
+        controller.gamepad.light.color = [[GCColor alloc] initWithRed:(r / 255.0f) green:(g / 255.0f) blue:(b / 255.0f)];
+    }
+}
+
 -(void) updateLeftStick:(Controller*)controller x:(short)x y:(short)y
 {
     @synchronized(controller) {
@@ -512,6 +529,11 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
             if (controller.motion.hasRotationRate) {
                 capabilities |= LI_CCAP_GYRO;
             }
+        }
+        
+        // Detect RGB LED support
+        if (controller.light) {
+            capabilities |= LI_CCAP_RGB_LED;
         }
         
         LiSendControllerArrivalEvent(controller.playerIndex, [self getActiveGamepadMask], type, supportedButtonFlags, capabilities);
