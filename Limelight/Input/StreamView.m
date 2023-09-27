@@ -105,6 +105,12 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         continuousMouseWheelRecognizer.allowedTouchTypes = @[@(UITouchTypeIndirectPointer)];
         [self addGestureRecognizer:continuousMouseWheelRecognizer];
     }
+    
+    if (@available(iOS 16.1, *)) {
+        UIHoverGestureRecognizer *stylusHoverRecognizer = [[UIHoverGestureRecognizer alloc] initWithTarget:self action:@selector(sendStylusHoverEvent:)];
+        stylusHoverRecognizer.allowedTouchTypes = @[@(UITouchTypePencil)];
+        [self addGestureRecognizer:stylusHoverRecognizer];
+    }
 #endif
     
     x1mouse = [[X1Mouse alloc] init];
@@ -166,6 +172,138 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     }
 }
 
+- (CGSize) getVideoAreaSize {
+    if (self.bounds.size.width > self.bounds.size.height * streamAspectRatio) {
+        return CGSizeMake(self.bounds.size.height * streamAspectRatio, self.bounds.size.height);
+    } else {
+        return CGSizeMake(self.bounds.size.width, self.bounds.size.width / streamAspectRatio);
+    }
+}
+
+- (CGPoint) adjustCoordinatesForVideoArea:(CGPoint)point {
+    // These are now relative to the StreamView, however we need to scale them
+    // further to make them relative to the actual video portion.
+    float x = point.x - self.bounds.origin.x;
+    float y = point.y - self.bounds.origin.y;
+    
+    // For some reason, we don't seem to always get to the bounds of the window
+    // so we'll subtract 1 pixel if we're to the left/below of the origin and
+    // and add 1 pixel if we're to the right/above. It should be imperceptible
+    // to the user but it will allow activation of gestures that require contact
+    // with the edge of the screen (like Aero Snap).
+    if (x < self.bounds.size.width / 2) {
+        x--;
+    }
+    else {
+        x++;
+    }
+    if (y < self.bounds.size.height / 2) {
+        y--;
+    }
+    else {
+        y++;
+    }
+    
+    // This logic mimics what iOS does with AVLayerVideoGravityResizeAspect
+    CGSize videoSize = [self getVideoAreaSize];
+    CGPoint videoOrigin = CGPointMake(self.bounds.size.width / 2 - videoSize.width / 2,
+                                      self.bounds.size.height / 2 - videoSize.height / 2);
+    
+    // Confine the cursor to the video region. We don't just discard events outside
+    // the region because we won't always get one exactly when the mouse leaves the region.
+    return CGPointMake(MIN(MAX(x, videoOrigin.x), videoOrigin.x + videoSize.width) - videoOrigin.x,
+                       MIN(MAX(y, videoOrigin.y), videoOrigin.y + videoSize.height) - videoOrigin.y);
+}
+
+#if !TARGET_OS_TV
+
+- (uint16_t)getRotationFromAzimuthAngle:(float)azimuthAngle {
+    // iOS reports azimuth of 0 when the stylus is pointing west, but Moonlight expects
+    // rotation of 0 to mean the stylus is pointing north. Rotate the azimuth angle
+    // clockwise by 90 degrees to convert from iOS to Moonlight rotation conventions.
+    int32_t rotationAngle = (azimuthAngle - M_PI_2) * (180.f / M_PI);
+    if (rotationAngle < 0) {
+        rotationAngle += 360;
+    }
+    return (uint16_t)rotationAngle;
+}
+
+- (uint8_t)getTiltFromAltitudeAngle:(float)altitudeAngle {
+    // iOS reports an altitude of 0 when the stylus is parallel to the touch surface,
+    // while Moonlight expects a tilt of 0 when the stylus is perpendicular to the surface.
+    // Subtract the tilt angle from 90 to convert from iOS to Moonlight tilt conventions.
+    uint8_t altitudeDegs = abs((int16_t)(altitudeAngle * (180.f / M_PI)));
+    return 90 - MIN(90, altitudeDegs);
+}
+
+- (void)sendStylusEvent:(UITouch*)event {
+    uint8_t type;
+    
+    switch (event.phase) {
+        case UITouchPhaseBegan:
+            type = LI_TOUCH_EVENT_DOWN;
+            break;
+        case UITouchPhaseMoved:
+            type = LI_TOUCH_EVENT_MOVE;
+            break;
+        case UITouchPhaseEnded:
+            type = LI_TOUCH_EVENT_UP;
+            break;
+        case UITouchPhaseCancelled:
+            type = LI_TOUCH_EVENT_CANCEL;
+            break;
+        default:
+            return;
+    }
+
+    CGPoint location = [self adjustCoordinatesForVideoArea:[event locationInView:self]];
+    CGSize videoSize = [self getVideoAreaSize];
+    
+    LiSendPenEvent(type, LI_TOOL_TYPE_PEN, 0, location.x / videoSize.width, location.y / videoSize.height,
+                   (event.force / event.maximumPossibleForce) / sin(event.altitudeAngle),
+                   0.0f, 0.0f,
+                   [self getRotationFromAzimuthAngle:[event azimuthAngleInView:self]],
+                   [self getTiltFromAltitudeAngle:event.altitudeAngle]);
+}
+
+- (void)sendStylusHoverEvent:(UIHoverGestureRecognizer*)gesture API_AVAILABLE(ios(13.0)) {
+    uint8_t type;
+    
+    switch (gesture.state) {
+        case UIGestureRecognizerStateBegan:
+        case UIGestureRecognizerStateChanged:
+            type = LI_TOUCH_EVENT_HOVER;
+            break;
+
+        case UIGestureRecognizerStateEnded:
+            type = LI_TOUCH_EVENT_HOVER_LEAVE;
+            break;
+
+        default:
+            return;
+    }
+
+    CGPoint location = [self adjustCoordinatesForVideoArea:[gesture locationInView:self]];
+    CGSize videoSize = [self getVideoAreaSize];
+    
+    float distance = 0.0f;
+    if (@available(iOS 16.1, *)) {
+        distance = gesture.zOffset;
+    }
+    
+    uint16_t rotationAngle = LI_ROT_UNKNOWN;
+    uint8_t tiltAngle = LI_TILT_UNKNOWN;
+    if (@available(iOS 16.4, *)) {
+        rotationAngle = [self getRotationFromAzimuthAngle:[gesture azimuthAngleInView:self]];
+        tiltAngle = [self getTiltFromAltitudeAngle:gesture.altitudeAngle];
+    }
+    
+    LiSendPenEvent(type, LI_TOOL_TYPE_PEN, 0, location.x / videoSize.width, location.y / videoSize.height,
+                   distance, 0.0f, 0.0f, rotationAngle, tiltAngle);
+}
+
+#endif
+
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     if ([self handleMouseButtonEvent:BUTTON_ACTION_PRESS
                           forTouches:touches
@@ -178,6 +316,17 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     
     // Notify of user interaction and start expiration timer
     [self startInteractionTimer];
+    
+#if !TARGET_OS_TV
+    if (@available(iOS 13.4, *)) {
+        for (UITouch* touch in touches) {
+            if (touch.type == UITouchTypePencil) {
+                [self sendStylusEvent:touch];
+                return;
+            }
+        }
+    }
+#endif
     
     if (![onScreenControls handleTouchDownEvent:touches]) {
         // We still inform the touch handler even if we're going trigger the
@@ -273,6 +422,13 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
 #if !TARGET_OS_TV
     if (@available(iOS 13.4, *)) {
+        for (UITouch* touch in touches) {
+            if (touch.type == UITouchTypePencil) {
+                [self sendStylusEvent:touch];
+                return;
+            }
+        }
+        
         UITouch *touch = [touches anyObject];
         if (touch.type == UITouchTypeIndirectPointer) {
             if (@available(iOS 14.0, *)) {
@@ -351,6 +507,17 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     
     hasUserInteracted = YES;
     
+#if !TARGET_OS_TV
+    if (@available(iOS 13.4, *)) {
+        for (UITouch* touch in touches) {
+            if (touch.type == UITouchTypePencil) {
+                [self sendStylusEvent:touch];
+                return;
+            }
+        }
+    }
+#endif
+    
     if (![onScreenControls handleTouchUpEvent:touches]) {
         [touchHandler touchesEnded:touches withEvent:event];
     }
@@ -361,48 +528,21 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     [self handleMouseButtonEvent:BUTTON_ACTION_RELEASE
                       forTouches:touches
                        withEvent:event];
+#if !TARGET_OS_TV
+    if (@available(iOS 13.4, *)) {
+        for (UITouch* touch in touches) {
+            if (touch.type == UITouchTypePencil) {
+                [self sendStylusEvent:touch];
+            }
+        }
+    }
+#endif
 }
 
 #if !TARGET_OS_TV
 - (void) updateCursorLocation:(CGPoint)location isMouse:(BOOL)isMouse {
-    // These are now relative to the StreamView, however we need to scale them
-    // further to make them relative to the actual video portion.
-    float x = location.x - self.bounds.origin.x;
-    float y = location.y - self.bounds.origin.y;
-    
-    // For some reason, we don't seem to always get to the bounds of the window
-    // so we'll subtract 1 pixel if we're to the left/below of the origin and
-    // and add 1 pixel if we're to the right/above. It should be imperceptible
-    // to the user but it will allow activation of gestures that require contact
-    // with the edge of the screen (like Aero Snap).
-    if (x < self.bounds.size.width / 2) {
-        x--;
-    }
-    else {
-        x++;
-    }
-    if (y < self.bounds.size.height / 2) {
-        y--;
-    }
-    else {
-        y++;
-    }
-    
-    // This logic mimics what iOS does with AVLayerVideoGravityResizeAspect
-    CGSize videoSize;
-    CGPoint videoOrigin;
-    if (self.bounds.size.width > self.bounds.size.height * streamAspectRatio) {
-        videoSize = CGSizeMake(self.bounds.size.height * streamAspectRatio, self.bounds.size.height);
-    } else {
-        videoSize = CGSizeMake(self.bounds.size.width, self.bounds.size.width / streamAspectRatio);
-    }
-    videoOrigin = CGPointMake(self.bounds.size.width / 2 - videoSize.width / 2,
-                              self.bounds.size.height / 2 - videoSize.height / 2);
-    
-    // Confine the cursor to the video region. We don't just discard events outside
-    // the region because we won't always get one exactly when the mouse leaves the region.
-    x = MIN(MAX(x, videoOrigin.x), videoOrigin.x + videoSize.width);
-    y = MIN(MAX(y, videoOrigin.y), videoOrigin.y + videoSize.height);
+    CGPoint normalizedLocation = [self adjustCoordinatesForVideoArea:location];
+    CGSize videoSize = [self getVideoAreaSize];
     
     // Send the mouse position relative to the video region if it has changed
     // if we're receiving coordinates from a real mouse.
@@ -411,15 +551,14 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     // send it if the value has changed. We will receive one of these events
     // any time the user presses a modifier key, which can result in errant
     // mouse motion when using a Citrix X1 mouse.
-    if (x != lastMouseX || y != lastMouseY || !isMouse) {
+    if (normalizedLocation.x != lastMouseX || normalizedLocation.y != lastMouseY || !isMouse) {
         if (lastMouseX != 0 || lastMouseY != 0 || !isMouse) {
-            LiSendMousePositionEvent(x - videoOrigin.x, y - videoOrigin.y,
-                                     videoSize.width, videoSize.height);
+            LiSendMousePositionEvent(normalizedLocation.x, normalizedLocation.y, videoSize.width, videoSize.height);
         }
         
         if (isMouse) {
-            lastMouseX = x;
-            lastMouseY = y;
+            lastMouseX = normalizedLocation.x;
+            lastMouseY = normalizedLocation.y;
         }
     }
 }
