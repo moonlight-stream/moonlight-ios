@@ -143,6 +143,19 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit)
         lastFrameNumber = decodeUnit->frameNumber;
     }
     
+    if (decodeUnit->frameHostProcessingLatency != 0) {
+        if (currentVideoStats.minHostProcessingLatency == 0 || decodeUnit->frameHostProcessingLatency < currentVideoStats.minHostProcessingLatency) {
+            currentVideoStats.minHostProcessingLatency = decodeUnit->frameHostProcessingLatency;
+        }
+        
+        if (decodeUnit->frameHostProcessingLatency > currentVideoStats.maxHostProcessingLatency) {
+            currentVideoStats.maxHostProcessingLatency = decodeUnit->frameHostProcessingLatency;
+        }
+        
+        currentVideoStats.framesWithHostProcessingLatency++;
+        currentVideoStats.totalHostProcessingLatency += decodeUnit->frameHostProcessingLatency;
+    }
+    
     currentVideoStats.receivedFrames++;
     currentVideoStats.totalFrames++;
 

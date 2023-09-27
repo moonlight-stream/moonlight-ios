@@ -167,14 +167,26 @@
         latencyString = @"N/A";
     }
     
+    NSString* hostProcessingString;
+    if (stats.framesWithHostProcessingLatency != 0) {
+        hostProcessingString = [NSString stringWithFormat:@"\nHost processing latency min/max/avg: %.1f/%.1f/%.1f ms",
+                                stats.minHostProcessingLatency / 10.f,
+                                stats.maxHostProcessingLatency / 10.f,
+                                (float)stats.totalHostProcessingLatency / stats.framesWithHostProcessingLatency / 10.f];
+    }
+    else {
+        hostProcessingString = @"";
+    }
+    
     float interval = stats.endTime - stats.startTime;
-    return [NSString stringWithFormat:@"Video stream: %dx%d %.2f FPS (Codec: %@)\nFrames dropped by your network connection: %.2f%%\nAverage network latency: %@",
+    return [NSString stringWithFormat:@"Video stream: %dx%d %.2f FPS (Codec: %@)\nFrames dropped by your network connection: %.2f%%\nAverage network latency: %@%@",
             _config.width,
             _config.height,
             stats.totalFrames / interval,
             [_connection getActiveCodecName],
             stats.networkDroppedFrames / interval,
-            latencyString];
+            latencyString,
+            hostProcessingString];
 }
 
 @end
