@@ -418,7 +418,7 @@ BOOL isCustomResolution(CGSize res) {
 }
 
 - (void)resolutionDisplayViewTapped:(UITapGestureRecognizer *)sender {
-    NSURL *url = [NSURL URLWithString:@"https://nvidia.custhelp.com/app/answers/detail/a_id/759/~/custom-resolutions"];
+    NSURL *url = [NSURL URLWithString:@"https://moonlight-stream.org/custom-resolution"];
     if ([[UIApplication sharedApplication] canOpenURL:url]) {
         [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
     }
