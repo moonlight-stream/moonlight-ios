@@ -203,13 +203,11 @@ BOOL isCustomResolution(CGSize res) {
     // they support HEVC decoding (A9 or later).
     if (@available(iOS 11.0, tvOS 11.0, *)) {
         if (!VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC)) {
-            [self.resolutionSelector removeSegmentAtIndex:5 animated:NO];
-            if (resolution >= 5) resolution--;
+            [self.resolutionSelector setEnabled:NO forSegmentAtIndex:3];
         }
     }
     else {
-        [self.resolutionSelector removeSegmentAtIndex:5 animated:NO];
-        if (resolution >= 5) resolution--;
+        [self.resolutionSelector setEnabled:NO forSegmentAtIndex:3];
     }
 
     // Disable the HEVC selector if HEVC is not supported by the hardware
@@ -271,7 +269,6 @@ BOOL isCustomResolution(CGSize res) {
     [self.bitrateSlider setValue:[self getSliderValueForBitrate:_bitrate] animated:YES];
     [self.bitrateSlider addTarget:self action:@selector(bitrateSliderMoved) forControlEvents:UIControlEventValueChanged];
     [self updateBitrateText];
-    [self updateCustomResolutionText];
     [self updateResolutionDisplayViewText];
 }
 
@@ -320,13 +317,13 @@ BOOL isCustomResolution(CGSize res) {
 }
 
 - (void) newResolutionChosen {
-    [self updateResolutionDisplayViewText];
     BOOL lastSegmentSelected = [self.resolutionSelector selectedSegmentIndex] + 1 == [self.resolutionSelector numberOfSegments];
     if (lastSegmentSelected) {
         [self promptCustomResolutionDialog];
     }
     else {
         [self updateBitrate];
+        [self updateResolutionDisplayViewText];
         _lastSelectedResolutionIndex = [self.resolutionSelector selectedSegmentIndex];
     }
 }
@@ -404,7 +401,6 @@ BOOL isCustomResolution(CGSize res) {
 
         resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX] = CGSizeMake(width, height);
         [self updateBitrate];
-        [self updateCustomResolutionText];
         [self updateResolutionDisplayViewText];
         self->_lastSelectedResolutionIndex = [self.resolutionSelector selectedSegmentIndex];
         
@@ -452,14 +448,6 @@ BOOL isCustomResolution(CGSize res) {
 
     [self.resolutionDisplayView addSubview:label1];
     [self.resolutionDisplayView addSubview:label2];
-}
-
-- (void) updateCustomResolutionText {
-    if (isCustomResolution(resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX])) {
-        NSString *newTitle = [NSString stringWithFormat:@"Custom"];
-        [self.resolutionSelector setTitle:newTitle forSegmentAtIndex:[self.resolutionSelector numberOfSegments] - 1];
-        self.resolutionSelector.apportionsSegmentWidthsByContent = YES; // to update the width
-    }
 }
 
 - (void) bitrateSliderMoved {
