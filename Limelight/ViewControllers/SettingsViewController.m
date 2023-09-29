@@ -50,7 +50,7 @@ static const int bitrateTable[] = {
     150000,
 };
 
-const int RESOLUTION_TABLE_SIZE = 5;
+const int RESOLUTION_TABLE_SIZE = 7;
 const int RESOLUTION_TABLE_CUSTOM_INDEX = RESOLUTION_TABLE_SIZE - 1;
 CGSize resolutionTable[RESOLUTION_TABLE_SIZE];
 
@@ -140,17 +140,31 @@ BOOL isCustomResolution(CGSize res) {
     // Ensure we pick a bitrate that falls exactly onto a slider notch
     _bitrate = bitrateTable[[self getSliderValueForBitrate:[currentSettings.bitrate intValue]]];
 
+    // Get the size of the screen with and without safe area insets
+    UIWindow *window = UIApplication.sharedApplication.windows.firstObject;
+    CGFloat screenScale = window.screen.scale;
+    CGFloat safeAreaWidth = (window.frame.size.width - window.safeAreaInsets.left - window.safeAreaInsets.right) * screenScale;
+    CGFloat fullScreenWidth = window.frame.size.width * screenScale;
+    CGFloat fullScreenHeight = window.frame.size.height * screenScale;
+    
+    self.resolutionDisplayView.layer.cornerRadius = 10;
+    self.resolutionDisplayView.clipsToBounds = YES;
+    UITapGestureRecognizer *resolutionDisplayViewTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(resolutionDisplayViewTapped:)];
+    [self.resolutionDisplayView addGestureRecognizer:resolutionDisplayViewTap];
+    
     resolutionTable[0] = CGSizeMake(640, 360);
     resolutionTable[1] = CGSizeMake(1280, 720);
     resolutionTable[2] = CGSizeMake(1920, 1080);
     resolutionTable[3] = CGSizeMake(3840, 2160);
-    resolutionTable[4] = CGSizeMake([currentSettings.width integerValue], [currentSettings.height integerValue]); // custom initial value
+    resolutionTable[4] = CGSizeMake(fullScreenWidth, fullScreenHeight);
+    resolutionTable[5] = CGSizeMake(safeAreaWidth, fullScreenHeight);
+    resolutionTable[6] = CGSizeMake([currentSettings.width integerValue], [currentSettings.height integerValue]); // custom initial value
     
     // Don't populate the custom entry unless we have a custom resolution
-    if (!isCustomResolution(resolutionTable[4])) {
-        resolutionTable[4] = CGSizeMake(0, 0);
+    if (!isCustomResolution(resolutionTable[6])) {
+        resolutionTable[6] = CGSizeMake(0, 0);
     }
-
+    
     NSInteger framerate;
     switch ([currentSettings.framerate integerValue]) {
         case 30:
@@ -189,13 +203,13 @@ BOOL isCustomResolution(CGSize res) {
     // they support HEVC decoding (A9 or later).
     if (@available(iOS 11.0, tvOS 11.0, *)) {
         if (!VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC)) {
-            [self.resolutionSelector removeSegmentAtIndex:3 animated:NO];
-            if (resolution >= 3) resolution--;
+            [self.resolutionSelector removeSegmentAtIndex:5 animated:NO];
+            if (resolution >= 5) resolution--;
         }
     }
     else {
-        [self.resolutionSelector removeSegmentAtIndex:3 animated:NO];
-        if (resolution >= 3) resolution--;
+        [self.resolutionSelector removeSegmentAtIndex:5 animated:NO];
+        if (resolution >= 5) resolution--;
     }
 
     // Disable the HEVC selector if HEVC is not supported by the hardware
@@ -258,6 +272,7 @@ BOOL isCustomResolution(CGSize res) {
     [self.bitrateSlider addTarget:self action:@selector(bitrateSliderMoved) forControlEvents:UIControlEventValueChanged];
     [self updateBitrateText];
     [self updateCustomResolutionText];
+    [self updateResolutionDisplayViewText];
 }
 
 - (void) touchModeChanged {
@@ -305,6 +320,7 @@ BOOL isCustomResolution(CGSize res) {
 }
 
 - (void) newResolutionChosen {
+    [self updateResolutionDisplayViewText];
     BOOL lastSegmentSelected = [self.resolutionSelector selectedSegmentIndex] + 1 == [self.resolutionSelector numberOfSegments];
     if (lastSegmentSelected) {
         [self promptCustomResolutionDialog];
@@ -389,6 +405,7 @@ BOOL isCustomResolution(CGSize res) {
         resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX] = CGSizeMake(width, height);
         [self updateBitrate];
         [self updateCustomResolutionText];
+        [self updateResolutionDisplayViewText];
         self->_lastSelectedResolutionIndex = [self.resolutionSelector selectedSegmentIndex];
         
         UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Custom Resolution Selected" message: @"Custom resolutions are not officially supported by GeForce Experience, so it will not set your host display resolution. You will need to set it manually while in game.\n\nResolutions that are not supported by your client or host PC may cause streaming errors." preferredStyle:UIAlertControllerStyleAlert];
@@ -404,9 +421,42 @@ BOOL isCustomResolution(CGSize res) {
     [self presentViewController:alertController animated:YES completion:nil];
 }
 
+- (void)resolutionDisplayViewTapped:(UITapGestureRecognizer *)sender {
+    NSURL *url = [NSURL URLWithString:@"https://nvidia.custhelp.com/app/answers/detail/a_id/759/~/custom-resolutions"];
+    if ([[UIApplication sharedApplication] canOpenURL:url]) {
+        [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
+    }
+}
+
+- (void) updateResolutionDisplayViewText {
+    NSInteger width = [self getChosenStreamWidth];
+    NSInteger height = [self getChosenStreamHeight];
+    CGFloat viewFrameWidth = self.resolutionDisplayView.frame.size.width;
+    CGFloat viewFrameHeight = self.resolutionDisplayView.frame.size.height;
+    CGFloat padding = 10;
+    CGFloat fontSize = [UIFont smallSystemFontSize];
+    
+    for (UIView *subview in self.resolutionDisplayView.subviews) {
+        [subview removeFromSuperview];
+    }
+    UILabel *label1 = [[UILabel alloc] init];
+    label1.text = @"Set PC/Game resolution: ";
+    label1.font = [UIFont systemFontOfSize:fontSize];
+    [label1 sizeToFit];
+    label1.frame = CGRectMake(padding, (viewFrameHeight - label1.frame.size.height) / 2, label1.frame.size.width, label1.frame.size.height);
+
+    UILabel *label2 = [[UILabel alloc] init];
+    label2.text = [NSString stringWithFormat:@"%ld x %ld", (long)width, (long)height];
+    [label2 sizeToFit];
+    label2.frame = CGRectMake(viewFrameWidth - label2.frame.size.width - padding, (viewFrameHeight - label2.frame.size.height) / 2, label2.frame.size.width, label2.frame.size.height);
+
+    [self.resolutionDisplayView addSubview:label1];
+    [self.resolutionDisplayView addSubview:label2];
+}
+
 - (void) updateCustomResolutionText {
     if (isCustomResolution(resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX])) {
-        NSString *newTitle = [NSString stringWithFormat:@"Custom %dx%d", (int) resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX].width, (int) resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX].height];
+        NSString *newTitle = [NSString stringWithFormat:@"Custom"];
         [self.resolutionSelector setTitle:newTitle forSegmentAtIndex:[self.resolutionSelector numberOfSegments] - 1];
         self.resolutionSelector.apportionsSegmentWidthsByContent = YES; // to update the width
     }
