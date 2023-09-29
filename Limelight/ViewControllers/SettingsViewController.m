@@ -283,34 +283,57 @@ BOOL isCustomResolution(CGSize res) {
     NSInteger height = [self getChosenStreamHeight];
     NSInteger defaultBitrate;
     
-    // This table prefers 16:10 resolutions because they are
-    // only slightly more pixels than the 16:9 equivalents, so
-    // we don't want to bump those 16:10 resolutions up to the
-    // next 16:9 slot.
-    //
     // This logic is shamelessly stolen from Moonlight Qt:
     // https://github.com/moonlight-stream/moonlight-qt/blob/master/app/settings/streamingpreferences.cpp
     
-    if (width * height <= 640 * 360) {
-        defaultBitrate = 1000 * (fps / 30.0);
+    // Don't scale bitrate linearly beyond 60 FPS. It's definitely not a linear
+    // bitrate increase for frame rate once we get to values that high.
+    float frameRateFactor = (fps <= 60 ? fps : (sqrtf(fps / 60.f) * 60.f)) / 30.f;
+
+    // TODO: Collect some empirical data to see if these defaults make sense.
+    // We're just using the values that the Shield used, as we have for years.
+    struct {
+        NSInteger pixels;
+        int factor;
+    } resTable[] = {
+        { 640 * 360, 1 },
+        { 854 * 480, 2 },
+        { 1280 * 720, 5 },
+        { 1920 * 1080, 10 },
+        { 2560 * 1440, 20 },
+        { 3840 * 2160, 40 },
+        { -1, -1 }
+    };
+
+    // Calculate the resolution factor by linear interpolation of the resolution table
+    float resolutionFactor;
+    NSInteger pixels = width * height;
+    for (int i = 0;; i++) {
+        if (pixels == resTable[i].pixels) {
+            // We can bail immediately for exact matches
+            resolutionFactor = resTable[i].factor;
+            break;
+        }
+        else if (pixels < resTable[i].pixels) {
+            if (i == 0) {
+                // Never go below the lowest resolution entry
+                resolutionFactor = resTable[i].factor;
+            }
+            else {
+                // Interpolate between the entry greater than the chosen resolution (i) and the entry less than the chosen resolution (i-1)
+                resolutionFactor = ((float)(pixels - resTable[i-1].pixels) / (resTable[i].pixels - resTable[i-1].pixels)) * (resTable[i].factor - resTable[i-1].factor) + resTable[i-1].factor;
+            }
+            break;
+        }
+        else if (resTable[i].pixels == -1) {
+            // Never go above the highest resolution entry
+            resolutionFactor = resTable[i-1].factor;
+            break;
+        }
     }
-    // This covers 1280x720 and 1280x800 too
-    else if (width * height <= 1366 * 768) {
-        defaultBitrate = 5000 * (fps / 30.0);
-    }
-    else if (width * height <= 1920 * 1200) {
-        defaultBitrate = 10000 * (fps / 30.0);
-    }
-    else if (width * height <= 2560 * 1600) {
-        defaultBitrate = 20000 * (fps / 30.0);
-    }
-    else /* if (width * height <= 3840 * 2160) */ {
-        defaultBitrate = 40000 * (fps / 30.0);
-    }
-    
-    // We should always be exactly on a slider position with default bitrates
+
+    defaultBitrate = round(resolutionFactor * frameRateFactor) * 1000;
     _bitrate = MIN(defaultBitrate, 100000);
-    assert(bitrateTable[[self getSliderValueForBitrate:_bitrate]] == _bitrate);
     [self.bitrateSlider setValue:[self getSliderValueForBitrate:_bitrate] animated:YES];
     
     [self updateBitrateText];
