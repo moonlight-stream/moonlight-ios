@@ -11,7 +11,40 @@
 
 @implementation KeyboardSupport
 
-+ (BOOL)sendKeyEvent:(UIKey*)key down:(BOOL)down API_AVAILABLE(ios(13.4)){
++ (BOOL)sendKeyEventForPress:(UIPress*)press down:(BOOL)down API_AVAILABLE(ios(13.4)) {
+    if (press.key != nil) {
+        return [KeyboardSupport sendKeyEvent:press.key down:down];
+    }
+    else {
+        short keyCode;
+
+        switch (press.type) {
+            case UIPressTypeUpArrow:
+                keyCode = 0x26;
+                break;
+            case UIPressTypeDownArrow:
+                keyCode = 0x28;
+                break;
+            case UIPressTypeLeftArrow:
+                keyCode = 0x25;
+                break;
+            case UIPressTypeRightArrow:
+                keyCode = 0x27;
+                break;
+            default:
+                // Unhandled press type
+                return NO;
+        }
+        
+        LiSendKeyboardEvent(0x8000 | keyCode,
+                            down ? KEY_ACTION_DOWN : KEY_ACTION_UP,
+                            0);
+        
+        return YES;
+    }
+}
+
++ (BOOL)sendKeyEvent:(UIKey*)key down:(BOOL)down API_AVAILABLE(ios(13.4)) {
     char modifierFlags = 0;
     short keyCode = 0;
     

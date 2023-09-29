@@ -470,7 +470,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         for (UIPress* press in presses) {
             // For now, we'll treated it as handled if we handle at least one of the
             // UIPress events inside the set.
-            if (press.key != nil && [KeyboardSupport sendKeyEvent:press.key down:YES]) {
+            if ([KeyboardSupport sendKeyEventForPress:press down:YES]) {
                 // This will prevent the legacy UITextField from receiving the event
                 handled = YES;
             }
@@ -489,7 +489,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         for (UIPress* press in presses) {
             // For now, we'll treated it as handled if we handle at least one of the
             // UIPress events inside the set.
-            if (press.key != nil && [KeyboardSupport sendKeyEvent:press.key down:NO]) {
+            if ([KeyboardSupport sendKeyEventForPress:press down:NO]) {
                 // This will prevent the legacy UITextField from receiving the event
                 handled = YES;
             }
