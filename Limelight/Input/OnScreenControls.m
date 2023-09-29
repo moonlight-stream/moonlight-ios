@@ -663,63 +663,63 @@ static float L3_Y;
     for (UITouch* touch in touches) {
         CGPoint touchLocation = [touch locationInView:_view];
         
-        if ([_aButton.presentationLayer hitTest:touchLocation]) {
+        if (_aButton.superlayer != nil && [_aButton.presentationLayer hitTest:touchLocation]) {
             [_controllerSupport setButtonFlag:_controller flags:A_FLAG];
             _aTouch = touch;
             updated = true;
-        } else if ([_bButton.presentationLayer hitTest:touchLocation]) {
+        } else if (_bButton.superlayer != nil && [_bButton.presentationLayer hitTest:touchLocation]) {
             [_controllerSupport setButtonFlag:_controller flags:B_FLAG];
             _bTouch = touch;
             updated = true;
-        } else if ([_xButton.presentationLayer hitTest:touchLocation]) {
+        } else if (_xButton.superlayer != nil && [_xButton.presentationLayer hitTest:touchLocation]) {
             [_controllerSupport setButtonFlag:_controller flags:X_FLAG];
             _xTouch = touch;
             updated = true;
-        } else if ([_yButton.presentationLayer hitTest:touchLocation]) {
+        } else if (_yButton.superlayer != nil && [_yButton.presentationLayer hitTest:touchLocation]) {
             [_controllerSupport setButtonFlag:_controller flags:Y_FLAG];
             _yTouch = touch;
             updated = true;
-        } else if ([_upButton.presentationLayer hitTest:touchLocation]) {
+        } else if (_upButton.superlayer != nil && [_upButton.presentationLayer hitTest:touchLocation]) {
             [_controllerSupport setButtonFlag:_controller flags:UP_FLAG];
             _dpadTouch = touch;
             updated = true;
-        } else if ([_downButton.presentationLayer hitTest:touchLocation]) {
+        } else if (_downButton.superlayer != nil && [_downButton.presentationLayer hitTest:touchLocation]) {
             [_controllerSupport setButtonFlag:_controller flags:DOWN_FLAG];
             _dpadTouch = touch;
             updated = true;
-        } else if ([_leftButton.presentationLayer hitTest:touchLocation]) {
+        } else if (_leftButton.superlayer != nil && [_leftButton.presentationLayer hitTest:touchLocation]) {
             [_controllerSupport setButtonFlag:_controller flags:LEFT_FLAG];
             _dpadTouch = touch;
             updated = true;
-        } else if ([_rightButton.presentationLayer hitTest:touchLocation]) {
+        } else if (_rightButton.superlayer != nil && [_rightButton.presentationLayer hitTest:touchLocation]) {
             [_controllerSupport setButtonFlag:_controller flags:RIGHT_FLAG];
             _dpadTouch = touch;
             updated = true;
-        } else if ([_startButton.presentationLayer hitTest:touchLocation]) {
+        } else if (_startButton.superlayer != nil && [_startButton.presentationLayer hitTest:touchLocation]) {
             [_controllerSupport setButtonFlag:_controller flags:PLAY_FLAG];
             _startTouch = touch;
             updated = true;
-        } else if ([_selectButton.presentationLayer hitTest:touchLocation]) {
+        } else if (_selectButton.superlayer != nil && [_selectButton.presentationLayer hitTest:touchLocation]) {
             [_controllerSupport setButtonFlag:_controller flags:BACK_FLAG];
             _selectTouch = touch;
             updated = true;
-        } else if ([_l1Button.presentationLayer hitTest:touchLocation]) {
+        } else if (_l1Button.superlayer != nil && [_l1Button.presentationLayer hitTest:touchLocation]) {
             [_controllerSupport setButtonFlag:_controller flags:LB_FLAG];
             _l1Touch = touch;
             updated = true;
-        } else if ([_r1Button.presentationLayer hitTest:touchLocation]) {
+        } else if (_r1Button.superlayer != nil && [_r1Button.presentationLayer hitTest:touchLocation]) {
             [_controllerSupport setButtonFlag:_controller flags:RB_FLAG];
             _r1Touch = touch;
             updated = true;
-        } else if ([_l2Button.presentationLayer hitTest:touchLocation]) {
+        } else if (_l2Button.superlayer != nil && [_l2Button.presentationLayer hitTest:touchLocation]) {
             [_controllerSupport updateLeftTrigger:_controller left:0xFF];
             _l2Touch = touch;
             updated = true;
-        } else if ([_r2Button.presentationLayer hitTest:touchLocation]) {
+        } else if (_r2Button.superlayer != nil && [_r2Button.presentationLayer hitTest:touchLocation]) {
             [_controllerSupport updateRightTrigger:_controller right:0xFF];
             _r2Touch = touch;
             updated = true;
-        } else if ([_l3Button.presentationLayer hitTest:touchLocation]) {
+        } else if (_l3Button.superlayer != nil && [_l3Button.presentationLayer hitTest:touchLocation]) {
             if (l3Set) {
                 [_controllerSupport clearButtonFlag:_controller flags:LS_CLK_FLAG];
                 _l3Button.borderWidth = 0.0f;
@@ -730,7 +730,7 @@ static float L3_Y;
             l3Set = !l3Set;
             _l3Touch = touch;
             updated = true;
-        } else if ([_r3Button.presentationLayer hitTest:touchLocation]) {
+        } else if (_r3Button.superlayer != nil && [_r3Button.presentationLayer hitTest:touchLocation]) {
             if (r3Set) {
                 [_controllerSupport clearButtonFlag:_controller flags:RS_CLK_FLAG];
                 _r3Button.borderWidth = 0.0f;
@@ -741,7 +741,7 @@ static float L3_Y;
             r3Set = !r3Set;
             _r3Touch = touch;
             updated = true;
-        } else if ([_leftStick.presentationLayer hitTest:touchLocation]) {
+        } else if (_leftStick.superlayer != nil && [_leftStick.presentationLayer hitTest:touchLocation]) {
             if (l3TouchStart != nil) {
                 // Find elapsed time and convert to milliseconds
                 // Use (-) modifier to conversion since receiver is earlier than now
@@ -753,7 +753,7 @@ static float L3_Y;
             }
             _lsTouch = touch;
             stickTouch = true;
-        } else if ([_rightStick.presentationLayer hitTest:touchLocation]) {
+        } else if (_rightStick.superlayer != nil && [_rightStick.presentationLayer hitTest:touchLocation]) {
             if (r3TouchStart != nil) {
                 // Find elapsed time and convert to milliseconds
                 // Use (-) modifier to conversion since receiver is earlier than now
