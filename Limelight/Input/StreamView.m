@@ -356,14 +356,14 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
                 // Prepare the toolbar above the keyboard for more options
                 UIToolbar *customToolbarView = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, 44)];
                 
-                UIBarButtonItem *doneBarButton = [self createButtonWithImageNamed:@"DoneIcon.png" backgroundColor:[UIColor clearColor] target:self action:@selector(toolbarButtonClicked:) keyCode:@"0x00" isToggleable:NO];
-                UIBarButtonItem *windowsBarButton = [self createButtonWithImageNamed:@"WindowsIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:@"0x5B" isToggleable:YES];
-                UIBarButtonItem *tabBarButton = [self createButtonWithImageNamed:@"TabIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:@"0x09" isToggleable:NO];
-                UIBarButtonItem *shiftBarButton = [self createButtonWithImageNamed:@"ShiftIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:@"0xA0" isToggleable:YES];
-                UIBarButtonItem *escapeBarButton = [self createButtonWithImageNamed:@"EscapeIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:@"0x1B" isToggleable:NO];
-                UIBarButtonItem *controlBarButton = [self createButtonWithImageNamed:@"ControlIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:@"0xA2" isToggleable:YES];
-                UIBarButtonItem *altBarButton = [self createButtonWithImageNamed:@"AltIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:@"0xA4" isToggleable:YES];
-                UIBarButtonItem *deleteBarButton = [self createButtonWithImageNamed:@"DeleteIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:@"0x2E" isToggleable:NO];
+                UIBarButtonItem *doneBarButton = [self createButtonWithImageNamed:@"DoneIcon.png" backgroundColor:[UIColor clearColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x00 isToggleable:NO];
+                UIBarButtonItem *windowsBarButton = [self createButtonWithImageNamed:@"WindowsIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x5B isToggleable:YES];
+                UIBarButtonItem *tabBarButton = [self createButtonWithImageNamed:@"TabIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x09 isToggleable:NO];
+                UIBarButtonItem *shiftBarButton = [self createButtonWithImageNamed:@"ShiftIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA0 isToggleable:YES];
+                UIBarButtonItem *escapeBarButton = [self createButtonWithImageNamed:@"EscapeIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x1B isToggleable:NO];
+                UIBarButtonItem *controlBarButton = [self createButtonWithImageNamed:@"ControlIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA2 isToggleable:YES];
+                UIBarButtonItem *altBarButton = [self createButtonWithImageNamed:@"AltIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA4 isToggleable:YES];
+                UIBarButtonItem *deleteBarButton = [self createButtonWithImageNamed:@"DeleteIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x2E isToggleable:NO];
                 UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
                 
                 [customToolbarView setItems:[NSArray arrayWithObjects:doneBarButton, windowsBarButton, escapeBarButton, tabBarButton, shiftBarButton, controlBarButton, altBarButton, deleteBarButton, flexibleSpace, nil]];
@@ -381,7 +381,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     }
 }
 
-- (UIBarButtonItem *)createButtonWithImageNamed:(NSString *)imageName backgroundColor:(UIColor *)backgroundColor target:(id)target action:(SEL)action keyCode:(NSString *)keyCode isToggleable:(BOOL)isToggleable {
+- (UIBarButtonItem *)createButtonWithImageNamed:(NSString *)imageName backgroundColor:(UIColor *)backgroundColor target:(id)target action:(SEL)action keyCode:(NSInteger)keyCode isToggleable:(BOOL)isToggleable {
     UIImage *image = [UIImage imageNamed:imageName];
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
     [button setImage:image forState:UIControlStateNormal];
@@ -391,7 +391,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     button.imageView.layer.cornerRadius = 10.0;
     button.imageEdgeInsets = UIEdgeInsetsMake(6, 6, 6, 6);
     [button addTarget:target action:action forControlEvents:UIControlEventTouchUpInside];
-    objc_setAssociatedObject(button, "keyCode", keyCode, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(button, "keyCode", @(keyCode), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     objc_setAssociatedObject(button, "isToggleable", @(isToggleable), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     objc_setAssociatedObject(button, "isOn", @(NO), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     UIBarButtonItem *barButton = [[UIBarButtonItem alloc] initWithCustomView:button];
@@ -413,27 +413,25 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     // Update the new on/off state of the button
     objc_setAssociatedObject(sender, "isOn", @(isOn), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     // Get the keyCode parameter and convert to short for key press event
-    NSString *keyCodeString = objc_getAssociatedObject(sender, "keyCode");
-    unsigned int keyCodeInteger = 0;
-    NSScanner *scanner = [NSScanner scannerWithString:keyCodeString];
-    [scanner scanHexInt:&keyCodeInteger];
-    short keyCodeShort = (short)keyCodeInteger;
+    short keyCode = [objc_getAssociatedObject(sender, "keyCode") shortValue];
     // Close keyboard if done button clicked
-    if ([keyCodeString isEqual: @"0x00"]){
-        [[UIApplication sharedApplication] sendAction:@selector(resignFirstResponder) to:nil from:nil forEvent:nil];
-    } else {
+    if (!keyCode) {
+        [keyInputField resignFirstResponder];
+        isInputingText = false;
+    }
+    else {
         // Send key press event using keyCode parameter, toggle if necessary
-        // FOR SOME REASON CTRL-ALT-DELETE DOESN'T WORK???
         if (isToggleable){
             if (isOn){
-                LiSendKeyboardEvent(keyCodeShort, KEY_ACTION_DOWN, 0);
+                LiSendKeyboardEvent(keyCode, KEY_ACTION_DOWN, 0);
             } else {
-                LiSendKeyboardEvent(keyCodeShort, KEY_ACTION_UP, 0);
+                LiSendKeyboardEvent(keyCode, KEY_ACTION_UP, 0);
             }
-        } else {
-            LiSendKeyboardEvent(keyCodeShort, KEY_ACTION_DOWN, 0);
+        }
+        else {
+            LiSendKeyboardEvent(keyCode, KEY_ACTION_DOWN, 0);
             usleep(50 * 1000);
-            LiSendKeyboardEvent(keyCodeShort, KEY_ACTION_UP, 0);
+            LiSendKeyboardEvent(keyCode, KEY_ACTION_UP, 0);
         }
     }
 }
