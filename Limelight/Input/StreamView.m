@@ -106,11 +106,13 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         [self addGestureRecognizer:continuousMouseWheelRecognizer];
     }
     
+#if defined(__IPHONE_16_1) || defined(__TVOS_16_1)
     if (@available(iOS 16.1, *)) {
         UIHoverGestureRecognizer *stylusHoverRecognizer = [[UIHoverGestureRecognizer alloc] initWithTarget:self action:@selector(sendStylusHoverEvent:)];
         stylusHoverRecognizer.allowedTouchTypes = @[@(UITouchTypePencil)];
         [self addGestureRecognizer:stylusHoverRecognizer];
     }
+#endif
 #endif
     
     x1mouse = [[X1Mouse alloc] init];
@@ -287,16 +289,20 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     CGSize videoSize = [self getVideoAreaSize];
     
     float distance = 0.0f;
+#if defined(__IPHONE_16_1) || defined(__TVOS_16_1)
     if (@available(iOS 16.1, *)) {
         distance = gesture.zOffset;
     }
+#endif
     
     uint16_t rotationAngle = LI_ROT_UNKNOWN;
     uint8_t tiltAngle = LI_TILT_UNKNOWN;
+#if defined(__IPHONE_16_4) || defined(__TVOS_16_4)
     if (@available(iOS 16.4, *)) {
         rotationAngle = [self getRotationFromAzimuthAngle:[gesture azimuthAngleInView:self]];
         tiltAngle = [self getTiltFromAltitudeAngle:gesture.altitudeAngle];
     }
+#endif
     
     LiSendPenEvent(type, LI_TOOL_TYPE_PEN, 0, location.x / videoSize.width, location.y / videoSize.height,
                    distance, 0.0f, 0.0f, rotationAngle, tiltAngle);
