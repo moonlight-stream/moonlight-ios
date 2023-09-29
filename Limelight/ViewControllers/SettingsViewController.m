@@ -156,8 +156,8 @@ BOOL isCustomResolution(CGSize res) {
     resolutionTable[1] = CGSizeMake(1280, 720);
     resolutionTable[2] = CGSizeMake(1920, 1080);
     resolutionTable[3] = CGSizeMake(3840, 2160);
-    resolutionTable[4] = CGSizeMake(fullScreenWidth, fullScreenHeight);
-    resolutionTable[5] = CGSizeMake(safeAreaWidth, fullScreenHeight);
+    resolutionTable[4] = CGSizeMake(safeAreaWidth, fullScreenHeight);
+    resolutionTable[5] = CGSizeMake(fullScreenWidth, fullScreenHeight);
     resolutionTable[6] = CGSizeMake([currentSettings.width integerValue], [currentSettings.height integerValue]); // custom initial value
     
     // Don't populate the custom entry unless we have a custom resolution
