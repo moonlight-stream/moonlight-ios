@@ -17,11 +17,10 @@
     float _streamAspectRatio;
     
     AVSampleBufferDisplayLayer* displayLayer;
-    Boolean waitingForSps, waitingForPps, waitingForVps;
     int videoFormat, videoWidth, videoHeight;
     int frameRate;
     
-    NSData *spsData, *ppsData, *vpsData;
+    NSMutableArray *parameterSetBuffers;
     NSData *masteringDisplayColorVolume;
     NSData *contentLightLevelInfo;
     CMVideoFormatDescriptionRef formatDesc;
@@ -64,14 +63,6 @@
         [_view.layer addSublayer:displayLayer];
     }
     
-    // We need some parameter sets before we can properly start decoding frames
-    waitingForSps = true;
-    spsData = nil;
-    waitingForPps = true;
-    ppsData = nil;
-    waitingForVps = true;
-    vpsData = nil;
-    
     if (formatDesc != nil) {
         CFRelease(formatDesc);
         formatDesc = nil;
@@ -86,6 +77,8 @@
     _callbacks = callbacks;
     _streamAspectRatio = aspectRatio;
     framePacing = useFramePacing;
+    
+    parameterSetBuffers = [[NSMutableArray alloc] init];
     
     [self reinitializeDisplayLayer];
     
@@ -149,21 +142,6 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
 #define NALU_START_PREFIX_SIZE 3
 #define NAL_LENGTH_PREFIX_SIZE 4
 
-- (BOOL)readyForAvcHevcPictureData
-{
-    if (videoFormat & VIDEO_FORMAT_MASK_H264) {
-        return !waitingForSps && !waitingForPps;
-    }
-    else if (videoFormat & VIDEO_FORMAT_MASK_H265) {
-        // H.265 requires VPS in addition to SPS and PPS
-        return !waitingForVps && !waitingForSps && !waitingForPps;
-    }
-    else {
-        // Other codecs shouldn't call this
-        abort();
-    }
-}
-
 - (void)updateAnnexBBufferForRange:(CMBlockBufferRef)frameBuffer dataBlock:(CMBlockBufferRef)dataBuffer offset:(int)offset length:(int)nalLength
 {
     OSStatus status;
@@ -203,39 +181,40 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
 {
     OSStatus status;
     
-    if (bufferType != BUFFER_TYPE_PICDATA) {
-        int startLen = data[2] == 0x01 ? 3 : 4;
-        
-        if (bufferType == BUFFER_TYPE_VPS) {
-            Log(LOG_I, @"Got VPS");
-            vpsData = [NSData dataWithBytes:&data[startLen] length:length - startLen];
-            waitingForVps = false;
+    // Construct a new format description object each time we receive an IDR frame
+    if (frameType == FRAME_TYPE_IDR) {
+        if (bufferType != BUFFER_TYPE_PICDATA) {
+            if (bufferType == BUFFER_TYPE_VPS || bufferType == BUFFER_TYPE_SPS || bufferType == BUFFER_TYPE_PPS) {
+                // Add new parameter set into the parameter set array
+                int startLen = data[2] == 0x01 ? 3 : 4;
+                [parameterSetBuffers addObject:[NSData dataWithBytes:&data[startLen] length:length - startLen]];
+                
+                // We must reconstruct the format description if we get new parameter sets
+                formatDesc = NULL;
+            }
             
-            // We got a new VPS so wait for a new SPS to match it
-            waitingForSps = true;
-        }
-        else if (bufferType == BUFFER_TYPE_SPS) {
-            Log(LOG_I, @"Got SPS");
-            spsData = [NSData dataWithBytes:&data[startLen] length:length - startLen];
-            waitingForSps = false;
+            // Data is NOT to be freed here. It's a direct usage of the caller's buffer.
             
-            // We got a new SPS so wait for a new PPS to match it
-            waitingForPps = true;
-        } else if (bufferType == BUFFER_TYPE_PPS) {
-            Log(LOG_I, @"Got PPS");
-            ppsData = [NSData dataWithBytes:&data[startLen] length:length - startLen];
-            waitingForPps = false;
+            // No frame data to submit for these NALUs
+            return DR_OK;
         }
-        
-        // See if we've got all the parameter sets we need for our video format
-        if ([self readyForAvcHevcPictureData]) {
+        else if (frameType == FRAME_TYPE_IDR && formatDesc == NULL) {
+            // Create the new format description when we get the first picture data buffer of an IDR frame.
+            // This is the only way we know that there is no more CSD for this frame.
             if (videoFormat & VIDEO_FORMAT_MASK_H264) {
-                const uint8_t* const parameterSetPointers[] = { [spsData bytes], [ppsData bytes] };
-                const size_t parameterSetSizes[] = { [spsData length], [ppsData length] };
+                // Construct parameter set arrays for the format description
+                size_t parameterSetCount = [parameterSetBuffers count];
+                const uint8_t* parameterSetPointers[parameterSetCount];
+                size_t parameterSetSizes[parameterSetCount];
+                for (int i = 0; i < parameterSetCount; i++) {
+                    NSData* parameterSet = parameterSetBuffers[i];
+                    parameterSetPointers[i] = parameterSet.bytes;
+                    parameterSetSizes[i] = parameterSet.length;
+                }
                 
                 Log(LOG_I, @"Constructing new H264 format description");
                 status = CMVideoFormatDescriptionCreateFromH264ParameterSets(kCFAllocatorDefault,
-                                                                             2, /* count of parameter sets */
+                                                                             parameterSetCount,
                                                                              parameterSetPointers,
                                                                              parameterSetSizes,
                                                                              NAL_LENGTH_PREFIX_SIZE,
@@ -244,10 +223,20 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
                     Log(LOG_E, @"Failed to create H264 format description: %d", (int)status);
                     formatDesc = NULL;
                 }
+                
+                // Free parameter set buffers after submission
+                [parameterSetBuffers removeAllObjects];
             }
             else if (videoFormat & VIDEO_FORMAT_MASK_H265) {
-                const uint8_t* const parameterSetPointers[] = { [vpsData bytes], [spsData bytes], [ppsData bytes] };
-                const size_t parameterSetSizes[] = { [vpsData length], [spsData length], [ppsData length] };
+                // Construct parameter set arrays for the format description
+                size_t parameterSetCount = [parameterSetBuffers count];
+                const uint8_t* parameterSetPointers[parameterSetCount];
+                size_t parameterSetSizes[parameterSetCount];
+                for (int i = 0; i < parameterSetCount; i++) {
+                    NSData* parameterSet = parameterSetBuffers[i];
+                    parameterSetPointers[i] = parameterSet.bytes;
+                    parameterSetSizes[i] = parameterSet.length;
+                }
                 
                 Log(LOG_I, @"Constructing new HEVC format description");
                 
@@ -260,9 +249,9 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
                 if (masteringDisplayColorVolume) {
                     [videoFormatParams setObject:masteringDisplayColorVolume forKey:(__bridge NSString*)kCMFormatDescriptionExtension_MasteringDisplayColorVolume];
                 }
-
+                
                 status = CMVideoFormatDescriptionCreateFromHEVCParameterSets(kCFAllocatorDefault,
-                                                                             3, /* count of parameter sets */
+                                                                             parameterSetCount,
                                                                              parameterSetPointers,
                                                                              parameterSetSizes,
                                                                              NAL_LENGTH_PREFIX_SIZE,
@@ -273,29 +262,27 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
                     Log(LOG_E, @"Failed to create HEVC format description: %d", (int)status);
                     formatDesc = NULL;
                 }
+                
+                // Free parameter set buffers after submission
+                [parameterSetBuffers removeAllObjects];
             }
+#if defined(__IPHONE_16_0) || defined(__TVOS_16_0)
+            else if (videoFormat & VIDEO_FORMAT_MASK_AV1) {
+                // AV1 doesn't have a special format description function like H.264 and HEVC have, so we just use the generic one
+                // TODO: Is this correct?
+                status = CMVideoFormatDescriptionCreate(kCFAllocatorDefault, kCMVideoCodecType_AV1, videoWidth, videoHeight, nil, &formatDesc);
+                if (status != noErr) {
+                    Log(LOG_E, @"Failed to create AV1 format description: %d", (int)status);
+                    formatDesc = NULL;
+                }
+            }
+#endif
             else {
-                // Other codecs shouldn't enter this path
+                // Unsupported codec!
                 abort();
             }
         }
-        
-        // Data is NOT to be freed here. It's a direct usage of the caller's buffer.
-        
-        // No frame data to submit for these NALUs
-        return DR_OK;
     }
-#if defined(__IPHONE_16_0) || defined(__TVOS_16_0)
-    else if ((videoFormat & VIDEO_FORMAT_MASK_AV1) && frameType == FRAME_TYPE_IDR) {
-        // AV1 doesn't have a special format description function like H.264 and HEVC have, so we just use the generic one
-        // TODO: Is this correct?
-        status = CMVideoFormatDescriptionCreate(kCFAllocatorDefault, kCMVideoCodecType_AV1, videoWidth, videoHeight, nil, &formatDesc);
-        if (status != noErr) {
-            Log(LOG_E, @"Failed to create AV1 format description: %d", (int)status);
-            formatDesc = NULL;
-        }
-    }
-#endif
     
     if (formatDesc == NULL) {
         // Can't decode if we haven't gotten our parameter sets yet
