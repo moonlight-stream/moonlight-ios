@@ -430,7 +430,7 @@ void ClSetControllerLED(uint16_t controllerNumber, uint8_t r, uint8_t g, uint8_t
     // reduce bandwidth usage while still gaining some image
     // quality improvement.
     _streamConfig.hevcBitratePercentageMultiplier = 75;
-    _streamConfig.av1BitratePercentageMultiplier = 65;
+    _streamConfig.av1BitratePercentageMultiplier = 75;
     
     if ([Utils isActiveNetworkVPN]) {
         // Force remote streaming mode when a VPN is connected
