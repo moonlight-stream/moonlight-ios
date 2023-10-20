@@ -166,8 +166,7 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit)
             ret = [renderer submitDecodeBuffer:(unsigned char*)entry->data
                                         length:entry->length
                                     bufferType:entry->bufferType
-                                     frameType:decodeUnit->frameType
-                                           pts:decodeUnit->presentationTimeMs];
+                                     decodeUnit:decodeUnit];
             if (ret != DR_OK) {
                 free(data);
                 return ret;
@@ -185,8 +184,7 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit)
     return [renderer submitDecodeBuffer:data
                                  length:offset
                              bufferType:BUFFER_TYPE_PICDATA
-                              frameType:decodeUnit->frameType
-                                    pts:decodeUnit->presentationTimeMs];
+                             decodeUnit:decodeUnit];
 }
 
 int ArInit(int audioConfiguration, POPUS_MULTISTREAM_CONFIGURATION opusConfig, void* context, int flags)

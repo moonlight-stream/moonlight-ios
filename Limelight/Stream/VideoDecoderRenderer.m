@@ -9,8 +9,6 @@
 #import "VideoDecoderRenderer.h"
 #import "StreamView.h"
 
-#include "Limelight.h"
-
 @implementation VideoDecoderRenderer {
     StreamView* _view;
     id<ConnectionCallbacks> _callbacks;
@@ -177,12 +175,12 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
 }
 
 // This function must free data for bufferType == BUFFER_TYPE_PICDATA
-- (int)submitDecodeBuffer:(unsigned char *)data length:(int)length bufferType:(int)bufferType frameType:(int)frameType pts:(unsigned int)pts
+- (int)submitDecodeBuffer:(unsigned char *)data length:(int)length bufferType:(int)bufferType decodeUnit:(PDECODE_UNIT)du
 {
     OSStatus status;
     
     // Construct a new format description object each time we receive an IDR frame
-    if (frameType == FRAME_TYPE_IDR) {
+    if (du->frameType == FRAME_TYPE_IDR) {
         if (bufferType != BUFFER_TYPE_PICDATA) {
             if (bufferType == BUFFER_TYPE_VPS || bufferType == BUFFER_TYPE_SPS || bufferType == BUFFER_TYPE_PPS) {
                 // Add new parameter set into the parameter set array
@@ -198,7 +196,7 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
             // No frame data to submit for these NALUs
             return DR_OK;
         }
-        else if (frameType == FRAME_TYPE_IDR && formatDesc == NULL) {
+        else if (formatDesc == NULL) {
             // Create the new format description when we get the first picture data buffer of an IDR frame.
             // This is the only way we know that there is no more CSD for this frame.
             if (videoFormat & VIDEO_FORMAT_MASK_H264) {
@@ -355,7 +353,7 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
         
     CMSampleBufferRef sampleBuffer;
     
-    CMSampleTimingInfo sampleTiming = {kCMTimeInvalid, CMTimeMake(pts, 1000), kCMTimeInvalid};
+    CMSampleTimingInfo sampleTiming = {kCMTimeInvalid, CMTimeMake(du->presentationTimeMs, 1000), kCMTimeInvalid};
     
     status = CMSampleBufferCreateReady(kCFAllocatorDefault,
                                   frameBlockBuffer,
@@ -372,7 +370,7 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
     // Enqueue the next frame
     [self->displayLayer enqueueSampleBuffer:sampleBuffer];
     
-    if (frameType == FRAME_TYPE_IDR) {
+    if (du->frameType == FRAME_TYPE_IDR) {
         // Ensure the layer is visible now
         self->displayLayer.hidden = NO;
         
