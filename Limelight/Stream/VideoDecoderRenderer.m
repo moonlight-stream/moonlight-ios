@@ -174,6 +174,53 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
     }
 }
 
+// Much of this logic comes from Chrome
+- (NSDictionary*)createAV1FormatExtensionsDictionaryForDU:(PDECODE_UNIT)du {
+    NSMutableDictionary* extensions = [[NSMutableDictionary alloc] init];
+
+    extensions[(__bridge NSString*)kCMFormatDescriptionExtension_FormatName] = @"av01";
+    
+    // We use the value for YUV without alpha, same as Chrome
+    // https://developer.apple.com/library/archive/qa/qa1183/_index.html
+    extensions[(__bridge NSString*)kCMFormatDescriptionExtension_Depth] = @24;
+
+    switch (du->colorspace) {
+        default:
+        case COLORSPACE_REC_601:
+            extensions[(__bridge NSString*)kCMFormatDescriptionExtension_ColorPrimaries] = (__bridge NSString*)kCMFormatDescriptionColorPrimaries_SMPTE_C;
+            extensions[(__bridge NSString*)kCMFormatDescriptionExtension_TransferFunction] = (__bridge NSString*)kCMFormatDescriptionTransferFunction_ITU_R_709_2;
+            extensions[(__bridge NSString*)kCMFormatDescriptionExtension_YCbCrMatrix] = (__bridge NSString*)kCMFormatDescriptionYCbCrMatrix_ITU_R_601_4;
+            break;
+        case COLORSPACE_REC_709:
+            extensions[(__bridge NSString*)kCMFormatDescriptionExtension_ColorPrimaries] = (__bridge NSString*)kCMFormatDescriptionColorPrimaries_ITU_R_709_2;
+            extensions[(__bridge NSString*)kCMFormatDescriptionExtension_TransferFunction] = (__bridge NSString*)kCMFormatDescriptionTransferFunction_ITU_R_709_2;
+            extensions[(__bridge NSString*)kCMFormatDescriptionExtension_YCbCrMatrix] = (__bridge NSString*)kCMFormatDescriptionTransferFunction_ITU_R_709_2;
+            break;
+        case COLORSPACE_REC_2020:
+            extensions[(__bridge NSString*)kCMFormatDescriptionExtension_ColorPrimaries] = (__bridge NSString*)kCMFormatDescriptionColorPrimaries_ITU_R_2020;
+            extensions[(__bridge NSString*)kCMFormatDescriptionExtension_YCbCrMatrix] = (__bridge NSString*)kCMFormatDescriptionYCbCrMatrix_ITU_R_2020;
+            if (du->hdrActive) {
+                extensions[(__bridge NSString*)kCMFormatDescriptionExtension_TransferFunction] = (__bridge NSString*)kCMFormatDescriptionTransferFunction_SMPTE_ST_2084_PQ;
+            }
+            else {
+                extensions[(__bridge NSString*)kCMFormatDescriptionExtension_TransferFunction] = (__bridge NSString*)kCMFormatDescriptionTransferFunction_ITU_R_2020;
+            }
+            break;
+    }
+    
+    extensions[(__bridge NSString*)kCMFormatDescriptionExtension_FullRangeVideo] = @(NO);
+    
+    if (contentLightLevelInfo) {
+        extensions[(__bridge NSString*)kCMFormatDescriptionExtension_ContentLightLevelInfo] = contentLightLevelInfo;
+    }
+    
+    if (masteringDisplayColorVolume) {
+        extensions[(__bridge NSString*)kCMFormatDescriptionExtension_MasteringDisplayColorVolume] = masteringDisplayColorVolume;
+    }
+    
+    return extensions;
+}
+
 // This function must free data for bufferType == BUFFER_TYPE_PICDATA
 - (int)submitDecodeBuffer:(unsigned char *)data length:(int)length bufferType:(int)bufferType decodeUnit:(PDECODE_UNIT)du
 {
@@ -267,8 +314,11 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
 #if defined(__IPHONE_16_0) || defined(__TVOS_16_0)
             else if (videoFormat & VIDEO_FORMAT_MASK_AV1) {
                 // AV1 doesn't have a special format description function like H.264 and HEVC have, so we just use the generic one
-                // TODO: Is this correct?
-                status = CMVideoFormatDescriptionCreate(kCFAllocatorDefault, kCMVideoCodecType_AV1, videoWidth, videoHeight, nil, &formatDesc);
+                NSDictionary* extensions = [self createAV1FormatExtensionsDictionaryForDU:du];
+                status = CMVideoFormatDescriptionCreate(kCFAllocatorDefault, kCMVideoCodecType_AV1,
+                                                        videoWidth, videoHeight,
+                                                        (__bridge CFDictionaryRef)extensions,
+                                                        &formatDesc);
                 if (status != noErr) {
                     Log(LOG_E, @"Failed to create AV1 format description: %d", (int)status);
                     formatDesc = NULL;
