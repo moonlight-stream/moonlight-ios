@@ -198,53 +198,43 @@ BOOL isCustomResolution(CGSize res) {
     if (!enable120Fps) {
         [self.framerateSelector removeSegmentAtIndex:2 animated:NO];
     }
-    
-    // Only show the 4K option for "recent" devices. We'll judge that by whether
-    // they support HEVC decoding (A9 or later).
-    if (@available(iOS 11.0, tvOS 11.0, *)) {
-        if (!VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC)) {
-            [self.resolutionSelector setEnabled:NO forSegmentAtIndex:3];
-        }
+
+    // Disable codec selector segments for unsupported codecs
+    if (!VTIsHardwareDecodeSupported(kCMVideoCodecType_AV1)) {
+        [self.codecSelector setEnabled:NO forSegmentAtIndex:2];
     }
-    else {
+    if (!VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC)) {
+        [self.codecSelector setEnabled:NO forSegmentAtIndex:1];
+        
+        // Only enable the 4K option for "recent" devices. We'll judge that by whether
+        // they support HEVC decoding (A9 or later).
         [self.resolutionSelector setEnabled:NO forSegmentAtIndex:3];
     }
-
-    // Disable the HEVC selector if HEVC is not supported by the hardware
-    // or the version of iOS. See comment in Connection.m for reasoning behind
-    // the iOS 11.3 check.
-    if (@available(iOS 11.3, tvOS 11.3, *)) {
-        if (VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC)) {
-            [self.hevcSelector setSelectedSegmentIndex:currentSettings.useHevc ? 1 : 0];
-        }
-        else {
-            [self.hevcSelector removeAllSegments];
-            [self.hevcSelector insertSegmentWithTitle:@"Unsupported on this device" atIndex:0 animated:NO];
-            [self.hevcSelector setEnabled:NO];
-        }
-        
-        // Disable HDR selector if HDR is not supported by the display
-        if (!VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC) || !(AVPlayer.availableHDRModes & AVPlayerHDRModeHDR10)) {
-            [self.hdrSelector removeAllSegments];
-            [self.hdrSelector insertSegmentWithTitle:@"Unsupported on this device" atIndex:0 animated:NO];
-            [self.hdrSelector setEnabled:NO];
-        }
-        else {
-            [self.hdrSelector setSelectedSegmentIndex:currentSettings.enableHdr ? 1 : 0];
-            [self.hdrSelector addTarget:self action:@selector(hdrStateChanged) forControlEvents:UIControlEventValueChanged];
+    switch (currentSettings.preferredCodec) {
+        case CODEC_PREF_AUTO:
+            [self.codecSelector setSelectedSegmentIndex:self.codecSelector.numberOfSegments - 1];
+            break;
             
-            // Manually trigger the hdrStateChanged callback to set the HEVC selector appropriately
-            [self hdrStateChanged];
-        }
+        case CODEC_PREF_AV1:
+            [self.codecSelector setSelectedSegmentIndex:2];
+            break;
+            
+        case CODEC_PREF_HEVC:
+            [self.codecSelector setSelectedSegmentIndex:1];
+            break;
+            
+        case CODEC_PREF_H264:
+            [self.codecSelector setSelectedSegmentIndex:0];
+            break;
+    }
+    
+    if (!VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC) || !(AVPlayer.availableHDRModes & AVPlayerHDRModeHDR10)) {
+        [self.hdrSelector removeAllSegments];
+        [self.hdrSelector insertSegmentWithTitle:@"Unsupported on this device" atIndex:0 animated:NO];
+        [self.hdrSelector setEnabled:NO];
     }
     else {
-        [self.hevcSelector removeAllSegments];
-        [self.hevcSelector insertSegmentWithTitle:@"Requires iOS 11.3 or later" atIndex:0 animated:NO];
-        [self.hevcSelector setEnabled:NO];
-        
-        [self.hdrSelector removeAllSegments];
-        [self.hdrSelector insertSegmentWithTitle:@"Requires iOS 11.3 or later" atIndex:0 animated:NO];
-        [self.hdrSelector setEnabled:NO];
+        [self.hdrSelector setSelectedSegmentIndex:currentSettings.enableHdr ? 1 : 0];
     }
     
     [self.touchModeSelector setSelectedSegmentIndex:currentSettings.absoluteTouchMode ? 1 : 0];
@@ -348,16 +338,6 @@ BOOL isCustomResolution(CGSize res) {
         [self updateBitrate];
         [self updateResolutionDisplayViewText];
         _lastSelectedResolutionIndex = [self.resolutionSelector selectedSegmentIndex];
-    }
-}
-
-- (void) hdrStateChanged {
-    if ([self.hdrSelector selectedSegmentIndex] == 1) {
-        [self.hevcSelector setSelectedSegmentIndex:1];
-        [self.hevcSelector setEnabled:NO];
-    }
-    else {
-        [self.hevcSelector setEnabled:YES];
     }
 }
 
@@ -497,6 +477,28 @@ BOOL isCustomResolution(CGSize res) {
     }
 }
 
+- (uint32_t) getChosenCodecPreference {
+    // Auto is always the last segment
+    if (self.codecSelector.selectedSegmentIndex == self.codecSelector.numberOfSegments - 1) {
+        return CODEC_PREF_AUTO;
+    }
+    else {
+        switch (self.codecSelector.selectedSegmentIndex) {
+            case 0:
+                return CODEC_PREF_H264;
+                
+            case 1:
+                return CODEC_PREF_HEVC;
+                
+            case 2:
+                return CODEC_PREF_AV1;
+                
+            default:
+                abort();
+        }
+    }
+}
+
 - (NSInteger) getChosenStreamHeight {
     // because the 4k resolution can be removed
     BOOL lastSegmentSelected = [self.resolutionSelector selectedSegmentIndex] + 1 == [self.resolutionSelector numberOfSegments];
@@ -527,7 +529,7 @@ BOOL isCustomResolution(CGSize res) {
     BOOL multiController = [self.multiControllerSelector selectedSegmentIndex] == 1;
     BOOL swapABXYButtons = [self.swapABXYButtonsSelector selectedSegmentIndex] == 1;
     BOOL audioOnPC = [self.audioOnPCSelector selectedSegmentIndex] == 1;
-    BOOL useHevc = [self.hevcSelector selectedSegmentIndex] == 1;
+    uint32_t preferredCodec = [self getChosenCodecPreference];
     BOOL btMouseSupport = [self.btMouseSelector selectedSegmentIndex] == 1;
     BOOL useFramePacing = [self.framePacingSelector selectedSegmentIndex] == 1;
     BOOL absoluteTouchMode = [self.touchModeSelector selectedSegmentIndex] == 1;
@@ -543,8 +545,8 @@ BOOL isCustomResolution(CGSize res) {
                      multiController:multiController
                      swapABXYButtons:swapABXYButtons
                            audioOnPC:audioOnPC
-                             useHevc:useHevc
-                            useFramePacing:useFramePacing
+                      preferredCodec:preferredCodec
+                      useFramePacing:useFramePacing
                            enableHdr:enableHdr
                       btMouseSupport:btMouseSupport
                    absoluteTouchMode:absoluteTouchMode

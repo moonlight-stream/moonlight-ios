@@ -662,17 +662,39 @@ static NSMutableSet* hostList;
     
     _streamConfig.serverCodecModeSupport = app.host.serverCodecModeSupport;
     
-    // H.264 is always supported
-    _streamConfig.supportedVideoFormats = VIDEO_FORMAT_H264;
+    switch (streamSettings.preferredCodec) {
+        case CODEC_PREF_AV1:
+            if (VTIsHardwareDecodeSupported(kCMVideoCodecType_AV1)) {
+                _streamConfig.supportedVideoFormats |= VIDEO_FORMAT_AV1_MAIN8;
+            }
+            // Fall-through
+            
+        case CODEC_PREF_AUTO:
+        case CODEC_PREF_HEVC:
+            if (VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC)) {
+                _streamConfig.supportedVideoFormats |= VIDEO_FORMAT_H265;
+            }
+            // Fall-through
+            
+        case CODEC_PREF_H264:
+            _streamConfig.supportedVideoFormats |= VIDEO_FORMAT_H264;
+            break;
+    }
     
     // HEVC is supported if the user wants it (or it's required by the chosen resolution) and the SoC supports it
-    if ((_streamConfig.width > 4096 || _streamConfig.height > 4096 || streamSettings.useHevc || streamSettings.enableHdr) && VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC)) {
+    if ((_streamConfig.width > 4096 || _streamConfig.height > 4096 || streamSettings.enableHdr) && VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC)) {
         _streamConfig.supportedVideoFormats |= VIDEO_FORMAT_H265;
         
         // HEVC Main10 is supported if the user wants it and the display supports it
         if (streamSettings.enableHdr && (AVPlayer.availableHDRModes & AVPlayerHDRModeHDR10) != 0) {
             _streamConfig.supportedVideoFormats |= VIDEO_FORMAT_H265_MAIN10;
         }
+    }
+    
+    // Add the AV1 Main10 format if AV1 and HDR are both enabled and supported
+    if ((_streamConfig.supportedVideoFormats & VIDEO_FORMAT_MASK_AV1) && streamSettings.enableHdr &&
+        VTIsHardwareDecodeSupported(kCMVideoCodecType_AV1) && (AVPlayer.availableHDRModes & AVPlayerHDRModeHDR10) != 0) {
+        _streamConfig.supportedVideoFormats |= VIDEO_FORMAT_AV1_MAIN10;
     }
 }
 
