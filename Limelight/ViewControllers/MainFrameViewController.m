@@ -664,9 +664,11 @@ static NSMutableSet* hostList;
     
     switch (streamSettings.preferredCodec) {
         case CODEC_PREF_AV1:
+#if defined(__IPHONE_16_0) || defined(__TVOS_16_0)
             if (VTIsHardwareDecodeSupported(kCMVideoCodecType_AV1)) {
                 _streamConfig.supportedVideoFormats |= VIDEO_FORMAT_AV1_MAIN8;
             }
+#endif
             // Fall-through
             
         case CODEC_PREF_AUTO:
@@ -691,11 +693,13 @@ static NSMutableSet* hostList;
         }
     }
     
+#if defined(__IPHONE_16_0) || defined(__TVOS_16_0)
     // Add the AV1 Main10 format if AV1 and HDR are both enabled and supported
     if ((_streamConfig.supportedVideoFormats & VIDEO_FORMAT_MASK_AV1) && streamSettings.enableHdr &&
         VTIsHardwareDecodeSupported(kCMVideoCodecType_AV1) && (AVPlayer.availableHDRModes & AVPlayerHDRModeHDR10) != 0) {
         _streamConfig.supportedVideoFormats |= VIDEO_FORMAT_AV1_MAIN10;
     }
+#endif
 }
 
 - (void)appLongClicked:(TemporaryApp *)app view:(UIView *)view {

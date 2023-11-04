@@ -200,7 +200,10 @@ BOOL isCustomResolution(CGSize res) {
     }
 
     // Disable codec selector segments for unsupported codecs
-    if (!VTIsHardwareDecodeSupported(kCMVideoCodecType_AV1)) {
+#if defined(__IPHONE_16_0) || defined(__TVOS_16_0)
+    if (!VTIsHardwareDecodeSupported(kCMVideoCodecType_AV1))
+#endif
+    {
         [self.codecSelector setEnabled:NO forSegmentAtIndex:2];
     }
     if (!VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC)) {
