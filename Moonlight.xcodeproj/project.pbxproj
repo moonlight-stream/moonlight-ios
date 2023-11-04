@@ -1179,11 +1179,17 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				LIBRARY_SEARCH_PATHS = (
+				"LIBRARY_SEARCH_PATHS[sdk=appletvos*]" = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/libs/opus/lib/tvOS",
 					"$(PROJECT_DIR)/libs/SDL2/lib/tvOS",
 					"$(PROJECT_DIR)/libs/FFmpeg/lib/tvOS",
+				);
+				"LIBRARY_SEARCH_PATHS[sdk=appletvsimulator*]" = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/libs/opus/lib/tvOS-Sim",
+					"$(PROJECT_DIR)/libs/SDL2/lib/tvOS-Sim",
+					"$(PROJECT_DIR)/libs/FFmpeg/lib/tvOS-Sim",
 				);
 				MARKETING_VERSION = 8.5.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
@@ -1228,11 +1234,17 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				LIBRARY_SEARCH_PATHS = (
+				"LIBRARY_SEARCH_PATHS[sdk=appletvos*]" = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/libs/opus/lib/tvOS",
 					"$(PROJECT_DIR)/libs/SDL2/lib/tvOS",
 					"$(PROJECT_DIR)/libs/FFmpeg/lib/tvOS",
+				);
+				"LIBRARY_SEARCH_PATHS[sdk=appletvsimulator*]" = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/libs/opus/lib/tvOS-Sim",
+					"$(PROJECT_DIR)/libs/SDL2/lib/tvOS-Sim",
+					"$(PROJECT_DIR)/libs/FFmpeg/lib/tvOS-Sim",
 				);
 				MARKETING_VERSION = 8.5.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -1378,11 +1390,17 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				LIBRARY_SEARCH_PATHS = (
+				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/libs/opus/lib/iOS",
 					"$(PROJECT_DIR)/libs/SDL2/lib/iOS",
 					"$(PROJECT_DIR)/libs/FFmpeg/lib/iOS",
+				);
+				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/libs/opus/lib/iOS-Sim",
+					"$(PROJECT_DIR)/libs/SDL2/lib/iOS-Sim",
+					"$(PROJECT_DIR)/libs/FFmpeg/lib/iOS-Sim",
 				);
 				MARKETING_VERSION = 8.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.$(PRODUCT_NAME:rfc1034identifier)";
@@ -1420,11 +1438,17 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				LIBRARY_SEARCH_PATHS = (
+				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/libs/opus/lib/iOS",
 					"$(PROJECT_DIR)/libs/SDL2/lib/iOS",
 					"$(PROJECT_DIR)/libs/FFmpeg/lib/iOS",
+				);
+				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/libs/opus/lib/iOS-Sim",
+					"$(PROJECT_DIR)/libs/SDL2/lib/iOS-Sim",
+					"$(PROJECT_DIR)/libs/FFmpeg/lib/iOS-Sim",
 				);
 				MARKETING_VERSION = 8.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.$(PRODUCT_NAME:rfc1034identifier)";
