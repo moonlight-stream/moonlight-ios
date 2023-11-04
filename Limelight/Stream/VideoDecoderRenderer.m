@@ -9,6 +9,13 @@
 #import "VideoDecoderRenderer.h"
 #import "StreamView.h"
 
+#include <libavformat/avio.h>
+#include <libavutil/mem.h>
+
+// Private libavformat API for writing the AV1 Codec Configuration Box
+extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
+                              int write_seq_header);
+
 @implementation VideoDecoderRenderer {
     StreamView* _view;
     id<ConnectionCallbacks> _callbacks;
@@ -174,8 +181,44 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
     }
 }
 
+- (NSData*)getAv1CodecConfigurationBox:(NSData*)frameData  {
+    AVIOContext* ioctx = NULL;
+    int err;
+    
+    err = avio_open_dyn_buf(&ioctx);
+    if (err < 0) {
+        Log(LOG_E, @"avio_open_dyn_buf() failed: %d", err);
+        return nil;
+    }
+    
+    // The sequence header and any metadata OBUs should always fit in the first buffer
+    err = ff_isom_write_av1c(ioctx, (uint8_t*)frameData.bytes, (int)frameData.length, 1);
+    if (err < 0) {
+        Log(LOG_E, @"ff_isom_write_av1c() failed: %d", err);
+        // Fall-through to close and free buffer
+    }
+    
+    // Close the dynbuf and get the underlying buffer back (which we must free)
+    uint8_t* av1cBuf = NULL;
+    int av1cBufLen = avio_close_dyn_buf(ioctx, &av1cBuf);
+    
+    Log(LOG_I, @"av1C block is %d bytes", av1cBufLen);
+    
+    // Only return data if ff_isom_write_av1c() was successful
+    NSData* data = nil;
+    if (err >= 0 && av1cBufLen > 0) {
+        data = [NSData dataWithBytes:av1cBuf length:av1cBufLen];
+    }
+    else {
+        data = nil;
+    }
+    
+    av_free(av1cBuf);
+    return data;
+}
+
 // Much of this logic comes from Chrome
-- (NSDictionary*)createAV1FormatExtensionsDictionaryForDU:(PDECODE_UNIT)du {
+- (NSDictionary*)createAV1FormatExtensionsDictionaryForDU:(PDECODE_UNIT)du frameData:(NSData*)frameData {
     NSMutableDictionary* extensions = [[NSMutableDictionary alloc] init];
 
     extensions[(__bridge NSString*)kCMFormatDescriptionExtension_FormatName] = @"av01";
@@ -217,6 +260,14 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
     if (masteringDisplayColorVolume) {
         extensions[(__bridge NSString*)kCMFormatDescriptionExtension_MasteringDisplayColorVolume] = masteringDisplayColorVolume;
     }
+    
+    // Referenced the VP9 code in Chrome that performs a similar function
+    // https://source.chromium.org/chromium/chromium/src/+/main:media/gpu/mac/vt_config_util.mm;drc=977dc02c431b4979e34c7792bc3d646f649dacb4;l=155
+    extensions[(__bridge NSString*)kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms] =
+    @{
+        @"av1C" : [self getAv1CodecConfigurationBox:frameData],
+    };
+    extensions[@"BitsPerComponent"] = @((videoFormat & VIDEO_FORMAT_MASK_10BIT) ? 10 : 8);
     
     return extensions;
 }
@@ -313,8 +364,11 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
             }
 #if defined(__IPHONE_16_0) || defined(__TVOS_16_0)
             else if (videoFormat & VIDEO_FORMAT_MASK_AV1) {
+                Log(LOG_I, @"Constructing new AV1 format description");
+                
                 // AV1 doesn't have a special format description function like H.264 and HEVC have, so we just use the generic one
-                NSDictionary* extensions = [self createAV1FormatExtensionsDictionaryForDU:du];
+                NSData* fullFrameData = [NSData dataWithBytesNoCopy:data length:length freeWhenDone:NO];
+                NSDictionary* extensions = [self createAV1FormatExtensionsDictionaryForDU:du frameData:fullFrameData];
                 status = CMVideoFormatDescriptionCreate(kCFAllocatorDefault, kCMVideoCodecType_AV1,
                                                         videoWidth, videoHeight,
                                                         (__bridge CFDictionaryRef)extensions,
