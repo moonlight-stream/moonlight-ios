@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2022 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -47,9 +47,9 @@ extern "C" {
 
 
 /**
- *  \brief The maximum size of a log message
+ *  \brief The maximum size of a log message prior to SDL 2.0.24
  *
- *  Messages longer than the maximum size will be truncated
+ *  As of 2.0.24 there is no limit to the length of SDL log messages.
  */
 #define SDL_MAX_LOG_MESSAGE 4096
 

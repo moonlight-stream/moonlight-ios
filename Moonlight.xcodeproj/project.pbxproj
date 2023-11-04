@@ -24,6 +24,12 @@
 		9865DC38213287FE0005B9B9 /* LoadingFrameViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FB4A23B71A9D3637004D2EF2 /* LoadingFrameViewController.m */; };
 		9865DC3C2132922E0005B9B9 /* GameController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9865DC3B2132922E0005B9B9 /* GameController.framework */; };
 		9865DC3E21332D660005B9B9 /* MainFrameViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FB89462519F646E200339C8A /* MainFrameViewController.m */; };
+		98882A062AF60F7000C5A11C /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98882A032AF60F5300C5A11C /* libavcodec.a */; };
+		98882A072AF60F7200C5A11C /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98882A052AF60F5300C5A11C /* libavformat.a */; };
+		98882A082AF60F7400C5A11C /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98882A042AF60F5300C5A11C /* libavutil.a */; };
+		98882A0C2AF60F9E00C5A11C /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98882A0A2AF60F9000C5A11C /* libavcodec.a */; };
+		98882A0D2AF60FA000C5A11C /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98882A0B2AF60F9000C5A11C /* libavformat.a */; };
+		98882A0E2AF60FA300C5A11C /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98882A092AF60F9000C5A11C /* libavutil.a */; };
 		988FCD41293B091B003050E2 /* KeyboardInputField.m in Sources */ = {isa = PBXBuildFile; fileRef = 988FCD40293B091B003050E2 /* KeyboardInputField.m */; };
 		988FCD42293B091B003050E2 /* KeyboardInputField.m in Sources */ = {isa = PBXBuildFile; fileRef = 988FCD40293B091B003050E2 /* KeyboardInputField.m */; };
 		9890CF6B203B7EE1006C4B06 /* libxml2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 9890CF6A203B7EE1006C4B06 /* libxml2.tbd */; };
@@ -188,6 +194,12 @@
 		986E28A528EA989100758361 /* Moonlight v1.9.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Moonlight v1.9.xcdatamodel"; sourceTree = "<group>"; };
 		9874E8962AE95E1D00130A3C /* Moonlight v1.10.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Moonlight v1.10.xcdatamodel"; sourceTree = "<group>"; };
 		98783FEA242EAC5D00F00EF4 /* Moonlight v1.5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Moonlight v1.5.xcdatamodel"; sourceTree = "<group>"; };
+		98882A032AF60F5300C5A11C /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcodec.a; path = libs/FFmpeg/lib/iOS/libavcodec.a; sourceTree = "<group>"; };
+		98882A042AF60F5300C5A11C /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavutil.a; path = libs/FFmpeg/lib/iOS/libavutil.a; sourceTree = "<group>"; };
+		98882A052AF60F5300C5A11C /* libavformat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavformat.a; path = libs/FFmpeg/lib/iOS/libavformat.a; sourceTree = "<group>"; };
+		98882A092AF60F9000C5A11C /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavutil.a; path = libs/FFmpeg/lib/tvOS/libavutil.a; sourceTree = "<group>"; };
+		98882A0A2AF60F9000C5A11C /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcodec.a; path = libs/FFmpeg/lib/tvOS/libavcodec.a; sourceTree = "<group>"; };
+		98882A0B2AF60F9000C5A11C /* libavformat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavformat.a; path = libs/FFmpeg/lib/tvOS/libavformat.a; sourceTree = "<group>"; };
 		988FCD3F293B091B003050E2 /* KeyboardInputField.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KeyboardInputField.h; sourceTree = "<group>"; };
 		988FCD40293B091B003050E2 /* KeyboardInputField.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KeyboardInputField.m; sourceTree = "<group>"; };
 		9890CF6A203B7EE1006C4B06 /* libxml2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.tbd; path = usr/lib/libxml2.tbd; sourceTree = SDKROOT; };
@@ -396,11 +408,14 @@
 				98A2E31129B5256200CA17A7 /* OpenSSL.xcframework in Frameworks */,
 				9865DC30213260B40005B9B9 /* libmoonlight-common-tv.a in Frameworks */,
 				9865DC3C2132922E0005B9B9 /* GameController.framework in Frameworks */,
+				98882A0D2AF60FA000C5A11C /* libavformat.a in Frameworks */,
+				98882A0E2AF60FA300C5A11C /* libavutil.a in Frameworks */,
 				FB1A67EA21324DF300507771 /* libxml2.tbd in Frameworks */,
 				FB1A67E821324DE300507771 /* libopus.a in Frameworks */,
 				98181BEB2791278F00E43572 /* libSDL2.a in Frameworks */,
 				FB1A67E521324A1F00507771 /* CoreData.framework in Frameworks */,
 				98B9CE6D27B2144B00B473C4 /* AVKit.framework in Frameworks */,
+				98882A0C2AF60F9E00C5A11C /* libavcodec.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -412,13 +427,16 @@
 				9890CF6B203B7EE1006C4B06 /* libxml2.tbd in Frameworks */,
 				98CFB82F1CAD481B0048EF74 /* libmoonlight-common.a in Frameworks */,
 				FB8946ED19F6AFE800339C8A /* libopus.a in Frameworks */,
+				98882A082AF60F7400C5A11C /* libavutil.a in Frameworks */,
 				FB290CF419B2C406004C83CF /* CoreGraphics.framework in Frameworks */,
 				FB290CF819B2C406004C83CF /* CoreData.framework in Frameworks */,
 				98181BED2791281100E43572 /* CoreMotion.framework in Frameworks */,
+				98882A072AF60F7200C5A11C /* libavformat.a in Frameworks */,
 				FB290CF619B2C406004C83CF /* UIKit.framework in Frameworks */,
 				FB290CF219B2C406004C83CF /* Foundation.framework in Frameworks */,
 				FB4679011A57048000377732 /* CoreFoundation.framework in Frameworks */,
 				98181BE92791277400E43572 /* libSDL2.a in Frameworks */,
+				98882A062AF60F7000C5A11C /* libavcodec.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -478,6 +496,12 @@
 		FB290CF019B2C406004C83CF /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				98882A032AF60F5300C5A11C /* libavcodec.a */,
+				98882A052AF60F5300C5A11C /* libavformat.a */,
+				98882A0A2AF60F9000C5A11C /* libavcodec.a */,
+				98882A0B2AF60F9000C5A11C /* libavformat.a */,
+				98882A042AF60F5300C5A11C /* libavutil.a */,
+				98882A092AF60F9000C5A11C /* libavutil.a */,
 				98A2E31029B5256200CA17A7 /* OpenSSL.xcframework */,
 				98B9CE6C27B2144B00B473C4 /* AVKit.framework */,
 				98181BEC2791281100E43572 /* CoreMotion.framework */,
@@ -1159,6 +1183,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/libs/opus/lib/tvOS",
 					"$(PROJECT_DIR)/libs/SDL2/lib/tvOS",
+					"$(PROJECT_DIR)/libs/FFmpeg/lib/tvOS",
 				);
 				MARKETING_VERSION = 8.5.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
@@ -1207,6 +1232,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/libs/opus/lib/tvOS",
 					"$(PROJECT_DIR)/libs/SDL2/lib/tvOS",
+					"$(PROJECT_DIR)/libs/FFmpeg/lib/tvOS",
 				);
 				MARKETING_VERSION = 8.5.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -1356,6 +1382,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/libs/opus/lib/iOS",
 					"$(PROJECT_DIR)/libs/SDL2/lib/iOS",
+					"$(PROJECT_DIR)/libs/FFmpeg/lib/iOS",
 				);
 				MARKETING_VERSION = 8.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.$(PRODUCT_NAME:rfc1034identifier)";
@@ -1397,6 +1424,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/libs/opus/lib/iOS",
 					"$(PROJECT_DIR)/libs/SDL2/lib/iOS",
+					"$(PROJECT_DIR)/libs/FFmpeg/lib/iOS",
 				);
 				MARKETING_VERSION = 8.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.$(PRODUCT_NAME:rfc1034identifier)";
