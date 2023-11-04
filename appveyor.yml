@@ -7,12 +7,15 @@ environment:
     - APPVEYOR_BUILD_WORKER_IMAGE: macOS-Monterey
       SCHEME: Moonlight
       SDK: iphonesimulator
-    - APPVEYOR_BUILD_WORKER_IMAGE: macOS-BigSur
+      PLATFORM: iOS
+    - APPVEYOR_BUILD_WORKER_IMAGE: macOS-Monterey
       SCHEME: Moonlight TV
       SDK: appletvsimulator
+      PLATFORM: tvOS
 
 before_build:
   - 'git submodule update --init --recursive'
+  - sh: 'xcodebuild -downloadPlatform $PLATFORM'
 
 build_script:
   - sh: set -o pipefail && xcodebuild -project Moonlight.xcodeproj -scheme "$SCHEME" -configuration Debug -sdk $SDK clean build | xcpretty
