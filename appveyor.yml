@@ -2,15 +2,20 @@ version: 0.0.0.{build}
 
 clone_depth: 1
 
-image: macOS-Monterey
+environment:
+  matrix:
+    - APPVEYOR_BUILD_WORKER_IMAGE: macOS-Monterey
+      SCHEME: Moonlight
+      SDK: iphonesimulator
+    - APPVEYOR_BUILD_WORKER_IMAGE: macOS-BigSur
+      SCHEME: Moonlight TV
+      SDK: appletvsimulator
 
 before_build:
   - 'git submodule update --init --recursive'
 
 build_script:
-  - sh: set -o pipefail && xcodebuild -project Moonlight.xcodeproj -scheme "Moonlight" -configuration Debug -sdk iphonesimulator clean build | xcpretty
-  - sh: set -o pipefail && xcodebuild -project Moonlight.xcodeproj -scheme "Moonlight" -configuration Release -sdk iphonesimulator clean build | xcpretty
-  - sh: set -o pipefail && xcodebuild -project Moonlight.xcodeproj -scheme "Moonlight TV" -configuration Debug -sdk appletvsimulator clean build | xcpretty
-  - sh: set -o pipefail && xcodebuild -project Moonlight.xcodeproj -scheme "Moonlight TV" -configuration Release -sdk appletvsimulator clean build | xcpretty
+  - sh: set -o pipefail && xcodebuild -project Moonlight.xcodeproj -scheme "$SCHEME" -configuration Debug -sdk $SDK clean build | xcpretty
+  - sh: set -o pipefail && xcodebuild -project Moonlight.xcodeproj -scheme "$SCHEME" -configuration Release -sdk $SDK clean build | xcpretty
 
 deploy: off
