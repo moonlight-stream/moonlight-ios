@@ -36,7 +36,7 @@
     assert([self.framerate intValue] != 0);
     self.audioConfig = [NSNumber numberWithInteger:[[NSUserDefaults standardUserDefaults] integerForKey:@"audioConfig"]];
     assert([self.audioConfig intValue] != 0);
-    self.preferredCodec = [[NSUserDefaults standardUserDefaults] integerForKey:@"preferredCodec"];
+    self.preferredCodec = (typeof(self.preferredCodec))[[NSUserDefaults standardUserDefaults] integerForKey:@"preferredCodec"];
     self.useFramePacing = [[NSUserDefaults standardUserDefaults] integerForKey:@"useFramePacing"] != 0;
     self.playAudioOnPC = [[NSUserDefaults standardUserDefaults] boolForKey:@"audioOnPC"];
     self.enableHdr = [[NSUserDefaults standardUserDefaults] boolForKey:@"enableHdr"];
