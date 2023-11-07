@@ -253,6 +253,12 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
     
     CodedBitstreamAV1Context* bitstreamCtx = (CodedBitstreamAV1Context*)cbsCtx->priv_data;
     AV1RawSequenceHeader* seqHeader = bitstreamCtx->sequence_header;
+    if (seqHeader == NULL) {
+        Log(LOG_E, @"AV1 sequence header not found in IDR frame!");
+        ff_cbs_fragment_free(&cbsFrag);
+        ff_cbs_close(&cbsCtx);
+        return nil;
+    }
     
     switch (seqHeader->color_config.color_primaries) {
         case 1: // CP_BT_709
