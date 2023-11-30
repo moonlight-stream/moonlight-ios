@@ -22,6 +22,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     
     KeyboardInputField* keyInputField;
     BOOL isInputingText;
+    NSMutableSet* keysDown;
     
     float streamAspectRatio;
     
@@ -53,6 +54,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     
     TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
     
+    keysDown = [[NSMutableSet alloc] init];
     keyInputField = [[KeyboardInputField alloc] initWithFrame:CGRectZero];
     [keyInputField setKeyboardType:UIKeyboardTypeDefault];
     [keyInputField setAutocorrectionType:UITextAutocorrectionTypeNo];
@@ -424,8 +426,10 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         if (isToggleable){
             if (isOn){
                 LiSendKeyboardEvent(keyCode, KEY_ACTION_DOWN, 0);
+                [keysDown addObject:@(keyCode)];
             } else {
                 LiSendKeyboardEvent(keyCode, KEY_ACTION_UP, 0);
+                [keysDown removeObject:@(keyCode)];
             }
         }
         else {
@@ -763,6 +767,13 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     usleep(50 * 1000);
     LiSendKeyboardEvent(0x0d, KEY_ACTION_UP, 0);
     return NO;
+}
+
+- (void)textFieldDidEndEditing:(UITextField *)textField {
+    for (NSNumber* keyCode in keysDown) {
+        LiSendKeyboardEvent([keyCode shortValue], KEY_ACTION_UP, 0);
+    }
+    [keysDown removeAllObjects];
 }
 
 - (void)onKeyboardPressed:(UITextField *)textField {
