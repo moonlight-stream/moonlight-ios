@@ -444,7 +444,9 @@ void ClSetControllerLED(uint16_t controllerNumber, uint8_t r, uint8_t g, uint8_t
     _drCallbacks.setup = DrDecoderSetup;
     _drCallbacks.start = DrStart;
     _drCallbacks.stop = DrStop;
-    _drCallbacks.capabilities = CAPABILITY_PULL_RENDERER | CAPABILITY_REFERENCE_FRAME_INVALIDATION_HEVC;
+    _drCallbacks.capabilities = CAPABILITY_PULL_RENDERER |
+                                CAPABILITY_REFERENCE_FRAME_INVALIDATION_HEVC |
+                                CAPABILITY_REFERENCE_FRAME_INVALIDATION_AV1;
 
     LiInitializeAudioCallbacks(&_arCallbacks);
     _arCallbacks.init = ArInit;
