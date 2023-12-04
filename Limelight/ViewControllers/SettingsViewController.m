@@ -204,11 +204,11 @@ BOOL isCustomResolution(CGSize res) {
     if (!VTIsHardwareDecodeSupported(kCMVideoCodecType_AV1))
 #endif
     {
-        [self.codecSelector setEnabled:NO forSegmentAtIndex:2];
+        [self.codecSelector removeSegmentAtIndex:2 animated:NO];
     }
     if (!VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC)) {
-        [self.codecSelector setEnabled:NO forSegmentAtIndex:1];
-        
+        [self.codecSelector removeSegmentAtIndex:1 animated:NO];
+
         // Only enable the 4K option for "recent" devices. We'll judge that by whether
         // they support HEVC decoding (A9 or later).
         [self.resolutionSelector setEnabled:NO forSegmentAtIndex:3];
