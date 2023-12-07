@@ -37,10 +37,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     float accumulatedScrollY;
     
     OnScreenControls *_osc;
-    
-    // This controller object is shared between on-screen controls
-    // and player 0
-    Controller *_player0osc;
+    Controller *_oscController;
     
 #define EMULATING_SELECT     0x1
 #define EMULATING_SPECIAL    0x2
@@ -55,12 +52,13 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
 #define UPDATE_BUTTON_FLAG(controller, x, y) \
 ((y) ? [self setButtonFlag:controller flags:x] : [self clearButtonFlag:controller flags:x])
 
+#define MAX_MAGNITUDE(x, y) (abs(x) > abs(y) ? (x) : (y))
+
 -(void) rumble:(unsigned short)controllerNumber lowFreqMotor:(unsigned short)lowFreqMotor highFreqMotor:(unsigned short)highFreqMotor
 {
     Controller* controller = [_controllers objectForKey:[NSNumber numberWithInteger:controllerNumber]];
     if (controller == nil && controllerNumber == 0 && _oscEnabled) {
-        // No physical controller, but we have on-screen controls
-        controller = _player0osc;
+        // TODO: Rumble emulation for OSC
     }
     if (controller == nil) {
         // No connected controller for this player
@@ -75,8 +73,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
 {
     Controller* controller = [_controllers objectForKey:[NSNumber numberWithInteger:controllerNumber]];
     if (controller == nil && controllerNumber == 0 && _oscEnabled) {
-        // No physical controller, but we have on-screen controls
-        controller = _player0osc;
+        // TODO: Trigger rumble emulation for OSC
     }
     if (controller == nil) {
         // No connected controller for this player
@@ -338,9 +335,29 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
         
         // Only send controller events if we successfully reported controller arrival
         if ([self reportControllerArrival:controller]) {
+            uint32_t buttonFlags = controller.lastButtonFlags;
+            uint8_t leftTrigger = controller.lastLeftTrigger;
+            uint8_t rightTrigger = controller.lastRightTrigger;
+            int16_t leftStickX = controller.lastLeftStickX;
+            int16_t leftStickY = controller.lastLeftStickY;
+            int16_t rightStickX = controller.lastRightStickX;
+            int16_t rightStickY = controller.lastRightStickY;
+            
+            // If this is merged with another controller, combine the inputs
+            if (controller.mergedWithController) {
+                buttonFlags |= controller.mergedWithController.lastButtonFlags;
+                leftTrigger = MAX(leftTrigger, controller.mergedWithController.lastLeftTrigger);
+                rightTrigger = MAX(rightTrigger, controller.mergedWithController.lastRightTrigger);
+                leftStickX = MAX_MAGNITUDE(leftStickX, controller.mergedWithController.lastLeftStickX);
+                leftStickY = MAX_MAGNITUDE(leftStickY, controller.mergedWithController.lastLeftStickY);
+                rightStickX = MAX_MAGNITUDE(rightStickX, controller.mergedWithController.lastRightStickX);
+                rightStickY = MAX_MAGNITUDE(rightStickY, controller.mergedWithController.lastRightStickY);
+            }
+            
             // Player 1 is always present for OSC
             LiSendMultiControllerEvent(_multiController ? controller.playerIndex : 0, [self getActiveGamepadMask],
-                                       controller.lastButtonFlags, controller.lastLeftTrigger, controller.lastRightTrigger, controller.lastLeftStickX, controller.lastLeftStickY, controller.lastRightStickX, controller.lastRightStickY);
+                                       buttonFlags, leftTrigger, rightTrigger,
+                                       leftStickX, leftStickY, rightStickX, rightStickY);
         }
     }
     [_controllerStreamLock unlock];
@@ -960,18 +977,14 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
             _controllerNumbers |= (1 << i);
             controller.playerIndex = i;
             
-            Controller* limeController;
-
-            if (i == 0) {
-                // Player 0 shares a controller object with the on-screen controls
-                limeController = _player0osc;
-            } else {
-                limeController = [[Controller alloc] init];
-                limeController.playerIndex = i;
-            }
-            
+            Controller* limeController = [[Controller alloc] init];
+            limeController.playerIndex = i;
             limeController.supportedEmulationFlags = EMULATING_SPECIAL | EMULATING_SELECT;
             limeController.gamepad = controller;
+
+            // If this is player 0, it shares state with the OSC
+            limeController.mergedWithController = _oscController;
+            _oscController.mergedWithController = limeController;
             
             if (@available(iOS 13.0, tvOS 13.0, *)) {
                 if (controller.extendedGamepad != nil &&
@@ -1003,7 +1016,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
 }
 
 -(Controller*) getOscController {
-    return _player0osc;
+    return _oscController;
 }
 
 +(bool) isSupportedGamepad:(GCController*) controller {
@@ -1071,8 +1084,8 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     _swapABXYButtons = streamConfig.swapABXYButtons;
     _delegate = delegate;
 
-    _player0osc = [[Controller alloc] init];
-    _player0osc.playerIndex = 0;
+    _oscController = [[Controller alloc] init];
+    _oscController.playerIndex = 0;
 
     DataManager* dataMan = [[DataManager alloc] init];
     _oscEnabled = (OnScreenControlsLevel)[[dataMan getSettings].onscreenControls integerValue] != OnScreenControlsLevelOff;
@@ -1146,8 +1159,11 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
             // Stop battery reports on this controller
             [self cleanupControllerBattery:limeController];
             
-            // Unset the GCController on this object (in case it is the OSC, which will persist)
-            limeController.gamepad = nil;
+            // Disassociate this controller from any controllers merged with it
+            if (limeController.mergedWithController) {
+                assert(limeController.mergedWithController.mergedWithController == limeController);
+                limeController.mergedWithController.mergedWithController = nil;
+            }
             
             // Inform the server of the updated active gamepads before removing this controller
             [self updateFinished:limeController];

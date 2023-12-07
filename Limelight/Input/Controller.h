@@ -48,5 +48,6 @@ typedef struct {
 @property (nonatomic)                   float lastBatteryLevel;
 
 @property (nonatomic)                   BOOL reportedArrival;
+@property (nonatomic)                   Controller* _Nullable mergedWithController;
 
 @end
