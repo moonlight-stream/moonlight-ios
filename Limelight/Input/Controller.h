@@ -43,6 +43,10 @@ typedef struct {
 @property (nonatomic)                   NSTimer* _Nullable gyroTimer;
 @property (nonatomic)                   GCRotationRate lastGyroSample;
 
+@property (nonatomic)                   NSTimer* _Nullable batteryTimer;
+@property (nonatomic)                   GCDeviceBatteryState lastBatteryState;
+@property (nonatomic)                   float lastBatteryLevel;
+
 @property (nonatomic)                   BOOL reportedArrival;
 
 @end

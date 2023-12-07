@@ -22,6 +22,7 @@
 @interface ControllerSupport : NSObject
 
 -(id) initWithConfig:(StreamConfiguration*)streamConfig delegate:(id<ControllerSupportDelegate>)delegate;
+-(void) connectionEstablished;
 
 -(void) initAutoOnScreenControlMode:(OnScreenControls*)osc;
 -(void) cleanup;

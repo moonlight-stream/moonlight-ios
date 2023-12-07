@@ -377,6 +377,8 @@
         
         [self->_streamView showOnScreenControls];
         
+        [self->_controllerSupport connectionEstablished];
+        
         if (self->_settings.statsOverlay) {
             self->_statsUpdateTimer = [NSTimer scheduledTimerWithTimeInterval:1.0f
                                                                        target:self
