@@ -356,7 +356,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
                 keyInputField.text = @"0";
 #if !TARGET_OS_TV
                 // Prepare the toolbar above the keyboard for more options
-                UIToolbar *customToolbarView = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, 44)];
+                UIToolbar *customToolbarView = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width > 1500 ? self.bounds.size.width : 1500, 44)];
                 
                 UIBarButtonItem *doneBarButton = [self createButtonWithImageNamed:@"DoneIcon.png" backgroundColor:[UIColor clearColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x00 isToggleable:NO];
                 UIBarButtonItem *windowsBarButton = [self createButtonWithImageNamed:@"WindowsIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x5B isToggleable:YES];
@@ -374,8 +374,23 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
                 UIBarButtonItem *fn6BarButton = [self createButtonWithImageNamed:@"Fn6Icon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x75 isToggleable:NO];
                 UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
                 
+                UIScrollView *scrollView = [[UIScrollView alloc] init];
+                scrollView.frame = customToolbarView.frame;
+                scrollView.bounds = customToolbarView.bounds;
+                scrollView.autoresizingMask = customToolbarView.autoresizingMask;
+                scrollView.showsVerticalScrollIndicator = true;
+                scrollView.showsHorizontalScrollIndicator = false;
+                scrollView.scrollEnabled = YES;
+                scrollView.bounces = false;
+                scrollView.bouncesZoom = false;
+                
                 [customToolbarView setItems:[NSArray arrayWithObjects:doneBarButton, windowsBarButton, escapeBarButton, tabBarButton, shiftBarButton, controlBarButton, altBarButton, deleteBarButton, fn1BarButton, fn2BarButton, fn3BarButton, fn4BarButton, fn5BarButton, fn6BarButton, flexibleSpace, nil]];
-                keyInputField.inputAccessoryView = customToolbarView;
+                customToolbarView.bounds = customToolbarView.frame;
+                scrollView.contentSize = customToolbarView.frame.size;
+                
+                [scrollView addSubview:customToolbarView];
+                
+                keyInputField.inputAccessoryView = scrollView;
 #endif
                 [keyInputField becomeFirstResponder];
                 [keyInputField addTarget:self action:@selector(onKeyboardPressed:) forControlEvents:UIControlEventEditingChanged];
