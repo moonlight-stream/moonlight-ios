@@ -366,9 +366,15 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
                 UIBarButtonItem *controlBarButton = [self createButtonWithImageNamed:@"ControlIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA2 isToggleable:YES];
                 UIBarButtonItem *altBarButton = [self createButtonWithImageNamed:@"AltIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA4 isToggleable:YES];
                 UIBarButtonItem *deleteBarButton = [self createButtonWithImageNamed:@"DeleteIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x2E isToggleable:NO];
+                UIBarButtonItem *fn1BarButton = [self createButtonWithImageNamed:@"Fn1Icon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x70 isToggleable:NO];
+                UIBarButtonItem *fn2BarButton = [self createButtonWithImageNamed:@"Fn2Icon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x71 isToggleable:NO];
+                UIBarButtonItem *fn3BarButton = [self createButtonWithImageNamed:@"Fn3Icon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x72 isToggleable:NO];
+                UIBarButtonItem *fn4BarButton = [self createButtonWithImageNamed:@"Fn4Icon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x73 isToggleable:NO];
+                UIBarButtonItem *fn5BarButton = [self createButtonWithImageNamed:@"Fn5Icon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x74 isToggleable:NO];
+                UIBarButtonItem *fn6BarButton = [self createButtonWithImageNamed:@"Fn6Icon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x75 isToggleable:NO];
                 UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
                 
-                [customToolbarView setItems:[NSArray arrayWithObjects:doneBarButton, windowsBarButton, escapeBarButton, tabBarButton, shiftBarButton, controlBarButton, altBarButton, deleteBarButton, flexibleSpace, nil]];
+                [customToolbarView setItems:[NSArray arrayWithObjects:doneBarButton, windowsBarButton, escapeBarButton, tabBarButton, shiftBarButton, controlBarButton, altBarButton, deleteBarButton, fn1BarButton, fn2BarButton, fn3BarButton, fn4BarButton, fn5BarButton, fn6BarButton, flexibleSpace, nil]];
                 keyInputField.inputAccessoryView = customToolbarView;
 #endif
                 [keyInputField becomeFirstResponder];
