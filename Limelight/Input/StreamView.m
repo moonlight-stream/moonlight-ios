@@ -240,8 +240,14 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     return 90 - MIN(90, altitudeDegs);
 }
 
-- (void)sendStylusEvent:(UITouch*)event {
+- (BOOL)sendStylusEvent:(UITouch*)event {
     uint8_t type;
+    
+    // Don't touch stylus events if the host doesn't support them. We want to pass
+    // them as normal touches for legacy hosts that don't understand pen events.
+    if (!(LiGetHostFeatureFlags() & LI_FF_PEN_TOUCH_EVENTS)) {
+        return NO;
+    }
     
     switch (event.phase) {
         case UITouchPhaseBegan:
@@ -257,17 +263,17 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
             type = LI_TOUCH_EVENT_CANCEL;
             break;
         default:
-            return;
+            return YES;
     }
 
     CGPoint location = [self adjustCoordinatesForVideoArea:[event locationInView:self]];
     CGSize videoSize = [self getVideoAreaSize];
     
-    LiSendPenEvent(type, LI_TOOL_TYPE_PEN, 0, location.x / videoSize.width, location.y / videoSize.height,
-                   (event.force / event.maximumPossibleForce) / sin(event.altitudeAngle),
-                   0.0f, 0.0f,
-                   [self getRotationFromAzimuthAngle:[event azimuthAngleInView:self]],
-                   [self getTiltFromAltitudeAngle:event.altitudeAngle]);
+    return LiSendPenEvent(type, LI_TOOL_TYPE_PEN, 0, location.x / videoSize.width, location.y / videoSize.height,
+                          (event.force / event.maximumPossibleForce) / sin(event.altitudeAngle),
+                          0.0f, 0.0f,
+                          [self getRotationFromAzimuthAngle:[event azimuthAngleInView:self]],
+                          [self getTiltFromAltitudeAngle:event.altitudeAngle]) != LI_ERR_UNSUPPORTED;
 }
 
 - (void)sendStylusHoverEvent:(UIHoverGestureRecognizer*)gesture API_AVAILABLE(ios(13.0)) {
@@ -329,8 +335,9 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     if (@available(iOS 13.4, *)) {
         for (UITouch* touch in touches) {
             if (touch.type == UITouchTypePencil) {
-                [self sendStylusEvent:touch];
-                return;
+                if ([self sendStylusEvent:touch]) {
+                    return;
+                }
             }
         }
     }
@@ -506,8 +513,9 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     if (@available(iOS 13.4, *)) {
         for (UITouch* touch in touches) {
             if (touch.type == UITouchTypePencil) {
-                [self sendStylusEvent:touch];
-                return;
+                if ([self sendStylusEvent:touch]) {
+                    return;
+                }
             }
         }
         
@@ -593,8 +601,9 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     if (@available(iOS 13.4, *)) {
         for (UITouch* touch in touches) {
             if (touch.type == UITouchTypePencil) {
-                [self sendStylusEvent:touch];
-                return;
+                if ([self sendStylusEvent:touch]) {
+                    return;
+                }
             }
         }
     }
