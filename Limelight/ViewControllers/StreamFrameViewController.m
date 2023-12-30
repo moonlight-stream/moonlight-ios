@@ -439,9 +439,21 @@
                     break;
                     
                 default:
+                {
+                    NSString* errorString;
+                    if (abs(errorCode) > 1000) {
+                        // We'll assume large errors are hex values
+                        errorString = [NSString stringWithFormat:@"%08X", (uint32_t)errorCode];
+                    }
+                    else {
+                        // Smaller values will just be printed as decimal (probably errno.h values)
+                        errorString = [NSString stringWithFormat:@"%d", errorCode];
+                    }
+                    
                     title = @"Connection Terminated";
-                    message = @"The connection was terminated";
+                    message = [NSString stringWithFormat: @"The connection was terminated\n\nError code: %@", errorString];
                     break;
+                }
             }
         }
         
