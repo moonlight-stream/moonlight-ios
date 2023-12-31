@@ -366,7 +366,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
                 const CGFloat BUTTON_WIDTH = 88;
                 const CGFloat BUTTON_HEIGHT = 44;
                 // Function key count except for the `Done` button. `Done` button is not in the scrollView, but is always on top.
-                const CGFloat FUNCTION_KEY_COUNT = 19;
+                const CGFloat FUNCTION_KEY_COUNT = 23;
                 const CGFloat TOOLBAR_WIDTH = BUTTON_WIDTH * FUNCTION_KEY_COUNT;
                 
                 // Function toolbar
@@ -378,6 +378,10 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
                 UIBarButtonItem *controlBarButton = [self createButtonWithImageNamed:@"ControlIcon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0xA2 isToggleable:YES];
                 UIBarButtonItem *altBarButton = [self createButtonWithImageNamed:@"AltIcon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0xA4 isToggleable:YES];
                 UIBarButtonItem *deleteBarButton = [self createButtonWithImageNamed:@"DeleteIcon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x2E isToggleable:NO];
+                UIBarButtonItem *leftBarButton = [self createButtonWithImageNamed:@"LeftArrowIcon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x25 isToggleable:NO];
+                UIBarButtonItem *downBarButton = [self createButtonWithImageNamed:@"DownArrowIcon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x28 isToggleable:NO];
+                UIBarButtonItem *upBarButton = [self createButtonWithImageNamed:@"UpArrowIcon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x26 isToggleable:NO];
+                UIBarButtonItem *rightBarButton = [self createButtonWithImageNamed:@"RightArrowIcon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x27 isToggleable:NO];
                 UIBarButtonItem *f1BarButton = [self createButtonWithImageNamed:@"F1Icon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x70 isToggleable:NO];
                 UIBarButtonItem *f2BarButton = [self createButtonWithImageNamed:@"F2Icon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x71 isToggleable:NO];
                 UIBarButtonItem *f3BarButton = [self createButtonWithImageNamed:@"F3Icon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x72 isToggleable:NO];
@@ -397,7 +401,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
                 
                 UIToolbar * functionToolbarView = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, BUTTON_HEIGHT)];
                 functionToolbarView.autoresizingMask = UIViewAutoresizingNone;
-                [functionToolbarView setItems:[NSArray arrayWithObjects:negativeSeperator, windowsBarButton, escapeBarButton, tabBarButton, shiftBarButton, controlBarButton, altBarButton, deleteBarButton, f1BarButton, f2BarButton, f3BarButton, f4BarButton, f5BarButton, f6BarButton, f7BarButton, f8BarButton, f9BarButton, f10BarButton, f11BarButton, f12BarButton, flexibleSpace, nil]];
+                [functionToolbarView setItems:[NSArray arrayWithObjects:negativeSeperator, windowsBarButton, escapeBarButton, tabBarButton, shiftBarButton, controlBarButton, altBarButton, deleteBarButton, leftBarButton, downBarButton, upBarButton, rightBarButton, f1BarButton, f2BarButton, f3BarButton, f4BarButton, f5BarButton, f6BarButton, f7BarButton, f8BarButton, f9BarButton, f10BarButton, f11BarButton, f12BarButton, flexibleSpace, nil]];
                 // Calculates remaining space for function keys, except for the `Done` button.
                 [functionToolbarView setFrame:CGRectMake(0, 0, self.bounds.size.width - BUTTON_WIDTH > TOOLBAR_WIDTH ? self.bounds.size.width - BUTTON_WIDTH : TOOLBAR_WIDTH, BUTTON_HEIGHT)];
                 
