@@ -422,14 +422,8 @@ void ClSetControllerLED(uint16_t controllerNumber, uint8_t r, uint8_t g, uint8_t
     
     // Since we require iOS 12 or above, we're guaranteed to be running
     // on a 64-bit device with ARMv8 crypto instructions, so we don't
-    // need to check for that here. Instead, we'll just check for more
-    // than 2 cores, which eliminates the early dual-core CPUs (A7-A9).
-    if (NSProcessInfo.processInfo.processorCount > 2) {
-        _streamConfig.encryptionFlags = ENCFLG_ALL;
-    }
-    else {
-        _streamConfig.encryptionFlags = ENCFLG_AUDIO;
-    }
+    // need to check for that here.
+    _streamConfig.encryptionFlags = ENCFLG_ALL;
     
     if ([Utils isActiveNetworkVPN]) {
         // Force remote streaming mode when a VPN is connected
