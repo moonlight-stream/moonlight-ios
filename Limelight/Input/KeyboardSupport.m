@@ -201,7 +201,7 @@
                 keyCode = 0x6B;
                 break;
             case UIKeyboardHIDUsageKeypadEnter:
-                keyCode = 0x0D; // FIXME: Is this correct?
+                keyCode = 0x0D;
                 break;
             case UIKeyboardHIDUsageKeypadPeriod:
                 keyCode = 0x6E;
