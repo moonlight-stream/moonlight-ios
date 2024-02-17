@@ -18,7 +18,7 @@ before_build:
   - sh: 'xcodebuild -downloadPlatform $PLATFORM'
 
 build_script:
-  - sh: set -o pipefail && xcodebuild -project Moonlight.xcodeproj -scheme "$SCHEME" -configuration Debug -sdk $SDK clean build | xcpretty
-  - sh: set -o pipefail && xcodebuild -project Moonlight.xcodeproj -scheme "$SCHEME" -configuration Release -sdk $SDK clean build | xcpretty
+  - sh: xcodebuild -project Moonlight.xcodeproj -scheme "$SCHEME" -configuration Debug -sdk $SDK clean build
+  - sh: xcodebuild -project Moonlight.xcodeproj -scheme "$SCHEME" -configuration Release -sdk $SDK clean build
 
 deploy: off
