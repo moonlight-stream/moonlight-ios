@@ -87,25 +87,24 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         Log(LOG_I, @"Setting manual on-screen controls level: %d", (int)level);
         [onScreenControls setLevel:level];
     }
-    
     // It would be nice to just use GCMouse on iOS 14+ and the older API on iOS 13
     // but unfortunately that isn't possible today. GCMouse doesn't recognize many
     // mice correctly, but UIKit does. We will register for both and ignore UIKit
     // events if a GCMouse is connected.
     if (@available(iOS 13.4, *)) {
-        [self addInteraction:[[UIPointerInteraction alloc] initWithDelegate:self]];
-        
-        UIPanGestureRecognizer *discreteMouseWheelRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(mouseWheelMovedDiscrete:)];
-        discreteMouseWheelRecognizer.maximumNumberOfTouches = 0;
-        discreteMouseWheelRecognizer.allowedScrollTypesMask = UIScrollTypeMaskDiscrete;
-        discreteMouseWheelRecognizer.allowedTouchTypes = @[@(UITouchTypeIndirectPointer)];
-        [self addGestureRecognizer:discreteMouseWheelRecognizer];
-        
-        UIPanGestureRecognizer *continuousMouseWheelRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(mouseWheelMovedContinuous:)];
-        continuousMouseWheelRecognizer.maximumNumberOfTouches = 0;
-        continuousMouseWheelRecognizer.allowedScrollTypesMask = UIScrollTypeMaskContinuous;
-        continuousMouseWheelRecognizer.allowedTouchTypes = @[@(UITouchTypeIndirectPointer)];
-        [self addGestureRecognizer:continuousMouseWheelRecognizer];
+//        [self addInteraction:[[UIPointerInteraction alloc] initWithDelegate:self]];
+//        
+//        UIPanGestureRecognizer *discreteMouseWheelRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(mouseWheelMovedDiscrete:)];
+//        discreteMouseWheelRecognizer.maximumNumberOfTouches = 0;
+//        discreteMouseWheelRecognizer.allowedScrollTypesMask = UIScrollTypeMaskDiscrete;
+//        discreteMouseWheelRecognizer.allowedTouchTypes = @[@(UITouchTypeIndirectPointer)];
+//        [self addGestureRecognizer:discreteMouseWheelRecognizer];
+//        
+//        UIPanGestureRecognizer *continuousMouseWheelRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(mouseWheelMovedContinuous:)];
+//        continuousMouseWheelRecognizer.maximumNumberOfTouches = 0;
+//        continuousMouseWheelRecognizer.allowedScrollTypesMask = UIScrollTypeMaskContinuous;
+//        continuousMouseWheelRecognizer.allowedTouchTypes = @[@(UITouchTypeIndirectPointer)];
+//        [self addGestureRecognizer:continuousMouseWheelRecognizer];
     }
     
 #if defined(__IPHONE_16_1) || defined(__TVOS_16_1)
@@ -240,6 +239,73 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     return 90 - MIN(90, altitudeDegs);
 }
 
+- (void)trySendTouchEvent:(UITouch*)event index:(int)index{
+    uint8_t type;
+    NSLog(@"trySendTouchEvent %ld,%d",(long)event.phase,(uint32_t)event);
+//#define LI_TOUCH_EVENT_HOVER       0x00
+//#define LI_TOUCH_EVENT_DOWN        0x01
+//#define LI_TOUCH_EVENT_UP          0x02
+//#define LI_TOUCH_EVENT_MOVE        0x03
+//#define LI_TOUCH_EVENT_CANCEL      0x04
+//#define LI_TOUCH_EVENT_BUTTON_ONLY 0x05
+//#define LI_TOUCH_EVENT_HOVER_LEAVE 0x06
+//#define LI_TOUCH_EVENT_CANCEL_ALL  0x07
+//#define LI_ROT_UNKNOWN 0xFFFF
+    
+    
+//    UITouchPhaseBegan,             // whenever a finger touches the surface.
+//    UITouchPhaseMoved,             // whenever a finger moves on the surface.
+//    UITouchPhaseStationary,        // whenever a finger is touching the surface but hasn't moved since the previous event.
+//    UITouchPhaseEnded,             // whenever a finger leaves the surface.
+//    UITouchPhaseCancelled,         // whenever a touch doesn't end but we need to stop tracking (e.g. putting device to face)
+//    UITouchPhaseRegionEntered   API_AVAILABLE(ios(13.4), tvos(13.4)) API_UNAVAILABLE(watchos),  // whenever a touch is entering the region of a user interface
+//    UITouchPhaseRegionMoved     API_AVAILABLE(ios(13.4), tvos(13.4)) API_UNAVAILABLE(watchos),  // when a touch is inside the region of a user interface, but hasn’t yet made contact or left the region
+//    UITouchPhaseRegionExited    API_AVAILABLE(ios(13.4), tvos(13.4))
+    
+    switch (event.phase) {
+        case UITouchPhaseBegan://开始触摸
+            type = LI_TOUCH_EVENT_DOWN;
+            break;
+        case UITouchPhaseMoved://移动
+        case UITouchPhaseStationary:
+            type = LI_TOUCH_EVENT_MOVE;
+            break;
+        case UITouchPhaseEnded://触摸结束
+            type = LI_TOUCH_EVENT_UP;
+            break;
+        case UITouchPhaseCancelled://触摸取消
+            type = LI_TOUCH_EVENT_CANCEL;
+            break;
+        case UITouchPhaseRegionEntered://停留
+        case UITouchPhaseRegionMoved://停留
+            type = LI_TOUCH_EVENT_HOVER;
+            break;
+        default:
+            return;
+    }
+//    switch (event.phase) {
+//            case UITouchPhaseBegan:
+//                type = LI_TOUCH_EVENT_DOWN;
+//                break;
+//            case UITouchPhaseMoved:
+//                type = LI_TOUCH_EVENT_MOVE;
+//                break;
+//            case UITouchPhaseEnded:
+//                type = LI_TOUCH_EVENT_UP;
+//                break;
+//            case UITouchPhaseCancelled:
+//                type = LI_TOUCH_EVENT_CANCEL;
+//                break;
+//            default:
+//                return;
+//        }
+    
+    CGPoint location = [self adjustCoordinatesForVideoArea:[event locationInView:self]];
+    CGSize videoSize = [self getVideoAreaSize];
+    LiSendTouchEvent(type,(uint32_t)event,location.x / videoSize.width, location.y / videoSize.height,(event.force / event.maximumPossibleForce) / sin(event.altitudeAngle),0.0f, 0.0f,[self getRotationFromAzimuthAngle:[event azimuthAngleInView:self]]);
+}
+
+
 - (void)sendStylusEvent:(UITouch*)event {
     uint8_t type;
     
@@ -327,10 +393,31 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     
 #if !TARGET_OS_TV
     if (@available(iOS 13.4, *)) {
+//        NSArray<UITouch*> *arr1 = [[event allTouches] allObjects];
+////        NSLog(@"touchesBegan - %lu",[[event allTouches] count]);
+////        NSLog(@"touchesBegan - %lu",arr1.count);
+//
+//        for(int i=0;i<arr1.count;i++){
+//            if (arr1[i].type == UITouchTypePencil) {
+//                [self sendStylusEvent:arr1[i]];
+//                return;
+//                
+//            }
+//            TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
+//            if (settings.absoluteTouchMode) {
+//                [self trySendTouchEvent:arr1[i] index:i];
+//                return;
+//            }
+//        }
         for (UITouch* touch in touches) {
             if (touch.type == UITouchTypePencil) {
                 [self sendStylusEvent:touch];
                 return;
+            }
+            TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
+            if (settings.absoluteTouchMode) {
+                [self trySendTouchEvent:touch index:0];
+//                return;
             }
         }
     }
@@ -344,42 +431,42 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         // is triggered.
         [touchHandler touchesBegan:touches withEvent:event];
         
-        if ([[event allTouches] count] == 3) {
-            if (isInputingText) {
-                Log(LOG_D, @"Closing the keyboard");
-                [keyInputField resignFirstResponder];
-                isInputingText = false;
-            } else {
-                Log(LOG_D, @"Opening the keyboard");
-                // Prepare the textbox used to capture keyboard events.
-                keyInputField.delegate = self;
-                keyInputField.text = @"0";
-#if !TARGET_OS_TV
-                // Prepare the toolbar above the keyboard for more options
-                UIToolbar *customToolbarView = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, 44)];
-                
-                UIBarButtonItem *doneBarButton = [self createButtonWithImageNamed:@"DoneIcon.png" backgroundColor:[UIColor clearColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x00 isToggleable:NO];
-                UIBarButtonItem *windowsBarButton = [self createButtonWithImageNamed:@"WindowsIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x5B isToggleable:YES];
-                UIBarButtonItem *tabBarButton = [self createButtonWithImageNamed:@"TabIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x09 isToggleable:NO];
-                UIBarButtonItem *shiftBarButton = [self createButtonWithImageNamed:@"ShiftIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA0 isToggleable:YES];
-                UIBarButtonItem *escapeBarButton = [self createButtonWithImageNamed:@"EscapeIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x1B isToggleable:NO];
-                UIBarButtonItem *controlBarButton = [self createButtonWithImageNamed:@"ControlIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA2 isToggleable:YES];
-                UIBarButtonItem *altBarButton = [self createButtonWithImageNamed:@"AltIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA4 isToggleable:YES];
-                UIBarButtonItem *deleteBarButton = [self createButtonWithImageNamed:@"DeleteIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x2E isToggleable:NO];
-                UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
-                
-                [customToolbarView setItems:[NSArray arrayWithObjects:doneBarButton, windowsBarButton, escapeBarButton, tabBarButton, shiftBarButton, controlBarButton, altBarButton, deleteBarButton, flexibleSpace, nil]];
-                keyInputField.inputAccessoryView = customToolbarView;
-#endif
-                [keyInputField becomeFirstResponder];
-                [keyInputField addTarget:self action:@selector(onKeyboardPressed:) forControlEvents:UIControlEventEditingChanged];
-                
-                // Undo causes issues for our state management, so turn it off
-                [keyInputField.undoManager disableUndoRegistration];
-                
-                isInputingText = true;
-            }
-        }
+//        if ([[event allTouches] count] == 3) {
+//            if (isInputingText) {
+//                Log(LOG_D, @"Closing the keyboard");
+//                [keyInputField resignFirstResponder];
+//                isInputingText = false;
+//            } else {
+//                Log(LOG_D, @"Opening the keyboard");
+//                // Prepare the textbox used to capture keyboard events.
+//                keyInputField.delegate = self;
+//                keyInputField.text = @"0";
+//#if !TARGET_OS_TV
+//                // Prepare the toolbar above the keyboard for more options
+//                UIToolbar *customToolbarView = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, 44)];
+//                
+//                UIBarButtonItem *doneBarButton = [self createButtonWithImageNamed:@"DoneIcon.png" backgroundColor:[UIColor clearColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x00 isToggleable:NO];
+//                UIBarButtonItem *windowsBarButton = [self createButtonWithImageNamed:@"WindowsIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x5B isToggleable:YES];
+//                UIBarButtonItem *tabBarButton = [self createButtonWithImageNamed:@"TabIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x09 isToggleable:NO];
+//                UIBarButtonItem *shiftBarButton = [self createButtonWithImageNamed:@"ShiftIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA0 isToggleable:YES];
+//                UIBarButtonItem *escapeBarButton = [self createButtonWithImageNamed:@"EscapeIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x1B isToggleable:NO];
+//                UIBarButtonItem *controlBarButton = [self createButtonWithImageNamed:@"ControlIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA2 isToggleable:YES];
+//                UIBarButtonItem *altBarButton = [self createButtonWithImageNamed:@"AltIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA4 isToggleable:YES];
+//                UIBarButtonItem *deleteBarButton = [self createButtonWithImageNamed:@"DeleteIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x2E isToggleable:NO];
+//                UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+//                
+//                [customToolbarView setItems:[NSArray arrayWithObjects:doneBarButton, windowsBarButton, escapeBarButton, tabBarButton, shiftBarButton, controlBarButton, altBarButton, deleteBarButton, flexibleSpace, nil]];
+//                keyInputField.inputAccessoryView = customToolbarView;
+//#endif
+//                [keyInputField becomeFirstResponder];
+//                [keyInputField addTarget:self action:@selector(onKeyboardPressed:) forControlEvents:UIControlEventEditingChanged];
+//                
+//                // Undo causes issues for our state management, so turn it off
+//                [keyInputField.undoManager disableUndoRegistration];
+//                
+//                isInputingText = true;
+//            }
+//        }
     }
 }
 
@@ -509,6 +596,11 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
                 [self sendStylusEvent:touch];
                 return;
             }
+            TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
+            if (settings.absoluteTouchMode) {
+                [self trySendTouchEvent:touch index:0];
+//                return;
+            }
         }
         
         UITouch *touch = [touches anyObject];
@@ -596,6 +688,11 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
                 [self sendStylusEvent:touch];
                 return;
             }
+            TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
+            if (settings.absoluteTouchMode) {
+                [self trySendTouchEvent:touch index:0];
+//                return;
+            }
         }
     }
 #endif
@@ -615,6 +712,11 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         for (UITouch* touch in touches) {
             if (touch.type == UITouchTypePencil) {
                 [self sendStylusEvent:touch];
+            }
+            TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
+            if (settings.absoluteTouchMode) {
+                [self trySendTouchEvent:touch index:0];
+//                return;
             }
         }
     }
