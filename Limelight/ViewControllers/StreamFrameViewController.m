@@ -134,7 +134,7 @@
     _exitSwipeRecognizer.delaysTouchesBegan = NO;
     _exitSwipeRecognizer.delaysTouchesEnded = NO;
     
-    [self.view addGestureRecognizer:_exitSwipeRecognizer];
+    // [self.view addGestureRecognizer:_exitSwipeRecognizer];
 #endif
     
     _tipLabel = [[UILabel alloc] init];
