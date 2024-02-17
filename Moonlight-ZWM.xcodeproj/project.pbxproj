@@ -218,7 +218,7 @@
 		DC1F5A06206436B20037755F /* ConnectionHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionHelper.m; sourceTree = "<group>"; };
 		FB1A674B2131E65900507771 /* KeyboardSupport.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KeyboardSupport.h; sourceTree = "<group>"; };
 		FB1A674C2131E65900507771 /* KeyboardSupport.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KeyboardSupport.m; sourceTree = "<group>"; };
-		FB1A67532132419700507771 /* Moonlight TV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Moonlight TV.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		FB1A67532132419700507771 /* Moonlight-ZWM TV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Moonlight-ZWM TV.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB1A675F2132419700507771 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		FB1A67612132419A00507771 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FB1A67632132419A00507771 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -229,7 +229,7 @@
 		FB1D59961BBCCB6400F482CA /* ComputerScrollView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ComputerScrollView.m; sourceTree = "<group>"; };
 		FB1D59981BBCCD7E00F482CA /* AppCollectionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppCollectionView.h; sourceTree = "<group>"; };
 		FB1D59991BBCCD7E00F482CA /* AppCollectionView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppCollectionView.m; sourceTree = "<group>"; };
-		FB290CEE19B2C406004C83CF /* Moonlight.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Moonlight.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FB290CEE19B2C406004C83CF /* Moonlight-ZWM.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Moonlight-ZWM.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB290CF119B2C406004C83CF /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		FB290CF319B2C406004C83CF /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		FB290CF519B2C406004C83CF /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -487,8 +487,8 @@
 		FB290CEF19B2C406004C83CF /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				FB290CEE19B2C406004C83CF /* Moonlight.app */,
-				FB1A67532132419700507771 /* Moonlight TV.app */,
+				FB290CEE19B2C406004C83CF /* Moonlight-ZWM.app */,
+				FB1A67532132419700507771 /* Moonlight-ZWM TV.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -876,9 +876,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		FB1A67522132419700507771 /* Moonlight TV */ = {
+		FB1A67522132419700507771 /* Moonlight-ZWM TV */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = FB1A67682132419A00507771 /* Build configuration list for PBXNativeTarget "Moonlight TV" */;
+			buildConfigurationList = FB1A67682132419A00507771 /* Build configuration list for PBXNativeTarget "Moonlight-ZWM TV" */;
 			buildPhases = (
 				FB1A674F2132419700507771 /* Sources */,
 				FB1A67502132419700507771 /* Frameworks */,
@@ -889,14 +889,14 @@
 			dependencies = (
 				FB1A68172132509800507771 /* PBXTargetDependency */,
 			);
-			name = "Moonlight TV";
+			name = "Moonlight-ZWM TV";
 			productName = "Moonlight TV";
-			productReference = FB1A67532132419700507771 /* Moonlight TV.app */;
+			productReference = FB1A67532132419700507771 /* Moonlight-ZWM TV.app */;
 			productType = "com.apple.product-type.application";
 		};
-		FB290CED19B2C406004C83CF /* Moonlight */ = {
+		FB290CED19B2C406004C83CF /* Moonlight-ZWM */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = FB290D2019B2C406004C83CF /* Build configuration list for PBXNativeTarget "Moonlight" */;
+			buildConfigurationList = FB290D2019B2C406004C83CF /* Build configuration list for PBXNativeTarget "Moonlight-ZWM" */;
 			buildPhases = (
 				FB290CEA19B2C406004C83CF /* Sources */,
 				FB290CEB19B2C406004C83CF /* Frameworks */,
@@ -907,9 +907,9 @@
 			dependencies = (
 				98AB2E861CAD468B0089BB98 /* PBXTargetDependency */,
 			);
-			name = Moonlight;
+			name = "Moonlight-ZWM";
 			productName = Limelight;
-			productReference = FB290CEE19B2C406004C83CF /* Moonlight.app */;
+			productReference = FB290CEE19B2C406004C83CF /* Moonlight-ZWM.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -937,7 +937,7 @@
 					};
 				};
 			};
-			buildConfigurationList = FB290CE919B2C406004C83CF /* Build configuration list for PBXProject "Moonlight" */;
+			buildConfigurationList = FB290CE919B2C406004C83CF /* Build configuration list for PBXProject "Moonlight-ZWM" */;
 			compatibilityVersion = "Xcode 8.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -956,8 +956,8 @@
 			);
 			projectRoot = "";
 			targets = (
-				FB290CED19B2C406004C83CF /* Moonlight */,
-				FB1A67522132419700507771 /* Moonlight TV */,
+				FB290CED19B2C406004C83CF /* Moonlight-ZWM */,
+				FB1A67522132419700507771 /* Moonlight-ZWM TV */,
 			);
 		};
 /* End PBXProject section */
@@ -1377,7 +1377,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_TEAM = U39XM5BN3U;
+				DEVELOPMENT_TEAM = 8S84A8A3QF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Limelight/Limelight-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
@@ -1407,7 +1407,7 @@
 					"$(PROJECT_DIR)/libs/FFmpeg/lib/iOS-Sim",
 				);
 				MARKETING_VERSION = 9.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.iPadOS";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-zwm.iPadOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SKIP_INSTALL = NO;
@@ -1428,7 +1428,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_TEAM = U39XM5BN3U;
+				DEVELOPMENT_TEAM = 8S84A8A3QF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Limelight/Limelight-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
@@ -1458,7 +1458,7 @@
 					"$(PROJECT_DIR)/libs/FFmpeg/lib/iOS-Sim",
 				);
 				MARKETING_VERSION = 9.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.iPadOS";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-zwm.iPadOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SKIP_INSTALL = NO;
@@ -1475,7 +1475,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		FB1A67682132419A00507771 /* Build configuration list for PBXNativeTarget "Moonlight TV" */ = {
+		FB1A67682132419A00507771 /* Build configuration list for PBXNativeTarget "Moonlight-ZWM TV" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FB1A67662132419A00507771 /* Debug */,
@@ -1484,7 +1484,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		FB290CE919B2C406004C83CF /* Build configuration list for PBXProject "Moonlight" */ = {
+		FB290CE919B2C406004C83CF /* Build configuration list for PBXProject "Moonlight-ZWM" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FB290D1E19B2C406004C83CF /* Debug */,
@@ -1493,7 +1493,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		FB290D2019B2C406004C83CF /* Build configuration list for PBXNativeTarget "Moonlight" */ = {
+		FB290D2019B2C406004C83CF /* Build configuration list for PBXNativeTarget "Moonlight-ZWM" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FB290D2119B2C406004C83CF /* Debug */,
