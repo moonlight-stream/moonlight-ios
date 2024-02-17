@@ -4,11 +4,11 @@ clone_depth: 1
 
 environment:
   matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: macOS-Monterey
+    - APPVEYOR_BUILD_WORKER_IMAGE: macOS-Sonoma
       SCHEME: Moonlight
       SDK: iphonesimulator
       PLATFORM: iOS
-    - APPVEYOR_BUILD_WORKER_IMAGE: macOS-Monterey
+    - APPVEYOR_BUILD_WORKER_IMAGE: macOS-Sonoma
       SCHEME: Moonlight TV
       SDK: appletvsimulator
       PLATFORM: tvOS
