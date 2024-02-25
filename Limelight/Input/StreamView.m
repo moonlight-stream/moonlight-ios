@@ -699,26 +699,25 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         case UIGestureRecognizerStateEnded:
         default:
             // Ignore recognition failure and other states
-            lastScrollTranslation = CGPointMake(0, 0);
+            lastScrollTranslation = CGPointZero;
             return;
     }
     
     CGPoint currentScrollTranslation = [gesture translationInView:self];
-    
     {
-        short translationDeltaY = ((currentScrollTranslation.y - lastScrollTranslation.y) / self.bounds.size.height) * 120; // WHEEL_DELTA
+        short translationDeltaY = (short)(currentScrollTranslation.y - lastScrollTranslation.y); // WHEEL_DELTA
         if (translationDeltaY != 0) {
             LiSendHighResScrollEvent(translationDeltaY * 20);
-            lastScrollTranslation = currentScrollTranslation;
+            lastScrollTranslation.y += translationDeltaY;
         }
     }
 
     {
-        short translationDeltaX = ((currentScrollTranslation.x - lastScrollTranslation.x) / self.bounds.size.width) * 120; // WHEEL_DELTA
+        short translationDeltaX = (short)(currentScrollTranslation.x - lastScrollTranslation.x); // WHEEL_DELTA
         if (translationDeltaX != 0) {
             // Direction is reversed from vertical scrolling
             LiSendHighResHScrollEvent(-translationDeltaX * 20);
-            lastScrollTranslation = currentScrollTranslation;
+            lastScrollTranslation.x += translationDeltaX;
         }
     }
 }
