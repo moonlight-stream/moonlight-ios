@@ -704,20 +704,21 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     }
     
     CGPoint currentScrollTranslation = [gesture translationInView:self];
+    const short translationMultiplier = 120 * 20; // WHEEL_DELTA * 20
     
     {
-        short translationDeltaY = ((currentScrollTranslation.y - lastScrollTranslation.y) / self.bounds.size.height) * 120; // WHEEL_DELTA
+        short translationDeltaY = ((currentScrollTranslation.y - lastScrollTranslation.y) / self.bounds.size.height) * translationMultiplier;
         if (translationDeltaY != 0) {
-            LiSendHighResScrollEvent(translationDeltaY * 20);
+            LiSendHighResScrollEvent(translationDeltaY);
             lastScrollTranslation = currentScrollTranslation;
         }
     }
 
     {
-        short translationDeltaX = ((currentScrollTranslation.x - lastScrollTranslation.x) / self.bounds.size.width) * 120; // WHEEL_DELTA
+        short translationDeltaX = ((currentScrollTranslation.x - lastScrollTranslation.x) / self.bounds.size.width) * translationMultiplier;
         if (translationDeltaX != 0) {
             // Direction is reversed from vertical scrolling
-            LiSendHighResHScrollEvent(-translationDeltaX * 20);
+            LiSendHighResHScrollEvent(-translationDeltaX);
             lastScrollTranslation = currentScrollTranslation;
         }
     }
