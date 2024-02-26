@@ -363,20 +363,64 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
                 keyInputField.text = @"0";
 #if !TARGET_OS_TV
                 // Prepare the toolbar above the keyboard for more options
-                UIToolbar *customToolbarView = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, 44)];
+                const CGFloat BUTTON_WIDTH = 88;
+                const CGFloat BUTTON_HEIGHT = 44;
+                // Function key count except for the `Done` button. `Done` button is not in the scrollView, but is always on top.
+                const CGFloat FUNCTION_KEY_COUNT = 23;
+                const CGFloat TOOLBAR_WIDTH = BUTTON_WIDTH * FUNCTION_KEY_COUNT;
                 
-                UIBarButtonItem *doneBarButton = [self createButtonWithImageNamed:@"DoneIcon.png" backgroundColor:[UIColor clearColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x00 isToggleable:NO];
-                UIBarButtonItem *windowsBarButton = [self createButtonWithImageNamed:@"WindowsIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x5B isToggleable:YES];
-                UIBarButtonItem *tabBarButton = [self createButtonWithImageNamed:@"TabIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x09 isToggleable:NO];
-                UIBarButtonItem *shiftBarButton = [self createButtonWithImageNamed:@"ShiftIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA0 isToggleable:YES];
-                UIBarButtonItem *escapeBarButton = [self createButtonWithImageNamed:@"EscapeIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x1B isToggleable:NO];
-                UIBarButtonItem *controlBarButton = [self createButtonWithImageNamed:@"ControlIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA2 isToggleable:YES];
-                UIBarButtonItem *altBarButton = [self createButtonWithImageNamed:@"AltIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA4 isToggleable:YES];
-                UIBarButtonItem *deleteBarButton = [self createButtonWithImageNamed:@"DeleteIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x2E isToggleable:NO];
+                // Function toolbar
+                UIBarButtonItem *doneBarButton = [self createButtonWithImageNamed:@"DoneIcon.png" backgroundColor:[UIColor clearColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x00 isToggleable:NO];
+                UIBarButtonItem *windowsBarButton = [self createButtonWithImageNamed:@"WindowsIcon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x5B isToggleable:YES];
+                UIBarButtonItem *escapeBarButton = [self createButtonWithImageNamed:@"EscapeIcon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x1B isToggleable:NO];
+                UIBarButtonItem *tabBarButton = [self createButtonWithImageNamed:@"TabIcon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x09 isToggleable:NO];
+                UIBarButtonItem *shiftBarButton = [self createButtonWithImageNamed:@"ShiftIcon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0xA0 isToggleable:YES];
+                UIBarButtonItem *controlBarButton = [self createButtonWithImageNamed:@"ControlIcon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0xA2 isToggleable:YES];
+                UIBarButtonItem *altBarButton = [self createButtonWithImageNamed:@"AltIcon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0xA4 isToggleable:YES];
+                UIBarButtonItem *deleteBarButton = [self createButtonWithImageNamed:@"DeleteIcon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x2E isToggleable:NO];
+                UIBarButtonItem *leftBarButton = [self createButtonWithImageNamed:@"LeftArrowIcon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x25 isToggleable:NO];
+                UIBarButtonItem *downBarButton = [self createButtonWithImageNamed:@"DownArrowIcon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x28 isToggleable:NO];
+                UIBarButtonItem *upBarButton = [self createButtonWithImageNamed:@"UpArrowIcon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x26 isToggleable:NO];
+                UIBarButtonItem *rightBarButton = [self createButtonWithImageNamed:@"RightArrowIcon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x27 isToggleable:NO];
+                UIBarButtonItem *f1BarButton = [self createButtonWithImageNamed:@"F1Icon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x70 isToggleable:NO];
+                UIBarButtonItem *f2BarButton = [self createButtonWithImageNamed:@"F2Icon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x71 isToggleable:NO];
+                UIBarButtonItem *f3BarButton = [self createButtonWithImageNamed:@"F3Icon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x72 isToggleable:NO];
+                UIBarButtonItem *f4BarButton = [self createButtonWithImageNamed:@"F4Icon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x73 isToggleable:NO];
+                UIBarButtonItem *f5BarButton = [self createButtonWithImageNamed:@"F5Icon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x74 isToggleable:NO];
+                UIBarButtonItem *f6BarButton = [self createButtonWithImageNamed:@"F6Icon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH  target:self action:@selector(toolbarButtonClicked:) keyCode:0x75 isToggleable:NO];
+                UIBarButtonItem *f7BarButton = [self createButtonWithImageNamed:@"F7Icon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x76 isToggleable:NO];
+                UIBarButtonItem *f8BarButton = [self createButtonWithImageNamed:@"F8Icon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x77 isToggleable:NO];
+                UIBarButtonItem *f9BarButton = [self createButtonWithImageNamed:@"F9Icon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x78 isToggleable:NO];
+                UIBarButtonItem *f10BarButton = [self createButtonWithImageNamed:@"F10Icon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x79 isToggleable:NO];
+                UIBarButtonItem *f11BarButton = [self createButtonWithImageNamed:@"F11Icon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH target:self action:@selector(toolbarButtonClicked:) keyCode:0x7A isToggleable:NO];
+                UIBarButtonItem *f12BarButton = [self createButtonWithImageNamed:@"F12Icon.png" backgroundColor:[UIColor blackColor] buttonWidth: BUTTON_WIDTH  target:self action:@selector(toolbarButtonClicked:) keyCode:0x7B isToggleable:NO];
                 UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+                // Removes unwanted space between buttons
+                UIBarButtonItem *negativeSeperator = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
+                negativeSeperator.width = -1;
                 
-                [customToolbarView setItems:[NSArray arrayWithObjects:doneBarButton, windowsBarButton, escapeBarButton, tabBarButton, shiftBarButton, controlBarButton, altBarButton, deleteBarButton, flexibleSpace, nil]];
-                keyInputField.inputAccessoryView = customToolbarView;
+                UIToolbar * functionToolbarView = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, BUTTON_HEIGHT)];
+                functionToolbarView.autoresizingMask = UIViewAutoresizingNone;
+                [functionToolbarView setItems:[NSArray arrayWithObjects:negativeSeperator, windowsBarButton, escapeBarButton, tabBarButton, shiftBarButton, controlBarButton, altBarButton, deleteBarButton, leftBarButton, downBarButton, upBarButton, rightBarButton, f1BarButton, f2BarButton, f3BarButton, f4BarButton, f5BarButton, f6BarButton, f7BarButton, f8BarButton, f9BarButton, f10BarButton, f11BarButton, f12BarButton, flexibleSpace, nil]];
+                // Calculates remaining space for function keys, except for the `Done` button.
+                [functionToolbarView setFrame:CGRectMake(0, 0, self.bounds.size.width - BUTTON_WIDTH > TOOLBAR_WIDTH ? self.bounds.size.width - BUTTON_WIDTH : TOOLBAR_WIDTH, BUTTON_HEIGHT)];
+                
+                UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, BUTTON_HEIGHT)];
+                scrollView.autoresizingMask = UIViewAutoresizingNone;
+                scrollView.contentSize = functionToolbarView.frame.size;
+                scrollView.scrollEnabled = self.bounds.size.width - BUTTON_WIDTH > TOOLBAR_WIDTH ? false : true;
+                scrollView.bounces = false;
+                scrollView.bouncesZoom = false;
+                scrollView.showsVerticalScrollIndicator = false;
+                scrollView.showsHorizontalScrollIndicator = false;
+                [scrollView setBackgroundColor: [UIColor darkGrayColor]];
+                
+                [scrollView addSubview:functionToolbarView];
+                UIBarButtonItem *customItem = [[UIBarButtonItem alloc] initWithCustomView:scrollView];
+                UIToolbar *toolbarView = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, BUTTON_HEIGHT)];
+                [toolbarView setItems:[NSArray arrayWithObjects:negativeSeperator, doneBarButton, customItem, negativeSeperator, nil]];
+                [toolbarView setBackgroundColor: [UIColor darkGrayColor]];
+                keyInputField.inputAccessoryView = toolbarView;
 #endif
                 [keyInputField becomeFirstResponder];
                 [keyInputField addTarget:self action:@selector(onKeyboardPressed:) forControlEvents:UIControlEventEditingChanged];
@@ -390,7 +434,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     }
 }
 
-- (UIBarButtonItem *)createButtonWithImageNamed:(NSString *)imageName backgroundColor:(UIColor *)backgroundColor target:(id)target action:(SEL)action keyCode:(NSInteger)keyCode isToggleable:(BOOL)isToggleable {
+- (UIBarButtonItem *)createButtonWithImageNamed:(NSString *)imageName backgroundColor:(UIColor *)backgroundColor buttonWidth:(CGFloat)buttonWidth target:(id)target action:(SEL)action keyCode:(NSInteger)keyCode isToggleable:(BOOL)isToggleable {
     UIImage *image = [UIImage imageNamed:imageName];
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
     [button setImage:image forState:UIControlStateNormal];
@@ -399,6 +443,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     button.imageView.backgroundColor = backgroundColor;
     button.imageView.layer.cornerRadius = 10.0;
     button.imageEdgeInsets = UIEdgeInsetsMake(6, 6, 6, 6);
+    [button addConstraint:[NSLayoutConstraint constraintWithItem:button attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:buttonWidth]];
     [button addTarget:target action:action forControlEvents:UIControlEventTouchUpInside];
     objc_setAssociatedObject(button, "keyCode", @(keyCode), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     objc_setAssociatedObject(button, "isToggleable", @(isToggleable), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
