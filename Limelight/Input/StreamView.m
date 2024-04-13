@@ -252,7 +252,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
 - (void)trySendTouchEvent:(UITouch*)event index:(int)index{
     uint8_t type;
-    NSLog(@"trySendTouchEvent %ld,%d",(long)event.phase,(uint32_t)event);
+    // NSLog(@"trySendTouchEvent %ld,%d",(long)event.phase,(uint32_t)event);
 //#define LI_TOUCH_EVENT_HOVER       0x00
 //#define LI_TOUCH_EVENT_DOWN        0x01
 //#define LI_TOUCH_EVENT_UP          0x02

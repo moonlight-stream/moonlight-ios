@@ -11,11 +11,11 @@
 #import "Moonlight-Swift.h"
 #import "StreamConfiguration.h"
 
-
 @protocol UserInteractionDelegate <NSObject>
 
 - (void) userInteractionBegan;
 - (void) userInteractionEnded;
+
 @end
 
 #if TARGET_OS_TV
