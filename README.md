@@ -4,7 +4,9 @@ This fork is probably the first one to work properly in native multi-point passt
 Additionaly, I directly disable the "swipe from edge to exit session" funtion, to prevent accidently quit from session in native-touch passthrough mode, which happens frequenly while playing Genshin Imapct.
 
 To install the ipa file in release, you need to find a way to sideload the app on iOS.
+
 To Enable native-touch passthrough, just select "Touchscreen" in "Settings -> Touch Mode".
+
 To check the code go to branch "moonlight-iOS-ZWM".
 
 
