@@ -1,10 +1,13 @@
-This fork is probably the first one to work properly in native multi-point passthrough mode on iOS. It's based on moonlight-ios version 9.0.0, and early development by Bilibili uploader 阿西西的日常. Additionaly, I directly disable the "swipe from edge to exit session" funtion, to prevent accidently quit from session in native-touch passthrough mode, which happens frequenly while playing Genshin Imapct.
+This fork is probably the first one to work properly in native multi-point passthrough mode on iOS. It's based on moonlight-ios version 9.0.0, moonlight-common-c submodule commited on 2024.2.4, and early modification by Bilibili uploader 阿西西的日常. 
+
+Additionaly, I directly disable the "swipe from edge to exit session" funtion, to prevent accidently quit from session in native-touch passthrough mode, which happens frequently while playing Genshin Imapct.
 
 To install the ipa file in release, you need to find a way to sideload the app on iOS.
 
 To Enable native-touch passthrough, just select "Touchscreen" in "Settings -> Touch Mode".
 
 To check the code go to branch "moonlight-iOS-ZWM".
+
 
 # Moonlight iOS/tvOS
 
