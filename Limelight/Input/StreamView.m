@@ -14,6 +14,7 @@
 #import "RelativeTouchHandler.h"
 #import "AbsoluteTouchHandler.h"
 #import "KeyboardInputField.h"
+#import "zlib.h"  //to implement crc32 checksum
 
 static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
@@ -239,6 +240,16 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     return 90 - MIN(90, altitudeDegs);
 }
 
+// convert 64bit pointer to CRC32 checksum
+- (uint32_t)crc32OfUint64:(uint64_t)value {
+    // uint64_t可以被视为字符数组来计算CRC32
+    char data[sizeof(value)];
+    memcpy(data, &value, sizeof(value));
+    uint32_t crc = crc32(0, Z_NULL, 0);
+    crc = crc32(crc, (const Bytef *)data, sizeof(value));
+    return crc;
+}
+
 - (void)trySendTouchEvent:(UITouch*)event index:(int)index{
     uint8_t type;
     NSLog(@"trySendTouchEvent %ld,%d",(long)event.phase,(uint32_t)event);
@@ -299,11 +310,14 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 //            default:
 //                return;
 //        }
-    
+    uint32_t pointerId = [self crc32OfUint64:((uint64_t)event)]; // convert pointer event(64bit) to CRC32 checksum as touch pointer ID.
+    // There's no pointerId like Android in definition of iOS touch event "UITouch", we use pointer to UITouch to generate touch pointer ID.
+    // Since touch pointer ID is defined to be uint32_t, I implement CRC32 checksum to the 64bit address, which avoids touch pointer ID repetition.
     CGPoint location = [self adjustCoordinatesForVideoArea:[event locationInView:self]];
     CGSize videoSize = [self getVideoAreaSize];
-    LiSendTouchEvent(type,(uint32_t)event,location.x / videoSize.width, location.y / videoSize.height,(event.force / event.maximumPossibleForce) / sin(event.altitudeAngle),0.0f, 0.0f,[self getRotationFromAzimuthAngle:[event azimuthAngleInView:self]]);
+    LiSendTouchEvent(type,pointerId,location.x / videoSize.width, location.y / videoSize.height,(event.force / event.maximumPossibleForce) / sin(event.altitudeAngle),0.0f, 0.0f,[self getRotationFromAzimuthAngle:[event azimuthAngleInView:self]]);
 }
+
 
 
 - (void)sendStylusEvent:(UITouch*)event {
