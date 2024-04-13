@@ -1,3 +1,15 @@
+这可能是第一个在 iOS 上多点触控模式下可以正常操作的分支。基于 moonlight-ios 9.0.0 版本，2024.2.4 提交的 moonlight-common-c 子模块，以及 Bilibili Up主 阿西西的日常 的早期修改。
+
+此外，除了解决多点触控的问题之外，我直接禁用了“从边缘滑动退出会话”功能，防止意外退出会话。这在玩原神时经常发生。
+
+安装 release 中的 ipa 文件，需要先对文件进行自签名，或者先越狱、安装巨魔商店。
+
+启用多点触控，只需在“设置 ->触摸模式”中选择“触摸屏”即可。
+
+查看代码，请转到分支“moonlight-iOS-ZWM”。
+
+
+
 This fork is probably the first one to work properly in native multi-point passthrough mode on iOS. It's based on moonlight-ios version 9.0.0, moonlight-common-c submodule commited on 2024.2.4, and early modification by Bilibili uploader 阿西西的日常. 
 
 Additionaly, I directly disable the "swipe from edge to exit session" funtion, to prevent accidently quit from session in native-touch passthrough mode, which happens frequently while playing Genshin Imapct.
