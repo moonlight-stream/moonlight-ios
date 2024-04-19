@@ -1,30 +1,3 @@
-这是第一个在iOS多点触控模式下可以正常操作的fork。基于 moonlight-ios 9.0.0 版本，2024.2.4 提交的 moonlight-common-c 子模块，以及 Bilibili Up主 阿西西的日常 的早期修改。 
-
-2023年12月，另一名 Bilibili Up主 aoeas771- (https://github.com/nyht6), 发现了原神PC版的隐藏触屏UI模式, 阿西西的日常随后首先在iOS Moonlight上实现了多点触控，当时我在他的QQ群里承担了大部分iOS版的测试。感谢他们两位，实现了从PC串流原生多点触控的米家游戏。
-
-2024年4月，我尝试搭建MacOS Xcode开发环境，并解决了一个因pointer ID重复导致的奇怪bug. 除了解决多点触控的问题之外，我直接禁用了“从边缘滑动退出会话”功能，防止意外退出会话。这在玩原神时经常发生。
-
-安装 release 中的 ipa 文件，需要先对文件进行自签名，或者先越狱、安装巨魔商店。
-
-启用多点触控，只需在“设置 ->触摸模式”中选择“触摸屏”即可。
-
-查看代码，请转到分支“moonlight-iOS-ZWM”。
-
-
-
-The first fork published that actually works properly in native multi-point passthrough mode on iOS. It's based on moonlight-ios version 9.0.0, moonlight-common-c submodule commited on 2024.2.4, and early modification by Bilibili uploader 阿西西的日常. 
-
-In Dec. 2023 a hidden touch UI of Genshin Impact PC version was discovered by another Bilibili uploader aoeas771-(https://github.com/nyht6), 阿西西的日常 was the first developer to implement native multi-touch passthrough on iOS while I undertook most part of testing for the modified iOS moonlight in his QQ group. Thanks to both of them we're able to stream Mihoyo Games from PC with native multi-point touch mode, both Android & iOS.
-
-In Apr. 2024, I managed to setup a MacOS VM with Xcode, and fix a weird bug caused by pointer ID repetition. Additionaly, I directly disable the "swipe from edge to exit session" funtion, to prevent accidently quit from session in native-touch passthrough mode, which happens frequently while playing Genshin Imapct.
-
-To install the ipa file in release, you need to find a way to sideload the app on iOS.
-
-To Enable native-touch passthrough, just select "Touchscreen" in "Settings -> Touch Mode".
-
-To check the code go to branch "moonlight-iOS-ZWM".
-
-
 # Moonlight iOS/tvOS
 
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/kwv8vpwr457lqn25/branch/master?svg=true)](https://ci.appveyor.com/project/cgutman/moonlight-ios/branch/master)
