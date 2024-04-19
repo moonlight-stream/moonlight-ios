@@ -1,6 +1,6 @@
 这是第一个在iOS多点触控模式下可以正常操作的fork。基于 moonlight-ios 9.0.0 版本，2024.2.4 提交的 moonlight-common-c 子模块，以及 Bilibili Up主 阿西西的日常 的早期修改。 
 
-2023年12月，另一名 Bilibili Up主 aoeas771- (https://github.com/nyht6)发现了原神PC版的隐藏触屏UI模式, 阿西西的日常随后首先在iOS Moonlight上实现了多点触控，当时我在他的QQ群里承担了大部分iOS版的测试。感谢他们两位，实现了从PC串流原生多点触控的米家游戏。
+2023年12月，另一名 Bilibili Up主 aoeas771- (https://github.com/nyht6), 发现了原神PC版的隐藏触屏UI模式, 阿西西的日常随后首先在iOS Moonlight上实现了多点触控，当时我在他的QQ群里承担了大部分iOS版的测试。感谢他们两位，实现了从PC串流原生多点触控的米家游戏。
 
 几个月后，我尝试搭建了MacOS Xcode开发环境，并解决一个因pointer ID重复导致的奇怪bug. 除了解决多点触控的问题之外，我直接禁用了“从边缘滑动退出会话”功能，防止意外退出会话。这在玩原神时经常发生。
 
