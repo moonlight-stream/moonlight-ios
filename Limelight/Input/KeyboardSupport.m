@@ -201,7 +201,7 @@
                 keyCode = 0x6B;
                 break;
             case UIKeyboardHIDUsageKeypadEnter:
-                keyCode = 0x0D; // FIXME: Is this correct?
+                keyCode = 0x0D;
                 break;
             case UIKeyboardHIDUsageKeypadPeriod:
                 keyCode = 0x6E;
@@ -247,6 +247,9 @@
                 break;
             case UIKeyboardHIDUsageKeyboardRightAlt:
                 keyCode = 0xA5;
+                break;
+            case 669: // This value corresponds to the "Globe" or "Language" key on most Apple branded iPad keyboards.
+                keyCode = 0x1B; // This value corresponds to "Escape", which is missing from most Apple branded iPad keyboards.
                 break;
             default:
                 NSLog(@"Unhandled HID usage: %lu", (unsigned long)key.keyCode);

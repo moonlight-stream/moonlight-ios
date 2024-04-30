@@ -1376,8 +1376,13 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+<<<<<<< HEAD:Moonlight-ZWM.xcodeproj/project.pbxproj
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 8S84A8A3QF;
+=======
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = DM46QST4M7;
+>>>>>>> Moonlight-iOS-Official9.0.2:Moonlight.xcodeproj/project.pbxproj
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Limelight/Limelight-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
@@ -1406,8 +1411,13 @@
 					"$(PROJECT_DIR)/libs/SDL2/lib/iOS-Sim",
 					"$(PROJECT_DIR)/libs/FFmpeg/lib/iOS-Sim",
 				);
+<<<<<<< HEAD:Moonlight-ZWM.xcodeproj/project.pbxproj
+				MARKETING_VERSION = 9.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-zwm.iPadOS";
+=======
 				MARKETING_VERSION = 9.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.Moonlight";
+>>>>>>> Moonlight-iOS-Official9.0.2:Moonlight.xcodeproj/project.pbxproj
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SKIP_INSTALL = NO;
@@ -1427,8 +1437,13 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+<<<<<<< HEAD:Moonlight-ZWM.xcodeproj/project.pbxproj
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 8S84A8A3QF;
+=======
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = DM46QST4M7;
+>>>>>>> Moonlight-iOS-Official9.0.2:Moonlight.xcodeproj/project.pbxproj
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Limelight/Limelight-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
@@ -1457,8 +1472,13 @@
 					"$(PROJECT_DIR)/libs/SDL2/lib/iOS-Sim",
 					"$(PROJECT_DIR)/libs/FFmpeg/lib/iOS-Sim",
 				);
+<<<<<<< HEAD:Moonlight-ZWM.xcodeproj/project.pbxproj
 				MARKETING_VERSION = 9.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-zwm.iPadOS";
+=======
+				MARKETING_VERSION = 9.0.2;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.Moonlight";
+>>>>>>> Moonlight-iOS-Official9.0.2:Moonlight.xcodeproj/project.pbxproj
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SKIP_INSTALL = NO;

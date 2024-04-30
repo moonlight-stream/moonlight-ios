@@ -276,7 +276,7 @@
     // indicated by a negative version in the last field.
     int fps = (config.frameRate > 60 && ![config.appVersion containsString:@".-"]) ? 0 : config.frameRate;
     
-    NSString* urlString = [NSString stringWithFormat:@"%@/%@?uniqueid=%@&appid=%@&mode=%dx%dx%d&additionalStates=1&sops=%d&rikey=%@&rikeyid=%d%@&localAudioPlayMode=%d&surroundAudioInfo=%d&remoteControllersBitmap=%d&gcmap=%d&gcpersist=%d",
+    NSString* urlString = [NSString stringWithFormat:@"%@/%@?uniqueid=%@&appid=%@&mode=%dx%dx%d&additionalStates=1&sops=%d&rikey=%@&rikeyid=%d%@&localAudioPlayMode=%d&surroundAudioInfo=%d&remoteControllersBitmap=%d&gcmap=%d&gcpersist=%d%s",
                            _baseHTTPSURL, verb, _uniqueId,
                            config.appID,
                            config.width, config.height, fps,
@@ -286,7 +286,8 @@
                            config.playAudioOnPC ? 1 : 0,
                            SURROUNDAUDIOINFO_FROM_AUDIO_CONFIGURATION(config.audioConfiguration),
                            config.gamepadMask, config.gamepadMask,
-                           !config.multiController ? 1 : 0];
+                           !config.multiController ? 1 : 0,
+                           LiGetLaunchUrlQueryParameters()];
     Log(LOG_I, @"Requesting: %@", urlString);
     // This blocks while the app is launching
     return [self createRequestFromString:urlString timeout:LONG_TIMEOUT_SEC];

@@ -240,6 +240,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     return 90 - MIN(90, altitudeDegs);
 }
 
+<<<<<<< HEAD
 // convert 64bit pointer to CRC32 checksum
 - (uint32_t)crc32OfUint64:(uint64_t)value {
     // uint64_t可以被视为字符数组来计算CRC32
@@ -321,6 +322,9 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
 
 - (void)sendStylusEvent:(UITouch*)event {
+=======
+- (BOOL)sendStylusEvent:(UITouch*)event {
+>>>>>>> Moonlight-iOS-Official9.0.2
     uint8_t type;
     
     // Don't touch stylus events if the host doesn't support them. We want to pass
