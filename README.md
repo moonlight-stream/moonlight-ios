@@ -13,7 +13,7 @@
 查看代码，请转到分支“moonlight-iOS-ZWM-updated”。
 
 
-This is the first fork published that actually works properly in native multi-point passthrough mode on iOS. It was originally based on moonlight-ios version 9.0.0 and early modification by Bilibili uploader 阿西西的日常. On 2024.04.30, I already merged my fork with 9.0.2 modifications from official repo & update to latest moonlight-common-c. To be updaed in the future if necessary.
+This is the first fork published that actually works properly in native multi-point passthrough mode on iOS. It was originally based on moonlight-ios version 9.0.0 and early modification by Bilibili uploader 阿西西的日常. On 2024.04.30, I merged my fork with 9.0.2 modifications from official repo & updated moonlight-common-c to the latest commit. To be updated in the future if necessary.
 
 In Dec. 2023 阿西西的日常 was the first developer to implement native multi-touch passthrough on iOS while I undertook most part of testing for the modified iOS moonlight in his QQ group. 
 
