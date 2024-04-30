@@ -320,7 +320,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
 
 
-- (void)sendStylusEvent:(UITouch*)event {
+- (BOOL)sendStylusEvent:(UITouch*)event {
     uint8_t type;
     
     // Don't touch stylus events if the host doesn't support them. We want to pass
