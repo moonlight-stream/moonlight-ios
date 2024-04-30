@@ -17,6 +17,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <Limelight.h>
+#import "CustomEdgeSwipeGestureRecognizer.h"
 
 #if TARGET_OS_TV
 #import <AVFoundation/AVDisplayCriteria.h>
@@ -29,6 +30,8 @@
 @property(readonly, nonatomic) float refreshRate;
 - (id)initWithRefreshRate:(float)arg1 videoDynamicRange:(int)arg2;
 @end
+
+
 
 @implementation StreamFrameViewController {
     ControllerSupport *_controllerSupport;
@@ -49,7 +52,7 @@
     CGSize _keyboardSize;
     
 #if !TARGET_OS_TV
-    UIScreenEdgePanGestureRecognizer *_exitSwipeRecognizer;
+    CustomEdgeSwipeGestureRecognizer *_exitSwipeRecognizer;
 #endif
 }
 
@@ -129,12 +132,13 @@
     [self.view addGestureRecognizer:_playPauseTapGestureRecognizer];
 
 #else
-    _exitSwipeRecognizer = [[UIScreenEdgePanGestureRecognizer alloc] initWithTarget:self action:@selector(edgeSwiped)];
-    _exitSwipeRecognizer.edges = UIRectEdgeLeft;
+    _exitSwipeRecognizer = [[CustomEdgeSwipeGestureRecognizer alloc] initWithTarget:self action:@selector(edgeSwiped)];
+    //_exitSwipeRecognizer.edges = UIRectEdgeLeft;
+    //_exitSwipeRecognizer.edges = UIRectEdgeLeft;
     _exitSwipeRecognizer.delaysTouchesBegan = NO;
     _exitSwipeRecognizer.delaysTouchesEnded = NO;
     
-    // [self.view addGestureRecognizer:_exitSwipeRecognizer];
+    [self.view addGestureRecognizer:_exitSwipeRecognizer];
 #endif
     
     _tipLabel = [[UILabel alloc] init];
