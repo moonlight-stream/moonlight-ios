@@ -1,6 +1,7 @@
 # Moonlight-ZWM
 
-这是第一个在iOS多点触控模式下可以正常操作的fork。基于 moonlight-ios 9.0.0 版本，2024.2.4 提交的 moonlight-common-c 子模块，以及 Bilibili Up主 阿西西的日常 的早期修改。 已于2024.04.30合并官方仓库9.0.2的代码修改， 并更新了moonlight-common-c. 后续将视情况更新。
+这是首个公开的支持iOS多点触控透传模式的fork。原版本基于 moonlight-ios 9.0.0 ，2024.2.4 提交的 moonlight-common-c 子模块，以及 Bilibili Up主 阿西西的日常 的早期修改。
+已于2024.04.30合并官方仓库9.0.2的代码修改， 并更新moonlight-common-c, 同时修改了触发退出会话的手势。 后续将视情况更新。
 
 2023年12月， 阿西西的日常首先在iOS Moonlight上实现了多点触控，当时我在他的QQ群里承担了大部分iOS版的测试。
 
@@ -13,11 +14,11 @@
 查看代码，请转到分支“moonlight-iOS-ZWM-updated”。
 
 
-This is the first fork published that actually works properly in native multi-point passthrough mode on iOS. It was originally based on moonlight-ios version 9.0.0 and early modification by Bilibili uploader 阿西西的日常. On 2024.04.30, I merged my fork with 9.0.2 modifications from official repo & updated moonlight-common-c to the latest commit. To be updated in the future if necessary.
+This is the first fork published that actually works properly in native multi-point passthrough mode on iOS. It was originally based on moonlight-ios version 9.0.0 and early modification by Bilibili uploader 阿西西的日常. On 2024.04.30, I merged my fork with 9.0.2 modifications from official repo, updated moonlight-common-c to the latest commit, also defined a custom gesture for exiting remote session. To be updated in the future if necessary.
 
 In Dec. 2023 阿西西的日常 was the first developer to implement native multi-touch passthrough on iOS while I undertook most part of testing for the modified iOS moonlight in his QQ group. 
 
-On 2024.04.13, I managed to fix a weird bug caused by pointer ID repetition making it able to work properly in native-touch passthrough for the first time.
+In Apr. 2024, I managed to fix a weird bug caused by pointer ID repetition making it able to work properly in native-touch passthrough for the first time.
 
 To install the ipa file in release, you need to find a way to sideload the app on iOS, or try to jaibreak or install trollstore.
 
