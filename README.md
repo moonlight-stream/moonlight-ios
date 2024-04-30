@@ -1,6 +1,6 @@
 # Moonlight-ZWM
 
-这是首个公开的支持iOS多点触控透传模式的fork。原版本基于 moonlight-ios 9.0.0 ，2024.2.4 提交的 moonlight-common-c 子模块，以及 Bilibili Up主 阿西西的日常 的早期修改。
+这是首个公开的 iOS 多点触控透传fork。原版本基于 moonlight-ios 9.0.0 ，2024.2.4 提交的 moonlight-common-c 子模块，以及 Bilibili Up主 阿西西的日常 的早期修改。
 已于2024.04.30合并官方仓库9.0.2的代码修改， 并更新moonlight-common-c, 同时修改了触发退出会话的手势。 后续将视情况更新。
 
 2023年12月， 阿西西的日常首先在iOS Moonlight上实现了多点触控，当时我在他的QQ群里承担了大部分iOS版的测试。
