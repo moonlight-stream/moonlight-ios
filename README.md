@@ -1,30 +1,29 @@
 # Moonlight-ZWM
 
-这是第一个在iOS多点触控模式下可以正常操作的fork。基于 moonlight-ios 9.0.0 版本，2024.2.4 提交的 moonlight-common-c 子模块，以及 Bilibili Up主 阿西西的日常 的早期修改。 
+这是第一个在iOS多点触控模式下可以正常操作的fork。基于 moonlight-ios 9.0.0 版本，2024.2.4 提交的 moonlight-common-c 子模块，以及 Bilibili Up主 阿西西的日常 的早期修改。 已于2024.04.30合并官方仓库9.0.2的代码修改， 并更新了moonlight-common-c. 后续将视情况更新。
 
-2023年12月，首先在iOS Moonlight上实现了多点触控，当时我在他的QQ群里承担了大部分iOS版的测试。
+2023年12月， 阿西西的日常首先在iOS Moonlight上实现了多点触控，当时我在他的QQ群里承担了大部分iOS版的测试。
 
-2024年4月，我尝试解决了一个因pointer ID重复导致的奇怪bug. 除了解决多点触控的问题之外，我直接禁用了“从边缘滑动退出会话”功能，防止意外退出会话。
+2024年4月，我尝试解决了一个因pointer ID重复导致的奇怪bug, 第一次可以正常使用多点触控。
 
 安装 release 中的 ipa 文件，需要先对文件进行自签名，或者先越狱、安装巨魔商店。
 
 启用多点触控，只需在“设置 ->触摸模式”中选择“触摸屏”即可。
 
-查看代码，请转到分支“moonlight-iOS-ZWM”。
+查看代码，请转到分支“moonlight-iOS-ZWM-updated”。
 
 
-
-The first fork published that actually works properly in native multi-point passthrough mode on iOS. It's based on moonlight-ios version 9.0.0, moonlight-common-c submodule commited on 2024.2.4, and early modification by Bilibili uploader 阿西西的日常. 
+This is the first fork published that actually works properly in native multi-point passthrough mode on iOS. It was originally based on moonlight-ios version 9.0.0 and early modification by Bilibili uploader 阿西西的日常. On 2024.04.30, I already merged my fork with 9.0.2 modifications from official repo & update to latest moonlight-common-c. To be updaed in the future if necessary.
 
 In Dec. 2023 阿西西的日常 was the first developer to implement native multi-touch passthrough on iOS while I undertook most part of testing for the modified iOS moonlight in his QQ group. 
 
-In Apr. 2024, I managed to fix a weird bug caused by pointer ID repetition. Additionaly, I directly disable the "swipe from edge to exit session" funtion, to prevent accidently quit from session in native-touch passthrough mode.
+On 2024.04.13, I managed to fix a weird bug caused by pointer ID repetition making it able to work properly in native-touch passthrough for the first time.
 
-To install the ipa file in release, you need to find a way to sideload the app on iOS.
+To install the ipa file in release, you need to find a way to sideload the app on iOS, or try to jaibreak or install trollstore.
 
 To Enable native-touch passthrough, just select "Touchscreen" in "Settings -> Touch Mode".
 
-To check the code go to branch "moonlight-iOS-ZWM".
+To check the code go to branch "moonlight-iOS-ZWM-updated".
 
 
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/kwv8vpwr457lqn25/branch/master?svg=true)](https://ci.appveyor.com/project/cgutman/moonlight-ios/branch/master)
