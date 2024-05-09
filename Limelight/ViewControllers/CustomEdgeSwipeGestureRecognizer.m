@@ -40,9 +40,9 @@
     CGFloat nomarlizedStartPointX = _startPoint.x/screenWidthInPoints;
     // CGFloat nomarlizedgestureEndPointYDelta = (gestureEndPoint.y-_startPoint.y)/screenHeightInPoints;
     // Log(LOG_I, @"current point x: %f", nomarlizedgestureEndPointXDelta);
-    NSLog(@"in CUSTOM swipe REC");
-    NSLog(@"startpointX %f", _startPoint.x);
-    NSLog(@"NorXDelta %f", nomarlizedGestureEndPointX);
+    // NSLog(@"in CUSTOM swipe REC");
+    // NSLog(@"startpointX %f", _startPoint.x);
+    // NSLog(@"NorXDelta %f", nomarlizedGestureEndPointX);
     _nomarlizedswipeThreshold = 0.5; // You need swipe half of screen width from left edge to trigger this Recognizer
     if (nomarlizedStartPointX <= 0.025 && nomarlizedGestureEndPointX > _nomarlizedswipeThreshold) {
         // Detected a swipe from the left edge that exceeds _nomarlizedswipeThreshold
