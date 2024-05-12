@@ -14,7 +14,6 @@
 #import "RelativeTouchHandler.h"
 #import "AbsoluteTouchHandler.h"
 #import "KeyboardInputField.h"
-#import "zlib.h"  //to implement crc32 checksum
 
 static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
@@ -26,6 +25,12 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     NSMutableSet* keysDown;
     
     float streamAspectRatio;
+    
+    // Use a Dictionary to store UITouch object's memory address as key, and pointerId as value,字典存放UITouch对象地址和pointerId映射关系
+    // pointerId will be generated from electronic noise, by arc4_random, pointerId,由随机噪声生成
+    // Use a NSSet store pointerId, for quick repeition inquiry, NSSet存放活跃的pointerId合集,用于快速查找,以防重复.
+    NSMutableDictionary *pointerIdDict; //pointerId Dict for native touch.
+    NSMutableSet<NSNumber *> *pointerIdSet; //pointerIdSet for native touch.
     
     // iOS 13.4 mouse support
     NSInteger lastMouseButtonMask;
@@ -50,6 +55,9 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 - (void) setupStreamView:(ControllerSupport*)controllerSupport
      interactionDelegate:(id<UserInteractionDelegate>)interactionDelegate
                   config:(StreamConfiguration*)streamConfig {
+    pointerIdDict = [NSMutableDictionary dictionary];
+    pointerIdSet = [NSMutableSet set];
+    
     self->interactionDelegate = interactionDelegate;
     self->streamAspectRatio = (float)streamConfig.width / (float)streamConfig.height;
     
@@ -240,19 +248,45 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     return 90 - MIN(90, altitudeDegs);
 }
 
-// convert 64bit pointer to CRC32 checksum
-- (uint32_t)crc32OfUint64:(uint64_t)value {
-    // uint64_t可以被视为字符数组来计算CRC32
-    char data[sizeof(value)];
-    memcpy(data, &value, sizeof(value));
-    uint32_t crc = crc32(0, Z_NULL, 0);
-    crc = crc32(crc, (const Bytef *)data, sizeof(value));
-    return crc;
+// 随机生成pointerId并填入NSDict和NSSet
+// generate & populate pointerId into NSDict & NSSet, called in UITouchPhaseBegan
+- (void)populatePointerId:(UITouch*)event{
+    uint64_t eventAddrValue = (uint64_t)event;
+    uint32_t randomPointerId = arc4random_uniform(UINT32_MAX); // generate pointerId from eletronic noise.
+    while(true){
+        if([pointerIdSet containsObject:@(randomPointerId)]) randomPointerId = arc4random_uniform(UINT32_MAX); // in case of new pointerId collides with existing ones, generate again.
+        else{ // populate pointerId into NSDict & NSSet.
+            [pointerIdDict setObject:@(randomPointerId) forKey:@(eventAddrValue)];
+            [pointerIdSet addObject:@(randomPointerId)];
+            return;
+        }
+    }
 }
 
-- (void)trySendTouchEvent:(UITouch*)event index:(int)index{
+// remove pointerId in UITouchPhaseEnded condition
+- (void)removePointerId:(UITouch*)event{
+    uint64_t eventAddrValue = (uint64_t)event;
+    [pointerIdSet removeObject:[pointerIdDict objectForKey:@(eventAddrValue)]];
+    [pointerIdDict removeObjectForKey:@(eventAddrValue)];
+}
+
+// 从字典中获取UITouch事件对应的pointerId
+// call this only when NSDcit & NSSet is up-to-date.
+- (uint32_t) retrievePointerIdFromDict:(UITouch*)event{
+    return [[pointerIdDict objectForKey:@((uint64_t)event)] unsignedIntValue];
+}
+
+
+- (void)sendTouchEvent:(UITouch*)event touchType:(uint8_t)touchType{
+    CGPoint location = [self adjustCoordinatesForVideoArea:[event locationInView:self]];
+    CGSize videoSize = [self getVideoAreaSize];
+    LiSendTouchEvent(touchType,[self retrievePointerIdFromDict:event],location.x / videoSize.width, location.y / videoSize.height,(event.force / event.maximumPossibleForce) / sin(event.altitudeAngle),0.0f, 0.0f,[self getRotationFromAzimuthAngle:[event azimuthAngleInView:self]]);
+}
+
+
+- (void)handleUITouch:(UITouch*)event index:(int)index{
     uint8_t type;
-    // NSLog(@"trySendTouchEvent %ld,%d",(long)event.phase,(uint32_t)event);
+    // NSLog(@"handleUITouch %ld,%d",(long)event.phase,(uint32_t)event);
 //#define LI_TOUCH_EVENT_HOVER       0x00
 //#define LI_TOUCH_EVENT_DOWN        0x01
 //#define LI_TOUCH_EVENT_UP          0x02
@@ -276,46 +310,32 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     switch (event.phase) {
         case UITouchPhaseBegan://开始触摸
             type = LI_TOUCH_EVENT_DOWN;
+            [self populatePointerId:event]; //获取并记录pointerId
             break;
         case UITouchPhaseMoved://移动
         case UITouchPhaseStationary:
             type = LI_TOUCH_EVENT_MOVE;
             break;
-        case UITouchPhaseEnded://触摸结束
-            type = LI_TOUCH_EVENT_UP;
-            break;
-        case UITouchPhaseCancelled://触摸取消
-            type = LI_TOUCH_EVENT_CANCEL;
-            break;
         case UITouchPhaseRegionEntered://停留
         case UITouchPhaseRegionMoved://停留
             type = LI_TOUCH_EVENT_HOVER;
             break;
+        case UITouchPhaseEnded://触摸结束
+            type = LI_TOUCH_EVENT_UP;
+            [self sendTouchEvent:event touchType:type]; //先发送,再删除
+            [self removePointerId:event]; //删除pointerId
+            return;
+        case UITouchPhaseCancelled://触摸取消
+            type = LI_TOUCH_EVENT_CANCEL;
+            //[self sendTouchEvent:event touchType:type];
+            // [pointerIdDict removeAllObjects]; //do not remove object from pointerDict & pointerIdSet here. they'll be removed in UITouchPhaseEnded.
+            // [pointerIdSet removeAllObjects];
+            //return;
         default:
             return;
     }
-//    switch (event.phase) {
-//            case UITouchPhaseBegan:
-//                type = LI_TOUCH_EVENT_DOWN;
-//                break;
-//            case UITouchPhaseMoved:
-//                type = LI_TOUCH_EVENT_MOVE;
-//                break;
-//            case UITouchPhaseEnded:
-//                type = LI_TOUCH_EVENT_UP;
-//                break;
-//            case UITouchPhaseCancelled:
-//                type = LI_TOUCH_EVENT_CANCEL;
-//                break;
-//            default:
-//                return;
-//        }
-    uint32_t pointerId = [self crc32OfUint64:((uint64_t)event)]; // convert pointer event(64bit) to CRC32 checksum as touch pointer ID.
-    // There's no pointerId like Android in definition of iOS touch event "UITouch", we use pointer to UITouch to generate touch pointer ID.
-    // Since touch pointer ID is defined to be uint32_t, I implement CRC32 checksum to the 64bit address, which avoids touch pointer ID repetition.
-    CGPoint location = [self adjustCoordinatesForVideoArea:[event locationInView:self]];
-    CGSize videoSize = [self getVideoAreaSize];
-    LiSendTouchEvent(type,pointerId,location.x / videoSize.width, location.y / videoSize.height,(event.force / event.maximumPossibleForce) / sin(event.altitudeAngle),0.0f, 0.0f,[self getRotationFromAzimuthAngle:[event azimuthAngleInView:self]]);
+
+    [self sendTouchEvent:event touchType:type];
 }
 
 
@@ -425,7 +445,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 //            }
 //            TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
 //            if (settings.absoluteTouchMode) {
-//                [self trySendTouchEvent:arr1[i] index:i];
+//                [self handleUITouch:arr1[i] index:i];
 //                return;
 //            }
 //        }
@@ -437,7 +457,8 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
             }
             TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
             if (settings.absoluteTouchMode) {
-                [self trySendTouchEvent:touch index:0];
+                [self handleUITouch:touch index:0];
+                
 //                return;
             }
         }
@@ -620,8 +641,8 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
             }
             TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
             if (settings.absoluteTouchMode) {
-                [self trySendTouchEvent:touch index:0];
-//                return;
+                [self handleUITouch:touch index:0];
+                //                return;
             }
         }
         
@@ -713,7 +734,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
             }
             TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
             if (settings.absoluteTouchMode) {
-                [self trySendTouchEvent:touch index:0];
+                [self handleUITouch:touch index:0];
 //                return;
             }
         }
@@ -738,7 +759,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
             }
             TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
             if (settings.absoluteTouchMode) {
-                [self trySendTouchEvent:touch index:0];
+                [self handleUITouch:touch index:0];
 //                return;
             }
         }
