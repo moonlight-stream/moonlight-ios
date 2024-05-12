@@ -266,8 +266,11 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 // remove pointerId in UITouchPhaseEnded condition
 - (void)removePointerId:(UITouch*)event{
     uint64_t eventAddrValue = (uint64_t)event;
-    [pointerIdSet removeObject:[pointerIdDict objectForKey:@(eventAddrValue)]];
-    [pointerIdDict removeObjectForKey:@(eventAddrValue)];
+    NSNumber* pointerIdObj = [pointerIdDict objectForKey:@(eventAddrValue)];
+    if(pointerIdObj != nil){
+        [pointerIdSet removeObject:pointerIdObj];
+        [pointerIdDict removeObjectForKey:@(eventAddrValue)];
+    }
 }
 
 // 从字典中获取UITouch事件对应的pointerId
@@ -320,17 +323,16 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         case UITouchPhaseRegionMoved://停留
             type = LI_TOUCH_EVENT_HOVER;
             break;
+        case UITouchPhaseCancelled://触摸取消
+            type = LI_TOUCH_EVENT_CANCEL;
+            [self sendTouchEvent:event touchType:type]; //先发送,再删除
+            [self removePointerId:event]; //删除pointerId
+            return;
         case UITouchPhaseEnded://触摸结束
             type = LI_TOUCH_EVENT_UP;
             [self sendTouchEvent:event touchType:type]; //先发送,再删除
             [self removePointerId:event]; //删除pointerId
             return;
-        case UITouchPhaseCancelled://触摸取消
-            type = LI_TOUCH_EVENT_CANCEL;
-            //[self sendTouchEvent:event touchType:type];
-            // [pointerIdDict removeAllObjects]; //do not remove object from pointerDict & pointerIdSet here. they'll be removed in UITouchPhaseEnded.
-            // [pointerIdSet removeAllObjects];
-            //return;
         default:
             return;
     }
@@ -462,6 +464,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 //                return;
             }
         }
+        // NSLog(@"touchesBegan - allTouches %lu, pointerSet count %lu",[[event allTouches] count], [pointerIdSet count]);
     }
 #endif
     
@@ -645,7 +648,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
                 //                return;
             }
         }
-        
+        // NSLog(@"touchesMoved - allTouches %lu, pointerSet count %lu",[[event allTouches] count], [pointerIdSet count]);
         UITouch *touch = [touches anyObject];
         if (touch.type == UITouchTypeIndirectPointer) {
             if (@available(iOS 14.0, *)) {
@@ -738,6 +741,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 //                return;
             }
         }
+        // NSLog(@"touchesEnded - allTouches %lu, pointerSet count %lu",[[event allTouches] count], [pointerIdSet count]);
     }
 #endif
     
@@ -763,6 +767,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 //                return;
             }
         }
+        // NSLog(@"touchesCancelled - allTouches %lu, pointerSet count %lu",[[event allTouches] count], [pointerIdSet count]);
     }
 #endif
 }
