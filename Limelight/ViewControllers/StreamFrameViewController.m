@@ -137,8 +137,8 @@
     //_exitSwipeRecognizer.edges = UIRectEdgeLeft;
     _exitSwipeRecognizer.delaysTouchesBegan = NO;
     _exitSwipeRecognizer.delaysTouchesEnded = NO;
-    
     [self.view addGestureRecognizer:_exitSwipeRecognizer];
+    
 #endif
     
     _tipLabel = [[UILabel alloc] init];
@@ -147,7 +147,7 @@
 #if TARGET_OS_TV
     [_tipLabel setText:@"Tip: Tap the Play/Pause button on the Apple TV Remote to disconnect from your PC"];
 #else
-    [_tipLabel setText:@"Tip: Swipe from the left edge to disconnect from your PC"];
+    [_tipLabel setText:@"Tip: Swipe from the left edge to the middle of your screen to disconnect from your PC"];
 #endif
     
     [_tipLabel sizeToFit];

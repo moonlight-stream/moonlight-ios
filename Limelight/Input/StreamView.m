@@ -23,6 +23,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     KeyboardInputField* keyInputField;
     BOOL isInputingText;
     NSMutableSet* keysDown;
+    UITapGestureRecognizer* _keyboardToggleTapRecognizer;
     
     float streamAspectRatio;
     
@@ -70,6 +71,12 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     [keyInputField setAutocapitalizationType:UITextAutocapitalizationTypeNone];
     [keyInputField setSpellCheckingType:UITextSpellCheckingTypeNo];
     [self addSubview:keyInputField];
+    _keyboardToggleTapRecognizer  = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(toggleKeyboard)];
+    _keyboardToggleTapRecognizer.numberOfTouchesRequired = 2;
+    _keyboardToggleTapRecognizer.numberOfTapsRequired = 2;
+    _keyboardToggleTapRecognizer.delaysTouchesBegan = NO;
+    _keyboardToggleTapRecognizer.delaysTouchesEnded = NO;
+    [self addGestureRecognizer:_keyboardToggleTapRecognizer];
     
 #if TARGET_OS_TV
     // tvOS requires RelativeTouchHandler to manage Apple Remote input
@@ -135,6 +142,42 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     // This is critical to ensure keyboard events are delivered to this
     // StreamView and not our parent UIView, especially on tvOS.
     [self becomeFirstResponder];
+}
+
+- (void)toggleKeyboard{
+        if (isInputingText) {
+            Log(LOG_D, @"Closing the keyboard");
+            [keyInputField resignFirstResponder];
+            isInputingText = false;
+        } else {
+        Log(LOG_D, @"Opening the keyboard");
+        // Prepare the textbox used to capture keyboard events.
+        keyInputField.delegate = self;
+        keyInputField.text = @"0";
+        #if !TARGET_OS_TV
+        // Prepare the toolbar above the keyboard for more options
+            if(false){
+                UIToolbar *customToolbarView = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, 44)];
+                UIBarButtonItem *doneBarButton = [self createButtonWithImageNamed:@"DoneIcon.png" backgroundColor:[UIColor clearColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x00 isToggleable:NO];
+                UIBarButtonItem *windowsBarButton = [self createButtonWithImageNamed:@"WindowsIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x5B isToggleable:YES];
+                UIBarButtonItem *tabBarButton = [self createButtonWithImageNamed:@"TabIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x09 isToggleable:NO];
+                UIBarButtonItem *shiftBarButton = [self createButtonWithImageNamed:@"ShiftIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA0 isToggleable:YES];
+                UIBarButtonItem *escapeBarButton = [self createButtonWithImageNamed:@"EscapeIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x1B isToggleable:NO];
+                UIBarButtonItem *controlBarButton = [self createButtonWithImageNamed:@"ControlIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA2 isToggleable:YES];
+                UIBarButtonItem *altBarButton = [self createButtonWithImageNamed:@"AltIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA4 isToggleable:YES];
+                UIBarButtonItem *deleteBarButton = [self createButtonWithImageNamed:@"DeleteIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x2E isToggleable:NO];
+                UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+                
+                [customToolbarView setItems:[NSArray arrayWithObjects:doneBarButton, windowsBarButton, escapeBarButton, tabBarButton, shiftBarButton, controlBarButton, altBarButton, deleteBarButton, flexibleSpace, nil]];
+                keyInputField.inputAccessoryView = customToolbarView;
+            }
+        #endif
+        [keyInputField becomeFirstResponder];
+        [keyInputField addTarget:self action:@selector(onKeyboardPressed:) forControlEvents:UIControlEventEditingChanged];
+        // Undo causes issues for our state management, so turn it off
+        [keyInputField.undoManager disableUndoRegistration];
+        isInputingText = true;
+    }
 }
 
 - (void)startInteractionTimer {
@@ -435,22 +478,22 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     
 #if !TARGET_OS_TV
     if (@available(iOS 13.4, *)) {
-//        NSArray<UITouch*> *arr1 = [[event allTouches] allObjects];
-////        NSLog(@"touchesBegan - %lu",[[event allTouches] count]);
-////        NSLog(@"touchesBegan - %lu",arr1.count);
-//
-//        for(int i=0;i<arr1.count;i++){
-//            if (arr1[i].type == UITouchTypePencil) {
-//                [self sendStylusEvent:arr1[i]];
-//                return;
-//                
-//            }
-//            TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
-//            if (settings.absoluteTouchMode) {
-//                [self handleUITouch:arr1[i] index:i];
-//                return;
-//            }
-//        }
+        //        NSArray<UITouch*> *arr1 = [[event allTouches] allObjects];
+        ////        NSLog(@"touchesBegan - %lu",[[event allTouches] count]);
+        ////        NSLog(@"touchesBegan - %lu",arr1.count);
+        //
+        //        for(int i=0;i<arr1.count;i++){
+        //            if (arr1[i].type == UITouchTypePencil) {
+        //                [self sendStylusEvent:arr1[i]];
+        //                return;
+        //
+        //            }
+        //            TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
+        //            if (settings.absoluteTouchMode) {
+        //                [self handleUITouch:arr1[i] index:i];
+        //                return;
+        //            }
+        //        }
         for (UITouch* touch in touches) {
             if (touch.type == UITouchTypePencil) {
                 if ([self sendStylusEvent:touch]) {
@@ -461,7 +504,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
             if (settings.absoluteTouchMode) {
                 [self handleUITouch:touch index:0];
                 
-//                return;
+                //                return;
             }
         }
         // NSLog(@"touchesBegan - allTouches %lu, pointerSet count %lu",[[event allTouches] count], [pointerIdSet count]);
@@ -476,42 +519,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         // is triggered.
         [touchHandler touchesBegan:touches withEvent:event];
         
-//        if ([[event allTouches] count] == 3) {
-//            if (isInputingText) {
-//                Log(LOG_D, @"Closing the keyboard");
-//                [keyInputField resignFirstResponder];
-//                isInputingText = false;
-//            } else {
-//                Log(LOG_D, @"Opening the keyboard");
-//                // Prepare the textbox used to capture keyboard events.
-//                keyInputField.delegate = self;
-//                keyInputField.text = @"0";
-//#if !TARGET_OS_TV
-//                // Prepare the toolbar above the keyboard for more options
-//                UIToolbar *customToolbarView = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, 44)];
-//                
-//                UIBarButtonItem *doneBarButton = [self createButtonWithImageNamed:@"DoneIcon.png" backgroundColor:[UIColor clearColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x00 isToggleable:NO];
-//                UIBarButtonItem *windowsBarButton = [self createButtonWithImageNamed:@"WindowsIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x5B isToggleable:YES];
-//                UIBarButtonItem *tabBarButton = [self createButtonWithImageNamed:@"TabIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x09 isToggleable:NO];
-//                UIBarButtonItem *shiftBarButton = [self createButtonWithImageNamed:@"ShiftIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA0 isToggleable:YES];
-//                UIBarButtonItem *escapeBarButton = [self createButtonWithImageNamed:@"EscapeIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x1B isToggleable:NO];
-//                UIBarButtonItem *controlBarButton = [self createButtonWithImageNamed:@"ControlIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA2 isToggleable:YES];
-//                UIBarButtonItem *altBarButton = [self createButtonWithImageNamed:@"AltIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA4 isToggleable:YES];
-//                UIBarButtonItem *deleteBarButton = [self createButtonWithImageNamed:@"DeleteIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x2E isToggleable:NO];
-//                UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
-//                
-//                [customToolbarView setItems:[NSArray arrayWithObjects:doneBarButton, windowsBarButton, escapeBarButton, tabBarButton, shiftBarButton, controlBarButton, altBarButton, deleteBarButton, flexibleSpace, nil]];
-//                keyInputField.inputAccessoryView = customToolbarView;
-//#endif
-//                [keyInputField becomeFirstResponder];
-//                [keyInputField addTarget:self action:@selector(onKeyboardPressed:) forControlEvents:UIControlEventEditingChanged];
-//                
-//                // Undo causes issues for our state management, so turn it off
-//                [keyInputField.undoManager disableUndoRegistration];
-//                
-//                isInputingText = true;
-//            }
-//        }
+        //if ([[event allTouches] count] == 3) [self toggleKeyboard];
     }
 }
 
