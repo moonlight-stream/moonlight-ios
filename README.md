@@ -5,7 +5,7 @@
 
 2023年12月， 阿西西的日常首先在iOS Moonlight上实现了多点触控，当时我在他的QQ群里承担了大部分iOS版的测试。
 
-2024年4月，我尝试解决了一个因pointer ID重复导致的奇怪bug, 第一次可以正常使用多点触控。
+2024年4月，我尝试解决了一个奇怪的多点触控bug, 第一次可以正常使用多点触控。
 
 安装 release 中的 ipa 文件，需要先对文件进行自签名，或者先越狱、安装巨魔商店。
 
@@ -18,7 +18,7 @@ This is the first fork published that actually works properly in native multi-po
 
 In Dec. 2023 阿西西的日常 was the first developer to implement native multi-touch passthrough on iOS while I undertook most part of testing for the modified iOS moonlight in his QQ group. 
 
-In Apr. 2024, I managed to fix a weird bug caused by pointer ID repetition making it able to work properly in native-touch passthrough for the first time.
+In Apr. 2024, I managed to fix a weird native-touch bug making it able to work properly in native-touch passthrough for the first time.
 
 To install the ipa file in release, you need to find a way to sideload the app on iOS, or try to jaibreak or install trollstore.
 
