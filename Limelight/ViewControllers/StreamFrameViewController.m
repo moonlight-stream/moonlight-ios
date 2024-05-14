@@ -133,8 +133,8 @@
 
 #else
     _exitSwipeRecognizer = [[CustomEdgeSwipeGestureRecognizer alloc] initWithTarget:self action:@selector(edgeSwiped)];
-    //_exitSwipeRecognizer.edges = UIRectEdgeLeft;
-    //_exitSwipeRecognizer.edges = UIRectEdgeLeft;
+    _exitSwipeRecognizer.edges = UIRectEdgeLeft;
+    _exitSwipeRecognizer.normalizedThresholdDistance = 0.5f;
     _exitSwipeRecognizer.delaysTouchesBegan = NO;
     _exitSwipeRecognizer.delaysTouchesEnded = NO;
     [self.view addGestureRecognizer:_exitSwipeRecognizer];

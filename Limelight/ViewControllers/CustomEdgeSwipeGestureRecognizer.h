@@ -13,5 +13,8 @@
 
 @interface CustomEdgeSwipeGestureRecognizer : UIGestureRecognizer
 
+@property (nonatomic, assign) UIRectEdge edges; // Specify the edge(s) you want to recognize the swipe gesture on
+@property (nonatomic, assign) CGFloat normalizedThresholdDistance; // Distance from the edge to start recognizing the gesture
+
 @end
 #endif /* CustomEdgeSwipeGestureRecognizer_h */
