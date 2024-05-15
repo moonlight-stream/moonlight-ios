@@ -86,7 +86,6 @@
     self.absoluteTouchMode = settings.absoluteTouchMode;
     self.statsOverlay = settings.statsOverlay;
     
-    self.keyboardToggleTaps = @1;
     self.keyboardToggleFingers = @4;
 #endif
     self.uniqueId = settings.uniqueId;

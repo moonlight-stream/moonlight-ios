@@ -15,6 +15,8 @@
 #import "RelativeTouchHandler.h"
 #import "AbsoluteTouchHandler.h"
 #import "KeyboardInputField.h"
+#import "CustomTapGestureRecognizer.h"
+
 
 static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
@@ -24,7 +26,6 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     KeyboardInputField* keyInputField;
     BOOL isInputingText;
     NSMutableSet* keysDown;
-    uint32_t keyboardToggleFingers;
     float streamAspectRatio;
 
 
@@ -47,6 +48,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     BOOL hasUserInteracted;
     
     NSDictionary<NSString *, NSNumber *> *dictCodes;
+    CustomTapGestureRecognizer *keyboardToggleRecognizer;
 }
 
 - (void) setupStreamView:(ControllerSupport*)controllerSupport
@@ -67,8 +69,13 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     [keyInputField setAutocapitalizationType:UITextAutocapitalizationTypeNone];
     [keyInputField setSpellCheckingType:UITextSpellCheckingTypeNo];
     [self addSubview:keyInputField];
-    keyboardToggleFingers = settings.keyboardToggleFingers.intValue;
-    //[self addGestureRecognizer:_keyboardToggleTapRecognizer];
+    
+    keyboardToggleRecognizer = [[CustomTapGestureRecognizer alloc] initWithTarget:self action:@selector(toggleKeyboard)];
+    keyboardToggleRecognizer.numberOfTouchesRequired = settings.keyboardToggleFingers.intValue;
+    keyboardToggleRecognizer.tapDownTimeThreshold = 300.0; // tap down time threshold in milli seconds.
+    keyboardToggleRecognizer.delaysTouchesBegan = NO;
+    keyboardToggleRecognizer.delaysTouchesEnded = NO;
+    [self addGestureRecognizer:keyboardToggleRecognizer];
     
 #if TARGET_OS_TV
     // tvOS requires RelativeTouchHandler to manage Apple Remote input
@@ -480,7 +487,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         // is triggered.
         [touchHandler touchesBegan:touches withEvent:event];
         
-        if ([[event allTouches] count] == keyboardToggleFingers) [self toggleKeyboard];
+        // if ([[event allTouches] count] == keyboardToggleFingers) [self toggleKeyboard];
     }
 }
 
