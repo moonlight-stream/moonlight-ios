@@ -85,8 +85,7 @@
     self.btMouseSupport = settings.btMouseSupport;
     self.absoluteTouchMode = settings.absoluteTouchMode;
     self.statsOverlay = settings.statsOverlay;
-    
-    self.keyboardToggleFingers = @4;
+    self.keyboardToggleFingers = settings.keyboardToggleFingers;
 #endif
     self.uniqueId = settings.uniqueId;
     

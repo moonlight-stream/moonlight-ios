@@ -58,6 +58,7 @@
                            width:(NSInteger)width
                      audioConfig:(NSInteger)audioConfig
                 onscreenControls:(NSInteger)onscreenControls
+           keyboardToggleFingers:(NSInteger)keyboardToggleFingers
                    optimizeGames:(BOOL)optimizeGames
                  multiController:(BOOL)multiController
                  swapABXYButtons:(BOOL)swapABXYButtons
@@ -77,6 +78,7 @@
         settingsToSave.width = [NSNumber numberWithInteger:width];
         settingsToSave.audioConfig = [NSNumber numberWithInteger:audioConfig];
         settingsToSave.onscreenControls = [NSNumber numberWithInteger:onscreenControls];
+        settingsToSave.keyboardToggleFingers = [NSNumber numberWithInteger:keyboardToggleFingers];
         settingsToSave.optimizeGames = optimizeGames;
         settingsToSave.multiController = multiController;
         settingsToSave.swapABXYButtons = swapABXYButtons;

@@ -263,6 +263,10 @@ BOOL isCustomResolution(CGSize res) {
     [self.bitrateSlider addTarget:self action:@selector(bitrateSliderMoved) forControlEvents:UIControlEventValueChanged];
     [self updateBitrateText];
     [self updateResolutionDisplayViewText];
+    [self.keyboardToggleFingerNumSlider addTarget:self action:@selector(keyboardToggleFingerNumSliderMoved) forControlEvents:(UIControlEventValueChanged)];
+    // currentSettings.keyboardToggleFingers = @((uint8_t)self.keyboardToggleFingerNumSlider.value);
+    
+    
 }
 
 - (void) touchModeChanged {
@@ -456,6 +460,11 @@ BOOL isCustomResolution(CGSize res) {
     [self.resolutionDisplayView addSubview:label2];
 }
 
+- (void) keyboardToggleFingerNumSliderMoved{
+    [self.keyboardToggleFingerNumLabel setText:[NSString stringWithFormat:@"Fingers to Tap on Local Keyboard: %@", @((uint8_t)self.keyboardToggleFingerNumSlider.value)]];
+}
+
+
 - (void) bitrateSliderMoved {
     assert(self.bitrateSlider.value < (sizeof(bitrateTable) / sizeof(*bitrateTable)));
     _bitrate = bitrateTable[(int)self.bitrateSlider.value];
@@ -528,6 +537,7 @@ BOOL isCustomResolution(CGSize res) {
     NSInteger height = [self getChosenStreamHeight];
     NSInteger width = [self getChosenStreamWidth];
     NSInteger onscreenControls = [self.onscreenControlSelector selectedSegmentIndex];
+    NSInteger keyboardToggleFingers = (uint8_t)self.keyboardToggleFingerNumSlider.value;
     BOOL optimizeGames = [self.optimizeSettingsSelector selectedSegmentIndex] == 1;
     BOOL multiController = [self.multiControllerSelector selectedSegmentIndex] == 1;
     BOOL swapABXYButtons = [self.swapABXYButtonsSelector selectedSegmentIndex] == 1;
@@ -544,6 +554,7 @@ BOOL isCustomResolution(CGSize res) {
                                width:width
                          audioConfig:2 // Stereo
                     onscreenControls:onscreenControls
+               keyboardToggleFingers:keyboardToggleFingers
                        optimizeGames:optimizeGames
                      multiController:multiController
                      swapABXYButtons:swapABXYButtons

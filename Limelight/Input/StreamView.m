@@ -144,18 +144,21 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 }
 
 - (void)toggleKeyboard{
-        if (isInputingText) {
-            Log(LOG_D, @"Closing the keyboard");
-            [keyInputField resignFirstResponder];
-            isInputingText = false;
-        } else {
-        Log(LOG_D, @"Opening the keyboard");
-        // Prepare the textbox used to capture keyboard events.
-        keyInputField.delegate = self;
-        keyInputField.text = @"0";
-        #if !TARGET_OS_TV
-        // Prepare the toolbar above the keyboard for more options
-            if(false){
+    if (true){
+        isInputingText = false;
+    }
+    if (isInputingText) {
+        Log(LOG_D, @"Closing the keyboard");
+        [keyInputField resignFirstResponder];
+        isInputingText = false;
+    } else {
+    Log(LOG_D, @"Opening the keyboard");
+    // Prepare the textbox used to capture keyboard events.
+    keyInputField.delegate = self;
+    keyInputField.text = @"0";
+    #if !TARGET_OS_TV
+    // Prepare the toolbar above the keyboard for more options
+        if(false){
                 UIToolbar *customToolbarView = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, 44)];
                 UIBarButtonItem *doneBarButton = [self createButtonWithImageNamed:@"DoneIcon.png" backgroundColor:[UIColor clearColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x00 isToggleable:NO];
                 UIBarButtonItem *windowsBarButton = [self createButtonWithImageNamed:@"WindowsIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x5B isToggleable:YES];
@@ -168,14 +171,14 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
                 UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
                 
                 [customToolbarView setItems:[NSArray arrayWithObjects:doneBarButton, windowsBarButton, escapeBarButton, tabBarButton, shiftBarButton, controlBarButton, altBarButton, deleteBarButton, flexibleSpace, nil]];
-                keyInputField.inputAccessoryView = customToolbarView;
-            }
-        #endif
-        [keyInputField becomeFirstResponder];
-        [keyInputField addTarget:self action:@selector(onKeyboardPressed:) forControlEvents:UIControlEventEditingChanged];
-        // Undo causes issues for our state management, so turn it off
-        [keyInputField.undoManager disableUndoRegistration];
-        isInputingText = true;
+            keyInputField.inputAccessoryView = customToolbarView;
+        }
+    #endif
+    [keyInputField becomeFirstResponder];
+    [keyInputField addTarget:self action:@selector(onKeyboardPressed:) forControlEvents:UIControlEventEditingChanged];
+    // Undo causes issues for our state management, so turn it off
+    [keyInputField.undoManager disableUndoRegistration];
+    isInputingText = true;
     }
 }
 
