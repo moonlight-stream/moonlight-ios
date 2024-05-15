@@ -54,8 +54,8 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 - (void) setupStreamView:(ControllerSupport*)controllerSupport
      interactionDelegate:(id<UserInteractionDelegate>)interactionDelegate
                   config:(StreamConfiguration*)streamConfig {
-    NSMutableDictionary *pointerIdDict = [NativeTouchHandler initializePointerIdDict];
-    NSMutableSet<NSNumber *> *pointerIdSet = [NativeTouchHandler initializePointerIdSet];
+    [NativeTouchHandler initializePointerIdDict];
+    [NativeTouchHandler initializePointerIdSet];
     
     self->interactionDelegate = interactionDelegate;
     self->streamAspectRatio = (float)streamConfig.width / (float)streamConfig.height;
@@ -144,7 +144,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 }
 
 - (void)toggleKeyboard{
-    if (true){
+    if (false){
         isInputingText = false;
     }
     if (isInputingText) {
