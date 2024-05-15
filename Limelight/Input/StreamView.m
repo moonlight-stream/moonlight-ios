@@ -11,6 +11,7 @@
 #import "DataManager.h"
 #import "ControllerSupport.h"
 #import "KeyboardSupport.h"
+#import "NativeTouchHandler.h"
 #import "RelativeTouchHandler.h"
 #import "AbsoluteTouchHandler.h"
 #import "KeyboardInputField.h"
@@ -23,15 +24,10 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     KeyboardInputField* keyInputField;
     BOOL isInputingText;
     NSMutableSet* keysDown;
-    UITapGestureRecognizer* _keyboardToggleTapRecognizer;
-    
+    uint32_t keyboardToggleFingers;
     float streamAspectRatio;
-    
-    // Use a Dictionary to store UITouch object's memory address as key, and pointerId as value,字典存放UITouch对象地址和pointerId映射关系
-    // pointerId will be generated from electronic noise, by arc4_random, pointerId,由随机噪声生成
-    // Use a NSSet store pointerId, for quick repeition inquiry, NSSet存放活跃的pointerId合集,用于快速查找,以防重复.
-    NSMutableDictionary *pointerIdDict; //pointerId Dict for native touch.
-    NSMutableSet<NSNumber *> *pointerIdSet; //pointerIdSet for native touch.
+
+
     
     // iOS 13.4 mouse support
     NSInteger lastMouseButtonMask;
@@ -56,8 +52,8 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 - (void) setupStreamView:(ControllerSupport*)controllerSupport
      interactionDelegate:(id<UserInteractionDelegate>)interactionDelegate
                   config:(StreamConfiguration*)streamConfig {
-    pointerIdDict = [NSMutableDictionary dictionary];
-    pointerIdSet = [NSMutableSet set];
+    NSMutableDictionary *pointerIdDict = [NativeTouchHandler initializePointerIdDict];
+    NSMutableSet<NSNumber *> *pointerIdSet = [NativeTouchHandler initializePointerIdSet];
     
     self->interactionDelegate = interactionDelegate;
     self->streamAspectRatio = (float)streamConfig.width / (float)streamConfig.height;
@@ -71,12 +67,8 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     [keyInputField setAutocapitalizationType:UITextAutocapitalizationTypeNone];
     [keyInputField setSpellCheckingType:UITextSpellCheckingTypeNo];
     [self addSubview:keyInputField];
-    _keyboardToggleTapRecognizer  = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(toggleKeyboard)];
-    _keyboardToggleTapRecognizer.numberOfTouchesRequired = 2;
-    _keyboardToggleTapRecognizer.numberOfTapsRequired = 2;
-    _keyboardToggleTapRecognizer.delaysTouchesBegan = NO;
-    _keyboardToggleTapRecognizer.delaysTouchesEnded = NO;
-    [self addGestureRecognizer:_keyboardToggleTapRecognizer];
+    keyboardToggleFingers = settings.keyboardToggleFingers.intValue;
+    //[self addGestureRecognizer:_keyboardToggleTapRecognizer];
     
 #if TARGET_OS_TV
     // tvOS requires RelativeTouchHandler to manage Apple Remote input
@@ -291,42 +283,11 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     return 90 - MIN(90, altitudeDegs);
 }
 
-// 随机生成pointerId并填入NSDict和NSSet
-// generate & populate pointerId into NSDict & NSSet, called in UITouchPhaseBegan
-- (void)populatePointerId:(UITouch*)event{
-    uint64_t eventAddrValue = (uint64_t)event;
-    uint32_t randomPointerId = arc4random_uniform(UINT32_MAX); // generate pointerId from eletronic noise.
-    while(true){
-        if([pointerIdSet containsObject:@(randomPointerId)]) randomPointerId = arc4random_uniform(UINT32_MAX); // in case of new pointerId collides with existing ones, generate again.
-        else{ // populate pointerId into NSDict & NSSet.
-            [pointerIdDict setObject:@(randomPointerId) forKey:@(eventAddrValue)];
-            [pointerIdSet addObject:@(randomPointerId)];
-            return;
-        }
-    }
-}
-
-// remove pointerId in UITouchPhaseEnded condition
-- (void)removePointerId:(UITouch*)event{
-    uint64_t eventAddrValue = (uint64_t)event;
-    NSNumber* pointerIdObj = [pointerIdDict objectForKey:@(eventAddrValue)];
-    if(pointerIdObj != nil){
-        [pointerIdSet removeObject:pointerIdObj];
-        [pointerIdDict removeObjectForKey:@(eventAddrValue)];
-    }
-}
-
-// 从字典中获取UITouch事件对应的pointerId
-// call this only when NSDcit & NSSet is up-to-date.
-- (uint32_t) retrievePointerIdFromDict:(UITouch*)event{
-    return [[pointerIdDict objectForKey:@((uint64_t)event)] unsignedIntValue];
-}
-
 
 - (void)sendTouchEvent:(UITouch*)event touchType:(uint8_t)touchType{
     CGPoint location = [self adjustCoordinatesForVideoArea:[event locationInView:self]];
     CGSize videoSize = [self getVideoAreaSize];
-    LiSendTouchEvent(touchType,[self retrievePointerIdFromDict:event],location.x / videoSize.width, location.y / videoSize.height,(event.force / event.maximumPossibleForce) / sin(event.altitudeAngle),0.0f, 0.0f,[self getRotationFromAzimuthAngle:[event azimuthAngleInView:self]]);
+    LiSendTouchEvent(touchType,[NativeTouchHandler retrievePointerIdFromDict:event],location.x / videoSize.width, location.y / videoSize.height,(event.force / event.maximumPossibleForce) / sin(event.altitudeAngle),0.0f, 0.0f,[self getRotationFromAzimuthAngle:[event azimuthAngleInView:self]]);
 }
 
 
@@ -356,7 +317,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     switch (event.phase) {
         case UITouchPhaseBegan://开始触摸
             type = LI_TOUCH_EVENT_DOWN;
-            [self populatePointerId:event]; //获取并记录pointerId
+            [NativeTouchHandler populatePointerId:event]; //获取并记录pointerId
             break;
         case UITouchPhaseMoved://移动
         case UITouchPhaseStationary:
@@ -369,12 +330,12 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         case UITouchPhaseCancelled://触摸取消
             type = LI_TOUCH_EVENT_CANCEL;
             [self sendTouchEvent:event touchType:type]; //先发送,再删除
-            [self removePointerId:event]; //删除pointerId
+            [NativeTouchHandler removePointerId:event]; //删除pointerId
             return;
         case UITouchPhaseEnded://触摸结束
             type = LI_TOUCH_EVENT_UP;
             [self sendTouchEvent:event touchType:type]; //先发送,再删除
-            [self removePointerId:event]; //删除pointerId
+            [NativeTouchHandler removePointerId:event]; //删除pointerId
             return;
         default:
             return;
@@ -519,7 +480,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         // is triggered.
         [touchHandler touchesBegan:touches withEvent:event];
         
-        //if ([[event allTouches] count] == 3) [self toggleKeyboard];
+        if ([[event allTouches] count] == keyboardToggleFingers) [self toggleKeyboard];
     }
 }
 

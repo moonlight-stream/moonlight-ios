@@ -24,14 +24,14 @@ static CGFloat EDGE_TOLERANCE_POINTS = 50.0f;
 }
 
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-    [super touchesBegan:touches withEvent:event];
+    // [super touchesBegan:touches withEvent:event];
     UITouch *touch = [touches anyObject];
     capturedUITouch = touch;
     _startPointX = [capturedUITouch locationInView:self.view].x;
 }
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-    [super touchesEnded:touches withEvent:event];
+    // [super touchesEnded:touches withEvent:event];
     
     if([touches containsObject:capturedUITouch]){
         CGFloat _endPointX = [capturedUITouch locationInView:self.view].x;
