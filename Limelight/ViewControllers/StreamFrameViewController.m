@@ -86,7 +86,7 @@
     
     [UIApplication sharedApplication].idleTimerDisabled = YES;
     
-    _settings = [[[DataManager alloc] init] getSettings];
+    _settings = [[[DataManager alloc] init] getSettings];  //StreamFrameViewController retrieve the settings here.
     
     _stageLabel = [[UILabel alloc] init];
     [_stageLabel setUserInteractionEnabled:NO];
@@ -134,7 +134,7 @@
 #else
     _exitSwipeRecognizer = [[CustomEdgeSwipeGestureRecognizer alloc] initWithTarget:self action:@selector(edgeSwiped)];
     _exitSwipeRecognizer.edges = UIRectEdgeLeft;
-    _exitSwipeRecognizer.normalizedThresholdDistance = 0.5f;
+    _exitSwipeRecognizer.normalizedThresholdDistance = _settings.swipeToExitDistance.floatValue;
     _exitSwipeRecognizer.delaysTouchesBegan = NO;
     _exitSwipeRecognizer.delaysTouchesEnded = NO;
     [self.view addGestureRecognizer:_exitSwipeRecognizer];

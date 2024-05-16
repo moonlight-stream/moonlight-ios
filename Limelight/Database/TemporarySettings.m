@@ -86,6 +86,7 @@
     self.absoluteTouchMode = settings.absoluteTouchMode;
     self.statsOverlay = settings.statsOverlay;
     self.keyboardToggleFingers = settings.keyboardToggleFingers;
+    self.swipeToExitDistance = settings.swipeToExitDistance;
 #endif
     self.uniqueId = settings.uniqueId;
     

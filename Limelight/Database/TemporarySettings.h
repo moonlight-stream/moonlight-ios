@@ -19,6 +19,7 @@
 @property (nonatomic, retain) NSNumber * audioConfig;
 @property (nonatomic, retain) NSNumber * onscreenControls;
 @property (nonatomic, retain) NSNumber * keyboardToggleFingers;
+@property (nonatomic, retain) NSNumber * swipeToExitDistance;
 @property (nonatomic, retain) NSString * uniqueId;
 @property (nonatomic) enum {
     CODEC_PREF_AUTO,

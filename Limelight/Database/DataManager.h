@@ -20,6 +20,7 @@
                 audioConfig:(NSInteger)audioConfig
                 onscreenControls:(NSInteger)onscreenControls
             keyboardToggleFingers:(NSInteger)keyboardToggleFingers
+             swipeToExitDistance:(CGFloat)swipeToExitDistance
                    optimizeGames:(BOOL)optimizeGames
                  multiController:(BOOL)multiController
                  swapABXYButtons:(BOOL)swapABXYButtons

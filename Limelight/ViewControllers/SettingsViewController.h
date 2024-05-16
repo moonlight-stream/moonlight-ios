@@ -29,6 +29,8 @@
 @property (strong, nonatomic) IBOutlet UIScrollView *scrollView;
 @property (strong, nonatomic) IBOutlet UILabel *keyboardToggleFingerNumLabel;
 @property (strong, nonatomic) IBOutlet UISlider *keyboardToggleFingerNumSlider;
+@property (strong, nonatomic) IBOutlet UILabel *swipeToExitDistanceUILabel;
+@property (strong, nonatomic) IBOutlet UISlider *swipeToExitDistanceSlider;
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability"
