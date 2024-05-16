@@ -29,6 +29,7 @@
 @property (strong, nonatomic) IBOutlet UIScrollView *scrollView;
 @property (strong, nonatomic) IBOutlet UILabel *keyboardToggleFingerNumLabel;
 @property (strong, nonatomic) IBOutlet UISlider *keyboardToggleFingerNumSlider;
+@property (strong, nonatomic) IBOutlet UISegmentedControl *swipeExitScreenEdgeSelector;
 @property (strong, nonatomic) IBOutlet UILabel *swipeToExitDistanceUILabel;
 @property (strong, nonatomic) IBOutlet UISlider *swipeToExitDistanceSlider;
 

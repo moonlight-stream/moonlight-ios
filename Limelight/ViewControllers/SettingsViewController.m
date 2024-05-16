@@ -10,6 +10,7 @@
 #import "TemporarySettings.h"
 #import "DataManager.h"
 
+#import <UIKit/UIGestureRecognizerSubclass.h>
 #import <VideoToolbox/VideoToolbox.h>
 #import <AVFoundation/AVFoundation.h>
 
@@ -263,14 +264,36 @@ BOOL isCustomResolution(CGSize res) {
     [self.bitrateSlider addTarget:self action:@selector(bitrateSliderMoved) forControlEvents:UIControlEventValueChanged];
     [self updateBitrateText];
     [self updateResolutionDisplayViewText];
+    
     [self.keyboardToggleFingerNumSlider setValue:(CGFloat)currentSettings.keyboardToggleFingers.intValue animated:YES]; // Load old setting. old setting was converted to uint16_t before saving.
     [self.keyboardToggleFingerNumLabel setText:[NSString stringWithFormat:@"Fingers to Tap-Toggle Local Keyboard: %d", (uint16_t)self.keyboardToggleFingerNumSlider.value]]; // Initiate label display
     [self.keyboardToggleFingerNumSlider addTarget:self action:@selector(keyboardToggleFingerNumSliderMoved) forControlEvents:(UIControlEventValueChanged)]; // Update label display when slider is being moved.
     
+    [self.swipeExitScreenEdgeSelector setSelectedSegmentIndex:[self getSelectorIndexFromScreenEdge:(uint32_t)currentSettings.swipeExitScreenEdge.integerValue]]; // Load old setting
     [self.swipeToExitDistanceSlider setValue:(CGFloat)currentSettings.swipeToExitDistance.floatValue animated:YES]; // Load old setting.
     [self.swipeToExitDistanceUILabel setText:[NSString stringWithFormat:@"Swipe & Exit Distance: %.2f * screen-width", self.swipeToExitDistanceSlider.value]]; // Initiate label display
     [self.swipeToExitDistanceSlider addTarget:self action:@selector(swipeToExitDistanceSliderMoved) forControlEvents:(UIControlEventValueChanged)]; // Update label display when slider is being moved.
 }
+
+- (uint32_t) getScreenEdgeFromSelector {
+    switch (self.swipeExitScreenEdgeSelector.selectedSegmentIndex) {
+        case 0: return UIRectEdgeLeft;
+        case 1: return UIRectEdgeRight;
+        case 2: return UIRectEdgeLeft|UIRectEdgeRight;
+        default: return UIRectEdgeLeft;
+    }
+}
+
+- (uint32_t) getSelectorIndexFromScreenEdge: (uint32_t)edge {
+    switch (edge) {
+        case UIRectEdgeLeft: return 0;
+        case UIRectEdgeRight: return 1;
+        case UIRectEdgeLeft|UIRectEdgeRight: return 2;
+        default: return 0;
+    }
+    return 0;
+}
+
 
 - (void) touchModeChanged {
     // Disable on-screen controls in absolute touch mode
@@ -546,6 +569,7 @@ BOOL isCustomResolution(CGSize res) {
     NSInteger keyboardToggleFingers = (uint16_t)self.keyboardToggleFingerNumSlider.value;
     // NSLog(@"saveSettings keyboardToggleFingers  %d", (uint16_t)keyboardToggleFingers);
     CGFloat swipeToExitDistance = self.swipeToExitDistanceSlider.value;
+    uint32_t swipeExitScreenEdge = [self getScreenEdgeFromSelector];
     BOOL optimizeGames = [self.optimizeSettingsSelector selectedSegmentIndex] == 1;
     BOOL multiController = [self.multiControllerSelector selectedSegmentIndex] == 1;
     BOOL swapABXYButtons = [self.swapABXYButtonsSelector selectedSegmentIndex] == 1;
@@ -563,6 +587,7 @@ BOOL isCustomResolution(CGSize res) {
                          audioConfig:2 // Stereo
                     onscreenControls:onscreenControls
                keyboardToggleFingers:keyboardToggleFingers
+                 swipeExitScreenEdge:swipeExitScreenEdge
                  swipeToExitDistance:swipeToExitDistance
                        optimizeGames:optimizeGames
                      multiController:multiController

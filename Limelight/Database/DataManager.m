@@ -59,6 +59,7 @@
                      audioConfig:(NSInteger)audioConfig
                 onscreenControls:(NSInteger)onscreenControls
            keyboardToggleFingers:(NSInteger)keyboardToggleFingers
+             swipeExitScreenEdge:(NSInteger)swipeExitScreenEdge
              swipeToExitDistance:(CGFloat)swipeToExitDistance
                    optimizeGames:(BOOL)optimizeGames
                  multiController:(BOOL)multiController
@@ -80,6 +81,7 @@
         settingsToSave.audioConfig = [NSNumber numberWithInteger:audioConfig];
         settingsToSave.onscreenControls = [NSNumber numberWithInteger:onscreenControls];
         settingsToSave.keyboardToggleFingers = [NSNumber numberWithInteger:(uint16_t)keyboardToggleFingers];
+        settingsToSave.swipeExitScreenEdge = [NSNumber numberWithInteger:(uint32_t)swipeExitScreenEdge];
         settingsToSave.swipeToExitDistance = [NSNumber numberWithFloat:swipeToExitDistance];
         settingsToSave.optimizeGames = optimizeGames;
         settingsToSave.multiController = multiController;
