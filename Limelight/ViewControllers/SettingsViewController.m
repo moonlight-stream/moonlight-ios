@@ -264,7 +264,7 @@ BOOL isCustomResolution(CGSize res) {
     [self updateBitrateText];
     [self updateResolutionDisplayViewText];
     [self.keyboardToggleFingerNumSlider setValue:(CGFloat)currentSettings.keyboardToggleFingers.intValue animated:YES]; // Load old setting. old setting was converted to uint32_t before saving.
-    [self.keyboardToggleFingerNumLabel setText:[NSString stringWithFormat:@"Fingers to Tap on Local Keyboard: %@", @((uint16_t)self.keyboardToggleFingerNumSlider.value)]]; // Initiate label display
+    [self.keyboardToggleFingerNumLabel setText:[NSString stringWithFormat:@"Fingers to Tap-Toggle Local Keyboard: %@", @((uint16_t)self.keyboardToggleFingerNumSlider.value)]]; // Initiate label display
     [self.keyboardToggleFingerNumSlider addTarget:self action:@selector(keyboardToggleFingerNumSliderMoved) forControlEvents:(UIControlEventValueChanged)]; // Update label display when slider is being moved.
 }
 
@@ -460,7 +460,7 @@ BOOL isCustomResolution(CGSize res) {
 }
 
 - (void) keyboardToggleFingerNumSliderMoved{
-    [self.keyboardToggleFingerNumLabel setText:[NSString stringWithFormat:@"Fingers to Tap on Local Keyboard: %@", @((uint8_t)self.keyboardToggleFingerNumSlider.value)]];
+    [self.keyboardToggleFingerNumLabel setText:[NSString stringWithFormat:@"Fingers to Tap-Toggle Local Keyboard: %@", @((uint8_t)self.keyboardToggleFingerNumSlider.value)]];
 }
 
 

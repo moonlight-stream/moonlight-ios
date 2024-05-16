@@ -179,6 +179,7 @@
 #if 0
     // FIXME: This doesn't work reliably on iPad for some reason. Showing and hiding the keyboard
     // several times in a row will not correctly restore the state of the UIScrollView.
+    // I add this notification to the StreamView, works well on ipad mini6.
     [[NSNotificationCenter defaultCenter] addObserver: self
                                              selector: @selector(keyboardWillShow:)
                                                  name: UIKeyboardWillShowNotification

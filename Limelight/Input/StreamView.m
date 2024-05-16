@@ -75,6 +75,15 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     keyboardToggleRecognizer.tapDownTimeThreshold = 300.0; // tap down time threshold in milli seconds.
     keyboardToggleRecognizer.delaysTouchesBegan = NO;
     keyboardToggleRecognizer.delaysTouchesEnded = NO;
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardWillShow)
+                                                 name:UIKeyboardWillShowNotification
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardWillHide)
+                                                 name:UIKeyboardWillHideNotification
+                                               object:nil];
     [self addGestureRecognizer:keyboardToggleRecognizer];
     
 #if TARGET_OS_TV
@@ -143,15 +152,25 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     [self becomeFirstResponder];
 }
 
+- (void)keyboardWillShow{
+    isInputingText = true;
+    // NSLog(@"keyboard will show");
+}
+
+- (void)keyboardWillHide{
+    isInputingText = false;
+    // NSLog(@"keyboard will hide");
+}
+
+
 - (void)toggleKeyboard{
-    if (false){
-        isInputingText = false;
-    }
     if (isInputingText) {
         Log(LOG_D, @"Closing the keyboard");
+        // NSLog(@"Closing the keyboard");
         [keyInputField resignFirstResponder];
         isInputingText = false;
     } else {
+        // NSLog(@"Opening the keyboard");
     Log(LOG_D, @"Opening the keyboard");
     // Prepare the textbox used to capture keyboard events.
     keyInputField.delegate = self;
@@ -178,7 +197,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     [keyInputField addTarget:self action:@selector(onKeyboardPressed:) forControlEvents:UIControlEventEditingChanged];
     // Undo causes issues for our state management, so turn it off
     [keyInputField.undoManager disableUndoRegistration];
-    isInputingText = true;
+    //isInputingText = true;
     }
 }
 
@@ -489,7 +508,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         // activation of one or two finger gestures when a three finger gesture
         // is triggered.
         [touchHandler touchesBegan:touches withEvent:event];
-        
+        // I refactored keyboard toggle by the CustomTapGestureRecognizer
         // if ([[event allTouches] count] == keyboardToggleFingers) [self toggleKeyboard];
     }
 }
