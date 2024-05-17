@@ -1,31 +1,67 @@
 # Moonlight-ZWM
 
-这是首个公开的 iOS 多点触控透传fork。原版本基于 moonlight-ios 9.0.0 ，2024.2.4 提交的 moonlight-common-c 子模块，以及 Bilibili Up主 阿西西的日常 的早期修改。
-已于2024.04.30合并官方仓库9.0.2的代码修改， 并更新moonlight-common-c, 同时修改了触发退出会话的手势。 后续将视情况更新。
+# 适用范围 Applies to
 
-2023年12月， 阿西西的日常首先在iOS Moonlight上实现了多点触控，当时我在他的QQ群里承担了大部分iOS版的测试。
+适用有强烈多点触控串流游戏需求的玩家, 尤其是米家自带原生触屏UI的游戏。 作为资深搓屏党一员，我认为自己对这种玩法的需求判断是准确的。具体请看主要特性列表。 <br>
+Players who have a strong demand for multi-touch streaming games, especially those who play Mihoyo games with built-in native touchscreen UI . As a senior player of the "touch screen club", I believe my judgment of this kindof gameplay requirement is accurate. Please see the main feature list for details
+ <br>
 
-2024年4月，我尝试解决了一个因pointer ID重复导致的奇怪bug, 第一次可以正常使用多点触控。
+# 注意事项 Notice
+欢迎公开或非公开的代码合并，但如果觉得这个Fork好用，或对自己有所启发， 请记得点星。如果能够声明引用这个Fork的改动，我将非常感谢。<br>
+Feel free to merge the code, whether publicly or privately. However, if you find this fork useful or inspiring, please remember to give it a star. I would greatly appreciate if you could mention the changes made to your own build originated from this fork.
+ <br>
 
-安装 release 中的 ipa 文件，需要先对文件进行自签名，或者先越狱、安装巨魔商店。
+# Fork缘由
 
-启用多点触控，只需在“设置 ->触摸模式”中选择“触摸屏”即可。
+这是首个公开的 iOS 多点触控透传fork。
 
-查看代码，请转到分支“moonlight-iOS-ZWM-updated”。
+原版本基于 moonlight-ios 9.0.0 ，2024.2.4 提交的 moonlight-common-c 子模块，以及 Bilibili Up主 阿西西的日常 的早期修改。已于2024.04.30合并官方仓库9.0.2的代码修改， 并更新moonlight-common-c。 
+
+2023年12月，某位匿名Up主发现了原神PC版的隐藏触屏UI。 我作为一个从ipad mini系列开始入坑原神、PC上操作不来键鼠，更不会用手柄的资深搓屏玩家， 开始对ipad上用触屏UI直接操作原神充满期待。
+于是我在阿西西QQ群里承担了大部分iOS版的测试，在2024年元旦前，终于有了第一个差不多通用的多点触控iOS版本。但这个版本并不完善， 多点触控经常性的卡死对游戏体验影响非常大。
+
+由于阿西西作为手柄玩家和非专业iOS开发者对iOS moonlight多点触控串流并上不心。2024年4月本人不得不亲自下场，找到bug根本原因并提交解决代码, 使之第一次可以正常使用多点触控。
+<br>
+<br>
+
+# 主要特性 Feature List 20240517
+
+1. 健壮的多点触控透传。Robust Multi-Touch Pass-Through.
+
+   经过早期Bug修复和后续优化， 多点触透传机制已经非常可靠。
+   <br>After early bug fixes and subsequent optimizations, the multi-touch pass-through mechanism has become very reliable.
+   <br><br>
+3. 重构退出会话手势识别，防止意外退出。Refactored Session Exit Gesture Recognition to Prevent Accidental Exits.
+
+   由于米家游戏UI左边的方向轮靠近屏幕边缘， 原版的退出桌面手势识别非常容易高频操作下触发，你无法想象在深境螺旋里，桌面突然退出的绝望。我不得不自己写了一个识别器替代iOS原生API， 要求从屏幕边缘滑动到一定距离才能触发退出桌面。<br>
+   并且滑动距离的触发门槛、以及要求从哪个边缘开始滑动，已加入设置菜单：
+   <br> Due to the Mihoyo game UI's directional wheel on the left being close to the screen edge, the original exit gesture recognition was frequently triggered during high-frequency operations. You cannot imagine the despair of suddenly exiting from desktop in the Genshin Impact Spiral Abyss. I had to write a recognizer myself to replace the iOS native API, requiring a swipe from the screen edge to a certain distance to trigger the exit to the desktop. The trigger threshold for the swipe distance and which edge to start the swipe from have been added to the settings menu: <br>
+![image](https://github.com/TrueZhuangJia/moonlight-ios-NativeMultiTouchPassthrough/assets/78474576/b2fec7b0-c82a-4bca-aec2-0620f5185b2e)
+![longSwipeToExit](https://github.com/TrueZhuangJia/moonlight-ios-NativeMultiTouchPassthrough/assets/78474576/a177b3e6-9b28-4274-b1b9-e4011a8caf86)
+   <br><br>
+
+5. 重构键盘切换手势识别，实现可靠本地输入法键盘唤醒、关闭。Refactored Tap Gesture Recognition for Reliable Local Keyboard Toggle.
+
+   Moonlight-iOS官方版在检测到屏幕上有三个触点时，直接触发本地键盘切换，这种机制将使三触点的拖动完全失效。而如果采用iOS API提供UITapGestureRecognizer, 手势识别成功率将降低，甚至出现连续无法识别的情况。
+   为此我重写了一个TapGestureRecognizer, 识别率几乎达到100%且不影响三触点拖动。为避免误触导致键盘意外唤醒， 为触发手势识别所要求的手指数量 增加了设置菜单。推荐手机设为三指触发， 平板设为四指或更多手指触发(用平板操作你的手掌可能会碰到屏幕，形成第三个触点)
+   <br>
+   The official version of Moonlight-iOS triggers the local keyboard switch when it detects three touch points on the screen, a mechanism that makes three-point dragging completely ineffective. <br> I also tried  UITapGestureRecognizer provided by iOS native API: the success rate of gesture recognition would decrease, and even continuous failures could occur. Therefore, I rewrote a TapGestureRecognizer with a recognition rate of almost 100% that does not affect multi-point dragging.
+   To prevent local keyboard from being invoked unexpectedly, I add the required number of fingers for tap recognizer to the setting menu. It is recommended to set three-finger triggering on phones and four or more on tablets (as your palm might touch the screen, forming a third touch point when using a tablet).
+   ![image](https://github.com/TrueZhuangJia/moonlight-ios-NativeMultiTouchPassthrough/assets/78474576/6d62fa86-5f89-42e2-8504-456bef04ba4c) <br> Here's a *.gif example of setting "Fingers to Tap" to 4 on my ipad mini6: <br>
+   ![testt5](https://github.com/TrueZhuangJia/moonlight-ios-NativeMultiTouchPassthrough/assets/78474576/747854af-d2aa-467c-9c94-eb07bdf52868)
+<br>
+
+# 安装 Installation
+
+安装 release 中的 ipa 文件，需要先对文件进行自签名，或者先越狱、安装巨魔商店。 目前我就用过Sideloadly.
+<br>
+To install the ipa file in release, you need to find a way to sideload the app on iOS, or try to jaibreak or install trollstore. I just tried Sideloadly so far.
 
 
-This is the first fork published that actually works properly in native multi-point passthrough mode on iOS. It was originally based on moonlight-ios version 9.0.0 and early modification by Bilibili uploader 阿西西的日常. On 2024.04.30, I merged my fork with 9.0.2 modifications from official repo, updated moonlight-common-c to the latest commit, also defined a custom gesture for exiting remote session. To be updated in the future if necessary.
 
-In Dec. 2023 阿西西的日常 was the first developer to implement native multi-touch passthrough on iOS while I undertook most part of testing for the modified iOS moonlight in his QQ group. 
 
-In Apr. 2024, I managed to fix a weird bug caused by pointer ID repetition making it able to work properly in native-touch passthrough for the first time.
 
-To install the ipa file in release, you need to find a way to sideload the app on iOS, or try to jaibreak or install trollstore.
-
-To Enable native-touch passthrough, just select "Touchscreen" in "Settings -> Touch Mode".
-
-To check the code go to branch "moonlight-iOS-ZWM-updated".
-
+<br><br><br><br><br>
 
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/kwv8vpwr457lqn25/branch/master?svg=true)](https://ci.appveyor.com/project/cgutman/moonlight-ios/branch/master)
 
