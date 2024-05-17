@@ -266,7 +266,8 @@ BOOL isCustomResolution(CGSize res) {
     [self updateResolutionDisplayViewText];
     
     [self.keyboardToggleFingerNumSlider setValue:(CGFloat)currentSettings.keyboardToggleFingers.intValue animated:YES]; // Load old setting. old setting was converted to uint16_t before saving.
-    [self.keyboardToggleFingerNumLabel setText:[NSString stringWithFormat:@"Fingers to Tap-Toggle Local Keyboard: %d", (uint16_t)self.keyboardToggleFingerNumSlider.value]]; // Initiate label display
+    if (self.keyboardToggleFingerNumSlider.value > 10.5f) [self.keyboardToggleFingerNumLabel setText:[NSString stringWithFormat:@"Tap-Toggle Local Keyboard Disabled"]]; // Initiate label display. Allow higher required finger number to completely disable keyboard toggle
+    else [self.keyboardToggleFingerNumLabel setText:[NSString stringWithFormat:@"Fingers to Tap-Toggle Local Keyboard: %d", (uint16_t)self.keyboardToggleFingerNumSlider.value]]; // Initiate label display
     [self.keyboardToggleFingerNumSlider addTarget:self action:@selector(keyboardToggleFingerNumSliderMoved) forControlEvents:(UIControlEventValueChanged)]; // Update label display when slider is being moved.
     
     [self.swipeExitScreenEdgeSelector setSelectedSegmentIndex:[self getSelectorIndexFromScreenEdge:(uint32_t)currentSettings.swipeExitScreenEdge.integerValue]]; // Load old setting
@@ -487,7 +488,8 @@ BOOL isCustomResolution(CGSize res) {
 }
 
 - (void) keyboardToggleFingerNumSliderMoved{
-    [self.keyboardToggleFingerNumLabel setText:[NSString stringWithFormat:@"Fingers to Tap-Toggle Local Keyboard: %d", (uint8_t)self.keyboardToggleFingerNumSlider.value]];
+    if (self.keyboardToggleFingerNumSlider.value > 10.5f) [self.keyboardToggleFingerNumLabel setText:[NSString stringWithFormat:@"Tap-Toggle Local Keyboard Disabled"]];
+    else [self.keyboardToggleFingerNumLabel setText:[NSString stringWithFormat:@"Fingers to Tap-Toggle Local Keyboard: %d", (uint16_t)self.keyboardToggleFingerNumSlider.value]]; // Initiate label display
 }
 
 - (void) swipeToExitDistanceSliderMoved{
