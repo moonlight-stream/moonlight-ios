@@ -29,7 +29,7 @@ Feel free to merge the code, whether publicly or privately. However, if you find
 1. 健壮的多点触控透传。Robust Multi-Touch Pass-Through.
 
    经过早期Bug修复和后续优化， 多点触透传机制已经非常可靠。
-   <br>After early bug fixes and subsequent optimizations, the multi-touch pass-through mechanism has become very reliable.
+   <br>After early bug fixes and subsequent optimizations, the multi-touch pass-through mechanism has become very reliable.<br>
 ![testt5](https://github.com/TrueZhuangJia/moonlight-ios-NativeMultiTouchPassthrough/assets/78474576/46af86e8-ef69-4923-a36b-0a7b54856b22)
    <br><br>
 
