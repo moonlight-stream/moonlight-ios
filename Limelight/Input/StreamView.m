@@ -13,6 +13,7 @@
 #import "KeyboardSupport.h"
 #import "RelativeTouchHandler.h"
 #import "AbsoluteTouchHandler.h"
+#import "PassthroughTouchHandler.h"
 #import "KeyboardInputField.h"
 
 static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
@@ -20,6 +21,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 @implementation StreamView {
     OnScreenControls* onScreenControls;
     
+    int keyboardGestureNFingers;
     KeyboardInputField* keyInputField;
     BOOL isInputingText;
     NSMutableSet* keysDown;
@@ -51,6 +53,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
                   config:(StreamConfiguration*)streamConfig {
     self->interactionDelegate = interactionDelegate;
     self->streamAspectRatio = (float)streamConfig.width / (float)streamConfig.height;
+    self->keyboardGestureNFingers = 3;
     
     TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
     
@@ -68,7 +71,15 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 #else
     // iOS uses RelativeTouchHandler or AbsoluteTouchHandler depending on user preference
     if (settings.absoluteTouchMode) {
-        self->touchHandler = [[AbsoluteTouchHandler alloc] initWithView:self];
+        if (settings.passthroughTouchMode) {
+            self->touchHandler = [[PassthroughTouchHandler alloc] initWithView:self];
+            // "Touch gestures for Windows" uses up to four fingers according to Microsoft support articles.
+            // Register keyboard gesture with 5 fingers can avoid conflict.
+            // Also the popup keyboarde became less useful since Windows has a built in on-screen keyboard.
+            self->keyboardGestureNFingers = 5;
+        } else {
+            self->touchHandler = [[AbsoluteTouchHandler alloc] initWithView:self];
+        }
     }
     else {
         self->touchHandler = [[RelativeTouchHandler alloc] initWithView:self];
@@ -318,6 +329,21 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
 #endif
 
+- (void)cancelAllTouchEvents {
+    // Use this to cancel touch events when the intention is meant for local device.
+    // i.e. open notification center, end streaming by swiping on edge
+    LiSendTouchEvent(
+        LI_TOUCH_EVENT_CANCEL_ALL,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        LI_ROT_UNKNOWN
+    );
+}
+
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     if ([self handleMouseButtonEvent:BUTTON_ACTION_PRESS
                           forTouches:touches
@@ -351,7 +377,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         // is triggered.
         [touchHandler touchesBegan:touches withEvent:event];
         
-        if ([[event allTouches] count] == 3) {
+        if ([[event allTouches] count] == self->keyboardGestureNFingers) {
             if (isInputingText) {
                 Log(LOG_D, @"Closing the keyboard");
                 [keyInputField resignFirstResponder];

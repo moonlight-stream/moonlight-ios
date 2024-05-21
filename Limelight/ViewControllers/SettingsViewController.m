@@ -242,6 +242,8 @@ BOOL isCustomResolution(CGSize res) {
     
     [self.touchModeSelector setSelectedSegmentIndex:currentSettings.absoluteTouchMode ? 1 : 0];
     [self.touchModeSelector addTarget:self action:@selector(touchModeChanged) forControlEvents:UIControlEventValueChanged];
+    [self.passthroughTouchModeSelector setSelectedSegmentIndex:currentSettings.passthroughTouchMode ? 1 : 0];
+    [self.passthroughTouchModeSelector setEnabled:currentSettings.absoluteTouchMode];
     [self.statsOverlaySelector setSelectedSegmentIndex:currentSettings.statsOverlay ? 1 : 0];
     [self.btMouseSelector setSelectedSegmentIndex:currentSettings.btMouseSupport ? 1 : 0];
     [self.optimizeSettingsSelector setSelectedSegmentIndex:currentSettings.optimizeGames ? 1 : 0];
@@ -268,6 +270,7 @@ BOOL isCustomResolution(CGSize res) {
 - (void) touchModeChanged {
     // Disable on-screen controls in absolute touch mode
     [self.onscreenControlSelector setEnabled:[self.touchModeSelector selectedSegmentIndex] == 0];
+    [self.passthroughTouchModeSelector setEnabled:[self.touchModeSelector selectedSegmentIndex] == 1];
 }
 
 - (void) updateBitrate {
@@ -536,6 +539,7 @@ BOOL isCustomResolution(CGSize res) {
     BOOL btMouseSupport = [self.btMouseSelector selectedSegmentIndex] == 1;
     BOOL useFramePacing = [self.framePacingSelector selectedSegmentIndex] == 1;
     BOOL absoluteTouchMode = [self.touchModeSelector selectedSegmentIndex] == 1;
+    BOOL passthroughTouchMode = [self.passthroughTouchModeSelector selectedSegmentIndex] == 1;
     BOOL statsOverlay = [self.statsOverlaySelector selectedSegmentIndex] == 1;
     BOOL enableHdr = [self.hdrSelector selectedSegmentIndex] == 1;
     [dataMan saveSettingsWithBitrate:_bitrate
@@ -553,6 +557,7 @@ BOOL isCustomResolution(CGSize res) {
                            enableHdr:enableHdr
                       btMouseSupport:btMouseSupport
                    absoluteTouchMode:absoluteTouchMode
+                passthroughTouchMode:passthroughTouchMode
                         statsOverlay:statsOverlay];
 }
 

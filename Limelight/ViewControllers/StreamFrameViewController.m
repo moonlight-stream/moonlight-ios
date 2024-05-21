@@ -186,11 +186,15 @@
                                                object: nil];
 #endif
     
-    // Only enable scroll and zoom in absolute touch mode
-    if (_settings.absoluteTouchMode) {
+    // Only enable scroll and zoom in absolute touch mode with exception of passthrough touch mode
+    // Windows has its own pinch / pan / scroll handling which conflicts with UIScrollView gestures.
+    if (_settings.absoluteTouchMode && !_settings.passthroughTouchMode) {
         _scrollView = [[UIScrollView alloc] initWithFrame:self.view.frame];
+        _scrollView.delaysContentTouches = NO;
 #if !TARGET_OS_TV
         [_scrollView.panGestureRecognizer setMinimumNumberOfTouches:2];
+        [_scrollView.panGestureRecognizer setDelaysTouchesBegan: NO];
+        [_scrollView.panGestureRecognizer setDelaysTouchesEnded: NO];
 #endif
         [_scrollView setShowsHorizontalScrollIndicator:NO];
         [_scrollView setShowsVerticalScrollIndicator:NO];
@@ -306,6 +310,7 @@
 }
 
 - (void) returnToMainFrame {
+    [self->_streamView cancelAllTouchEvents];
     // Reset display mode back to default
     [self updatePreferredDisplayMode:NO];
     
@@ -317,6 +322,7 @@
 
 // This will fire if the user opens control center or gets a low battery message
 - (void)applicationWillResignActive:(NSNotification *)notification {
+    [self->_streamView cancelAllTouchEvents];
     if (_inactivityTimer != nil) {
         [_inactivityTimer invalidate];
     }

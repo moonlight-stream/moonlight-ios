@@ -34,4 +34,8 @@
 - (void) updateCursorLocation:(CGPoint)location isMouse:(BOOL)isMouse;
 #endif
 
+- (CGSize) getVideoAreaSize;
+- (CGPoint) adjustCoordinatesForVideoArea:(CGPoint)point;
+- (void) cancelAllTouchEvents;
+
 @end
