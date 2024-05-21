@@ -84,6 +84,7 @@
     self.onscreenControls = settings.onscreenControls;
     self.btMouseSupport = settings.btMouseSupport;
     self.absoluteTouchMode = settings.absoluteTouchMode;
+    self.passthroughTouchMode = settings.passthroughTouchMode;
     self.statsOverlay = settings.statsOverlay;
 #endif
     self.uniqueId = settings.uniqueId;
