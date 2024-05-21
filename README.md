@@ -59,10 +59,11 @@ Feel free to merge the code, whether publicly or privately. However, if you find
 
 # 安装 Installation
 
-安装 release 中的 ipa 文件，需要先对文件进行自签名，或者先越狱、安装巨魔商店。 目前我就用过Sideloadly.
-<br>
-To install the ipa file in release, you need to find a way to sideload the app on iOS, or try to jaibreak or install trollstore. I just tried Sideloadly so far.
+安装 release 中的 ipa 文件，需要先对文件进行自签名，或者先越狱、安装巨魔商店。 
+推荐侧载方案：Sideloadly, Altstore.
 
+To install the ipa file in release, you need to find a way to sideload the app on iOS, or try to jaibreak or install trollstore.
+Recommended sideloading: Sideloadly, Altstore.
 
 
 
