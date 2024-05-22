@@ -129,7 +129,7 @@
     [self.view addGestureRecognizer:_playPauseTapGestureRecognizer];
 
 #else
-    _exitSwipeRecognizer = [[UIScreenEdgePanGestureRecognizer alloc] initWithTarget:self action:@selector(edgeSwiped)];
+    _exitSwipeRecognizer = [[UIScreenEdgePanGestureRecognizer alloc] initWithTarget:self action:@selector(edgeSwiped:)];
     _exitSwipeRecognizer.edges = UIRectEdgeLeft;
     _exitSwipeRecognizer.delaysTouchesBegan = NO;
     _exitSwipeRecognizer.delaysTouchesEnded = NO;
@@ -367,10 +367,14 @@
     [self returnToMainFrame];
 }
 
-- (void)edgeSwiped {
-    Log(LOG_I, @"User swiped to end stream");
-    
-    [self returnToMainFrame];
+- (void)edgeSwiped:(UIScreenEdgePanGestureRecognizer*)gestureRecognizer {
+    CGPoint touch = [gestureRecognizer locationInView:self.view];
+    double distancePct = touch.x / self.view.bounds.size.width;
+    Log(LOG_I, @"User swiped distance = %f%%", distancePct * 100);
+    if (distancePct > 0.5) {
+        Log(LOG_I, @"User swiped to end stream");
+        [self returnToMainFrame];
+    }
 }
 
 - (void) connectionStarted {
