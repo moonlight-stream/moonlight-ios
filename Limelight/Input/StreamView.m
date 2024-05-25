@@ -49,6 +49,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     
     NSDictionary<NSString *, NSNumber *> *dictCodes;
     CustomTapGestureRecognizer *keyboardToggleRecognizer;
+    CGFloat liftViewToHeight;
 }
 
 - (void) setupStreamView:(ControllerSupport*)controllerSupport
@@ -76,12 +77,12 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     keyboardToggleRecognizer.delaysTouchesBegan = NO;
     keyboardToggleRecognizer.delaysTouchesEnded = NO;
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(keyboardWillShow)
+                                             selector:@selector(keyboardWillShow:)
                                                  name:UIKeyboardWillShowNotification
                                                object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(keyboardWillHide)
+                                             selector:@selector(keyboardWillHide:)
                                                  name:UIKeyboardWillHideNotification
                                                object:nil];
     [self addGestureRecognizer:keyboardToggleRecognizer];
@@ -152,12 +153,27 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     [self becomeFirstResponder];
 }
 
-- (void)keyboardWillShow{
+
+- (void)keyboardWillShow:(NSNotification *)notification{
+    NSDictionary *userInfo = notification.userInfo;
+    // Get the keyboard size from the notification
+    CGRect keyboardFrame = [userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
+    liftViewToHeight = keyboardFrame.size.height - keyboardToggleRecognizer.lowestTouchPointHeight + CGRectGetHeight([[UIScreen mainScreen] bounds]) * 0.1; // lift the StreamView to the height of lowest touch point of multi-finger tap gesture, while reserving the view of 1/10 screen height for remote typing.
+    if(liftViewToHeight < 0) liftViewToHeight = 0;  // set liftViewtoHeight to 0 if it is high enough and not going to be covered by keyboard.
+
+    CGRect liftedStreamFrame = self.frame;
+    liftedStreamFrame.origin.y -= liftViewToHeight;
+    self.frame = liftedStreamFrame;
+    
     isInputingText = true;
     // NSLog(@"keyboard will show");
 }
 
-- (void)keyboardWillHide{
+- (void)keyboardWillHide:(NSNotification *)notification{
+    CGRect liftedStreamFrame = self.frame;
+    // recover view position in keyboard hiding.
+    liftedStreamFrame.origin.y += liftViewToHeight;
+    self.frame = liftedStreamFrame;
     isInputingText = false;
     // NSLog(@"keyboard will hide");
 }
@@ -170,6 +186,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         [keyInputField resignFirstResponder];
         isInputingText = false;
     } else {
+
         // NSLog(@"Opening the keyboard");
     Log(LOG_D, @"Opening the keyboard");
     // Prepare the textbox used to capture keyboard events.

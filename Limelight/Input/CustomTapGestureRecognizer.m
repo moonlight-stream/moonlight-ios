@@ -14,9 +14,12 @@
 
 static NSTimeInterval multiFingerDownTime;
 static bool multiFingerDown;
+static CGFloat screenHeightInPoints;
+static CGFloat lowestTouchPointYCoord = 0.0;
 
 - (instancetype)initWithTarget:(nullable id)target action:(nullable SEL)action {
     self = [super initWithTarget:target action:action];
+    screenHeightInPoints = CGRectGetHeight([[UIScreen mainScreen] bounds]);
     return self;
 }
 
@@ -25,15 +28,25 @@ static bool multiFingerDown;
     if ([[event allTouches] count] == _numberOfTouchesRequired) {
         multiFingerDownTime = CACurrentMediaTime();
         multiFingerDown = true;
+        
+        for(UITouch *touch in [event allTouches]){
+            if(lowestTouchPointYCoord < [touch locationInView:self.view].y) lowestTouchPointYCoord = [touch locationInView:self.view].y;
+        }
+        //NSLog(@"lowestTouchPointYCoord: %f ", lowestTouchPointYCoord);
+        _lowestTouchPointHeight = screenHeightInPoints - lowestTouchPointYCoord;
         self.state = UIGestureRecognizerStatePossible;
     }
 }
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    
     // [super touchesEnded:touches withEvent:event];
     if(multiFingerDown && [[event allTouches] count] == [touches count]){
         multiFingerDown = false;
-        if((CACurrentMediaTime() - multiFingerDownTime) < _tapDownTimeThreshold / 1000) self.state = UIGestureRecognizerStateRecognized;
+        if((CACurrentMediaTime() - multiFingerDownTime) < _tapDownTimeThreshold / 1000){
+            lowestTouchPointYCoord = 0.0; //reset for next recognition
+            self.state = UIGestureRecognizerStateRecognized;
+        }
     }
 }
 

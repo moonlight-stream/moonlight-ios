@@ -15,6 +15,8 @@
 
 @property (nonatomic, assign) uint8_t numberOfTouchesRequired;
 @property (nonatomic, assign) double tapDownTimeThreshold;
+@property (nonatomic, readonly) CGFloat lowestTouchPointHeight;
+
 
 @end
 #endif /* CustomTapGestureRecognizer_h */
