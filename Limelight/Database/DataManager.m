@@ -61,6 +61,8 @@
            keyboardToggleFingers:(NSInteger)keyboardToggleFingers
              swipeExitScreenEdge:(NSInteger)swipeExitScreenEdge
              swipeToExitDistance:(CGFloat)swipeToExitDistance
+       liftStreamViewForKeyboard:(BOOL)liftStreamViewForKeyboard
+             showKeyboardToolbar:(BOOL)showKeyboardToolbar
                    optimizeGames:(BOOL)optimizeGames
                  multiController:(BOOL)multiController
                  swapABXYButtons:(BOOL)swapABXYButtons
@@ -83,6 +85,8 @@
         settingsToSave.keyboardToggleFingers = [NSNumber numberWithInteger:(uint16_t)keyboardToggleFingers];
         settingsToSave.swipeExitScreenEdge = [NSNumber numberWithInteger:(uint32_t)swipeExitScreenEdge];
         settingsToSave.swipeToExitDistance = [NSNumber numberWithFloat:swipeToExitDistance];
+        settingsToSave.liftStreamViewForKeyboard = liftStreamViewForKeyboard;
+        settingsToSave.showKeyboardToolbar = showKeyboardToolbar;
         settingsToSave.optimizeGames = optimizeGames;
         settingsToSave.multiController = multiController;
         settingsToSave.swapABXYButtons = swapABXYButtons;

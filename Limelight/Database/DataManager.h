@@ -22,6 +22,8 @@
             keyboardToggleFingers:(NSInteger)keyboardToggleFingers
              swipeExitScreenEdge:(NSInteger)swipeExitScreenEdge
              swipeToExitDistance:(CGFloat)swipeToExitDistance
+       liftStreamViewForKeyboard:(BOOL)liftStreamViewForKeyboard
+             showKeyboardToolbar:(BOOL)showKeyboardToolbar
                    optimizeGames:(BOOL)optimizeGames
                  multiController:(BOOL)multiController
                  swapABXYButtons:(BOOL)swapABXYButtons

@@ -37,6 +37,9 @@
 @property (nonatomic) BOOL btMouseSupport;
 @property (nonatomic) BOOL absoluteTouchMode;
 @property (nonatomic) BOOL statsOverlay;
+@property (nonatomic) BOOL liftStreamViewForKeyboard;
+@property (nonatomic) BOOL showKeyboardToolbar;
+
 
 - (id) initFromSettings:(Settings*)settings;
 

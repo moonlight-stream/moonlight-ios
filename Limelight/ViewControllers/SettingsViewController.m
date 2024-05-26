@@ -269,7 +269,8 @@ BOOL isCustomResolution(CGSize res) {
     if (self.keyboardToggleFingerNumSlider.value > 10.5f) [self.keyboardToggleFingerNumLabel setText:[NSString stringWithFormat:@"Tap-Toggle Local Keyboard Disabled"]]; // Initiate label display. Allow higher required finger number to completely disable keyboard toggle
     else [self.keyboardToggleFingerNumLabel setText:[NSString stringWithFormat:@"Fingers to Tap-Toggle Local Keyboard: %d", (uint16_t)self.keyboardToggleFingerNumSlider.value]]; // Initiate label display
     [self.keyboardToggleFingerNumSlider addTarget:self action:@selector(keyboardToggleFingerNumSliderMoved) forControlEvents:(UIControlEventValueChanged)]; // Update label display when slider is being moved.
-    
+    [self.liftStreamViewForKeyboardSelector setSelectedSegmentIndex:currentSettings.liftStreamViewForKeyboard ? 1 : 0];// Load old setting
+    [self.showKeyboardToolbarSelector setSelectedSegmentIndex:currentSettings.showKeyboardToolbar ? 1 : 0];// Load old setting
     [self.swipeExitScreenEdgeSelector setSelectedSegmentIndex:[self getSelectorIndexFromScreenEdge:(uint32_t)currentSettings.swipeExitScreenEdge.integerValue]]; // Load old setting
     [self.swipeToExitDistanceSlider setValue:(CGFloat)currentSettings.swipeToExitDistance.floatValue animated:YES]; // Load old setting.
     [self.swipeToExitDistanceUILabel setText:[NSString stringWithFormat:@"Swipe & Exit Distance: %.2f * screen-width", self.swipeToExitDistanceSlider.value]]; // Initiate label display
@@ -572,6 +573,8 @@ BOOL isCustomResolution(CGSize res) {
     // NSLog(@"saveSettings keyboardToggleFingers  %d", (uint16_t)keyboardToggleFingers);
     CGFloat swipeToExitDistance = self.swipeToExitDistanceSlider.value;
     uint32_t swipeExitScreenEdge = [self getScreenEdgeFromSelector];
+    BOOL liftStreamViewForKeyboard = [self.liftStreamViewForKeyboardSelector selectedSegmentIndex] == 1;
+    BOOL showKeyboardToolbar = [self.showKeyboardToolbarSelector selectedSegmentIndex] == 1;
     BOOL optimizeGames = [self.optimizeSettingsSelector selectedSegmentIndex] == 1;
     BOOL multiController = [self.multiControllerSelector selectedSegmentIndex] == 1;
     BOOL swapABXYButtons = [self.swapABXYButtonsSelector selectedSegmentIndex] == 1;
@@ -591,6 +594,8 @@ BOOL isCustomResolution(CGSize res) {
                keyboardToggleFingers:keyboardToggleFingers
                  swipeExitScreenEdge:swipeExitScreenEdge
                  swipeToExitDistance:swipeToExitDistance
+           liftStreamViewForKeyboard:liftStreamViewForKeyboard
+                 showKeyboardToolbar:showKeyboardToolbar
                        optimizeGames:optimizeGames
                      multiController:multiController
                      swapABXYButtons:swapABXYButtons

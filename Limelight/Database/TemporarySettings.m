@@ -88,6 +88,8 @@
     self.keyboardToggleFingers = settings.keyboardToggleFingers;
     self.swipeExitScreenEdge = settings.swipeExitScreenEdge;
     self.swipeToExitDistance = settings.swipeToExitDistance;
+    self.liftStreamViewForKeyboard = settings.liftStreamViewForKeyboard;
+    self.showKeyboardToolbar = settings.showKeyboardToolbar;
 #endif
     self.uniqueId = settings.uniqueId;
     

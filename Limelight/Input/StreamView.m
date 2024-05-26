@@ -21,6 +21,8 @@
 static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
 @implementation StreamView {
+    TemporarySettings* settings;
+    
     OnScreenControls* onScreenControls;
     
     KeyboardInputField* keyInputField;
@@ -61,7 +63,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     self->interactionDelegate = interactionDelegate;
     self->streamAspectRatio = (float)streamConfig.width / (float)streamConfig.height;
     
-    TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
+    settings = [[[DataManager alloc] init] getSettings];
     
     keysDown = [[NSMutableSet alloc] init];
     keyInputField = [[KeyboardInputField alloc] initWithFrame:CGRectZero];
@@ -155,25 +157,31 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
 
 - (void)keyboardWillShow:(NSNotification *)notification{
-    NSDictionary *userInfo = notification.userInfo;
-    // Get the keyboard size from the notification
-    CGRect keyboardFrame = [userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
-    liftViewToHeight = keyboardFrame.size.height - keyboardToggleRecognizer.lowestTouchPointHeight + CGRectGetHeight([[UIScreen mainScreen] bounds]) * 0.1; // lift the StreamView to the height of lowest touch point of multi-finger tap gesture, while reserving the view of 1/10 screen height for remote typing.
-    if(liftViewToHeight < 0) liftViewToHeight = 0;  // set liftViewtoHeight to 0 if it is high enough and not going to be covered by keyboard.
+    if(settings.liftStreamViewForKeyboard){
+        NSDictionary *userInfo = notification.userInfo;
+        // Get the keyboard size from the notification
+        CGRect keyboardFrame = [userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
+        liftViewToHeight = keyboardFrame.size.height - keyboardToggleRecognizer.lowestTouchPointHeight + CGRectGetHeight([[UIScreen mainScreen] bounds]) * 0.1; // lift the StreamView to the height of lowest touch point of multi-finger tap gesture, while reserving the view of 1/10 screen height for remote typing.
+        if(liftViewToHeight < 0) liftViewToHeight = 0;  // set liftViewtoHeight to 0 if it is high enough and not going to be covered by keyboard.
+        CGRect liftedStreamFrame = self.frame;
+        liftedStreamFrame.origin.y -= liftViewToHeight;
+        self.frame = liftedStreamFrame;
+    }
 
-    CGRect liftedStreamFrame = self.frame;
-    liftedStreamFrame.origin.y -= liftViewToHeight;
-    self.frame = liftedStreamFrame;
     
     isInputingText = true;
     // NSLog(@"keyboard will show");
 }
 
 - (void)keyboardWillHide:(NSNotification *)notification{
-    CGRect liftedStreamFrame = self.frame;
-    // recover view position in keyboard hiding.
-    liftedStreamFrame.origin.y += liftViewToHeight;
-    self.frame = liftedStreamFrame;
+    
+    if(settings.liftStreamViewForKeyboard){
+        CGRect liftedStreamFrame = self.frame;
+        // recover view position in keyboard hiding.
+        liftedStreamFrame.origin.y += liftViewToHeight;
+        self.frame = liftedStreamFrame;
+    }
+    
     isInputingText = false;
     // NSLog(@"keyboard will hide");
 }
@@ -194,7 +202,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     keyInputField.text = @"0";
     #if !TARGET_OS_TV
     // Prepare the toolbar above the keyboard for more options
-        if(false){
+        if(settings.showKeyboardToolbar){
                 UIToolbar *customToolbarView = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, 44)];
                 UIBarButtonItem *doneBarButton = [self createButtonWithImageNamed:@"DoneIcon.png" backgroundColor:[UIColor clearColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x00 isToggleable:NO];
                 UIBarButtonItem *windowsBarButton = [self createButtonWithImageNamed:@"WindowsIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x5B isToggleable:YES];
