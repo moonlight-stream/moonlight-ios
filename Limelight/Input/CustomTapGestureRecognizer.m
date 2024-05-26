@@ -2,7 +2,7 @@
 //  CustomTapGestureRecognizer.m
 //  Moonlight
 //
-//  Created by Admin on 2024/5/15.
+//  Created by ZWM on 2024/5/15.
 //  Copyright © 2024 Moonlight Game Streaming Project. All rights reserved.
 //
 
