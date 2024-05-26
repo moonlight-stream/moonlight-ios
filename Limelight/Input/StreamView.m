@@ -73,6 +73,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     [keyInputField setSpellCheckingType:UITextSpellCheckingTypeNo];
     [self addSubview:keyInputField];
     
+    isInputingText = false;
     keyboardToggleRecognizer = [[CustomTapGestureRecognizer alloc] initWithTarget:self action:@selector(toggleKeyboard)];
     keyboardToggleRecognizer.numberOfTouchesRequired = settings.keyboardToggleFingers.intValue;
     keyboardToggleRecognizer.tapDownTimeThreshold = 300.0; // tap down time threshold in milli seconds.
@@ -157,7 +158,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
 
 - (void)keyboardWillShow:(NSNotification *)notification{
-    if(settings.liftStreamViewForKeyboard){
+    if(settings.liftStreamViewForKeyboard && !isInputingText){
         NSDictionary *userInfo = notification.userInfo;
         // Get the keyboard size from the notification
         CGRect keyboardFrame = [userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
@@ -175,7 +176,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
 - (void)keyboardWillHide:(NSNotification *)notification{
     
-    if(settings.liftStreamViewForKeyboard){
+    if(settings.liftStreamViewForKeyboard && isInputingText){
         CGRect liftedStreamFrame = self.frame;
         // recover view position in keyboard hiding.
         liftedStreamFrame.origin.y += liftViewToHeight;
