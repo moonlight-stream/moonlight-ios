@@ -36,7 +36,7 @@ Feel free to merge the code, whether publicly or privately. However, if you find
    <br><br>
 
 
-- ### 键盘工具栏可能过菜单开启或关闭。
+- ### 键盘工具栏可通过菜单开启或关闭。
   ### Configurable local keyboard toolbar:
   ![image](https://github.com/TrueZhuangJia/moonlight-ios-NativeMultiTouchPassthrough/assets/78474576/88a2eca7-dbbc-46c8-a60e-065a7f44b9fa)
    <br><br>
