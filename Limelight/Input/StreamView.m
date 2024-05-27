@@ -51,7 +51,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     
     NSDictionary<NSString *, NSNumber *> *dictCodes;
     CustomTapGestureRecognizer *keyboardToggleRecognizer;
-    CGFloat liftViewToHeight;
+    CGFloat HeightViewLiftedTo;
 }
 
 - (void) setupStreamView:(ControllerSupport*)controllerSupport
@@ -156,34 +156,32 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     [self becomeFirstResponder];
 }
 
-
 - (void)keyboardWillShow:(NSNotification *)notification{
     if(settings.liftStreamViewForKeyboard && !isInputingText){
         NSDictionary *userInfo = notification.userInfo;
         // Get the keyboard size from the notification
         CGRect keyboardFrame = [userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
-        liftViewToHeight = keyboardFrame.size.height - keyboardToggleRecognizer.lowestTouchPointHeight + CGRectGetHeight([[UIScreen mainScreen] bounds]) * 0.1; // lift the StreamView to the height of lowest touch point of multi-finger tap gesture, while reserving the view of 1/10 screen height for remote typing.
-        if(liftViewToHeight < 0) liftViewToHeight = 0;  // set liftViewtoHeight to 0 if it is high enough and not going to be covered by keyboard.
+        // NSLog(@"keyboard height %f, lowest point height %f", keyboardFrame.size.height, keyboardToggleRecognizer.lowestTouchPointHeight);
+        if(keyboardFrame.size.height < CGRectGetHeight([[UIScreen mainScreen] bounds]) * 0.25) return; // return in case of abnormal keyboard height
+        HeightViewLiftedTo = keyboardFrame.size.height - keyboardToggleRecognizer.lowestTouchPointHeight + CGRectGetHeight([[UIScreen mainScreen] bounds]) * 0.1; // lift the StreamView to the height of lowest touch point of multi-finger tap gesture, while reserving the view of 1/10 screen height for remote typing.
+        if(HeightViewLiftedTo < 0) HeightViewLiftedTo = 0;  // set HeightViewLiftedTo to 0 if it is high enough and not going to be covered by keyboard.
         CGRect liftedStreamFrame = self.frame;
-        liftedStreamFrame.origin.y -= liftViewToHeight;
+        liftedStreamFrame.origin.y -= HeightViewLiftedTo;
         self.frame = liftedStreamFrame;
+        isInputingText = true;
     }
-
-    
-    isInputingText = true;
     // NSLog(@"keyboard will show");
 }
 
 - (void)keyboardWillHide:(NSNotification *)notification{
     
-    if(settings.liftStreamViewForKeyboard && isInputingText){
+    if(isInputingText){
         CGRect liftedStreamFrame = self.frame;
         // recover view position in keyboard hiding.
-        liftedStreamFrame.origin.y += liftViewToHeight;
+        liftedStreamFrame.origin.y += HeightViewLiftedTo;
         self.frame = liftedStreamFrame;
+        isInputingText = false;
     }
-    
-    isInputingText = false;
     // NSLog(@"keyboard will hide");
 }
 
@@ -191,39 +189,34 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 - (void)toggleKeyboard{
     if (isInputingText) {
         Log(LOG_D, @"Closing the keyboard");
-        // NSLog(@"Closing the keyboard");
         [keyInputField resignFirstResponder];
-        isInputingText = false;
     } else {
-
-        // NSLog(@"Opening the keyboard");
-    Log(LOG_D, @"Opening the keyboard");
-    // Prepare the textbox used to capture keyboard events.
-    keyInputField.delegate = self;
-    keyInputField.text = @"0";
+        Log(LOG_D, @"Opening the keyboard");
+        // Prepare the textbox used to capture keyboard events.
+        keyInputField.delegate = self;
+        keyInputField.text = @"0";
     #if !TARGET_OS_TV
     // Prepare the toolbar above the keyboard for more options
         if(settings.showKeyboardToolbar){
-                UIToolbar *customToolbarView = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, 44)];
-                UIBarButtonItem *doneBarButton = [self createButtonWithImageNamed:@"DoneIcon.png" backgroundColor:[UIColor clearColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x00 isToggleable:NO];
-                UIBarButtonItem *windowsBarButton = [self createButtonWithImageNamed:@"WindowsIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x5B isToggleable:YES];
-                UIBarButtonItem *tabBarButton = [self createButtonWithImageNamed:@"TabIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x09 isToggleable:NO];
-                UIBarButtonItem *shiftBarButton = [self createButtonWithImageNamed:@"ShiftIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA0 isToggleable:YES];
-                UIBarButtonItem *escapeBarButton = [self createButtonWithImageNamed:@"EscapeIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x1B isToggleable:NO];
-                UIBarButtonItem *controlBarButton = [self createButtonWithImageNamed:@"ControlIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA2 isToggleable:YES];
-                UIBarButtonItem *altBarButton = [self createButtonWithImageNamed:@"AltIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA4 isToggleable:YES];
-                UIBarButtonItem *deleteBarButton = [self createButtonWithImageNamed:@"DeleteIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x2E isToggleable:NO];
-                UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
-                
-                [customToolbarView setItems:[NSArray arrayWithObjects:doneBarButton, windowsBarButton, escapeBarButton, tabBarButton, shiftBarButton, controlBarButton, altBarButton, deleteBarButton, flexibleSpace, nil]];
+            UIToolbar *customToolbarView = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, 44)];
+            UIBarButtonItem *doneBarButton = [self createButtonWithImageNamed:@"DoneIcon.png" backgroundColor:[UIColor clearColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x00 isToggleable:NO];
+            UIBarButtonItem *windowsBarButton = [self createButtonWithImageNamed:@"WindowsIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x5B isToggleable:YES];
+            UIBarButtonItem *tabBarButton = [self createButtonWithImageNamed:@"TabIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x09 isToggleable:NO];
+            UIBarButtonItem *shiftBarButton = [self createButtonWithImageNamed:@"ShiftIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA0 isToggleable:YES];
+            UIBarButtonItem *escapeBarButton = [self createButtonWithImageNamed:@"EscapeIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x1B isToggleable:NO];
+            UIBarButtonItem *controlBarButton = [self createButtonWithImageNamed:@"ControlIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA2 isToggleable:YES];
+            UIBarButtonItem *altBarButton = [self createButtonWithImageNamed:@"AltIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA4 isToggleable:YES];
+            UIBarButtonItem *deleteBarButton = [self createButtonWithImageNamed:@"DeleteIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x2E isToggleable:NO];
+            UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+            
+            [customToolbarView setItems:[NSArray arrayWithObjects:doneBarButton, windowsBarButton, escapeBarButton, tabBarButton, shiftBarButton, controlBarButton, altBarButton, deleteBarButton, flexibleSpace, nil]];
             keyInputField.inputAccessoryView = customToolbarView;
         }
     #endif
-    [keyInputField becomeFirstResponder];
-    [keyInputField addTarget:self action:@selector(onKeyboardPressed:) forControlEvents:UIControlEventEditingChanged];
-    // Undo causes issues for our state management, so turn it off
-    [keyInputField.undoManager disableUndoRegistration];
-    //isInputingText = true;
+        [keyInputField becomeFirstResponder];
+        [keyInputField addTarget:self action:@selector(onKeyboardPressed:) forControlEvents:UIControlEventEditingChanged];
+        // Undo causes issues for our state management, so turn it off
+        [keyInputField.undoManager disableUndoRegistration];
     }
 }
 

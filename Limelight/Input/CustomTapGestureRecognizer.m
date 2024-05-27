@@ -32,14 +32,12 @@ static CGFloat lowestTouchPointYCoord = 0.0;
         for(UITouch *touch in [event allTouches]){
             if(lowestTouchPointYCoord < [touch locationInView:self.view].y) lowestTouchPointYCoord = [touch locationInView:self.view].y;
         }
-        //NSLog(@"lowestTouchPointYCoord: %f ", lowestTouchPointYCoord);
         _lowestTouchPointHeight = screenHeightInPoints - lowestTouchPointYCoord;
         self.state = UIGestureRecognizerStatePossible;
     }
 }
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-    
     // [super touchesEnded:touches withEvent:event];
     if(multiFingerDown && [[event allTouches] count] == [touches count]){
         multiFingerDown = false;
@@ -47,6 +45,12 @@ static CGFloat lowestTouchPointYCoord = 0.0;
             lowestTouchPointYCoord = 0.0; //reset for next recognition
             self.state = UIGestureRecognizerStateRecognized;
         }
+    }
+}
+
++ (CGFloat)lowestTouchPointHeight{
+    @synchronized (self){
+        return self.lowestTouchPointHeight;
     }
 }
 

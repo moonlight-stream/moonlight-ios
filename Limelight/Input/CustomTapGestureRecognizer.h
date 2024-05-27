@@ -15,7 +15,7 @@
 
 @property (nonatomic, assign) uint8_t numberOfTouchesRequired;
 @property (nonatomic, assign) double tapDownTimeThreshold;
-@property (nonatomic, readonly) CGFloat lowestTouchPointHeight;
+@property (atomic, readonly) CGFloat lowestTouchPointHeight;
 
 
 @end
