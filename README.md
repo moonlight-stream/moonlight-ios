@@ -7,7 +7,7 @@ Players who have a strong demand for multi-touch streaming games, especially tho
  <br>
 
 # 注意事项 Notice
-欢迎公开或非公开的代码合并，但如果觉得这个Fork好用，或对自己有所启发， 请记得点星。如果能够声明引用这个Fork的改动，我将非常感谢。<br>
+欢迎公开或非公开的代码合并，但如果觉得这个Fork好用，或对自己有所启发， 请记得点星。不要一声不响地合并或模仿并视为自己的原创。如果能够声明引用这个Fork的改动，我将非常感谢。<br>
 Feel free to merge the code, whether publicly or privately. However, if you find this fork useful or inspiring, please remember to give it a star. I would greatly appreciate if you could mention the changes made to your own build originated from this fork.
  <br>
 
