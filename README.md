@@ -32,6 +32,7 @@ Feel free to merge the code, whether publicly or privately. However, if you find
   I did this because iOS floating keyboard sucks.<br>
   ![image](https://github.com/TrueZhuangJia/moonlight-ios-NativeMultiTouchPassthrough/assets/78474576/e1ac15d4-b4ef-4abd-9d25-13159a9ff4d4)
   ![ViewliftExplained - Copy](https://github.com/TrueZhuangJia/moonlight-ios-NativeMultiTouchPassthrough/assets/78474576/54ecd367-3ebb-43a1-95bb-358e3a9ccc54)
+  <br> 注意第二张图， 请用手势让软件知道你要在哪里输入文字， 唤醒键盘后串流视图才会抬升到适当的高度，避免文字输入区域被键盘挡住。以下是gif动图示例： <br> Use Gesture to let the software know where the remote input field is, then stream view will be lifted appropriately (not going to be covered by keyboard). Here's a gif example: <br>
   ![testt7](https://github.com/TrueZhuangJia/moonlight-ios-NativeMultiTouchPassthrough/assets/78474576/6230c225-1296-4be0-b64d-8980fce649c3)
    <br><br>
 
