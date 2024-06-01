@@ -17,6 +17,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <Limelight.h>
+#import "CustomEdgeSwipeGestureRecognizer.h"
 
 #if TARGET_OS_TV
 #import <AVFoundation/AVDisplayCriteria.h>
@@ -29,6 +30,8 @@
 @property(readonly, nonatomic) float refreshRate;
 - (id)initWithRefreshRate:(float)arg1 videoDynamicRange:(int)arg2;
 @end
+
+
 
 @implementation StreamFrameViewController {
     ControllerSupport *_controllerSupport;
@@ -49,7 +52,7 @@
     CGSize _keyboardSize;
     
 #if !TARGET_OS_TV
-    UIScreenEdgePanGestureRecognizer *_exitSwipeRecognizer;
+    CustomEdgeSwipeGestureRecognizer *_exitSwipeRecognizer;
 #endif
 }
 
@@ -83,7 +86,7 @@
     
     [UIApplication sharedApplication].idleTimerDisabled = YES;
     
-    _settings = [[[DataManager alloc] init] getSettings];
+    _settings = [[[DataManager alloc] init] getSettings];  //StreamFrameViewController retrieve the settings here.
     
     _stageLabel = [[UILabel alloc] init];
     [_stageLabel setUserInteractionEnabled:NO];
@@ -129,12 +132,13 @@
     [self.view addGestureRecognizer:_playPauseTapGestureRecognizer];
 
 #else
-    _exitSwipeRecognizer = [[UIScreenEdgePanGestureRecognizer alloc] initWithTarget:self action:@selector(edgeSwiped)];
-    _exitSwipeRecognizer.edges = UIRectEdgeLeft;
+    _exitSwipeRecognizer = [[CustomEdgeSwipeGestureRecognizer alloc] initWithTarget:self action:@selector(edgeSwiped)];
+    _exitSwipeRecognizer.edges = _settings.swipeExitScreenEdge.intValue;
+    _exitSwipeRecognizer.normalizedThresholdDistance = _settings.swipeToExitDistance.floatValue;
     _exitSwipeRecognizer.delaysTouchesBegan = NO;
     _exitSwipeRecognizer.delaysTouchesEnded = NO;
-    
     [self.view addGestureRecognizer:_exitSwipeRecognizer];
+    
 #endif
     
     _tipLabel = [[UILabel alloc] init];
@@ -143,7 +147,7 @@
 #if TARGET_OS_TV
     [_tipLabel setText:@"Tip: Tap the Play/Pause button on the Apple TV Remote to disconnect from your PC"];
 #else
-    [_tipLabel setText:@"Tip: Swipe from the left edge to disconnect from your PC"];
+    [_tipLabel setText:@"Tip: Swipe from the left edge to the middle of your screen to disconnect from your PC"];
 #endif
     
     [_tipLabel sizeToFit];
@@ -175,6 +179,7 @@
 #if 0
     // FIXME: This doesn't work reliably on iPad for some reason. Showing and hiding the keyboard
     // several times in a row will not correctly restore the state of the UIScrollView.
+    // I add this notification to the StreamView, works well on ipad mini6.
     [[NSNotificationCenter defaultCenter] addObserver: self
                                              selector: @selector(keyboardWillShow:)
                                                  name: UIKeyboardWillShowNotification
@@ -187,25 +192,25 @@
 #endif
     
     // Only enable scroll and zoom in absolute touch mode
-    if (_settings.absoluteTouchMode) {
-        _scrollView = [[UIScrollView alloc] initWithFrame:self.view.frame];
-#if !TARGET_OS_TV
-        [_scrollView.panGestureRecognizer setMinimumNumberOfTouches:2];
-#endif
-        [_scrollView setShowsHorizontalScrollIndicator:NO];
-        [_scrollView setShowsVerticalScrollIndicator:NO];
-        [_scrollView setDelegate:self];
-        [_scrollView setMaximumZoomScale:10.0f];
-        
-        // Add StreamView inside a UIScrollView for absolute mode
-        [_scrollView addSubview:_streamView];
-        [self.view addSubview:_scrollView];
-    }
-    else {
-        // Add StreamView directly in relative mode
-        [self.view addSubview:_streamView];
-    }
-    
+//    if (_settings.absoluteTouchMode) {
+//        _scrollView = [[UIScrollView alloc] initWithFrame:self.view.frame];
+//#if !TARGET_OS_TV
+//        [_scrollView.panGestureRecognizer setMinimumNumberOfTouches:2];
+//#endif
+//        [_scrollView setShowsHorizontalScrollIndicator:NO];
+//        [_scrollView setShowsVerticalScrollIndicator:NO];
+//        [_scrollView setDelegate:self];
+//        [_scrollView setMaximumZoomScale:10.0f];
+//        
+//        // Add StreamView inside a UIScrollView for absolute mode
+//        [_scrollView addSubview:_streamView];
+//        [self.view addSubview:_scrollView];
+//    }
+//    else {
+//        // Add StreamView directly in relative mode
+//        [self.view addSubview:_streamView];
+//    }
+    [self.view addSubview:_streamView];
     [self.view addSubview:_stageLabel];
     [self.view addSubview:_spinner];
     [self.view addSubview:_tipLabel];

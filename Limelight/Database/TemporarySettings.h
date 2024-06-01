@@ -18,6 +18,11 @@
 @property (nonatomic, retain) NSNumber * width;
 @property (nonatomic, retain) NSNumber * audioConfig;
 @property (nonatomic, retain) NSNumber * onscreenControls;
+@property (nonatomic, retain) NSNumber * keyboardToggleFingers;
+@property (nonatomic, retain) NSNumber * swipeExitScreenEdge;
+@property (nonatomic, retain) NSNumber * swipeToExitDistance;
+@property (nonatomic, retain) NSNumber * touchPointerVelocityFactor;
+@property (nonatomic, retain) NSNumber * pointerVelocityModeDivider;
 @property (nonatomic, retain) NSString * uniqueId;
 @property (nonatomic) enum {
     CODEC_PREF_AUTO,
@@ -34,6 +39,9 @@
 @property (nonatomic) BOOL btMouseSupport;
 @property (nonatomic) BOOL absoluteTouchMode;
 @property (nonatomic) BOOL statsOverlay;
+@property (nonatomic) BOOL liftStreamViewForKeyboard;
+@property (nonatomic) BOOL showKeyboardToolbar;
+
 
 - (id) initFromSettings:(Settings*)settings;
 

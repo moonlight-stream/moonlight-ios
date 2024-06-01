@@ -85,6 +85,13 @@
     self.btMouseSupport = settings.btMouseSupport;
     self.absoluteTouchMode = settings.absoluteTouchMode;
     self.statsOverlay = settings.statsOverlay;
+    self.keyboardToggleFingers = settings.keyboardToggleFingers;
+    self.swipeExitScreenEdge = settings.swipeExitScreenEdge;
+    self.swipeToExitDistance = settings.swipeToExitDistance;
+    self.liftStreamViewForKeyboard = settings.liftStreamViewForKeyboard;
+    self.showKeyboardToolbar = settings.showKeyboardToolbar;
+    self.touchPointerVelocityFactor = settings.touchPointerVelocityFactor;
+    self.pointerVelocityModeDivider = settings.pointerVelocityModeDivider;
 #endif
     self.uniqueId = settings.uniqueId;
     

@@ -17,8 +17,15 @@
                        framerate:(NSInteger)framerate
                           height:(NSInteger)height
                            width:(NSInteger)width
-                audioConfig:(NSInteger)audioConfig
+                     audioConfig:(NSInteger)audioConfig
                 onscreenControls:(NSInteger)onscreenControls
+            keyboardToggleFingers:(NSInteger)keyboardToggleFingers
+             swipeExitScreenEdge:(NSInteger)swipeExitScreenEdge
+             swipeToExitDistance:(CGFloat)swipeToExitDistance
+      pointerVelocityModeDivider:(CGFloat)pointerVelocityModeDivider
+      touchPointerVelocityFactor:(CGFloat)touchPointerVelocityFactor
+       liftStreamViewForKeyboard:(BOOL)liftStreamViewForKeyboard
+             showKeyboardToolbar:(BOOL)showKeyboardToolbar
                    optimizeGames:(BOOL)optimizeGames
                  multiController:(BOOL)multiController
                  swapABXYButtons:(BOOL)swapABXYButtons

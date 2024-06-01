@@ -8,6 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		693B3A9B218638CD00982F7B /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 693B3A9A218638CD00982F7B /* Settings.bundle */; };
+		840751AF2BF472A30096B657 /* NativeTouchHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 840751AE2BF472A30096B657 /* NativeTouchHandler.m */; };
+		840751B02BF472A30096B657 /* NativeTouchHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 840751AE2BF472A30096B657 /* NativeTouchHandler.m */; };
+		840751B32BF49C050096B657 /* CustomTapGestureRecognizer.m in Sources */ = {isa = PBXBuildFile; fileRef = 840751B22BF49C050096B657 /* CustomTapGestureRecognizer.m */; };
+		840751B42BF49C050096B657 /* CustomTapGestureRecognizer.m in Sources */ = {isa = PBXBuildFile; fileRef = 840751B22BF49C050096B657 /* CustomTapGestureRecognizer.m */; };
+		84591A512BE1625E006AAB10 /* CustomEdgeSwipeGestureRecognizer.m in Sources */ = {isa = PBXBuildFile; fileRef = 84591A502BE1625E006AAB10 /* CustomEdgeSwipeGestureRecognizer.m */; };
 		98181BE92791277400E43572 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98181BE82791275D00E43572 /* libSDL2.a */; };
 		98181BEB2791278F00E43572 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98181BEA2791278300E43572 /* libSDL2.a */; };
 		98181BED2791281100E43572 /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 98181BEC2791281100E43572 /* CoreMotion.framework */; };
@@ -172,6 +177,12 @@
 /* Begin PBXFileReference section */
 		566E9D2B2770B23A00EF7BFE /* Moonlight v1.7.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Moonlight v1.7.xcdatamodel"; sourceTree = "<group>"; };
 		693B3A9A218638CD00982F7B /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
+		840751AD2BF472810096B657 /* NativeTouchHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NativeTouchHandler.h; sourceTree = "<group>"; };
+		840751AE2BF472A30096B657 /* NativeTouchHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NativeTouchHandler.m; sourceTree = "<group>"; };
+		840751B12BF49B5A0096B657 /* CustomTapGestureRecognizer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CustomTapGestureRecognizer.h; sourceTree = "<group>"; };
+		840751B22BF49C050096B657 /* CustomTapGestureRecognizer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CustomTapGestureRecognizer.m; sourceTree = "<group>"; };
+		84591A4F2BE16240006AAB10 /* CustomEdgeSwipeGestureRecognizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomEdgeSwipeGestureRecognizer.h; sourceTree = "<group>"; };
+		84591A502BE1625E006AAB10 /* CustomEdgeSwipeGestureRecognizer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomEdgeSwipeGestureRecognizer.m; sourceTree = "<group>"; };
 		9803CCAB254F9EAF00EE185E /* ConnectionCallbacks.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ConnectionCallbacks.h; sourceTree = "<group>"; };
 		98132E8C20BC9A62007A053F /* Moonlight v1.1.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Moonlight v1.1.xcdatamodel"; sourceTree = "<group>"; };
 		98181BE82791275D00E43572 /* libSDL2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL2.a; path = libs/SDL2/lib/iOS/libSDL2.a; sourceTree = "<group>"; };
@@ -218,7 +229,7 @@
 		DC1F5A06206436B20037755F /* ConnectionHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionHelper.m; sourceTree = "<group>"; };
 		FB1A674B2131E65900507771 /* KeyboardSupport.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KeyboardSupport.h; sourceTree = "<group>"; };
 		FB1A674C2131E65900507771 /* KeyboardSupport.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KeyboardSupport.m; sourceTree = "<group>"; };
-		FB1A67532132419700507771 /* Moonlight TV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Moonlight TV.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		FB1A67532132419700507771 /* Moonlight-ZWM TV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Moonlight-ZWM TV.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB1A675F2132419700507771 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		FB1A67612132419A00507771 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FB1A67632132419A00507771 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -229,7 +240,7 @@
 		FB1D59961BBCCB6400F482CA /* ComputerScrollView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ComputerScrollView.m; sourceTree = "<group>"; };
 		FB1D59981BBCCD7E00F482CA /* AppCollectionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppCollectionView.h; sourceTree = "<group>"; };
 		FB1D59991BBCCD7E00F482CA /* AppCollectionView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppCollectionView.m; sourceTree = "<group>"; };
-		FB290CEE19B2C406004C83CF /* Moonlight.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Moonlight.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FB290CEE19B2C406004C83CF /* Moonlight-ZWM.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Moonlight-ZWM.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB290CF119B2C406004C83CF /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		FB290CF319B2C406004C83CF /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		FB290CF519B2C406004C83CF /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -487,8 +498,8 @@
 		FB290CEF19B2C406004C83CF /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				FB290CEE19B2C406004C83CF /* Moonlight.app */,
-				FB1A67532132419700507771 /* Moonlight TV.app */,
+				FB290CEE19B2C406004C83CF /* Moonlight-ZWM.app */,
+				FB1A67532132419700507771 /* Moonlight-ZWM TV.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -580,6 +591,8 @@
 		FB89460919F646E200339C8A /* Input */ = {
 			isa = PBXGroup;
 			children = (
+				840751AD2BF472810096B657 /* NativeTouchHandler.h */,
+				840751AE2BF472A30096B657 /* NativeTouchHandler.m */,
 				FB89460A19F646E200339C8A /* ControllerSupport.h */,
 				FB89460B19F646E200339C8A /* ControllerSupport.m */,
 				FB89460C19F646E200339C8A /* StreamView.h */,
@@ -592,6 +605,8 @@
 				9897B6A32212610800966419 /* Controller.h */,
 				9827E7A22514366900F25707 /* HapticContext.m */,
 				9827E7A7251436EA00F25707 /* HapticContext.h */,
+				840751B12BF49B5A0096B657 /* CustomTapGestureRecognizer.h */,
+				840751B22BF49C050096B657 /* CustomTapGestureRecognizer.m */,
 				9819CC12254F107A008A7C8E /* RelativeTouchHandler.h */,
 				9819CC13254F107A008A7C8E /* RelativeTouchHandler.m */,
 				9819CC20254F180F008A7C8E /* AbsoluteTouchHandler.h */,
@@ -648,6 +663,8 @@
 		FB89462319F646E200339C8A /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
+				84591A502BE1625E006AAB10 /* CustomEdgeSwipeGestureRecognizer.m */,
+				84591A4F2BE16240006AAB10 /* CustomEdgeSwipeGestureRecognizer.h */,
 				FBD3495119FF36FB002D2A60 /* SWRevealViewController.h */,
 				FBD3495219FF36FB002D2A60 /* SWRevealViewController.m */,
 				FB89462419F646E200339C8A /* MainFrameViewController.h */,
@@ -876,9 +893,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		FB1A67522132419700507771 /* Moonlight TV */ = {
+		FB1A67522132419700507771 /* Moonlight-ZWM TV */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = FB1A67682132419A00507771 /* Build configuration list for PBXNativeTarget "Moonlight TV" */;
+			buildConfigurationList = FB1A67682132419A00507771 /* Build configuration list for PBXNativeTarget "Moonlight-ZWM TV" */;
 			buildPhases = (
 				FB1A674F2132419700507771 /* Sources */,
 				FB1A67502132419700507771 /* Frameworks */,
@@ -889,14 +906,14 @@
 			dependencies = (
 				FB1A68172132509800507771 /* PBXTargetDependency */,
 			);
-			name = "Moonlight TV";
+			name = "Moonlight-ZWM TV";
 			productName = "Moonlight TV";
-			productReference = FB1A67532132419700507771 /* Moonlight TV.app */;
+			productReference = FB1A67532132419700507771 /* Moonlight-ZWM TV.app */;
 			productType = "com.apple.product-type.application";
 		};
-		FB290CED19B2C406004C83CF /* Moonlight */ = {
+		FB290CED19B2C406004C83CF /* Moonlight-ZWM */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = FB290D2019B2C406004C83CF /* Build configuration list for PBXNativeTarget "Moonlight" */;
+			buildConfigurationList = FB290D2019B2C406004C83CF /* Build configuration list for PBXNativeTarget "Moonlight-ZWM" */;
 			buildPhases = (
 				FB290CEA19B2C406004C83CF /* Sources */,
 				FB290CEB19B2C406004C83CF /* Frameworks */,
@@ -907,9 +924,9 @@
 			dependencies = (
 				98AB2E861CAD468B0089BB98 /* PBXTargetDependency */,
 			);
-			name = Moonlight;
+			name = "Moonlight-ZWM";
 			productName = Limelight;
-			productReference = FB290CEE19B2C406004C83CF /* Moonlight.app */;
+			productReference = FB290CEE19B2C406004C83CF /* Moonlight-ZWM.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -956,8 +973,8 @@
 			);
 			projectRoot = "";
 			targets = (
-				FB290CED19B2C406004C83CF /* Moonlight */,
-				FB1A67522132419700507771 /* Moonlight TV */,
+				FB290CED19B2C406004C83CF /* Moonlight-ZWM */,
+				FB1A67522132419700507771 /* Moonlight-ZWM TV */,
 			);
 		};
 /* End PBXProject section */
@@ -1040,6 +1057,7 @@
 				FB1A67CB213245EA00507771 /* ConnectionHelper.m in Sources */,
 				FB1A67BD213245E000507771 /* DiscoveryManager.m in Sources */,
 				FB1A67BF213245E000507771 /* DiscoveryWorker.m in Sources */,
+				840751B42BF49C050096B657 /* CustomTapGestureRecognizer.m in Sources */,
 				FB1A67C1213245E000507771 /* MDNSManager.m in Sources */,
 				FB1A67B1213245D500507771 /* HttpManager.m in Sources */,
 				FB1A67B3213245D500507771 /* HttpRequest.m in Sources */,
@@ -1053,6 +1071,7 @@
 				988FCD42293B091B003050E2 /* KeyboardInputField.m in Sources */,
 				FB1A67A3213245BD00507771 /* Connection.m in Sources */,
 				FB1A67A5213245BD00507771 /* StreamConfiguration.m in Sources */,
+				840751B02BF472A30096B657 /* NativeTouchHandler.m in Sources */,
 				FB1A67A7213245BD00507771 /* StreamManager.m in Sources */,
 				FB1A67A9213245BD00507771 /* VideoDecoderRenderer.m in Sources */,
 				FB1A67A12132458C00507771 /* main.m in Sources */,
@@ -1067,6 +1086,8 @@
 				9819CC22254F180F008A7C8E /* AbsoluteTouchHandler.m in Sources */,
 				9819CC14254F107A008A7C8E /* RelativeTouchHandler.m in Sources */,
 				FB1A674D2131E65900507771 /* KeyboardSupport.m in Sources */,
+				84591A512BE1625E006AAB10 /* CustomEdgeSwipeGestureRecognizer.m in Sources */,
+				840751AF2BF472A30096B657 /* NativeTouchHandler.m in Sources */,
 				FB89463219F646E200339C8A /* VideoDecoderRenderer.m in Sources */,
 				FB290D0419B2C406004C83CF /* AppDelegate.m in Sources */,
 				FB9AFD401A7E127D00872C98 /* AppListResponse.m in Sources */,
@@ -1087,6 +1108,7 @@
 				FB89462C19F646E200339C8A /* HttpManager.m in Sources */,
 				FB89462D19F646E200339C8A /* MDNSManager.m in Sources */,
 				FB89462B19F646E200339C8A /* StreamView.m in Sources */,
+				840751B32BF49C050096B657 /* CustomTapGestureRecognizer.m in Sources */,
 				FB4678FA1A55FFAD00377732 /* DiscoveryManager.m in Sources */,
 				98D5856D1C0EA79600F6CC00 /* TemporaryHost.m in Sources */,
 				FB89463519F646E200339C8A /* MainFrameViewController.m in Sources */,
@@ -1163,7 +1185,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = DM46QST4M7;
+				DEVELOPMENT_TEAM = 8S84A8A3QF;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -1191,7 +1213,7 @@
 					"$(PROJECT_DIR)/libs/SDL2/lib/tvOS-Sim",
 					"$(PROJECT_DIR)/libs/FFmpeg/lib/tvOS-Sim",
 				);
-				MARKETING_VERSION = 9.0.2;
+				MARKETING_VERSION = 9.0.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.Moonlight";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1247,7 +1269,7 @@
 					"$(PROJECT_DIR)/libs/SDL2/lib/tvOS-Sim",
 					"$(PROJECT_DIR)/libs/FFmpeg/lib/tvOS-Sim",
 				);
-				MARKETING_VERSION = 9.0.2;
+				MARKETING_VERSION = 9.0.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.Moonlight";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1376,8 +1398,8 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = DM46QST4M7;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = 8S84A8A3QF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Limelight/Limelight-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
@@ -1388,6 +1410,7 @@
 					"$(PROJECT_DIR)/libs/**",
 				);
 				INFOPLIST_FILE = "Limelight/Limelight-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = MoonlightAXI;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1405,8 +1428,8 @@
 					"$(PROJECT_DIR)/libs/SDL2/lib/iOS-Sim",
 					"$(PROJECT_DIR)/libs/FFmpeg/lib/iOS-Sim",
 				);
-				MARKETING_VERSION = 9.0.2;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.Moonlight";
+				MARKETING_VERSION = 9.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-zwm-updated.iPadOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SKIP_INSTALL = NO;
@@ -1426,8 +1449,8 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = DM46QST4M7;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = 8S84A8A3QF;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Limelight/Limelight-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
@@ -1438,6 +1461,7 @@
 					"$(PROJECT_DIR)/libs/**",
 				);
 				INFOPLIST_FILE = "Limelight/Limelight-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = MoonlightAXI;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1455,8 +1479,8 @@
 					"$(PROJECT_DIR)/libs/SDL2/lib/iOS-Sim",
 					"$(PROJECT_DIR)/libs/FFmpeg/lib/iOS-Sim",
 				);
-				MARKETING_VERSION = 9.0.2;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-stream.Moonlight";
+				MARKETING_VERSION = 9.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.moonlight-zwm-updated.iPadOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SKIP_INSTALL = NO;
@@ -1473,7 +1497,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		FB1A67682132419A00507771 /* Build configuration list for PBXNativeTarget "Moonlight TV" */ = {
+		FB1A67682132419A00507771 /* Build configuration list for PBXNativeTarget "Moonlight-ZWM TV" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FB1A67662132419A00507771 /* Debug */,
@@ -1491,7 +1515,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		FB290D2019B2C406004C83CF /* Build configuration list for PBXNativeTarget "Moonlight" */ = {
+		FB290D2019B2C406004C83CF /* Build configuration list for PBXNativeTarget "Moonlight-ZWM" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FB290D2119B2C406004C83CF /* Debug */,
