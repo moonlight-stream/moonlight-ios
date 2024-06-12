@@ -54,13 +54,11 @@ StreamView *streamView;
 - (void)updatePointerCoords:(UITouch *)touch{
     previousPoint = latestPoint;
     latestPoint = [touch locationInView:streamView];
-    if (pointerVelocityFactor != 1.0f){
-        velocityX = latestPoint.x - previousPoint.x;
-        velocityY = latestPoint.y - previousPoint.y;
-        previousRelativePoint = latestRelativePoint;
-        latestRelativePoint.x = previousRelativePoint.x + pointerVelocityFactor * velocityX;
-        latestRelativePoint.y = previousRelativePoint.y + pointerVelocityFactor * velocityY;
-    }
+    velocityX = latestPoint.x - previousPoint.x;
+    velocityY = latestPoint.y - previousPoint.y;
+    previousRelativePoint = latestRelativePoint;
+    latestRelativePoint.x = previousRelativePoint.x + pointerVelocityFactor * velocityX;
+    latestRelativePoint.y = previousRelativePoint.y + pointerVelocityFactor * velocityY;
 }
 
 + (void)initContextWith:(StreamView *)view{
