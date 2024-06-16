@@ -210,7 +210,6 @@
         // Add StreamView directly in relative mode
         [self.view addSubview:_streamView];
     }
-    [self.view addSubview:_streamView];
     [self.view addSubview:_stageLabel];
     [self.view addSubview:_spinner];
     [self.view addSubview:_tipLabel];
