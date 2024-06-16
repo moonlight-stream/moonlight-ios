@@ -19,6 +19,7 @@
 @implementation NativeTouchHandler {
     StreamView* streamView;
     TemporarySettings* currentSettings;
+    BOOL activateCoordSelector;
 }
 
 
@@ -26,6 +27,7 @@
     self = [self init];
     self->streamView = view;
     self->currentSettings = settings;
+    self->activateCoordSelector = currentSettings.pointerVelocityModeDivider.floatValue != 1.0;
     [NativeTouchPointer setPointerVelocityDivider:settings.pointerVelocityModeDivider.floatValue];
     [NativeTouchPointer setPointerVelocityFactor:settings.touchPointerVelocityFactor.floatValue];
     [NativeTouchPointer initContextWith:streamView];
@@ -48,7 +50,7 @@
 
 - (void)sendTouchEvent:(UITouch*)event touchType:(uint8_t)touchType{
     CGPoint targetCoords;
-    if(currentSettings.pointerVelocityModeDivider.floatValue != 1.0 && event.phase == UITouchPhaseMoved) targetCoords = [NativeTouchPointer selectCoordsFor:event]; // coordinates of touch pointer replaced to relative ones here.
+    if(activateCoordSelector && event.phase == UITouchPhaseMoved) targetCoords = [NativeTouchPointer selectCoordsFor:event]; // coordinates of touch pointer replaced to relative ones here.
     else targetCoords = [event locationInView:streamView];
     CGPoint location = [streamView adjustCoordinatesForVideoArea:targetCoords];
     CGSize videoSize = [streamView getVideoAreaSize];
@@ -82,24 +84,24 @@
         case UITouchPhaseBegan://touchBegan
             type = LI_TOUCH_EVENT_DOWN;
             [NativeTouchPointer populatePointerId:event]; //generate & populate pointerId
-            if(currentSettings.pointerVelocityModeDivider.floatValue != 1.0) [NativeTouchPointer populatePointerObjIntoDict:event];
+            if(activateCoordSelector) [NativeTouchPointer populatePointerObjIntoDict:event];
             break;
         case UITouchPhaseMoved://touchMoved
         case UITouchPhaseStationary:
             type = LI_TOUCH_EVENT_MOVE;
-            if(currentSettings.pointerVelocityModeDivider.floatValue != 1.0) [NativeTouchPointer updatePointerObjInDict:event];
+            if(activateCoordSelector) [NativeTouchPointer updatePointerObjInDict:event];
             break;
         case UITouchPhaseEnded://touchEnded
             type = LI_TOUCH_EVENT_UP;
             [self sendTouchEvent:event touchType:type]; //send touch event first
             [NativeTouchPointer removePointerId:event]; //then remove pointerId
-            if(currentSettings.pointerVelocityModeDivider.floatValue != 1.0) [NativeTouchPointer removePointerObjFromDict:event];
+            if(activateCoordSelector) [NativeTouchPointer removePointerObjFromDict:event];
             return;
         case UITouchPhaseCancelled://touchCancelled
             type = LI_TOUCH_EVENT_CANCEL;
             [self sendTouchEvent:event touchType:type]; //send touch event first
             [NativeTouchPointer removePointerId:event]; //then remove pointerId
-            if(currentSettings.pointerVelocityModeDivider.floatValue != 1.0) [NativeTouchPointer removePointerObjFromDict:event];
+            if(activateCoordSelector) [NativeTouchPointer removePointerObjFromDict:event];
             return;
         case UITouchPhaseRegionEntered:
         case UITouchPhaseRegionMoved:
