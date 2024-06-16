@@ -36,18 +36,6 @@
 }
 
 
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-    
-#if !TARGET_OS_TV
-    if (@available(iOS 13.4, *)) {
-            for (UITouch* touch in touches) [self handleUITouch:touch index:0];// Native touch (absoluteTouch) first!
-            return;
-        }
-#endif
-    }
-
-
-
 - (void)sendTouchEvent:(UITouch*)event touchType:(uint8_t)touchType{
     CGPoint targetCoords;
     if(activateCoordSelector && event.phase == UITouchPhaseMoved) targetCoords = [NativeTouchPointer selectCoordsFor:event]; // coordinates of touch pointer replaced to relative ones here.
@@ -113,38 +101,26 @@
     [self sendTouchEvent:event touchType:type];
 }
 
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+        for (UITouch* touch in touches) [self handleUITouch:touch index:0];
+        return;
+    }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-#if !TARGET_OS_TV
-    if (@available(iOS 13.4, *)) {
-        for (UITouch* touch in touches) [self handleUITouch:touch index:0];// Native touch (absoluteTouch) first!
-        return;
-        // NSLog(@"touchesMoved - allTouches %lu, pointerSet count %lu",[[event allTouches] count], [pointerIdSet count]);
-    }
-#endif
+    for (UITouch* touch in touches) [self handleUITouch:touch index:0];
+    return;
 }
 
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-#if !TARGET_OS_TV
-    if (@available(iOS 13.4, *)) {
-        for (UITouch* touch in touches) [self handleUITouch:touch index:0];// Native touch (absoluteTouch) first!
-        return;
-        // NSLog(@"touchesEnded - allTouches %lu, pointerSet count %lu",[[event allTouches] count], [pointerIdSet count]);
-    }
-#endif
+    for (UITouch* touch in touches) [self handleUITouch:touch index:0];
+    return;
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
-#if !TARGET_OS_TV
-    if (@available(iOS 13.4, *)) {
-            for (UITouch* touch in touches) [self handleUITouch:touch index:0];// Native touch (absoluteTouch) first!
-            return;
-    }
-        // NSLog(@"touchesCancelled - allTouches %lu, pointerSet count %lu",[[event allTouches] count], [pointerIdSet count]);
-#endif
+    for (UITouch* touch in touches) [self handleUITouch:touch index:0];// Native touch (absoluteTouch) first!
+    return;
 }
-
 
 
 @end
