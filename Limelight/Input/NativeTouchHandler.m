@@ -58,8 +58,7 @@
 
 - (void)handleUITouch:(UITouch*)event index:(int)index{
     uint8_t type;
-    //BOOL pointerVelocityScaleEnabled = (settings.pointerVelocityModeDivider.floatValue != 1.0); // when the divider is 1.0, means 0% of screen shall pass velocity-scaled pointer to sunshine.
-    // NSLog(@"handleUITouch %ld,%d",(long)event.phase,(uint32_t)event);
+// NSLog(@"handleUITouch %ld,%d",(long)event.phase,(uint32_t)event);
 //#define LI_TOUCH_EVENT_HOVER       0x00
 //#define LI_TOUCH_EVENT_DOWN        0x01
 //#define LI_TOUCH_EVENT_UP          0x02
@@ -80,30 +79,30 @@
 //    UITouchPhaseRegionExited    API_AVAILABLE(ios(13.4), tvos(13.4))
     
     switch (event.phase) {
-        case UITouchPhaseBegan://开始触摸
+        case UITouchPhaseBegan://touchBegan
             type = LI_TOUCH_EVENT_DOWN;
-            [NativeTouchPointer populatePointerId:event]; //获取并记录pointerId
+            [NativeTouchPointer populatePointerId:event]; //generate & populate pointerId
             if(currentSettings.pointerVelocityModeDivider.floatValue != 1.0) [NativeTouchPointer populatePointerObjIntoDict:event];
             break;
-        case UITouchPhaseMoved://移动
+        case UITouchPhaseMoved://touchMoved
         case UITouchPhaseStationary:
             type = LI_TOUCH_EVENT_MOVE;
             if(currentSettings.pointerVelocityModeDivider.floatValue != 1.0) [NativeTouchPointer updatePointerObjInDict:event];
             break;
-        case UITouchPhaseEnded://触摸结束
+        case UITouchPhaseEnded://touchEnded
             type = LI_TOUCH_EVENT_UP;
-            [self sendTouchEvent:event touchType:type]; //先发送,再删除
-            [NativeTouchPointer removePointerId:event]; //删除pointerId
+            [self sendTouchEvent:event touchType:type]; //send touch event first
+            [NativeTouchPointer removePointerId:event]; //then remove pointerId
             if(currentSettings.pointerVelocityModeDivider.floatValue != 1.0) [NativeTouchPointer removePointerObjFromDict:event];
             return;
-        case UITouchPhaseCancelled://触摸取消
+        case UITouchPhaseCancelled://touchCancelled
             type = LI_TOUCH_EVENT_CANCEL;
-            [self sendTouchEvent:event touchType:type]; //先发送,再删除
-            [NativeTouchPointer removePointerId:event]; //删除pointerId
+            [self sendTouchEvent:event touchType:type]; //send touch event first
+            [NativeTouchPointer removePointerId:event]; //then remove pointerId
             if(currentSettings.pointerVelocityModeDivider.floatValue != 1.0) [NativeTouchPointer removePointerObjFromDict:event];
             return;
-        case UITouchPhaseRegionEntered://停留
-        case UITouchPhaseRegionMoved://停留
+        case UITouchPhaseRegionEntered:
+        case UITouchPhaseRegionMoved:
             type = LI_TOUCH_EVENT_HOVER;
             break;
         default:
