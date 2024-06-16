@@ -125,19 +125,19 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     // mice correctly, but UIKit does. We will register for both and ignore UIKit
     // events if a GCMouse is connected.
     if (@available(iOS 13.4, *)) {
-//        [self addInteraction:[[UIPointerInteraction alloc] initWithDelegate:self]];
-//        
-//        UIPanGestureRecognizer *discreteMouseWheelRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(mouseWheelMovedDiscrete:)];
-//        discreteMouseWheelRecognizer.maximumNumberOfTouches = 0;
-//        discreteMouseWheelRecognizer.allowedScrollTypesMask = UIScrollTypeMaskDiscrete;
-//        discreteMouseWheelRecognizer.allowedTouchTypes = @[@(UITouchTypeIndirectPointer)];
-//        [self addGestureRecognizer:discreteMouseWheelRecognizer];
-//        
-//        UIPanGestureRecognizer *continuousMouseWheelRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(mouseWheelMovedContinuous:)];
-//        continuousMouseWheelRecognizer.maximumNumberOfTouches = 0;
-//        continuousMouseWheelRecognizer.allowedScrollTypesMask = UIScrollTypeMaskContinuous;
-//        continuousMouseWheelRecognizer.allowedTouchTypes = @[@(UITouchTypeIndirectPointer)];
-//        [self addGestureRecognizer:continuousMouseWheelRecognizer];
+        [self addInteraction:[[UIPointerInteraction alloc] initWithDelegate:self]];
+        
+        UIPanGestureRecognizer *discreteMouseWheelRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(mouseWheelMovedDiscrete:)];
+        discreteMouseWheelRecognizer.maximumNumberOfTouches = 0;
+        discreteMouseWheelRecognizer.allowedScrollTypesMask = UIScrollTypeMaskDiscrete;
+        discreteMouseWheelRecognizer.allowedTouchTypes = @[@(UITouchTypeIndirectPointer)];
+        [self addGestureRecognizer:discreteMouseWheelRecognizer];
+        
+        UIPanGestureRecognizer *continuousMouseWheelRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(mouseWheelMovedContinuous:)];
+        continuousMouseWheelRecognizer.maximumNumberOfTouches = 0;
+        continuousMouseWheelRecognizer.allowedScrollTypesMask = UIScrollTypeMaskContinuous;
+        continuousMouseWheelRecognizer.allowedTouchTypes = @[@(UITouchTypeIndirectPointer)];
+        [self addGestureRecognizer:continuousMouseWheelRecognizer];
     }
     
 #if defined(__IPHONE_16_1) || defined(__TVOS_16_1)

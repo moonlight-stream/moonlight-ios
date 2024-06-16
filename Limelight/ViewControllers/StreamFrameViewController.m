@@ -192,24 +192,24 @@
 #endif
     
     // Only enable scroll and zoom in absolute touch mode
-//    if (_settings.absoluteTouchMode) {
-//        _scrollView = [[UIScrollView alloc] initWithFrame:self.view.frame];
-//#if !TARGET_OS_TV
-//        [_scrollView.panGestureRecognizer setMinimumNumberOfTouches:2];
-//#endif
-//        [_scrollView setShowsHorizontalScrollIndicator:NO];
-//        [_scrollView setShowsVerticalScrollIndicator:NO];
-//        [_scrollView setDelegate:self];
-//        [_scrollView setMaximumZoomScale:10.0f];
-//        
-//        // Add StreamView inside a UIScrollView for absolute mode
-//        [_scrollView addSubview:_streamView];
-//        [self.view addSubview:_scrollView];
-//    }
-//    else {
-//        // Add StreamView directly in relative mode
-//        [self.view addSubview:_streamView];
-//    }
+    if (_settings.touchMode.intValue == ABSOLUTE_TOUCH_MODE) {
+        _scrollView = [[UIScrollView alloc] initWithFrame:self.view.frame];
+#if !TARGET_OS_TV
+        [_scrollView.panGestureRecognizer setMinimumNumberOfTouches:2];
+#endif
+        [_scrollView setShowsHorizontalScrollIndicator:NO];
+        [_scrollView setShowsVerticalScrollIndicator:NO];
+        [_scrollView setDelegate:self];
+        [_scrollView setMaximumZoomScale:10.0f];
+        
+        // Add StreamView inside a UIScrollView for absolute mode
+        [_scrollView addSubview:_streamView];
+        [self.view addSubview:_scrollView];
+    }
+    else {
+        // Add StreamView directly in relative mode
+        [self.view addSubview:_streamView];
+    }
     [self.view addSubview:_streamView];
     [self.view addSubview:_stageLabel];
     [self.view addSubview:_spinner];
