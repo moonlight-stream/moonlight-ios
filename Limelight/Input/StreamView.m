@@ -161,6 +161,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     [self becomeFirstResponder];
 }
 
+// this method also deals with lifting streamview for local keyboard
 - (void)keyboardWillShow:(NSNotification *)notification{
     if(settings.liftStreamViewForKeyboard && !isInputingText){
         NSDictionary *userInfo = notification.userInfo;
@@ -178,6 +179,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     // NSLog(@"keyboard will show");
 }
 
+// this method also deals with recovering streamview when local keyboard is turned off
 - (void)keyboardWillHide:(NSNotification *)notification{
     
     if(isInputingText){
