@@ -21,7 +21,6 @@
         <relationship name="appList" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="App" inverseName="host" inverseEntity="App" syncable="YES"/>
     </entity>
     <entity name="Settings" representedClassName="Settings" syncable="YES" codeGenerationType="class">
-        <attribute name="absoluteTouchMode" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="audioConfig" attributeType="Integer 32" defaultValueString="2" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="bitrate" attributeType="Integer 32" defaultValueString="10000" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="btMouseSupport" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES" syncable="YES"/>
@@ -42,6 +41,7 @@
         <attribute name="swapABXYButtons" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="swipeExitScreenEdge" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="swipeToExitDistance" optional="YES" attributeType="Float" defaultValueString="0.5" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="touchMode" optional="YES" attributeType="Integer 16" defaultValueString="1" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="touchPointerVelocityFactor" optional="YES" attributeType="Float" defaultValueString="1" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="uniqueId" attributeType="String" syncable="YES"/>
         <attribute name="useFramePacing" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES" syncable="YES"/>

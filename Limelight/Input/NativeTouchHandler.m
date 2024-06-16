@@ -2,134 +2,146 @@
 //  NativeTouchHandler.m
 //  Moonlight
 //
-//  Created by ZWM on 2024/5/14.
+//  Created by Admin on 2024/6/16.
 //  Copyright © 2024 Moonlight Game Streaming Project. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 #import "NativeTouchHandler.h"
+#import "NativeTouchPointer.h"
+#import "StreamView.h"
+#import "DataManager.h"
+
 #include <Limelight.h>
 
 
-// Use a Dictionary to store UITouch object's memory address as key, and pointerId as value,字典存放UITouch对象地址和pointerId映射关系
-// pointerId will be generated from electronic noise, by arc4_random, pointerId,由随机噪声生成
-// Use a NSSet store pointerId, for quick repeition inquiry, NSSet存放活跃的pointerId合集,用于快速查找,以防重复.
-static NSMutableDictionary *pointerIdDict; //pointerId Dict for native touch.
-static NSMutableSet<NSNumber *> *pointerIdSet; //pointerIdSet for native touch.
-static NSMutableDictionary *pointerDict;
 
-static CGFloat pointerVelocityFactor;
-static CGFloat pointerVelocityDivider;
-static CGFloat pointerVelocityDividerLocation;
-
-StreamView *streamView;
-
-@implementation TouchPointer{
-    CGPoint initialPoint;
-    CGPoint latestPoint;
-    CGPoint previousPoint;
-    CGPoint latestRelativePoint;
-    CGPoint previousRelativePoint;
-    CGFloat velocityX;
-    CGFloat velocityY;
-}
-
-+ (void)setPointerVelocityDivider:(CGFloat)dividerLocation{
-    pointerVelocityDivider = dividerLocation;
-}
-
-+ (void)setPointerVelocityFactor:(CGFloat)velocityFactor{
-    pointerVelocityFactor = velocityFactor;
+@implementation NativeTouchHandler {
+    StreamView* streamView;
+    bool activateCoordSelector;
 }
 
 
-- (instancetype)initWith:(UITouch *)touch{
-        self = [self init];
-        self->initialPoint = [touch locationInView:streamView];
-        self->latestPoint = self->initialPoint;
-        self->latestRelativePoint = self->initialPoint;
-        return self;
-    }
-
-- (void)updatePointerCoords:(UITouch *)touch{
-    previousPoint = latestPoint;
-    latestPoint = [touch locationInView:streamView];
-    velocityX = latestPoint.x - previousPoint.x;
-    velocityY = latestPoint.y - previousPoint.y;
-    previousRelativePoint = latestRelativePoint;
-    latestRelativePoint.x = previousRelativePoint.x + pointerVelocityFactor * velocityX;
-    latestRelativePoint.y = previousRelativePoint.y + pointerVelocityFactor * velocityY;
-}
-
-+ (void)initContextWith:(StreamView *)view{
-    streamView = view;
-    pointerIdDict = [NSMutableDictionary dictionary];
-    pointerIdSet = [NSMutableSet set];
-    pointerDict = [NSMutableDictionary dictionary];
-    pointerVelocityDividerLocation = CGRectGetWidth([[UIScreen mainScreen] bounds]) * pointerVelocityDivider;
-    NSLog(@"pointerVelocityDivider:  %.2f", pointerVelocityDivider);
-    NSLog(@"pointerVelocityDividerLocation:  %.2f", pointerVelocityDividerLocation);
-}
-
-+ (void)populatePointerObjIntoDict:(UITouch*)touch{
-    [pointerDict setObject:[[TouchPointer alloc] initWith:touch] forKey:@((uint64_t)touch)];
-}
-
-+ (void)removePointerObjFromDict:(UITouch*)touch{
-    uint64_t eventAddrValue = (uint64_t)touch;
-    TouchPointer* pointer = [pointerDict objectForKey:@(eventAddrValue)];
-    if(pointer != nil){
-        [pointerDict removeObjectForKey:@(eventAddrValue)];
-    }
-
-}
-
-+ (void)updatePointerObjInDict:(UITouch *)touch{
-    [[pointerDict objectForKey:@((uint64_t)touch)] updatePointerCoords:touch];
+- (id)initWith:(StreamView*)view and:(TemporarySettings*)settings{
+    self = [self init];
+    self->streamView = view;
+    activateCoordSelector = (settings.pointerVelocityModeDivider.floatValue != 1.0);
+    [NativeTouchPointer setPointerVelocityDivider:settings.pointerVelocityModeDivider.floatValue];
+    [NativeTouchPointer setPointerVelocityFactor:settings.touchPointerVelocityFactor.floatValue];
+    [NativeTouchPointer initContextWith:streamView];
+    
+    return self;
 }
 
 
-+ (CGPoint)selectCoordsFor:(UITouch *)touch{
-    TouchPointer *pointer = [pointerDict objectForKey:@((uint64_t)touch)];
-    if((pointer -> initialPoint).x > pointerVelocityDividerLocation){  //if first contact coords locates on the right side of divider.
-        return pointer->latestRelativePoint;
-    }
-    return [touch locationInView:streamView];
-}
-
-
-
-// 随机生成pointerId并填入NSDict和NSSet
-// generate & populate pointerId into NSDict & NSSet, called in UITouchPhaseBegan
-+ (void)populatePointerId:(UITouch*)touch{
-    uint64_t eventAddrValue = (uint64_t)touch;
-    uint32_t randomPointerId = arc4random_uniform(UINT32_MAX); // generate pointerId from eletronic noise.
-    for(;;){
-        if([pointerIdSet containsObject:@(randomPointerId)]) randomPointerId = arc4random_uniform(UINT32_MAX); // in case of new pointerId collides with existing ones, generate again.
-        else{ // populate pointerId into NSDict & NSSet.
-            [pointerIdDict setObject:@(randomPointerId) forKey:@(eventAddrValue)];
-            [pointerIdSet addObject:@(randomPointerId)];
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    
+#if !TARGET_OS_TV
+    if (@available(iOS 13.4, *)) {
+            for (UITouch* touch in touches) [self handleUITouch:touch index:0];// Native touch (absoluteTouch) first!
             return;
         }
+#endif
     }
+
+
+
+- (void)sendTouchEvent:(UITouch*)event touchType:(uint8_t)touchType{
+    CGPoint targetCoords;
+    if(activateCoordSelector && event.phase == UITouchPhaseMoved) targetCoords = [NativeTouchPointer selectCoordsFor:event]; // coordinates of touch pointer replaced to relative ones here.
+    else targetCoords = [event locationInView:streamView];
+    CGPoint location = [streamView adjustCoordinatesForVideoArea:targetCoords];
+    CGSize videoSize = [streamView getVideoAreaSize];
+    LiSendTouchEvent(touchType,[NativeTouchPointer retrievePointerIdFromDict:event],location.x / videoSize.width, location.y / videoSize.height,(event.force / event.maximumPossibleForce) / sin(event.altitudeAngle),0.0f, 0.0f,[streamView getRotationFromAzimuthAngle:[event azimuthAngleInView:streamView]]);
 }
 
 
-
-// remove pointerId in UITouchPhaseEnded condition
-+ (void)removePointerId:(UITouch*)touch{
-    uint64_t eventAddrValue = (uint64_t)touch;
-    NSNumber* pointerIdObj = [pointerIdDict objectForKey:@(eventAddrValue)];
-    if(pointerIdObj != nil){
-        [pointerIdSet removeObject:pointerIdObj];
-        [pointerIdDict removeObjectForKey:@(eventAddrValue)];
+- (void)handleUITouch:(UITouch*)event index:(int)index{
+    uint8_t type;
+    //BOOL pointerVelocityScaleEnabled = (settings.pointerVelocityModeDivider.floatValue != 1.0); // when the divider is 1.0, means 0% of screen shall pass velocity-scaled pointer to sunshine.
+    // NSLog(@"handleUITouch %ld,%d",(long)event.phase,(uint32_t)event);
+//#define LI_TOUCH_EVENT_HOVER       0x00
+//#define LI_TOUCH_EVENT_DOWN        0x01
+//#define LI_TOUCH_EVENT_UP          0x02
+//#define LI_TOUCH_EVENT_MOVE        0x03
+//#define LI_TOUCH_EVENT_CANCEL      0x04
+//#define LI_TOUCH_EVENT_BUTTON_ONLY 0x05
+//#define LI_TOUCH_EVENT_HOVER_LEAVE 0x06
+//#define LI_TOUCH_EVENT_CANCEL_ALL  0x07
+//#define LI_ROT_UNKNOWN 0xFFFF
+    
+//    UITouchPhaseBegan,             // whenever a finger touches the surface.
+//    UITouchPhaseMoved,             // whenever a finger moves on the surface.
+//    UITouchPhaseStationary,        // whenever a finger is touching the surface but hasn't moved since the previous event.
+//    UITouchPhaseEnded,             // whenever a finger leaves the surface.
+//    UITouchPhaseCancelled,         // whenever a touch doesn't end but we need to stop tracking (e.g. putting device to face)
+//    UITouchPhaseRegionEntered   API_AVAILABLE(ios(13.4), tvos(13.4)) API_UNAVAILABLE(watchos),  // whenever a touch is entering the region of a user interface
+//    UITouchPhaseRegionMoved     API_AVAILABLE(ios(13.4), tvos(13.4)) API_UNAVAILABLE(watchos),  // when a touch is inside the region of a user interface, but hasn’t yet made contact or left the region
+//    UITouchPhaseRegionExited    API_AVAILABLE(ios(13.4), tvos(13.4))
+    
+    switch (event.phase) {
+        case UITouchPhaseBegan://开始触摸
+            type = LI_TOUCH_EVENT_DOWN;
+            [NativeTouchPointer populatePointerId:event]; //获取并记录pointerId
+            if(activateCoordSelector) [NativeTouchPointer populatePointerObjIntoDict:event];
+            break;
+        case UITouchPhaseMoved://移动
+        case UITouchPhaseStationary:
+            type = LI_TOUCH_EVENT_MOVE;
+            if(activateCoordSelector) [NativeTouchPointer updatePointerObjInDict:event];
+            break;
+        case UITouchPhaseEnded://触摸结束
+            type = LI_TOUCH_EVENT_UP;
+            [self sendTouchEvent:event touchType:type]; //先发送,再删除
+            [NativeTouchPointer removePointerId:event]; //删除pointerId
+            if(activateCoordSelector) [NativeTouchPointer removePointerObjFromDict:event];
+            return;
+        case UITouchPhaseCancelled://触摸取消
+            type = LI_TOUCH_EVENT_CANCEL;
+            [self sendTouchEvent:event touchType:type]; //先发送,再删除
+            [NativeTouchPointer removePointerId:event]; //删除pointerId
+            if(activateCoordSelector) [NativeTouchPointer removePointerObjFromDict:event];
+            return;
+        case UITouchPhaseRegionEntered://停留
+        case UITouchPhaseRegionMoved://停留
+            type = LI_TOUCH_EVENT_HOVER;
+            break;
+        default:
+            return;
     }
+    [self sendTouchEvent:event touchType:type];
 }
 
-// 从字典中获取UITouch事件对应的pointerId
-// call this only when NSDcit & NSSet is up-to-date.
-+ (uint32_t) retrievePointerIdFromDict:(UITouch*)touch{
-    return [[pointerIdDict objectForKey:@((uint64_t)touch)] unsignedIntValue];
+
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+#if !TARGET_OS_TV
+    if (@available(iOS 13.4, *)) {
+        for (UITouch* touch in touches) [self handleUITouch:touch index:0];// Native touch (absoluteTouch) first!
+        return;
+        // NSLog(@"touchesMoved - allTouches %lu, pointerSet count %lu",[[event allTouches] count], [pointerIdSet count]);
+    }
+#endif
+}
+
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+#if !TARGET_OS_TV
+    if (@available(iOS 13.4, *)) {
+        for (UITouch* touch in touches) [self handleUITouch:touch index:0];// Native touch (absoluteTouch) first!
+        return;
+        // NSLog(@"touchesEnded - allTouches %lu, pointerSet count %lu",[[event allTouches] count], [pointerIdSet count]);
+    }
+#endif
+}
+
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
+#if !TARGET_OS_TV
+    if (@available(iOS 13.4, *)) {
+            for (UITouch* touch in touches) [self handleUITouch:touch index:0];// Native touch (absoluteTouch) first!
+            return;
+    }
+        // NSLog(@"touchesCancelled - allTouches %lu, pointerSet count %lu",[[event allTouches] count], [pointerIdSet count]);
+#endif
 }
 
 

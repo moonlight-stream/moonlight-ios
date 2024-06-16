@@ -73,7 +73,8 @@
                   useFramePacing:(BOOL)useFramePacing
                        enableHdr:(BOOL)enableHdr
                   btMouseSupport:(BOOL)btMouseSupport
-               absoluteTouchMode:(BOOL)absoluteTouchMode
+               // absoluteTouchMode:(BOOL)absoluteTouchMode
+                       touchMode:(NSInteger)touchMode
                     statsOverlay:(BOOL)statsOverlay {
     
     [_managedObjectContext performBlockAndWait:^{
@@ -99,7 +100,8 @@
         settingsToSave.useFramePacing = useFramePacing;
         settingsToSave.enableHdr = enableHdr;
         settingsToSave.btMouseSupport = btMouseSupport;
-        settingsToSave.absoluteTouchMode = absoluteTouchMode;
+        // settingsToSave.absoluteTouchMode = absoluteTouchMode;
+        settingsToSave.touchMode = [NSNumber numberWithInteger:(uint16_t)touchMode];
         settingsToSave.statsOverlay = statsOverlay;
         
         [self saveData];

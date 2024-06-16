@@ -1061,7 +1061,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     // Even if no gamepads are present, we will always count one if OSC is enabled,
     // or it's set to auto and no keyboard or mouse is present. Absolute touch mode
     // disables the OSC.
-    if (level != OnScreenControlsLevelOff && (![ControllerSupport hasKeyboardOrMouse] || level != OnScreenControlsLevelAuto) && !settings.absoluteTouchMode) {
+    if (level != OnScreenControlsLevelOff && (![ControllerSupport hasKeyboardOrMouse] || level != OnScreenControlsLevelAuto) && (settings.touchMode.intValue == RELATIVE_TOUCH_MODE)) {
         mask |= 0x1;
     }
     

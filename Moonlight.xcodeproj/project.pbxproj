@@ -8,10 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		693B3A9B218638CD00982F7B /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 693B3A9A218638CD00982F7B /* Settings.bundle */; };
-		840751AF2BF472A30096B657 /* NativeTouchHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 840751AE2BF472A30096B657 /* NativeTouchHandler.m */; };
-		840751B02BF472A30096B657 /* NativeTouchHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 840751AE2BF472A30096B657 /* NativeTouchHandler.m */; };
 		840751B32BF49C050096B657 /* CustomTapGestureRecognizer.m in Sources */ = {isa = PBXBuildFile; fileRef = 840751B22BF49C050096B657 /* CustomTapGestureRecognizer.m */; };
 		840751B42BF49C050096B657 /* CustomTapGestureRecognizer.m in Sources */ = {isa = PBXBuildFile; fileRef = 840751B22BF49C050096B657 /* CustomTapGestureRecognizer.m */; };
+		843CC7F02C1E757D00BBC475 /* NativeTouchPointer.m in Sources */ = {isa = PBXBuildFile; fileRef = 843CC7EF2C1E757D00BBC475 /* NativeTouchPointer.m */; };
+		843CC7F12C1E757D00BBC475 /* NativeTouchPointer.m in Sources */ = {isa = PBXBuildFile; fileRef = 843CC7EF2C1E757D00BBC475 /* NativeTouchPointer.m */; };
+		843CC7F62C1E7A1700BBC475 /* NativeTouchHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 843CC7F52C1E7A1700BBC475 /* NativeTouchHandler.m */; };
+		843CC7F72C1E7A1700BBC475 /* NativeTouchHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 843CC7F52C1E7A1700BBC475 /* NativeTouchHandler.m */; };
 		84591A512BE1625E006AAB10 /* CustomEdgeSwipeGestureRecognizer.m in Sources */ = {isa = PBXBuildFile; fileRef = 84591A502BE1625E006AAB10 /* CustomEdgeSwipeGestureRecognizer.m */; };
 		98181BE92791277400E43572 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98181BE82791275D00E43572 /* libSDL2.a */; };
 		98181BEB2791278F00E43572 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98181BEA2791278300E43572 /* libSDL2.a */; };
@@ -177,10 +179,12 @@
 /* Begin PBXFileReference section */
 		566E9D2B2770B23A00EF7BFE /* Moonlight v1.7.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Moonlight v1.7.xcdatamodel"; sourceTree = "<group>"; };
 		693B3A9A218638CD00982F7B /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
-		840751AD2BF472810096B657 /* NativeTouchHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NativeTouchHandler.h; sourceTree = "<group>"; };
-		840751AE2BF472A30096B657 /* NativeTouchHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NativeTouchHandler.m; sourceTree = "<group>"; };
 		840751B12BF49B5A0096B657 /* CustomTapGestureRecognizer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CustomTapGestureRecognizer.h; sourceTree = "<group>"; };
 		840751B22BF49C050096B657 /* CustomTapGestureRecognizer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CustomTapGestureRecognizer.m; sourceTree = "<group>"; };
+		843CC7EE2C1E757D00BBC475 /* NativeTouchPointer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NativeTouchPointer.h; sourceTree = "<group>"; };
+		843CC7EF2C1E757D00BBC475 /* NativeTouchPointer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NativeTouchPointer.m; sourceTree = "<group>"; };
+		843CC7F42C1E778000BBC475 /* NativeTouchHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NativeTouchHandler.h; sourceTree = "<group>"; };
+		843CC7F52C1E7A1700BBC475 /* NativeTouchHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NativeTouchHandler.m; sourceTree = "<group>"; };
 		84591A4F2BE16240006AAB10 /* CustomEdgeSwipeGestureRecognizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomEdgeSwipeGestureRecognizer.h; sourceTree = "<group>"; };
 		84591A502BE1625E006AAB10 /* CustomEdgeSwipeGestureRecognizer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomEdgeSwipeGestureRecognizer.m; sourceTree = "<group>"; };
 		9803CCAB254F9EAF00EE185E /* ConnectionCallbacks.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ConnectionCallbacks.h; sourceTree = "<group>"; };
@@ -591,12 +595,12 @@
 		FB89460919F646E200339C8A /* Input */ = {
 			isa = PBXGroup;
 			children = (
-				840751AD2BF472810096B657 /* NativeTouchHandler.h */,
-				840751AE2BF472A30096B657 /* NativeTouchHandler.m */,
 				FB89460A19F646E200339C8A /* ControllerSupport.h */,
 				FB89460B19F646E200339C8A /* ControllerSupport.m */,
 				FB89460C19F646E200339C8A /* StreamView.h */,
 				FB89460D19F646E200339C8A /* StreamView.m */,
+				843CC7EE2C1E757D00BBC475 /* NativeTouchPointer.h */,
+				843CC7EF2C1E757D00BBC475 /* NativeTouchPointer.m */,
 				FB4678EB1A50C40900377732 /* OnScreenControls.h */,
 				FB4678EC1A50C40900377732 /* OnScreenControls.m */,
 				FB1A674B2131E65900507771 /* KeyboardSupport.h */,
@@ -608,6 +612,8 @@
 				840751B12BF49B5A0096B657 /* CustomTapGestureRecognizer.h */,
 				840751B22BF49C050096B657 /* CustomTapGestureRecognizer.m */,
 				9819CC12254F107A008A7C8E /* RelativeTouchHandler.h */,
+				843CC7F42C1E778000BBC475 /* NativeTouchHandler.h */,
+				843CC7F52C1E7A1700BBC475 /* NativeTouchHandler.m */,
 				9819CC13254F107A008A7C8E /* RelativeTouchHandler.m */,
 				9819CC20254F180F008A7C8E /* AbsoluteTouchHandler.h */,
 				9819CC21254F180F008A7C8E /* AbsoluteTouchHandler.m */,
@@ -1053,6 +1059,7 @@
 				FB1A67C3213245EA00507771 /* AppAssetManager.m in Sources */,
 				FB1A67C5213245EA00507771 /* AppAssetRetriever.m in Sources */,
 				FB1A67C7213245EA00507771 /* PairManager.m in Sources */,
+				843CC7F12C1E757D00BBC475 /* NativeTouchPointer.m in Sources */,
 				FB1A67C9213245EA00507771 /* WakeOnLanManager.m in Sources */,
 				FB1A67CB213245EA00507771 /* ConnectionHelper.m in Sources */,
 				FB1A67BD213245E000507771 /* DiscoveryManager.m in Sources */,
@@ -1062,6 +1069,7 @@
 				FB1A67B1213245D500507771 /* HttpManager.m in Sources */,
 				FB1A67B3213245D500507771 /* HttpRequest.m in Sources */,
 				FB1A67B5213245D500507771 /* HttpResponse.m in Sources */,
+				843CC7F72C1E7A1700BBC475 /* NativeTouchHandler.m in Sources */,
 				FB1A67B7213245D500507771 /* ServerInfoResponse.m in Sources */,
 				FB1A67B9213245D500507771 /* AppAssetResponse.m in Sources */,
 				FB1A67BB213245D500507771 /* AppListResponse.m in Sources */,
@@ -1071,7 +1079,6 @@
 				988FCD42293B091B003050E2 /* KeyboardInputField.m in Sources */,
 				FB1A67A3213245BD00507771 /* Connection.m in Sources */,
 				FB1A67A5213245BD00507771 /* StreamConfiguration.m in Sources */,
-				840751B02BF472A30096B657 /* NativeTouchHandler.m in Sources */,
 				FB1A67A7213245BD00507771 /* StreamManager.m in Sources */,
 				FB1A67A9213245BD00507771 /* VideoDecoderRenderer.m in Sources */,
 				FB1A67A12132458C00507771 /* main.m in Sources */,
@@ -1087,7 +1094,7 @@
 				9819CC14254F107A008A7C8E /* RelativeTouchHandler.m in Sources */,
 				FB1A674D2131E65900507771 /* KeyboardSupport.m in Sources */,
 				84591A512BE1625E006AAB10 /* CustomEdgeSwipeGestureRecognizer.m in Sources */,
-				840751AF2BF472A30096B657 /* NativeTouchHandler.m in Sources */,
+				843CC7F62C1E7A1700BBC475 /* NativeTouchHandler.m in Sources */,
 				FB89463219F646E200339C8A /* VideoDecoderRenderer.m in Sources */,
 				FB290D0419B2C406004C83CF /* AppDelegate.m in Sources */,
 				FB9AFD401A7E127D00872C98 /* AppListResponse.m in Sources */,
@@ -1105,6 +1112,7 @@
 				FBD3495319FF36FB002D2A60 /* SWRevealViewController.m in Sources */,
 				FB1D59971BBCCB6400F482CA /* ComputerScrollView.m in Sources */,
 				FBD3495019FF2174002D2A60 /* SettingsViewController.m in Sources */,
+				843CC7F02C1E757D00BBC475 /* NativeTouchPointer.m in Sources */,
 				FB89462C19F646E200339C8A /* HttpManager.m in Sources */,
 				FB89462D19F646E200339C8A /* MDNSManager.m in Sources */,
 				FB89462B19F646E200339C8A /* StreamView.m in Sources */,

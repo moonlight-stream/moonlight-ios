@@ -264,7 +264,8 @@ BOOL isCustomResolution(CGSize res) {
         [self.hdrSelector setSelectedSegmentIndex:currentSettings.enableHdr ? 1 : 0];
     }
     
-    [self.touchModeSelector setSelectedSegmentIndex:currentSettings.absoluteTouchMode ? 1 : 0];
+    // [self.touchModeSelector setSelectedSegmentIndex:currentSettings.absoluteTouchMode ? 1 : 0];
+    [self.touchModeSelector setSelectedSegmentIndex:currentSettings.touchMode.intValue]; //Load old touchMode setting
     [self.touchModeSelector addTarget:self action:@selector(touchModeChanged) forControlEvents:UIControlEventValueChanged];
     [self.statsOverlaySelector setSelectedSegmentIndex:currentSettings.statsOverlay ? 1 : 0];
     [self.btMouseSelector setSelectedSegmentIndex:currentSettings.btMouseSupport ? 1 : 0];
@@ -280,7 +281,7 @@ BOOL isCustomResolution(CGSize res) {
     [self.framerateSelector setSelectedSegmentIndex:framerate];
     [self.framerateSelector addTarget:self action:@selector(updateBitrate) forControlEvents:UIControlEventValueChanged];
     [self.onscreenControlSelector setSelectedSegmentIndex:onscreenControls];
-    [self.onscreenControlSelector setEnabled:!currentSettings.absoluteTouchMode];
+    [self.onscreenControlSelector setEnabled:[self.touchModeSelector selectedSegmentIndex] == RELATIVE_TOUCH_MODE];//initialize controller UI widget
     [self.bitrateSlider setMinimumValue:0];
     [self.bitrateSlider setMaximumValue:(sizeof(bitrateTable) / sizeof(*bitrateTable)) - 1];
     [self.bitrateSlider setValue:[self getSliderValueForBitrate:_bitrate] animated:YES];
@@ -302,10 +303,13 @@ BOOL isCustomResolution(CGSize res) {
     [self.pointerVelocityModeDividerSlider setValue:currentSettings.pointerVelocityModeDivider.floatValue * 100 animated:YES]; // Load old setting.
     [self.pointerVelocityModeDividerUILabel setText:[NSString stringWithFormat:@"Touch Pointer Velocity: Scaled on %d%% of Right Screen", 100 - (uint8_t)self.pointerVelocityModeDividerSlider.value]]; // Initiate label display
     [self.pointerVelocityModeDividerSlider addTarget:self action:@selector(pointerVelocityModeDividerSliderMoved) forControlEvents:(UIControlEventValueChanged)]; // Update label display when slider is being moved.
-    
+    [self.pointerVelocityModeDividerSlider setEnabled:[self.touchModeSelector selectedSegmentIndex] == NATIVE_TOUCH_MODE]; // pointer velocity scaling works only in native touch mode.
+
     [self.touchPointerVelocityFactorSlider setValue:currentSettings.touchPointerVelocityFactor.floatValue * 100 animated:YES]; // Load old setting.
     [self.touchPointerVelocityFactorUILabel setText:[NSString stringWithFormat:@"Touch Pointer Velocity Factor: %d%%", (uint16_t)self.touchPointerVelocityFactorSlider.value]]; // Initiate label display
     [self.touchPointerVelocityFactorSlider addTarget:self action:@selector(touchPointerVelocityFactorSliderMoved) forControlEvents:(UIControlEventValueChanged)]; // Update label display when slider is being moved.
+    [self.touchPointerVelocityFactorSlider setEnabled:[self.touchModeSelector selectedSegmentIndex] == NATIVE_TOUCH_MODE]; // pointer velocity scaling works only in native touch mode.
+    
 }
 
 - (void) pointerVelocityModeDividerSliderMoved {
@@ -338,9 +342,9 @@ BOOL isCustomResolution(CGSize res) {
 
 - (void) touchModeChanged {
     // Disable on-screen controls in absolute touch mode
-    [self.onscreenControlSelector setEnabled:[self.touchModeSelector selectedSegmentIndex] == 0];
-    [self.pointerVelocityModeDividerSlider setEnabled:[self.touchModeSelector selectedSegmentIndex] == 1]; // pointer velocity scaling works only in native touch mode.
-    [self.touchPointerVelocityFactorSlider setEnabled:[self.touchModeSelector selectedSegmentIndex] == 1]; // pointer velocity scaling works only in native touch mode.
+    [self.onscreenControlSelector setEnabled:[self.touchModeSelector selectedSegmentIndex] == RELATIVE_TOUCH_MODE];
+    [self.pointerVelocityModeDividerSlider setEnabled:[self.touchModeSelector selectedSegmentIndex] == NATIVE_TOUCH_MODE]; // pointer velocity scaling works only in native touch mode.
+    [self.touchPointerVelocityFactorSlider setEnabled:[self.touchModeSelector selectedSegmentIndex] == NATIVE_TOUCH_MODE]; // pointer velocity scaling works only in native touch mode.
 }
 
 - (void) updateBitrate {
@@ -625,7 +629,8 @@ BOOL isCustomResolution(CGSize res) {
     uint32_t preferredCodec = [self getChosenCodecPreference];
     BOOL btMouseSupport = [self.btMouseSelector selectedSegmentIndex] == 1;
     BOOL useFramePacing = [self.framePacingSelector selectedSegmentIndex] == 1;
-    BOOL absoluteTouchMode = [self.touchModeSelector selectedSegmentIndex] == 1;
+    // BOOL absoluteTouchMode = [self.touchModeSelector selectedSegmentIndex] == 1;
+    NSInteger touchMode = [self.touchModeSelector selectedSegmentIndex];
     BOOL statsOverlay = [self.statsOverlaySelector selectedSegmentIndex] == 1;
     BOOL enableHdr = [self.hdrSelector selectedSegmentIndex] == 1;
     [dataMan saveSettingsWithBitrate:_bitrate
@@ -649,7 +654,8 @@ BOOL isCustomResolution(CGSize res) {
                       useFramePacing:useFramePacing
                            enableHdr:enableHdr
                       btMouseSupport:btMouseSupport
-                   absoluteTouchMode:absoluteTouchMode
+                   // absoluteTouchMode:absoluteTouchMode
+                           touchMode:touchMode
                         statsOverlay:statsOverlay];
 }
 

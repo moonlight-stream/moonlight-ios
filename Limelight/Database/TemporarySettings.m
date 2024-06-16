@@ -83,7 +83,8 @@
     self.swapABXYButtons = settings.swapABXYButtons;
     self.onscreenControls = settings.onscreenControls;
     self.btMouseSupport = settings.btMouseSupport;
-    self.absoluteTouchMode = settings.absoluteTouchMode;
+    // self.absoluteTouchMode = settings.absoluteTouchMode;
+    self.touchMode = settings.touchMode;
     self.statsOverlay = settings.statsOverlay;
     self.keyboardToggleFingers = settings.keyboardToggleFingers;
     self.swipeExitScreenEdge = settings.swipeExitScreenEdge;

@@ -34,7 +34,8 @@
                   useFramePacing:(BOOL)useFramePacing
                        enableHdr:(BOOL)enableHdr
                   btMouseSupport:(BOOL)btMouseSupport
-               absoluteTouchMode:(BOOL)absoluteTouchMode
+               // absoluteTouchMode:(BOOL)absoluteTouchMode
+                       touchMode:(NSInteger)touchMode
                     statsOverlay:(BOOL)statsOverlay;
 
 - (NSArray*) getHosts;

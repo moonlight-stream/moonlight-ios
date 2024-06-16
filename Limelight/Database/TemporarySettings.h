@@ -7,6 +7,10 @@
 //
 
 #import "Settings+CoreDataClass.h"
+#define RELATIVE_TOUCH_MODE 0
+#define NATIVE_TOUCH_MODE 1
+#define ABSOLUTE_TOUCH_MODE 2
+
 
 @interface TemporarySettings : NSObject
 
@@ -37,7 +41,8 @@
 @property (nonatomic) BOOL optimizeGames;
 @property (nonatomic) BOOL enableHdr;
 @property (nonatomic) BOOL btMouseSupport;
-@property (nonatomic) BOOL absoluteTouchMode;
+// @property (nonatomic) BOOL absoluteTouchMode;
+@property (nonatomic, retain) NSNumber * touchMode;
 @property (nonatomic) BOOL statsOverlay;
 @property (nonatomic) BOOL liftStreamViewForKeyboard;
 @property (nonatomic) BOOL showKeyboardToolbar;

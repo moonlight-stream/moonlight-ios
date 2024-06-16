@@ -153,7 +153,8 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <segments>
                                     <segment title="Touchpad"/>
-                                    <segment title="Native Multi-Point Touch"/>
+                                    <segment title="Native Multi-Touch"/>
+                                    <segment title="Absolute Touch"/>
                                 </segments>
                                 <color key="tintColor" red="0.6716768742" green="0.61711704730000005" blue="0.99902987480000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <color key="selectedSegmentTintColor" red="0.6716768742" green="0.61711704730000005" blue="0.99902987480000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
