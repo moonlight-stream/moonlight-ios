@@ -2,7 +2,7 @@
 //  NativeTouchHandler.m
 //  Moonlight
 //
-//  Created by Admin on 2024/6/16.
+//  Created by ZWM on 2024/6/16.
 //  Copyright © 2024 Moonlight Game Streaming Project. All rights reserved.
 //
 
@@ -18,14 +18,14 @@
 
 @implementation NativeTouchHandler {
     StreamView* streamView;
-    bool activateCoordSelector;
+    TemporarySettings* currentSettings;
 }
 
 
 - (id)initWith:(StreamView*)view and:(TemporarySettings*)settings{
     self = [self init];
     self->streamView = view;
-    activateCoordSelector = (settings.pointerVelocityModeDivider.floatValue != 1.0);
+    self->currentSettings = settings;
     [NativeTouchPointer setPointerVelocityDivider:settings.pointerVelocityModeDivider.floatValue];
     [NativeTouchPointer setPointerVelocityFactor:settings.touchPointerVelocityFactor.floatValue];
     [NativeTouchPointer initContextWith:streamView];
@@ -48,7 +48,7 @@
 
 - (void)sendTouchEvent:(UITouch*)event touchType:(uint8_t)touchType{
     CGPoint targetCoords;
-    if(activateCoordSelector && event.phase == UITouchPhaseMoved) targetCoords = [NativeTouchPointer selectCoordsFor:event]; // coordinates of touch pointer replaced to relative ones here.
+    if(currentSettings.pointerVelocityModeDivider.floatValue != 1.0 && event.phase == UITouchPhaseMoved) targetCoords = [NativeTouchPointer selectCoordsFor:event]; // coordinates of touch pointer replaced to relative ones here.
     else targetCoords = [event locationInView:streamView];
     CGPoint location = [streamView adjustCoordinatesForVideoArea:targetCoords];
     CGSize videoSize = [streamView getVideoAreaSize];
@@ -83,24 +83,24 @@
         case UITouchPhaseBegan://开始触摸
             type = LI_TOUCH_EVENT_DOWN;
             [NativeTouchPointer populatePointerId:event]; //获取并记录pointerId
-            if(activateCoordSelector) [NativeTouchPointer populatePointerObjIntoDict:event];
+            if(currentSettings.pointerVelocityModeDivider.floatValue != 1.0) [NativeTouchPointer populatePointerObjIntoDict:event];
             break;
         case UITouchPhaseMoved://移动
         case UITouchPhaseStationary:
             type = LI_TOUCH_EVENT_MOVE;
-            if(activateCoordSelector) [NativeTouchPointer updatePointerObjInDict:event];
+            if(currentSettings.pointerVelocityModeDivider.floatValue != 1.0) [NativeTouchPointer updatePointerObjInDict:event];
             break;
         case UITouchPhaseEnded://触摸结束
             type = LI_TOUCH_EVENT_UP;
             [self sendTouchEvent:event touchType:type]; //先发送,再删除
             [NativeTouchPointer removePointerId:event]; //删除pointerId
-            if(activateCoordSelector) [NativeTouchPointer removePointerObjFromDict:event];
+            if(currentSettings.pointerVelocityModeDivider.floatValue != 1.0) [NativeTouchPointer removePointerObjFromDict:event];
             return;
         case UITouchPhaseCancelled://触摸取消
             type = LI_TOUCH_EVENT_CANCEL;
             [self sendTouchEvent:event touchType:type]; //先发送,再删除
             [NativeTouchPointer removePointerId:event]; //删除pointerId
-            if(activateCoordSelector) [NativeTouchPointer removePointerObjFromDict:event];
+            if(currentSettings.pointerVelocityModeDivider.floatValue != 1.0) [NativeTouchPointer removePointerObjFromDict:event];
             return;
         case UITouchPhaseRegionEntered://停留
         case UITouchPhaseRegionMoved://停留
