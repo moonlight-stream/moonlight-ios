@@ -7,8 +7,11 @@
 //
 
 #import "RelativeTouchHandler.h"
+#import "CustomTapGestureRecognizer.h"
 
 #include <Limelight.h>
+#define RIGHTCLICK_TAP_DOWN_TIME_THRESHOLD_S 0.1
+
 
 static const int REFERENCE_WIDTH = 1280;
 static const int REFERENCE_HEIGHT = 720;
@@ -19,6 +22,7 @@ static const int REFERENCE_HEIGHT = 720;
     BOOL isDragging;
     NSTimer* dragTimer;
     NSUInteger peakTouchCount;
+    CustomTapGestureRecognizer* rightClickTapRecognizer;
     
 #if TARGET_OS_TV
     UIGestureRecognizer* remotePressRecognizer;
@@ -32,6 +36,16 @@ static const int REFERENCE_HEIGHT = 720;
     self = [self init];
     self->view = view;
     
+    // replace righclick recoginizing with my CustomTapGestureRecognizer for better experience, higher recoginizing rate.
+    rightClickTapRecognizer = [[CustomTapGestureRecognizer alloc] initWithTarget:self action:@selector(mouseRightClick)];
+    rightClickTapRecognizer.numberOfTouchesRequired = 2;
+    rightClickTapRecognizer.tapDownTimeThreshold = RIGHTCLICK_TAP_DOWN_TIME_THRESHOLD_S; // tap down time in seconds.
+    rightClickTapRecognizer.delaysTouchesBegan = NO;
+    rightClickTapRecognizer.delaysTouchesEnded = NO;
+    [self->view addGestureRecognizer:rightClickTapRecognizer];
+
+    
+    
 #if TARGET_OS_TV
     remotePressRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(remoteButtonPressed:)];
     remotePressRecognizer.allowedPressTypes = @[@(UIPressTypeSelect)];
@@ -44,6 +58,16 @@ static const int REFERENCE_HEIGHT = 720;
 #endif
     
     return self;
+}
+
+- (void)mouseRightClick {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+        Log(LOG_D, @"Sending right mouse button press");
+        LiSendMouseButtonEvent(BUTTON_ACTION_PRESS, BUTTON_RIGHT);
+        // Wait 100 ms to simulate a real button press
+        usleep(100 * 1000);
+        LiSendMouseButtonEvent(BUTTON_ACTION_RELEASE, BUTTON_RIGHT);
+    });
 }
 
 - (BOOL)isConfirmedMove:(CGPoint)currentPoint from:(CGPoint)originalPoint {
@@ -102,12 +126,13 @@ static const int REFERENCE_HEIGHT = 720;
                 }
             }
         }
-    } else if ([[event allTouches] count] == 2) {
+    } else if ([[event allTouches] count] == 2) { // mouse wheel scroll & right button click are both triggered by 2 finger gesture, some times cause competing (right click fails & scroll view jumps around).
+        //I'll deal with this in coming code.
         CGPoint firstLocation = [[[[event allTouches] allObjects] objectAtIndex:0] locationInView:view];
         CGPoint secondLocation = [[[[event allTouches] allObjects] objectAtIndex:1] locationInView:view];
         
         CGPoint avgLocation = CGPointMake((firstLocation.x + secondLocation.x) / 2, (firstLocation.y + secondLocation.y) / 2);
-        if (touchLocation.y != avgLocation.y) {
+        if ((CACurrentMediaTime() - rightClickTapRecognizer.gestureCapturedTime > RIGHTCLICK_TAP_DOWN_TIME_THRESHOLD_S) && touchLocation.y != avgLocation.y) { //prevent sending scrollevent while right click gesture is being recognized. The time threshold is only 100ms, resulting in a barely noticeable delay before the scroll event is activated.
             LiSendHighResScrollEvent((avgLocation.y - touchLocation.y) * 10);
         }
 
@@ -128,7 +153,7 @@ static const int REFERENCE_HEIGHT = 720;
         isDragging = false;
         LiSendMouseButtonEvent(BUTTON_ACTION_RELEASE, BUTTON_LEFT);
     } else if (!touchMoved) {
-        if (peakTouchCount == 2) {
+        /*if (peakTouchCount == 2) {
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
                 Log(LOG_D, @"Sending right mouse button press");
                 
@@ -139,7 +164,7 @@ static const int REFERENCE_HEIGHT = 720;
                 
                 LiSendMouseButtonEvent(BUTTON_ACTION_RELEASE, BUTTON_RIGHT);
             });
-        } else if (peakTouchCount == 1) {
+        } else */if (peakTouchCount == 1) {
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
                 if (!self->isDragging){
                     Log(LOG_D, @"Sending left mouse button press");

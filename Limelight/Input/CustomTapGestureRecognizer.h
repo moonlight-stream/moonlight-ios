@@ -11,12 +11,16 @@
 
 
 
-@interface CustomTapGestureRecognizer : UIGestureRecognizer
+@interface CustomTapGestureRecognizer : UIGestureRecognizer{
+    CGFloat lowestTouchPointYCoord;
+}
+
 
 @property (nonatomic, assign) uint8_t numberOfTouchesRequired;
-@property (nonatomic, assign) double tapDownTimeThreshold;
-@property (atomic, readonly) CGFloat lowestTouchPointHeight;
-
+@property (nonatomic, assign) double tapDownTimeThreshold; // tap down threshold in seconds.
+@property (nonatomic, readonly) CGFloat lowestTouchPointHeight;
+@property (nonatomic, readonly) bool gestureCaptured;
+@property (nonatomic, readonly) NSTimeInterval gestureCapturedTime;
 
 @end
 #endif /* CustomTapGestureRecognizer_h */
