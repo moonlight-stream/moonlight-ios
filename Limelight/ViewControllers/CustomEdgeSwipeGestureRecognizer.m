@@ -39,14 +39,12 @@ static CGFloat EDGE_TOLERANCE_POINTS = 50.0f;
         
         if(self.edges & UIRectEdgeLeft){
             if(_startPointX < EDGE_TOLERANCE_POINTS && normalizedGestureDistance > _normalizedThresholdDistance){
-                self.state = UIGestureRecognizerStateBegan;
                 self.state = UIGestureRecognizerStateEnded;
             }
             // NSLog(@"_startPointX  %f , normalizedGestureDeltaX %f", _startPointX,  normalizedGestureDistance);
         }
         if(self.edges & UIRectEdgeRight){
             if((_startPointX > (screenWidthInPoints - EDGE_TOLERANCE_POINTS)) && normalizedGestureDistance > _normalizedThresholdDistance){
-                self.state = UIGestureRecognizerStateBegan;
                 self.state = UIGestureRecognizerStateEnded;
             }
            // NSLog(@"_startPointX  %f , normalizedGestureDeltaX %f", _startPointX,  normalizedGestureDistance);
