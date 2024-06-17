@@ -10,6 +10,8 @@
 #import <UIKit/UIGestureRecognizerSubclass.h>
 #import "CustomTapGestureRecognizer.h"
 
+// The most accurate & reliable tap gesture recognizer of iOS with almost 100% recoginition rate, instances of different numberOfTouchesRequired barely compete with each other. UITapGestureRecognizer of Apple API is just intractable.
+// Known issue: not reliable in absolute touch mode, since it competes with 2 finger zoom-in & out gestures from original moonlight
 @implementation CustomTapGestureRecognizer
 
 static CGFloat screenHeightInPoints;
@@ -40,20 +42,16 @@ static CGFloat screenHeightInPoints;
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     // [super touchesEnded:touches withEvent:event];
-    if(_gestureCaptured && [[event allTouches] count] == [touches count]){
+    if ([[event allTouches] count] > _numberOfTouchesRequired) {
         _gestureCaptured = false;
+        self.state = UIGestureRecognizerStateFailed;
+    } else if(_gestureCaptured && [[event allTouches] count] == [touches count]){
+        _gestureCaptured = false; //reset for next recognition
         if((CACurrentMediaTime() - _gestureCapturedTime) < _tapDownTimeThreshold){
             lowestTouchPointYCoord = 0.0; //reset for next recognition
             self.state = UIGestureRecognizerStateRecognized;
         }
     }
 }
-
-/*
-+ (CGFloat)lowestTouchPointHeight{
-    @synchronized (self){
-        return self.lowestTouchPointHeight;
-    }
-}*/
 
 @end
