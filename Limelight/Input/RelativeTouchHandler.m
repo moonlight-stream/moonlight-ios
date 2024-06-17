@@ -10,7 +10,7 @@
 #import "CustomTapGestureRecognizer.h"
 
 #include <Limelight.h>
-#define RIGHTCLICK_TAP_DOWN_TIME_THRESHOLD_S 0.1
+#define RIGHTCLICK_TAP_DOWN_TIME_THRESHOLD_S 0.2
 
 
 static const int REFERENCE_WIDTH = 1280;
