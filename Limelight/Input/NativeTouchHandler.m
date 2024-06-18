@@ -19,7 +19,7 @@
 @implementation NativeTouchHandler {
     StreamView* streamView;
     TemporarySettings* currentSettings;
-    BOOL activateCoordSelector;
+    bool activateCoordSelector;
 }
 
 

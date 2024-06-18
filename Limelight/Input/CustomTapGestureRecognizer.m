@@ -11,9 +11,12 @@
 #import "CustomTapGestureRecognizer.h"
 
 // The most accurate & reliable tap gesture recognizer of iOS:
-// - almost 100% recoginition rate. UITapGestureRecognizer of Apple API is just intractable.
-// - instances of different numberOfTouchesRequired barely compete with each other, even when immediateTriggering is set to false.
-// - set property immediateTriggering = true, ensures no competition with gestures of less fingers in non-native touch mode.
+// - Almost 100% recoginition rate. UITapGestureRecognizer of Apple API fails frequently, just intractable.
+// - When immediateTriggering is set to false (for native multi-touch):
+//   Gesture signal will be triggered on touchesEnded stage, multi finger touch operations will not be interrupted by the arising keyboard.
+//   Instances of different [numberOfTouchesRequired] barely compete with each other, for example, the chance of 3-finger gesture get triggered by 4 or 5 finger tap is very small.
+// - Set property immediateTriggering to true, to ensure the priority of keyboard toggle in non-native touch mode, in compete with 2-finger gestures.
+// - This recognizer also provides properties like gestureCapturedTime, to be accessed outside the class for useful purpose.
 
 @implementation CustomTapGestureRecognizer
 

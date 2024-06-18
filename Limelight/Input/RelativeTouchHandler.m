@@ -10,7 +10,7 @@
 #import "CustomTapGestureRecognizer.h"
 
 #include <Limelight.h>
-#define RIGHTCLICK_TAP_DOWN_TIME_THRESHOLD_S 0.2
+#define RIGHTCLICK_TAP_DOWN_TIME_THRESHOLD_S 0.15
 
 
 static const int REFERENCE_WIDTH = 1280;
@@ -132,7 +132,7 @@ static const int REFERENCE_HEIGHT = 720;
         CGPoint secondLocation = [[[[event allTouches] allObjects] objectAtIndex:1] locationInView:view];
         
         CGPoint avgLocation = CGPointMake((firstLocation.x + secondLocation.x) / 2, (firstLocation.y + secondLocation.y) / 2);
-        if ((CACurrentMediaTime() - rightClickTapRecognizer.gestureCapturedTime > RIGHTCLICK_TAP_DOWN_TIME_THRESHOLD_S) && touchLocation.y != avgLocation.y) { //prevent sending scrollevent while right click gesture is being recognized. The time threshold is only 100ms, resulting in a barely noticeable delay before the scroll event is activated.
+        if ((CACurrentMediaTime() - rightClickTapRecognizer.gestureCapturedTime > RIGHTCLICK_TAP_DOWN_TIME_THRESHOLD_S) && touchLocation.y != avgLocation.y) { //prevent sending scrollevent while right click gesture is being recognized. The time threshold is only 150ms, resulting in a barely noticeable delay before the scroll event is activated.
             LiSendHighResScrollEvent((avgLocation.y - touchLocation.y) * 10);
         }
 

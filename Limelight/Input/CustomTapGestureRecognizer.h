@@ -10,14 +10,13 @@
 #define CustomTapGestureRecognizer_h
 
 
-
 @interface CustomTapGestureRecognizer : UIGestureRecognizer{
     CGFloat lowestTouchPointYCoord;
 }
 
 
 @property (nonatomic, assign) uint8_t numberOfTouchesRequired;
-@property (nonatomic, assign) bool immediateTriggering; // trigger the signal on touchesBegan stage if enabled.
+@property (nonatomic, assign) bool immediateTriggering; // if enabled,  trigger the signal on touchesBegan stage.
 @property (nonatomic, assign) double tapDownTimeThreshold; // tap down threshold in seconds.
 @property (nonatomic, readonly) CGFloat lowestTouchPointHeight;
 @property (nonatomic, readonly) bool gestureCaptured;
