@@ -89,7 +89,6 @@
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     for (UITouch* touch in touches){
         [self populatePointerId:touch]; //generate & populate pointerId
-        if([activePointerIds count] > 10) return; //limit touches upto 10, since win11 support 10 touches.
         if(activateCoordSelector) [NativeTouchPointer populatePointerObjIntoDict:touch];
         [self sendTouchEvent:touch withTouchtype:LI_TOUCH_EVENT_DOWN];
     }
