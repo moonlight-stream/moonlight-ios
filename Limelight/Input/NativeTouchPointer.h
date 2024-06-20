@@ -12,10 +12,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface NativeTouchPointer : NSObject
 
-+ (void)initContextWith:(StreamView *)view;
-+ (void)populatePointerId:(UITouch*)touch;
-+ (void)removePointerId:(UITouch*)touch;
-+ (uint32_t) retrievePointerIdFromDict:(UITouch*)touch;
++ (void)initContextWithView:(StreamView *)view;
+
 + (void)setPointerVelocityDivider:(CGFloat)dividerLocation;
 + (void)setPointerVelocityFactor:(CGFloat)velocityFactor;
 + (void)populatePointerObjIntoDict:(UITouch*)touch;
@@ -24,7 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (CGPoint)selectCoordsFor:(UITouch *)touch;
 
 
-- (instancetype)initWith:(UITouch *)touch;
+- (instancetype)initWithTouch:(UITouch *)touch;
 @end
 
 

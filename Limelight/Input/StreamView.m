@@ -98,7 +98,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     
     switch (settings.touchMode.intValue) {
         case NATIVE_TOUCH_MODE:
-            self->touchHandler = [[NativeTouchHandler alloc] initWith:self and:settings];break;
+            self->touchHandler = [[NativeTouchHandler alloc] initWithView:self andSettings:settings];break;
         case RELATIVE_TOUCH_MODE:
             self->touchHandler = [[RelativeTouchHandler alloc] initWithView:self];
             keyboardToggleRecognizer.immediateTriggering = true; //triggers signal in touchesBegan callback stage
