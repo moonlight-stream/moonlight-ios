@@ -10,10 +10,7 @@
 #import "NativeTouchPointer.h"
 #include <Limelight.h>
 
-// native touch pointer class deals with:
-// generating pointerId randomly, pointerId Dic & set management
-// pointer instance with coordinate manipulation.
-
+// native touch pointer ojbect that stores & manipulates touch coordinates
 
 static NSMutableDictionary *pointerObjDict;
 
