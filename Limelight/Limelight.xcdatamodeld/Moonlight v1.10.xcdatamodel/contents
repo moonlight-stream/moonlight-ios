@@ -30,6 +30,7 @@
         <attribute name="height" attributeType="Integer 32" defaultValueString="720" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="keyboardToggleFingers" optional="YES" attributeType="Integer 16" defaultValueString="3" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="liftStreamViewForKeyboard" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="mousePointerVelocityFactor" optional="YES" attributeType="Float" defaultValueString="1" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="multiController" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="onscreenControls" attributeType="Integer 32" defaultValueString="1" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="optimizeGames" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES" syncable="YES"/>

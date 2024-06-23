@@ -8,6 +8,7 @@
 
 #import "RelativeTouchHandler.h"
 #import "CustomTapGestureRecognizer.h"
+#import "DataManager.h"
 
 #include <Limelight.h>
 #define RIGHTCLICK_TAP_DOWN_TIME_THRESHOLD_S 0.15
@@ -17,6 +18,7 @@ static const int REFERENCE_WIDTH = 1280;
 static const int REFERENCE_HEIGHT = 720;
 
 @implementation RelativeTouchHandler {
+    TemporarySettings* currentSettings;
     CGPoint touchLocation, originalLocation;
     BOOL touchMoved;
     BOOL isDragging;
@@ -32,10 +34,10 @@ static const int REFERENCE_HEIGHT = 720;
     UIView* view;
 }
 
-- (id)initWithView:(StreamView*)view {
+- (id)initWithView:(StreamView*)view andSettings:(TemporarySettings*)settings {
     self = [self init];
     self->view = view;
-    
+    self->currentSettings = settings;
     // replace righclick recoginizing with my CustomTapGestureRecognizer for better experience, higher recoginizing rate.
     rightClickTapRecognizer = [[CustomTapGestureRecognizer alloc] initWithTarget:self action:@selector(mouseRightClick)];
     rightClickTapRecognizer.numberOfTouchesRequired = 2;
@@ -112,8 +114,8 @@ static const int REFERENCE_HEIGHT = 720;
         if (touchLocation.x != currentLocation.x ||
             touchLocation.y != currentLocation.y)
         {
-            int deltaX = (currentLocation.x - touchLocation.x) * (REFERENCE_WIDTH / view.bounds.size.width);
-            int deltaY = (currentLocation.y - touchLocation.y) * (REFERENCE_HEIGHT / view.bounds.size.height);
+            int deltaX = (currentLocation.x - touchLocation.x) * (REFERENCE_WIDTH / view.bounds.size.width) * currentSettings.mousePointerVelocityFactor.floatValue;
+            int deltaY = (currentLocation.y - touchLocation.y) * (REFERENCE_HEIGHT / view.bounds.size.height) * currentSettings.mousePointerVelocityFactor.floatValue;
             
             if (deltaX != 0 || deltaY != 0) {
                 LiSendMouseMoveEvent(deltaX, deltaY);

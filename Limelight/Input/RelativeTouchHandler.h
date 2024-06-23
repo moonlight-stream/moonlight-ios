@@ -7,12 +7,13 @@
 //
 
 #import "StreamView.h"
+#import "DataManager.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface RelativeTouchHandler : UIResponder
 
--(id)initWithView:(StreamView*)view;
+- (id)initWithView:(StreamView*)view andSettings:(TemporarySettings*)settings;
 
 @end
 

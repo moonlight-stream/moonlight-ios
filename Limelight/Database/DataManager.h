@@ -24,6 +24,7 @@
              swipeToExitDistance:(CGFloat)swipeToExitDistance
       pointerVelocityModeDivider:(CGFloat)pointerVelocityModeDivider
       touchPointerVelocityFactor:(CGFloat)touchPointerVelocityFactor
+      mousePointerVelocityFactor:(CGFloat)mousePointerVelocityFactor
        liftStreamViewForKeyboard:(BOOL)liftStreamViewForKeyboard
              showKeyboardToolbar:(BOOL)showKeyboardToolbar
                    optimizeGames:(BOOL)optimizeGames

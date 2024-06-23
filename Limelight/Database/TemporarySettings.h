@@ -26,6 +26,7 @@
 @property (nonatomic, retain) NSNumber * swipeExitScreenEdge;
 @property (nonatomic, retain) NSNumber * swipeToExitDistance;
 @property (nonatomic, retain) NSNumber * touchPointerVelocityFactor;
+@property (nonatomic, retain) NSNumber * mousePointerVelocityFactor;
 @property (nonatomic, retain) NSNumber * pointerVelocityModeDivider;
 @property (nonatomic, retain) NSString * uniqueId;
 @property (nonatomic) enum {

@@ -63,6 +63,7 @@
              swipeToExitDistance:(CGFloat)swipeToExitDistance
       pointerVelocityModeDivider:(CGFloat)pointerVelocityModeDivider
       touchPointerVelocityFactor:(CGFloat)touchPointerVelocityFactor
+      mousePointerVelocityFactor:(CGFloat)mousePointerVelocityFactor
        liftStreamViewForKeyboard:(BOOL)liftStreamViewForKeyboard
              showKeyboardToolbar:(BOOL)showKeyboardToolbar
                    optimizeGames:(BOOL)optimizeGames
@@ -90,6 +91,7 @@
         settingsToSave.swipeToExitDistance = [NSNumber numberWithFloat:swipeToExitDistance];
         settingsToSave.pointerVelocityModeDivider = [NSNumber numberWithFloat:pointerVelocityModeDivider];
         settingsToSave.touchPointerVelocityFactor = [NSNumber numberWithFloat:touchPointerVelocityFactor];
+        settingsToSave.mousePointerVelocityFactor = [NSNumber numberWithFloat:mousePointerVelocityFactor];
         settingsToSave.liftStreamViewForKeyboard = liftStreamViewForKeyboard;
         settingsToSave.showKeyboardToolbar = showKeyboardToolbar;
         settingsToSave.optimizeGames = optimizeGames;

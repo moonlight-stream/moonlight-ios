@@ -38,6 +38,8 @@
 @property (strong, nonatomic) IBOutlet UILabel *pointerVelocityModeDividerUILabel;
 @property (strong, nonatomic) IBOutlet UISlider *touchPointerVelocityFactorSlider;
 @property (strong, nonatomic) IBOutlet UILabel *touchPointerVelocityFactorUILabel;
+@property (strong, nonatomic) IBOutlet UISlider *mousePointerVelocityFactorSlider;
+@property (strong, nonatomic) IBOutlet UILabel *mousePointerVelocityFactorUILabel;
 
 
 

@@ -305,9 +305,16 @@ BOOL isCustomResolution(CGSize res) {
     [self.pointerVelocityModeDividerSlider setEnabled: currentSettings.touchMode.intValue == NATIVE_TOUCH_MODE]; // pointer velocity scaling works only in native touch mode.
 
     [self.touchPointerVelocityFactorSlider setValue:currentSettings.touchPointerVelocityFactor.floatValue * 100 animated:YES]; // Load old setting.
-    [self.touchPointerVelocityFactorUILabel setText:[NSString stringWithFormat:@"Touch Pointer Velocity Factor: %d%%", (uint16_t)self.touchPointerVelocityFactorSlider.value]]; // Initiate label display
+    [self.touchPointerVelocityFactorUILabel setText:[NSString stringWithFormat:@"Touch Pointer Velocity: %d%%", (uint16_t)self.touchPointerVelocityFactorSlider.value]]; // Initiate label display
     [self.touchPointerVelocityFactorSlider addTarget:self action:@selector(touchPointerVelocityFactorSliderMoved) forControlEvents:(UIControlEventValueChanged)]; // Update label display when slider is being moved.
     [self.touchPointerVelocityFactorSlider setEnabled: currentSettings.touchMode.intValue == NATIVE_TOUCH_MODE]; // pointer velocity scaling works only in native touch mode.
+    
+    [self.mousePointerVelocityFactorSlider setValue:currentSettings.mousePointerVelocityFactor.floatValue * 100 animated:YES]; // Load old setting.
+    [self.mousePointerVelocityFactorUILabel setText:[NSString stringWithFormat:@"Mouse Pointer Velocity: %d%%", (uint16_t)self.mousePointerVelocityFactorSlider.value]]; // Initiate label display
+    [self.mousePointerVelocityFactorSlider addTarget:self action:@selector(mousePointerVelocityFactorSliderMoved) forControlEvents:(UIControlEventValueChanged)]; // Update label display when slider is being moved.
+    [self.mousePointerVelocityFactorSlider setEnabled: currentSettings.touchMode.intValue == RELATIVE_TOUCH_MODE]; // mouse velocity scaling works only in relative touch mode.
+
+    
 }
 
 - (void) pointerVelocityModeDividerSliderMoved {
@@ -315,7 +322,11 @@ BOOL isCustomResolution(CGSize res) {
 }
 
 - (void) touchPointerVelocityFactorSliderMoved {
-    [self.touchPointerVelocityFactorUILabel setText:[NSString stringWithFormat:@"Touch Pointer Velocity Factor: %d%%", (uint16_t)self.touchPointerVelocityFactorSlider.value]]; // Initiate label display
+    [self.touchPointerVelocityFactorUILabel setText:[NSString stringWithFormat:@"Touch Pointer Velocity: %d%%", (uint16_t)self.touchPointerVelocityFactorSlider.value]]; // Update label display
+}
+
+- (void) mousePointerVelocityFactorSliderMoved {
+    [self.mousePointerVelocityFactorUILabel setText:[NSString stringWithFormat:@"Mouse Pointer Velocity: %d%%", (uint16_t)self.mousePointerVelocityFactorSlider.value]]; // Update label display
 }
 
 - (uint32_t) getScreenEdgeFromSelector {
@@ -343,6 +354,7 @@ BOOL isCustomResolution(CGSize res) {
     [self.onscreenControlSelector setEnabled:[self.touchModeSelector selectedSegmentIndex] == RELATIVE_TOUCH_MODE];
     [self.pointerVelocityModeDividerSlider setEnabled:[self.touchModeSelector selectedSegmentIndex] == NATIVE_TOUCH_MODE]; // pointer velocity scaling works only in native touch mode.
     [self.touchPointerVelocityFactorSlider setEnabled:[self.touchModeSelector selectedSegmentIndex] == NATIVE_TOUCH_MODE]; // pointer velocity scaling works only in native touch mode.
+    [self.mousePointerVelocityFactorSlider setEnabled:[self.touchModeSelector selectedSegmentIndex] == RELATIVE_TOUCH_MODE]; // mouse velocity scaling works only in relative touch mode.
 }
 
 - (void) updateBitrate {
@@ -618,6 +630,7 @@ BOOL isCustomResolution(CGSize res) {
     uint32_t swipeExitScreenEdge = [self getScreenEdgeFromSelector];
     CGFloat pointerVelocityModeDivider = (CGFloat)(uint8_t)self.pointerVelocityModeDividerSlider.value/100;
     CGFloat touchPointerVelocityFactor =(CGFloat)(uint16_t)self.touchPointerVelocityFactorSlider.value/100;
+    CGFloat mousePointerVelocityFactor =(CGFloat)(uint16_t)self.mousePointerVelocityFactorSlider.value/100;
     BOOL liftStreamViewForKeyboard = [self.liftStreamViewForKeyboardSelector selectedSegmentIndex] == 1;
     BOOL showKeyboardToolbar = [self.showKeyboardToolbarSelector selectedSegmentIndex] == 1;
     BOOL optimizeGames = [self.optimizeSettingsSelector selectedSegmentIndex] == 1;
@@ -642,6 +655,7 @@ BOOL isCustomResolution(CGSize res) {
                  swipeToExitDistance:swipeToExitDistance
           pointerVelocityModeDivider:pointerVelocityModeDivider
           touchPointerVelocityFactor:touchPointerVelocityFactor
+          mousePointerVelocityFactor:mousePointerVelocityFactor
            liftStreamViewForKeyboard:liftStreamViewForKeyboard
                  showKeyboardToolbar:showKeyboardToolbar
                        optimizeGames:optimizeGames
