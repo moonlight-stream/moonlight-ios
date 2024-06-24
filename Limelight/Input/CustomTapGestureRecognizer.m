@@ -21,15 +21,18 @@
 @implementation CustomTapGestureRecognizer
 
 static CGFloat screenHeightInPoints;
+static CGFloat screenWidthInPoints;
 
 - (instancetype)initWithTarget:(nullable id)target action:(nullable SEL)action {
     self = [super initWithTarget:target action:action];
     screenHeightInPoints = CGRectGetHeight([[UIScreen mainScreen] bounds]);
+    screenWidthInPoints = CGRectGetWidth([[UIScreen mainScreen] bounds]);
     lowestTouchPointYCoord = 0.0;
     _numberOfTouchesRequired = 3;
     _immediateTriggering = false;
     _tapDownTimeThreshold = 0.3;
     _gestureCaptured = false;
+    _areVirtualControllerTaps = false;
     return self;
 }
 
@@ -41,6 +44,12 @@ static CGFloat screenHeightInPoints;
         for(UITouch *touch in [event allTouches]){
             if(lowestTouchPointYCoord < [touch locationInView:self.view].y) lowestTouchPointYCoord = [touch locationInView:self.view].y;
         }
+        
+        if(_numberOfTouchesRequired == 2){
+            NSArray *twoTouches = [[event allTouches] allObjects];
+            _areVirtualControllerTaps = fabs([twoTouches[1] locationInView:self.view].x - [twoTouches[0] locationInView:self.view].x) > screenWidthInPoints/3;
+        }
+        
         _lowestTouchPointHeight = screenHeightInPoints - lowestTouchPointYCoord;
         if(_immediateTriggering){
             lowestTouchPointYCoord = 0.0; //reset for next recoginition
@@ -61,7 +70,8 @@ static CGFloat screenHeightInPoints;
     if([[event allTouches] count] > _numberOfTouchesRequired) {
         _gestureCaptured = false;
         self.state = UIGestureRecognizerStateFailed;
-    } else if(_gestureCaptured && [[event allTouches] count] == [touches count]){
+    } 
+    else if(_gestureCaptured && [[event allTouches] count] == [touches count] && !_areVirtualControllerTaps){  //must exclude virtual controller taps here to prevent stucked button
         _gestureCaptured = false; //reset for next recognition
         if((CACurrentMediaTime() - _gestureCapturedTime) < _tapDownTimeThreshold){
             lowestTouchPointYCoord = 0.0; //reset for next recognition
