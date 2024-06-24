@@ -3,3 +3,4 @@
 **/xcschemes/*.xcscheme
 Build
 DerivedData
+*.xccheckout

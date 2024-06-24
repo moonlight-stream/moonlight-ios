@@ -11,20 +11,27 @@
 #import "DataManager.h"
 #import "ControllerSupport.h"
 #import "KeyboardSupport.h"
+#import "NativeTouchPointer.h"
+#import "NativeTouchHandler.h"
 #import "RelativeTouchHandler.h"
 #import "AbsoluteTouchHandler.h"
 #import "KeyboardInputField.h"
+#import "CustomTapGestureRecognizer.h"
+
 
 static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
 @implementation StreamView {
+    TemporarySettings* settings;
+    
     OnScreenControls* onScreenControls;
     
     KeyboardInputField* keyInputField;
     BOOL isInputingText;
     NSMutableSet* keysDown;
-    
     float streamAspectRatio;
+
+
     
     // iOS 13.4 mouse support
     NSInteger lastMouseButtonMask;
@@ -44,15 +51,18 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     BOOL hasUserInteracted;
     
     NSDictionary<NSString *, NSNumber *> *dictCodes;
+    CustomTapGestureRecognizer *keyboardToggleRecognizer;
+    CGFloat HeightViewLiftedTo;
 }
 
 - (void) setupStreamView:(ControllerSupport*)controllerSupport
      interactionDelegate:(id<UserInteractionDelegate>)interactionDelegate
                   config:(StreamConfiguration*)streamConfig {
+    
     self->interactionDelegate = interactionDelegate;
     self->streamAspectRatio = (float)streamConfig.width / (float)streamConfig.height;
     
-    TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
+    settings = [[[DataManager alloc] init] getSettings];
     
     keysDown = [[NSMutableSet alloc] init];
     keyInputField = [[KeyboardInputField alloc] initWithFrame:CGRectZero];
@@ -62,22 +72,50 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     [keyInputField setSpellCheckingType:UITextSpellCheckingTypeNo];
     [self addSubview:keyInputField];
     
+    isInputingText = false;
+    keyboardToggleRecognizer = [[CustomTapGestureRecognizer alloc] initWithTarget:self action:@selector(toggleKeyboard)];
+    keyboardToggleRecognizer.numberOfTouchesRequired = settings.keyboardToggleFingers.intValue;
+    keyboardToggleRecognizer.tapDownTimeThreshold = 0.3; // tap down time threshold in seconds.
+    keyboardToggleRecognizer.delaysTouchesBegan = NO;
+    keyboardToggleRecognizer.delaysTouchesEnded = NO;
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardWillShow:)
+                                                 name:UIKeyboardWillShowNotification
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardWillHide:)
+                                                 name:UIKeyboardWillHideNotification
+                                               object:nil];
+    [self addGestureRecognizer:keyboardToggleRecognizer];
+    
 #if TARGET_OS_TV
     // tvOS requires RelativeTouchHandler to manage Apple Remote input
     self->touchHandler = [[RelativeTouchHandler alloc] initWithView:self];
 #else
-    // iOS uses RelativeTouchHandler or AbsoluteTouchHandler depending on user preference
-    if (settings.absoluteTouchMode) {
-        self->touchHandler = [[AbsoluteTouchHandler alloc] initWithView:self];
-    }
-    else {
-        self->touchHandler = [[RelativeTouchHandler alloc] initWithView:self];
+    // iOS uses touch Mode depending on user preference
+    
+    
+    switch (settings.touchMode.intValue) {
+        case NATIVE_TOUCH_MODE:
+            self->touchHandler = [[NativeTouchHandler alloc] initWithView:self andSettings:settings];break;
+        case RELATIVE_TOUCH_MODE:
+            self->touchHandler = [[RelativeTouchHandler alloc] initWithView:self andSettings:settings];
+            keyboardToggleRecognizer.immediateTriggering = true; //triggers signal in touchesBegan callback stage
+            break;
+        case ABSOLUTE_TOUCH_MODE:
+            self->touchHandler = [[AbsoluteTouchHandler alloc] initWithView:self]; 
+            keyboardToggleRecognizer.immediateTriggering = true; //triggers signal in touchesBegan callback stage
+            break;
+            
+        default:
+            break;
     }
     
     onScreenControls = [[OnScreenControls alloc] initWithView:self controllerSup:controllerSupport streamConfig:streamConfig];
     OnScreenControlsLevel level = (OnScreenControlsLevel)[settings.onscreenControls integerValue];
-    if (settings.absoluteTouchMode) {
-        Log(LOG_I, @"On-screen controls disabled in absolute touch mode");
+    if (settings.touchMode.intValue != RELATIVE_TOUCH_MODE) {
+        Log(LOG_I, @"On-screen controls disabled in non-relative touch mode");
         [onScreenControls setLevel:OnScreenControlsLevelOff];
     }
     else if (level == OnScreenControlsLevelAuto) {
@@ -87,7 +125,6 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         Log(LOG_I, @"Setting manual on-screen controls level: %d", (int)level);
         [onScreenControls setLevel:level];
     }
-    
     // It would be nice to just use GCMouse on iOS 14+ and the older API on iOS 13
     // but unfortunately that isn't possible today. GCMouse doesn't recognize many
     // mice correctly, but UIKit does. We will register for both and ignore UIKit
@@ -127,6 +164,72 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     // This is critical to ensure keyboard events are delivered to this
     // StreamView and not our parent UIView, especially on tvOS.
     [self becomeFirstResponder];
+}
+
+// this method also deals with lifting streamview for local keyboard
+- (void)keyboardWillShow:(NSNotification *)notification{
+    if(settings.liftStreamViewForKeyboard && !isInputingText){
+        NSDictionary *userInfo = notification.userInfo;
+        // Get the keyboard size from the notification
+        CGRect keyboardFrame = [userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
+        // NSLog(@"keyboard height %f, lowest point height %f", keyboardFrame.size.height, keyboardToggleRecognizer.lowestTouchPointHeight);
+        if(keyboardFrame.size.height < CGRectGetHeight([[UIScreen mainScreen] bounds]) * 0.25) return; // return in case of abnormal keyboard height
+        HeightViewLiftedTo = keyboardFrame.size.height - keyboardToggleRecognizer.lowestTouchPointHeight + CGRectGetHeight([[UIScreen mainScreen] bounds]) * 0.1; // lift the StreamView to the height of lowest touch point of multi-finger tap gesture, while reserving the view of 1/10 screen height for remote typing.
+        if(HeightViewLiftedTo < 0) HeightViewLiftedTo = 0;  // set HeightViewLiftedTo to 0 if it is high enough and not going to be covered by keyboard.
+        CGRect liftedStreamFrame = self.frame;
+        liftedStreamFrame.origin.y -= HeightViewLiftedTo;
+        self.frame = liftedStreamFrame;
+        isInputingText = true;
+    }
+    // NSLog(@"keyboard will show");
+}
+
+// this method also deals with recovering streamview when local keyboard is turned off
+- (void)keyboardWillHide:(NSNotification *)notification{
+    
+    if(isInputingText){
+        CGRect liftedStreamFrame = self.frame;
+        // recover view position in keyboard hiding.
+        liftedStreamFrame.origin.y += HeightViewLiftedTo;
+        self.frame = liftedStreamFrame;
+        isInputingText = false;
+    }
+    // NSLog(@"keyboard will hide");
+}
+
+
+- (void)toggleKeyboard{
+    if (isInputingText) {
+        Log(LOG_D, @"Closing the keyboard");
+        [keyInputField resignFirstResponder];
+    } else {
+        Log(LOG_D, @"Opening the keyboard");
+        // Prepare the textbox used to capture keyboard events.
+        keyInputField.delegate = self;
+        keyInputField.text = @"0";
+    #if !TARGET_OS_TV
+    // Prepare the toolbar above the keyboard for more options
+        if(settings.showKeyboardToolbar){
+            UIToolbar *customToolbarView = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, 44)];
+            UIBarButtonItem *doneBarButton = [self createButtonWithImageNamed:@"DoneIcon.png" backgroundColor:[UIColor clearColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x00 isToggleable:NO];
+            UIBarButtonItem *windowsBarButton = [self createButtonWithImageNamed:@"WindowsIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x5B isToggleable:YES];
+            UIBarButtonItem *tabBarButton = [self createButtonWithImageNamed:@"TabIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x09 isToggleable:NO];
+            UIBarButtonItem *shiftBarButton = [self createButtonWithImageNamed:@"ShiftIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA0 isToggleable:YES];
+            UIBarButtonItem *escapeBarButton = [self createButtonWithImageNamed:@"EscapeIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x1B isToggleable:NO];
+            UIBarButtonItem *controlBarButton = [self createButtonWithImageNamed:@"ControlIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA2 isToggleable:YES];
+            UIBarButtonItem *altBarButton = [self createButtonWithImageNamed:@"AltIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA4 isToggleable:YES];
+            UIBarButtonItem *deleteBarButton = [self createButtonWithImageNamed:@"DeleteIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x2E isToggleable:NO];
+            UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+            
+            [customToolbarView setItems:[NSArray arrayWithObjects:doneBarButton, windowsBarButton, escapeBarButton, tabBarButton, shiftBarButton, controlBarButton, altBarButton, deleteBarButton, flexibleSpace, nil]];
+            keyInputField.inputAccessoryView = customToolbarView;
+        }
+    #endif
+        [keyInputField becomeFirstResponder];
+        [keyInputField addTarget:self action:@selector(onKeyboardPressed:) forControlEvents:UIControlEventEditingChanged];
+        // Undo causes issues for our state management, so turn it off
+        [keyInputField.undoManager disableUndoRegistration];
+    }
 }
 
 - (void)startInteractionTimer {
@@ -319,6 +422,21 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 #endif
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+#if !TARGET_OS_TV
+    if (@available(iOS 13.4, *)) {
+        if (settings.touchMode.intValue == NATIVE_TOUCH_MODE) {
+            [touchHandler touchesBegan:touches withEvent:event];
+            return; //This is a native touch oriented fork, in native touch mode, this call back method deals with native touch only.
+        }
+        else{
+            for (UITouch* touch in touches) {
+                if (touch.type == UITouchTypePencil) {
+                    if ([self sendStylusEvent:touch]) return;
+                }
+            }
+        }
+    }
+#endif
     if ([self handleMouseButtonEvent:BUTTON_ACTION_PRESS
                           forTouches:touches
                            withEvent:event]) {
@@ -331,18 +449,6 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     // Notify of user interaction and start expiration timer
     [self startInteractionTimer];
     
-#if !TARGET_OS_TV
-    if (@available(iOS 13.4, *)) {
-        for (UITouch* touch in touches) {
-            if (touch.type == UITouchTypePencil) {
-                if ([self sendStylusEvent:touch]) {
-                    return;
-                }
-            }
-        }
-    }
-#endif
-    
     if (![onScreenControls handleTouchDownEvent:touches]) {
         // We still inform the touch handler even if we're going trigger the
         // keyboard activation gesture. This is important to ensure the touch
@@ -350,43 +456,8 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         // activation of one or two finger gestures when a three finger gesture
         // is triggered.
         [touchHandler touchesBegan:touches withEvent:event];
-        
-        if ([[event allTouches] count] == 3) {
-            if (isInputingText) {
-                Log(LOG_D, @"Closing the keyboard");
-                [keyInputField resignFirstResponder];
-                isInputingText = false;
-            } else {
-                Log(LOG_D, @"Opening the keyboard");
-                // Prepare the textbox used to capture keyboard events.
-                keyInputField.delegate = self;
-                keyInputField.text = @"0";
-#if !TARGET_OS_TV
-                // Prepare the toolbar above the keyboard for more options
-                UIToolbar *customToolbarView = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, 44)];
-                
-                UIBarButtonItem *doneBarButton = [self createButtonWithImageNamed:@"DoneIcon.png" backgroundColor:[UIColor clearColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x00 isToggleable:NO];
-                UIBarButtonItem *windowsBarButton = [self createButtonWithImageNamed:@"WindowsIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x5B isToggleable:YES];
-                UIBarButtonItem *tabBarButton = [self createButtonWithImageNamed:@"TabIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x09 isToggleable:NO];
-                UIBarButtonItem *shiftBarButton = [self createButtonWithImageNamed:@"ShiftIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA0 isToggleable:YES];
-                UIBarButtonItem *escapeBarButton = [self createButtonWithImageNamed:@"EscapeIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x1B isToggleable:NO];
-                UIBarButtonItem *controlBarButton = [self createButtonWithImageNamed:@"ControlIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA2 isToggleable:YES];
-                UIBarButtonItem *altBarButton = [self createButtonWithImageNamed:@"AltIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA4 isToggleable:YES];
-                UIBarButtonItem *deleteBarButton = [self createButtonWithImageNamed:@"DeleteIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x2E isToggleable:NO];
-                UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
-                
-                [customToolbarView setItems:[NSArray arrayWithObjects:doneBarButton, windowsBarButton, escapeBarButton, tabBarButton, shiftBarButton, controlBarButton, altBarButton, deleteBarButton, flexibleSpace, nil]];
-                keyInputField.inputAccessoryView = customToolbarView;
-#endif
-                [keyInputField becomeFirstResponder];
-                [keyInputField addTarget:self action:@selector(onKeyboardPressed:) forControlEvents:UIControlEventEditingChanged];
-                
-                // Undo causes issues for our state management, so turn it off
-                [keyInputField.undoManager disableUndoRegistration];
-                
-                isInputingText = true;
-            }
-        }
+        // I refactored keyboard toggle by the CustomTapGestureRecognizer
+        // if ([[event allTouches] count] == keyboardToggleFingers) [self toggleKeyboard];
     }
 }
 
@@ -511,14 +582,17 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
 #if !TARGET_OS_TV
     if (@available(iOS 13.4, *)) {
-        for (UITouch* touch in touches) {
-            if (touch.type == UITouchTypePencil) {
-                if ([self sendStylusEvent:touch]) {
-                    return;
+        if (settings.touchMode.intValue == NATIVE_TOUCH_MODE) {
+            [touchHandler touchesMoved:touches withEvent:event];
+            return; //This is a native touch oriented fork, in native touch mode, this call back method deals with native touch only.
+        }
+        else{
+            for (UITouch* touch in touches) {
+                if (touch.type == UITouchTypePencil) {
+                    if ([self sendStylusEvent:touch]) return;
                 }
             }
         }
-        
         UITouch *touch = [touches anyObject];
         if (touch.type == UITouchTypeIndirectPointer) {
             if (@available(iOS 14.0, *)) {
@@ -586,6 +660,21 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+#if !TARGET_OS_TV
+    if (@available(iOS 13.4, *)) {
+        if (settings.touchMode.intValue == NATIVE_TOUCH_MODE) {
+            [touchHandler touchesEnded:touches withEvent:event];
+            return; //This is a native touch oriented fork, in native touch mode, this call back method deals with native touch only.
+        }
+        else{
+            for (UITouch* touch in touches) {
+                if (touch.type == UITouchTypePencil) {
+                    if ([self sendStylusEvent:touch]) return;
+                }
+            }
+        }
+    }
+#endif
     if ([self handleMouseButtonEvent:BUTTON_ACTION_RELEASE
                           forTouches:touches
                            withEvent:event]) {
@@ -597,18 +686,6 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     
     hasUserInteracted = YES;
     
-#if !TARGET_OS_TV
-    if (@available(iOS 13.4, *)) {
-        for (UITouch* touch in touches) {
-            if (touch.type == UITouchTypePencil) {
-                if ([self sendStylusEvent:touch]) {
-                    return;
-                }
-            }
-        }
-    }
-#endif
-    
     if (![onScreenControls handleTouchUpEvent:touches]) {
         [touchHandler touchesEnded:touches withEvent:event];
     }
@@ -616,18 +693,21 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
     [touchHandler touchesCancelled:touches withEvent:event];
-    [self handleMouseButtonEvent:BUTTON_ACTION_RELEASE
-                      forTouches:touches
-                       withEvent:event];
 #if !TARGET_OS_TV
     if (@available(iOS 13.4, *)) {
-        for (UITouch* touch in touches) {
-            if (touch.type == UITouchTypePencil) {
-                [self sendStylusEvent:touch];
+        if (settings.touchMode.intValue == NATIVE_TOUCH_MODE) return; //This is a native touch oriented fork, in native touch mode, this call back method deals with native touch only.
+        else{
+            for (UITouch* touch in touches) {
+                if (touch.type == UITouchTypePencil) {
+                    if ([self sendStylusEvent:touch]) return;
+                }
             }
         }
     }
 #endif
+    [self handleMouseButtonEvent:BUTTON_ACTION_RELEASE
+                      forTouches:touches
+                       withEvent:event];
 }
 
 #if !TARGET_OS_TV

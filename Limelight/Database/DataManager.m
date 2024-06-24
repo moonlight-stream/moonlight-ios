@@ -58,6 +58,14 @@
                            width:(NSInteger)width
                      audioConfig:(NSInteger)audioConfig
                 onscreenControls:(NSInteger)onscreenControls
+           keyboardToggleFingers:(NSInteger)keyboardToggleFingers
+             swipeExitScreenEdge:(NSInteger)swipeExitScreenEdge
+             swipeToExitDistance:(CGFloat)swipeToExitDistance
+      pointerVelocityModeDivider:(CGFloat)pointerVelocityModeDivider
+      touchPointerVelocityFactor:(CGFloat)touchPointerVelocityFactor
+      mousePointerVelocityFactor:(CGFloat)mousePointerVelocityFactor
+       liftStreamViewForKeyboard:(BOOL)liftStreamViewForKeyboard
+             showKeyboardToolbar:(BOOL)showKeyboardToolbar
                    optimizeGames:(BOOL)optimizeGames
                  multiController:(BOOL)multiController
                  swapABXYButtons:(BOOL)swapABXYButtons
@@ -66,7 +74,8 @@
                   useFramePacing:(BOOL)useFramePacing
                        enableHdr:(BOOL)enableHdr
                   btMouseSupport:(BOOL)btMouseSupport
-               absoluteTouchMode:(BOOL)absoluteTouchMode
+               // absoluteTouchMode:(BOOL)absoluteTouchMode
+                       touchMode:(NSInteger)touchMode
                     statsOverlay:(BOOL)statsOverlay {
     
     [_managedObjectContext performBlockAndWait:^{
@@ -77,6 +86,14 @@
         settingsToSave.width = [NSNumber numberWithInteger:width];
         settingsToSave.audioConfig = [NSNumber numberWithInteger:audioConfig];
         settingsToSave.onscreenControls = [NSNumber numberWithInteger:onscreenControls];
+        settingsToSave.keyboardToggleFingers = [NSNumber numberWithInteger:(uint16_t)keyboardToggleFingers];
+        settingsToSave.swipeExitScreenEdge = [NSNumber numberWithInteger:(uint32_t)swipeExitScreenEdge];
+        settingsToSave.swipeToExitDistance = [NSNumber numberWithFloat:swipeToExitDistance];
+        settingsToSave.pointerVelocityModeDivider = [NSNumber numberWithFloat:pointerVelocityModeDivider];
+        settingsToSave.touchPointerVelocityFactor = [NSNumber numberWithFloat:touchPointerVelocityFactor];
+        settingsToSave.mousePointerVelocityFactor = [NSNumber numberWithFloat:mousePointerVelocityFactor];
+        settingsToSave.liftStreamViewForKeyboard = liftStreamViewForKeyboard;
+        settingsToSave.showKeyboardToolbar = showKeyboardToolbar;
         settingsToSave.optimizeGames = optimizeGames;
         settingsToSave.multiController = multiController;
         settingsToSave.swapABXYButtons = swapABXYButtons;
@@ -85,7 +102,8 @@
         settingsToSave.useFramePacing = useFramePacing;
         settingsToSave.enableHdr = enableHdr;
         settingsToSave.btMouseSupport = btMouseSupport;
-        settingsToSave.absoluteTouchMode = absoluteTouchMode;
+        // settingsToSave.absoluteTouchMode = absoluteTouchMode;
+        settingsToSave.touchMode = [NSNumber numberWithInteger:(uint16_t)touchMode];
         settingsToSave.statsOverlay = statsOverlay;
         
         [self saveData];

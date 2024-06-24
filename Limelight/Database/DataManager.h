@@ -17,8 +17,16 @@
                        framerate:(NSInteger)framerate
                           height:(NSInteger)height
                            width:(NSInteger)width
-                audioConfig:(NSInteger)audioConfig
+                     audioConfig:(NSInteger)audioConfig
                 onscreenControls:(NSInteger)onscreenControls
+            keyboardToggleFingers:(NSInteger)keyboardToggleFingers
+             swipeExitScreenEdge:(NSInteger)swipeExitScreenEdge
+             swipeToExitDistance:(CGFloat)swipeToExitDistance
+      pointerVelocityModeDivider:(CGFloat)pointerVelocityModeDivider
+      touchPointerVelocityFactor:(CGFloat)touchPointerVelocityFactor
+      mousePointerVelocityFactor:(CGFloat)mousePointerVelocityFactor
+       liftStreamViewForKeyboard:(BOOL)liftStreamViewForKeyboard
+             showKeyboardToolbar:(BOOL)showKeyboardToolbar
                    optimizeGames:(BOOL)optimizeGames
                  multiController:(BOOL)multiController
                  swapABXYButtons:(BOOL)swapABXYButtons
@@ -27,7 +35,8 @@
                   useFramePacing:(BOOL)useFramePacing
                        enableHdr:(BOOL)enableHdr
                   btMouseSupport:(BOOL)btMouseSupport
-               absoluteTouchMode:(BOOL)absoluteTouchMode
+               // absoluteTouchMode:(BOOL)absoluteTouchMode
+                       touchMode:(NSInteger)touchMode
                     statsOverlay:(BOOL)statsOverlay;
 
 - (NSArray*) getHosts;

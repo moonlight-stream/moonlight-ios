@@ -28,6 +28,10 @@
      interactionDelegate:(id<UserInteractionDelegate>)interactionDelegate
                   config:(StreamConfiguration*)streamConfig;
 - (void) showOnScreenControls;
+- (CGSize) getVideoAreaSize;
+- (CGPoint) adjustCoordinatesForVideoArea:(CGPoint)point;
+- (uint16_t)getRotationFromAzimuthAngle:(float)azimuthAngle;
+
 - (OnScreenControlsLevel) getCurrentOscState;
 
 #if !TARGET_OS_TV

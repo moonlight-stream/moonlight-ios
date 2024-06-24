@@ -10,6 +10,7 @@
 #import "TemporarySettings.h"
 #import "DataManager.h"
 
+#import <UIKit/UIGestureRecognizerSubclass.h>
 #import <VideoToolbox/VideoToolbox.h>
 #import <AVFoundation/AVFoundation.h>
 
@@ -46,8 +47,30 @@ static const int bitrateTable[] = {
     70000,
     80000,
     100000,
+    110000,
     120000,
+    130000,
+    140000,
     150000,
+    160000,
+    170000,
+    180000,
+    200000,
+    220000,
+    240000,
+    260000,
+    280000,
+    300000,
+    320000,
+    340000,
+    360000,
+    380000,
+    400000,
+    420000,
+    440000,
+    460000,
+    480000,
+    500000,
 };
 
 const int RESOLUTION_TABLE_SIZE = 7;
@@ -240,7 +263,8 @@ BOOL isCustomResolution(CGSize res) {
         [self.hdrSelector setSelectedSegmentIndex:currentSettings.enableHdr ? 1 : 0];
     }
     
-    [self.touchModeSelector setSelectedSegmentIndex:currentSettings.absoluteTouchMode ? 1 : 0];
+    // [self.touchModeSelector setSelectedSegmentIndex:currentSettings.absoluteTouchMode ? 1 : 0];
+    [self.touchModeSelector setSelectedSegmentIndex:currentSettings.touchMode.intValue]; //Load old touchMode setting
     [self.touchModeSelector addTarget:self action:@selector(touchModeChanged) forControlEvents:UIControlEventValueChanged];
     [self.statsOverlaySelector setSelectedSegmentIndex:currentSettings.statsOverlay ? 1 : 0];
     [self.btMouseSelector setSelectedSegmentIndex:currentSettings.btMouseSupport ? 1 : 0];
@@ -256,18 +280,81 @@ BOOL isCustomResolution(CGSize res) {
     [self.framerateSelector setSelectedSegmentIndex:framerate];
     [self.framerateSelector addTarget:self action:@selector(updateBitrate) forControlEvents:UIControlEventValueChanged];
     [self.onscreenControlSelector setSelectedSegmentIndex:onscreenControls];
-    [self.onscreenControlSelector setEnabled:!currentSettings.absoluteTouchMode];
+    [self.onscreenControlSelector setEnabled: currentSettings.touchMode.intValue == RELATIVE_TOUCH_MODE];//enable/disable controller UI widget for the first time.
     [self.bitrateSlider setMinimumValue:0];
     [self.bitrateSlider setMaximumValue:(sizeof(bitrateTable) / sizeof(*bitrateTable)) - 1];
     [self.bitrateSlider setValue:[self getSliderValueForBitrate:_bitrate] animated:YES];
     [self.bitrateSlider addTarget:self action:@selector(bitrateSliderMoved) forControlEvents:UIControlEventValueChanged];
     [self updateBitrateText];
     [self updateResolutionDisplayViewText];
+    
+    [self.keyboardToggleFingerNumSlider setValue:(CGFloat)currentSettings.keyboardToggleFingers.intValue animated:YES]; // Load old setting. old setting was converted to uint16_t before saving.
+    if (self.keyboardToggleFingerNumSlider.value > 10.5f) [self.keyboardToggleFingerNumLabel setText:[NSString stringWithFormat:@"Tap-Toggle Local Keyboard Disabled"]]; // Initiate label display. Allow higher required finger number to completely disable keyboard toggle
+    else [self.keyboardToggleFingerNumLabel setText:[NSString stringWithFormat:@"To Toggle Local Keyboard: Tap %d Fingers", (uint16_t)self.keyboardToggleFingerNumSlider.value]]; // Initiate label display
+    [self.keyboardToggleFingerNumSlider addTarget:self action:@selector(keyboardToggleFingerNumSliderMoved) forControlEvents:(UIControlEventValueChanged)]; // Update label display when slider is being moved.
+    [self.liftStreamViewForKeyboardSelector setSelectedSegmentIndex:currentSettings.liftStreamViewForKeyboard ? 1 : 0];// Load old setting
+    [self.showKeyboardToolbarSelector setSelectedSegmentIndex:currentSettings.showKeyboardToolbar ? 1 : 0];// Load old setting
+    [self.swipeExitScreenEdgeSelector setSelectedSegmentIndex:[self getSelectorIndexFromScreenEdge:(uint32_t)currentSettings.swipeExitScreenEdge.integerValue]]; // Load old setting
+    [self.swipeToExitDistanceSlider setValue:(CGFloat)currentSettings.swipeToExitDistance.floatValue animated:YES]; // Load old setting.
+    [self.swipeToExitDistanceUILabel setText:[NSString stringWithFormat:@"Swipe & Exit Distance: %.2f * screen-width", self.swipeToExitDistanceSlider.value]]; // Initiate label display
+    [self.swipeToExitDistanceSlider addTarget:self action:@selector(swipeToExitDistanceSliderMoved) forControlEvents:(UIControlEventValueChanged)]; // Update label display when slider is being moved.
+    
+    [self.pointerVelocityModeDividerSlider setValue:currentSettings.pointerVelocityModeDivider.floatValue * 100 animated:YES]; // Load old setting.
+    [self.pointerVelocityModeDividerUILabel setText:[NSString stringWithFormat:@"Touch Pointer Velocity: Scaled on %d%% of Right Screen", 100 - (uint8_t)self.pointerVelocityModeDividerSlider.value]]; // Initiate label display
+    [self.pointerVelocityModeDividerSlider addTarget:self action:@selector(pointerVelocityModeDividerSliderMoved) forControlEvents:(UIControlEventValueChanged)]; // Update label display when slider is being moved.
+    [self.pointerVelocityModeDividerSlider setEnabled: currentSettings.touchMode.intValue == NATIVE_TOUCH_MODE]; // pointer velocity scaling works only in native touch mode.
+
+    [self.touchPointerVelocityFactorSlider setValue:currentSettings.touchPointerVelocityFactor.floatValue * 100 animated:YES]; // Load old setting.
+    [self.touchPointerVelocityFactorUILabel setText:[NSString stringWithFormat:@"Touch Pointer Velocity: %d%%", (uint16_t)self.touchPointerVelocityFactorSlider.value]]; // Initiate label display
+    [self.touchPointerVelocityFactorSlider addTarget:self action:@selector(touchPointerVelocityFactorSliderMoved) forControlEvents:(UIControlEventValueChanged)]; // Update label display when slider is being moved.
+    [self.touchPointerVelocityFactorSlider setEnabled: currentSettings.touchMode.intValue == NATIVE_TOUCH_MODE]; // pointer velocity scaling works only in native touch mode.
+    
+    [self.mousePointerVelocityFactorSlider setValue:currentSettings.mousePointerVelocityFactor.floatValue * 100 animated:YES]; // Load old setting.
+    [self.mousePointerVelocityFactorUILabel setText:[NSString stringWithFormat:@"Mouse Pointer Velocity: %d%%", (uint16_t)self.mousePointerVelocityFactorSlider.value]]; // Initiate label display
+    [self.mousePointerVelocityFactorSlider addTarget:self action:@selector(mousePointerVelocityFactorSliderMoved) forControlEvents:(UIControlEventValueChanged)]; // Update label display when slider is being moved.
+    [self.mousePointerVelocityFactorSlider setEnabled: currentSettings.touchMode.intValue == RELATIVE_TOUCH_MODE]; // mouse velocity scaling works only in relative touch mode.
+
+    
 }
+
+- (void) pointerVelocityModeDividerSliderMoved {
+    [self.pointerVelocityModeDividerUILabel setText:[NSString stringWithFormat:@"Touch Pointer Velocity: Scaled on %d%% of Right Screen", 100 - (uint8_t)self.pointerVelocityModeDividerSlider.value]];
+}
+
+- (void) touchPointerVelocityFactorSliderMoved {
+    [self.touchPointerVelocityFactorUILabel setText:[NSString stringWithFormat:@"Touch Pointer Velocity: %d%%", (uint16_t)self.touchPointerVelocityFactorSlider.value]]; // Update label display
+}
+
+- (void) mousePointerVelocityFactorSliderMoved {
+    [self.mousePointerVelocityFactorUILabel setText:[NSString stringWithFormat:@"Mouse Pointer Velocity: %d%%", (uint16_t)self.mousePointerVelocityFactorSlider.value]]; // Update label display
+}
+
+- (uint32_t) getScreenEdgeFromSelector {
+    switch (self.swipeExitScreenEdgeSelector.selectedSegmentIndex) {
+        case 0: return UIRectEdgeLeft;
+        case 1: return UIRectEdgeRight;
+        case 2: return UIRectEdgeLeft|UIRectEdgeRight;
+        default: return UIRectEdgeLeft;
+    }
+}
+
+- (uint32_t) getSelectorIndexFromScreenEdge: (uint32_t)edge {
+    switch (edge) {
+        case UIRectEdgeLeft: return 0;
+        case UIRectEdgeRight: return 1;
+        case UIRectEdgeLeft|UIRectEdgeRight: return 2;
+        default: return 0;
+    }
+    return 0;
+}
+
 
 - (void) touchModeChanged {
     // Disable on-screen controls in absolute touch mode
-    [self.onscreenControlSelector setEnabled:[self.touchModeSelector selectedSegmentIndex] == 0];
+    [self.onscreenControlSelector setEnabled:[self.touchModeSelector selectedSegmentIndex] == RELATIVE_TOUCH_MODE];
+    [self.pointerVelocityModeDividerSlider setEnabled:[self.touchModeSelector selectedSegmentIndex] == NATIVE_TOUCH_MODE]; // pointer velocity scaling works only in native touch mode.
+    [self.touchPointerVelocityFactorSlider setEnabled:[self.touchModeSelector selectedSegmentIndex] == NATIVE_TOUCH_MODE]; // pointer velocity scaling works only in native touch mode.
+    [self.mousePointerVelocityFactorSlider setEnabled:[self.touchModeSelector selectedSegmentIndex] == RELATIVE_TOUCH_MODE]; // mouse velocity scaling works only in relative touch mode.
 }
 
 - (void) updateBitrate {
@@ -456,6 +543,15 @@ BOOL isCustomResolution(CGSize res) {
     [self.resolutionDisplayView addSubview:label2];
 }
 
+- (void) keyboardToggleFingerNumSliderMoved{
+    if (self.keyboardToggleFingerNumSlider.value > 10.5f) [self.keyboardToggleFingerNumLabel setText:[NSString stringWithFormat:@"Local Keyboard Toggle Disabled"]];
+    else [self.keyboardToggleFingerNumLabel setText:[NSString stringWithFormat:@"To Toggle Local Keyboard: Tap %d Fingers", (uint16_t)self.keyboardToggleFingerNumSlider.value]]; // Initiate label display
+}
+
+- (void) swipeToExitDistanceSliderMoved{
+    [self.swipeToExitDistanceUILabel setText:[NSString stringWithFormat:@"Swipe & Exit Distance: %.2f * screen-width", self.swipeToExitDistanceSlider.value]];
+}
+
 - (void) bitrateSliderMoved {
     assert(self.bitrateSlider.value < (sizeof(bitrateTable) / sizeof(*bitrateTable)));
     _bitrate = bitrateTable[(int)self.bitrateSlider.value];
@@ -528,6 +624,15 @@ BOOL isCustomResolution(CGSize res) {
     NSInteger height = [self getChosenStreamHeight];
     NSInteger width = [self getChosenStreamWidth];
     NSInteger onscreenControls = [self.onscreenControlSelector selectedSegmentIndex];
+    NSInteger keyboardToggleFingers = (uint16_t)self.keyboardToggleFingerNumSlider.value;
+    // NSLog(@"saveSettings keyboardToggleFingers  %d", (uint16_t)keyboardToggleFingers);
+    CGFloat swipeToExitDistance = self.swipeToExitDistanceSlider.value;
+    uint32_t swipeExitScreenEdge = [self getScreenEdgeFromSelector];
+    CGFloat pointerVelocityModeDivider = (CGFloat)(uint8_t)self.pointerVelocityModeDividerSlider.value/100;
+    CGFloat touchPointerVelocityFactor =(CGFloat)(uint16_t)self.touchPointerVelocityFactorSlider.value/100;
+    CGFloat mousePointerVelocityFactor =(CGFloat)(uint16_t)self.mousePointerVelocityFactorSlider.value/100;
+    BOOL liftStreamViewForKeyboard = [self.liftStreamViewForKeyboardSelector selectedSegmentIndex] == 1;
+    BOOL showKeyboardToolbar = [self.showKeyboardToolbarSelector selectedSegmentIndex] == 1;
     BOOL optimizeGames = [self.optimizeSettingsSelector selectedSegmentIndex] == 1;
     BOOL multiController = [self.multiControllerSelector selectedSegmentIndex] == 1;
     BOOL swapABXYButtons = [self.swapABXYButtonsSelector selectedSegmentIndex] == 1;
@@ -535,7 +640,8 @@ BOOL isCustomResolution(CGSize res) {
     uint32_t preferredCodec = [self getChosenCodecPreference];
     BOOL btMouseSupport = [self.btMouseSelector selectedSegmentIndex] == 1;
     BOOL useFramePacing = [self.framePacingSelector selectedSegmentIndex] == 1;
-    BOOL absoluteTouchMode = [self.touchModeSelector selectedSegmentIndex] == 1;
+    // BOOL absoluteTouchMode = [self.touchModeSelector selectedSegmentIndex] == 1;
+    NSInteger touchMode = [self.touchModeSelector selectedSegmentIndex];
     BOOL statsOverlay = [self.statsOverlaySelector selectedSegmentIndex] == 1;
     BOOL enableHdr = [self.hdrSelector selectedSegmentIndex] == 1;
     [dataMan saveSettingsWithBitrate:_bitrate
@@ -544,6 +650,14 @@ BOOL isCustomResolution(CGSize res) {
                                width:width
                          audioConfig:2 // Stereo
                     onscreenControls:onscreenControls
+               keyboardToggleFingers:keyboardToggleFingers
+                 swipeExitScreenEdge:swipeExitScreenEdge
+                 swipeToExitDistance:swipeToExitDistance
+          pointerVelocityModeDivider:pointerVelocityModeDivider
+          touchPointerVelocityFactor:touchPointerVelocityFactor
+          mousePointerVelocityFactor:mousePointerVelocityFactor
+           liftStreamViewForKeyboard:liftStreamViewForKeyboard
+                 showKeyboardToolbar:showKeyboardToolbar
                        optimizeGames:optimizeGames
                      multiController:multiController
                      swapABXYButtons:swapABXYButtons
@@ -552,7 +666,8 @@ BOOL isCustomResolution(CGSize res) {
                       useFramePacing:useFramePacing
                            enableHdr:enableHdr
                       btMouseSupport:btMouseSupport
-                   absoluteTouchMode:absoluteTouchMode
+                   // absoluteTouchMode:absoluteTouchMode
+                           touchMode:touchMode
                         statsOverlay:statsOverlay];
 }
 
