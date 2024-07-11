@@ -37,13 +37,13 @@
 		9896219A23D56E8100211983 /* X1Kit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9896219623D15C7000211983 /* X1Kit.swift */; };
 		9897B6A1221260EF00966419 /* Controller.m in Sources */ = {isa = PBXBuildFile; fileRef = 9897B6A0221260EF00966419 /* Controller.m */; };
 		9897B6A62212732C00966419 /* Controller.m in Sources */ = {isa = PBXBuildFile; fileRef = 9897B6A0221260EF00966419 /* Controller.m */; };
-		98A2E31129B5256200CA17A7 /* OpenSSL.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 98A2E31029B5256200CA17A7 /* OpenSSL.xcframework */; };
-		98A2E31229B5256E00CA17A7 /* OpenSSL.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 98A2E31029B5256200CA17A7 /* OpenSSL.xcframework */; };
 		98B9CE6D27B2144B00B473C4 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 98B9CE6C27B2144B00B473C4 /* AVKit.framework */; };
 		98CFB82F1CAD481B0048EF74 /* libmoonlight-common.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98AB2E841CAD46840089BB98 /* libmoonlight-common.a */; };
 		98D5856D1C0EA79600F6CC00 /* TemporaryHost.m in Sources */ = {isa = PBXBuildFile; fileRef = 98D5856C1C0EA79600F6CC00 /* TemporaryHost.m */; };
 		98D585701C0ED0E800F6CC00 /* TemporarySettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 98D5856F1C0ED0E800F6CC00 /* TemporarySettings.m */; };
 		DC1F5A07206436B20037755F /* ConnectionHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = DC1F5A06206436B20037755F /* ConnectionHelper.m */; };
+		F74BEF9C2C1A705600224667 /* OpenSSL in Frameworks */ = {isa = PBXBuildFile; productRef = F74BEF9B2C1A705600224667 /* OpenSSL */; };
+		F74BEFA42C1A80E400224667 /* OpenSSL in Frameworks */ = {isa = PBXBuildFile; productRef = F74BEFA32C1A80E400224667 /* OpenSSL */; };
 		FB1A674D2131E65900507771 /* KeyboardSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = FB1A674C2131E65900507771 /* KeyboardSupport.m */; };
 		FB1A67602132419700507771 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FB1A675E2132419700507771 /* Main.storyboard */; };
 		FB1A67622132419A00507771 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FB1A67612132419A00507771 /* Assets.xcassets */; };
@@ -206,7 +206,6 @@
 		9896219623D15C7000211983 /* X1Kit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = X1Kit.swift; path = X1Kit/Sources/X1Kit/X1Kit.swift; sourceTree = "<group>"; };
 		9897B6A0221260EF00966419 /* Controller.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Controller.m; sourceTree = "<group>"; };
 		9897B6A32212610800966419 /* Controller.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Controller.h; sourceTree = "<group>"; };
-		98A2E31029B5256200CA17A7 /* OpenSSL.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = OpenSSL.xcframework; path = libs/OpenSSL.xcframework; sourceTree = "<group>"; };
 		98AB2E7F1CAD46830089BB98 /* moonlight-common.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "moonlight-common.xcodeproj"; path = "moonlight-common/moonlight-common.xcodeproj"; sourceTree = "<group>"; };
 		98B9CE6C27B2144B00B473C4 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS15.2.sdk/System/Library/Frameworks/AVKit.framework; sourceTree = DEVELOPER_DIR; };
 		98D5856B1C0EA79600F6CC00 /* TemporaryHost.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TemporaryHost.h; path = Database/TemporaryHost.h; sourceTree = "<group>"; };
@@ -289,83 +288,6 @@
 		FB89462619F646E200339C8A /* StreamFrameViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StreamFrameViewController.h; sourceTree = "<group>"; };
 		FB89462719F646E200339C8A /* StreamFrameViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StreamFrameViewController.m; sourceTree = "<group>"; };
 		FB89463719F6473800339C8A /* Launch Screen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "Launch Screen.xib"; sourceTree = SOURCE_ROOT; };
-		FB89469419F6AFB800339C8A /* aes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = aes.h; sourceTree = "<group>"; };
-		FB89469519F6AFB800339C8A /* asn1.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = asn1.h; sourceTree = "<group>"; };
-		FB89469619F6AFB800339C8A /* asn1_mac.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = asn1_mac.h; sourceTree = "<group>"; };
-		FB89469719F6AFB800339C8A /* asn1t.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = asn1t.h; sourceTree = "<group>"; };
-		FB89469819F6AFB800339C8A /* bio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bio.h; sourceTree = "<group>"; };
-		FB89469919F6AFB800339C8A /* blowfish.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = blowfish.h; sourceTree = "<group>"; };
-		FB89469A19F6AFB800339C8A /* bn.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bn.h; sourceTree = "<group>"; };
-		FB89469B19F6AFB800339C8A /* buffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = buffer.h; sourceTree = "<group>"; };
-		FB89469C19F6AFB800339C8A /* camellia.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = camellia.h; sourceTree = "<group>"; };
-		FB89469D19F6AFB800339C8A /* cast.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cast.h; sourceTree = "<group>"; };
-		FB89469E19F6AFB800339C8A /* cmac.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cmac.h; sourceTree = "<group>"; };
-		FB89469F19F6AFB800339C8A /* cms.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cms.h; sourceTree = "<group>"; };
-		FB8946A019F6AFB800339C8A /* comp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = comp.h; sourceTree = "<group>"; };
-		FB8946A119F6AFB800339C8A /* conf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = conf.h; sourceTree = "<group>"; };
-		FB8946A219F6AFB800339C8A /* conf_api.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = conf_api.h; sourceTree = "<group>"; };
-		FB8946A319F6AFB800339C8A /* crypto.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = crypto.h; sourceTree = "<group>"; };
-		FB8946A419F6AFB800339C8A /* des.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = des.h; sourceTree = "<group>"; };
-		FB8946A519F6AFB800339C8A /* des_old.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = des_old.h; sourceTree = "<group>"; };
-		FB8946A619F6AFB800339C8A /* dh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dh.h; sourceTree = "<group>"; };
-		FB8946A719F6AFB800339C8A /* dsa.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dsa.h; sourceTree = "<group>"; };
-		FB8946A819F6AFB800339C8A /* dso.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dso.h; sourceTree = "<group>"; };
-		FB8946A919F6AFB800339C8A /* dtls1.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dtls1.h; sourceTree = "<group>"; };
-		FB8946AA19F6AFB800339C8A /* e_os2.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = e_os2.h; sourceTree = "<group>"; };
-		FB8946AB19F6AFB800339C8A /* ebcdic.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ebcdic.h; sourceTree = "<group>"; };
-		FB8946AC19F6AFB800339C8A /* ec.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ec.h; sourceTree = "<group>"; };
-		FB8946AD19F6AFB800339C8A /* ecdh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ecdh.h; sourceTree = "<group>"; };
-		FB8946AE19F6AFB800339C8A /* ecdsa.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ecdsa.h; sourceTree = "<group>"; };
-		FB8946AF19F6AFB800339C8A /* engine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = engine.h; sourceTree = "<group>"; };
-		FB8946B019F6AFB800339C8A /* err.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = err.h; sourceTree = "<group>"; };
-		FB8946B119F6AFB800339C8A /* evp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = evp.h; sourceTree = "<group>"; };
-		FB8946B219F6AFB800339C8A /* hmac.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hmac.h; sourceTree = "<group>"; };
-		FB8946B319F6AFB800339C8A /* idea.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = idea.h; sourceTree = "<group>"; };
-		FB8946B419F6AFB800339C8A /* krb5_asn.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = krb5_asn.h; sourceTree = "<group>"; };
-		FB8946B519F6AFB800339C8A /* kssl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kssl.h; sourceTree = "<group>"; };
-		FB8946B619F6AFB800339C8A /* lhash.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lhash.h; sourceTree = "<group>"; };
-		FB8946B719F6AFB800339C8A /* md4.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = md4.h; sourceTree = "<group>"; };
-		FB8946B819F6AFB800339C8A /* md5.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = md5.h; sourceTree = "<group>"; };
-		FB8946B919F6AFB800339C8A /* mdc2.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mdc2.h; sourceTree = "<group>"; };
-		FB8946BA19F6AFB800339C8A /* modes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = modes.h; sourceTree = "<group>"; };
-		FB8946BB19F6AFB800339C8A /* obj_mac.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = obj_mac.h; sourceTree = "<group>"; };
-		FB8946BC19F6AFB800339C8A /* objects.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = objects.h; sourceTree = "<group>"; };
-		FB8946BD19F6AFB800339C8A /* ocsp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ocsp.h; sourceTree = "<group>"; };
-		FB8946BE19F6AFB800339C8A /* opensslconf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = opensslconf.h; sourceTree = "<group>"; };
-		FB8946BF19F6AFB800339C8A /* opensslv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = opensslv.h; sourceTree = "<group>"; };
-		FB8946C019F6AFB800339C8A /* ossl_typ.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ossl_typ.h; sourceTree = "<group>"; };
-		FB8946C119F6AFB800339C8A /* pem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pem.h; sourceTree = "<group>"; };
-		FB8946C219F6AFB800339C8A /* pem2.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pem2.h; sourceTree = "<group>"; };
-		FB8946C319F6AFB800339C8A /* pkcs12.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pkcs12.h; sourceTree = "<group>"; };
-		FB8946C419F6AFB800339C8A /* pkcs7.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pkcs7.h; sourceTree = "<group>"; };
-		FB8946C519F6AFB800339C8A /* pqueue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pqueue.h; sourceTree = "<group>"; };
-		FB8946C619F6AFB800339C8A /* rand.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = rand.h; sourceTree = "<group>"; };
-		FB8946C719F6AFB800339C8A /* rc2.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = rc2.h; sourceTree = "<group>"; };
-		FB8946C819F6AFB800339C8A /* rc4.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = rc4.h; sourceTree = "<group>"; };
-		FB8946C919F6AFB800339C8A /* ripemd.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ripemd.h; sourceTree = "<group>"; };
-		FB8946CA19F6AFB800339C8A /* rsa.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = rsa.h; sourceTree = "<group>"; };
-		FB8946CB19F6AFB800339C8A /* safestack.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = safestack.h; sourceTree = "<group>"; };
-		FB8946CC19F6AFB800339C8A /* seed.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = seed.h; sourceTree = "<group>"; };
-		FB8946CD19F6AFB800339C8A /* sha.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sha.h; sourceTree = "<group>"; };
-		FB8946CE19F6AFB800339C8A /* srp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = srp.h; sourceTree = "<group>"; };
-		FB8946CF19F6AFB800339C8A /* srtp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = srtp.h; sourceTree = "<group>"; };
-		FB8946D019F6AFB800339C8A /* ssl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ssl.h; sourceTree = "<group>"; };
-		FB8946D119F6AFB800339C8A /* ssl2.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ssl2.h; sourceTree = "<group>"; };
-		FB8946D219F6AFB800339C8A /* ssl23.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ssl23.h; sourceTree = "<group>"; };
-		FB8946D319F6AFB800339C8A /* ssl3.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ssl3.h; sourceTree = "<group>"; };
-		FB8946D419F6AFB800339C8A /* stack.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stack.h; sourceTree = "<group>"; };
-		FB8946D519F6AFB800339C8A /* symhacks.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = symhacks.h; sourceTree = "<group>"; };
-		FB8946D619F6AFB800339C8A /* tls1.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tls1.h; sourceTree = "<group>"; };
-		FB8946D719F6AFB800339C8A /* ts.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ts.h; sourceTree = "<group>"; };
-		FB8946D819F6AFB800339C8A /* txt_db.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = txt_db.h; sourceTree = "<group>"; };
-		FB8946D919F6AFB800339C8A /* ui.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ui.h; sourceTree = "<group>"; };
-		FB8946DA19F6AFB800339C8A /* ui_compat.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ui_compat.h; sourceTree = "<group>"; };
-		FB8946DB19F6AFB800339C8A /* whrlpool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = whrlpool.h; sourceTree = "<group>"; };
-		FB8946DC19F6AFB800339C8A /* x509.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = x509.h; sourceTree = "<group>"; };
-		FB8946DD19F6AFB800339C8A /* x509_vfy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = x509_vfy.h; sourceTree = "<group>"; };
-		FB8946DE19F6AFB800339C8A /* x509v3.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = x509v3.h; sourceTree = "<group>"; };
-		FB8946E019F6AFB800339C8A /* libcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libcrypto.a; sourceTree = "<group>"; };
-		FB8946E119F6AFB800339C8A /* libssl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libssl.a; sourceTree = "<group>"; };
 		FB8946E519F6AFB800339C8A /* opus.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = opus.h; sourceTree = "<group>"; };
 		FB8946E619F6AFB800339C8A /* opus_defines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = opus_defines.h; sourceTree = "<group>"; };
 		FB8946E719F6AFB800339C8A /* opus_multistream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = opus_multistream.h; sourceTree = "<group>"; };
@@ -405,11 +327,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				98A2E31129B5256200CA17A7 /* OpenSSL.xcframework in Frameworks */,
 				9865DC30213260B40005B9B9 /* libmoonlight-common-tv.a in Frameworks */,
 				9865DC3C2132922E0005B9B9 /* GameController.framework in Frameworks */,
 				98882A0D2AF60FA000C5A11C /* libavformat.a in Frameworks */,
 				98882A0E2AF60FA300C5A11C /* libavutil.a in Frameworks */,
+				F74BEFA42C1A80E400224667 /* OpenSSL in Frameworks */,
 				FB1A67EA21324DF300507771 /* libxml2.tbd in Frameworks */,
 				FB1A67E821324DE300507771 /* libopus.a in Frameworks */,
 				98181BEB2791278F00E43572 /* libSDL2.a in Frameworks */,
@@ -423,7 +345,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				98A2E31229B5256E00CA17A7 /* OpenSSL.xcframework in Frameworks */,
 				9890CF6B203B7EE1006C4B06 /* libxml2.tbd in Frameworks */,
 				98CFB82F1CAD481B0048EF74 /* libmoonlight-common.a in Frameworks */,
 				FB8946ED19F6AFE800339C8A /* libopus.a in Frameworks */,
@@ -431,6 +352,7 @@
 				FB290CF419B2C406004C83CF /* CoreGraphics.framework in Frameworks */,
 				FB290CF819B2C406004C83CF /* CoreData.framework in Frameworks */,
 				98181BED2791281100E43572 /* CoreMotion.framework in Frameworks */,
+				F74BEF9C2C1A705600224667 /* OpenSSL in Frameworks */,
 				98882A072AF60F7200C5A11C /* libavformat.a in Frameworks */,
 				FB290CF619B2C406004C83CF /* UIKit.framework in Frameworks */,
 				FB290CF219B2C406004C83CF /* Foundation.framework in Frameworks */,
@@ -502,7 +424,6 @@
 				98882A0B2AF60F9000C5A11C /* libavformat.a */,
 				98882A042AF60F5300C5A11C /* libavutil.a */,
 				98882A092AF60F9000C5A11C /* libavutil.a */,
-				98A2E31029B5256200CA17A7 /* OpenSSL.xcframework */,
 				98B9CE6C27B2144B00B473C4 /* AVKit.framework */,
 				98181BEC2791281100E43572 /* CoreMotion.framework */,
 				98181BE82791275D00E43572 /* libSDL2.a */,
@@ -665,118 +586,9 @@
 		FB89468F19F6AFB800339C8A /* libs */ = {
 			isa = PBXGroup;
 			children = (
-				FB89469119F6AFB800339C8A /* openssl */,
 				FB8946E219F6AFB800339C8A /* opus */,
 			);
 			path = libs;
-			sourceTree = "<group>";
-		};
-		FB89469119F6AFB800339C8A /* openssl */ = {
-			isa = PBXGroup;
-			children = (
-				FB89469219F6AFB800339C8A /* include */,
-				FB8946DF19F6AFB800339C8A /* lib */,
-			);
-			path = openssl;
-			sourceTree = "<group>";
-		};
-		FB89469219F6AFB800339C8A /* include */ = {
-			isa = PBXGroup;
-			children = (
-				FB89469319F6AFB800339C8A /* openssl */,
-			);
-			path = include;
-			sourceTree = "<group>";
-		};
-		FB89469319F6AFB800339C8A /* openssl */ = {
-			isa = PBXGroup;
-			children = (
-				FB89469419F6AFB800339C8A /* aes.h */,
-				FB89469519F6AFB800339C8A /* asn1.h */,
-				FB89469619F6AFB800339C8A /* asn1_mac.h */,
-				FB89469719F6AFB800339C8A /* asn1t.h */,
-				FB89469819F6AFB800339C8A /* bio.h */,
-				FB89469919F6AFB800339C8A /* blowfish.h */,
-				FB89469A19F6AFB800339C8A /* bn.h */,
-				FB89469B19F6AFB800339C8A /* buffer.h */,
-				FB89469C19F6AFB800339C8A /* camellia.h */,
-				FB89469D19F6AFB800339C8A /* cast.h */,
-				FB89469E19F6AFB800339C8A /* cmac.h */,
-				FB89469F19F6AFB800339C8A /* cms.h */,
-				FB8946A019F6AFB800339C8A /* comp.h */,
-				FB8946A119F6AFB800339C8A /* conf.h */,
-				FB8946A219F6AFB800339C8A /* conf_api.h */,
-				FB8946A319F6AFB800339C8A /* crypto.h */,
-				FB8946A419F6AFB800339C8A /* des.h */,
-				FB8946A519F6AFB800339C8A /* des_old.h */,
-				FB8946A619F6AFB800339C8A /* dh.h */,
-				FB8946A719F6AFB800339C8A /* dsa.h */,
-				FB8946A819F6AFB800339C8A /* dso.h */,
-				FB8946A919F6AFB800339C8A /* dtls1.h */,
-				FB8946AA19F6AFB800339C8A /* e_os2.h */,
-				FB8946AB19F6AFB800339C8A /* ebcdic.h */,
-				FB8946AC19F6AFB800339C8A /* ec.h */,
-				FB8946AD19F6AFB800339C8A /* ecdh.h */,
-				FB8946AE19F6AFB800339C8A /* ecdsa.h */,
-				FB8946AF19F6AFB800339C8A /* engine.h */,
-				FB8946B019F6AFB800339C8A /* err.h */,
-				FB8946B119F6AFB800339C8A /* evp.h */,
-				FB8946B219F6AFB800339C8A /* hmac.h */,
-				FB8946B319F6AFB800339C8A /* idea.h */,
-				FB8946B419F6AFB800339C8A /* krb5_asn.h */,
-				FB8946B519F6AFB800339C8A /* kssl.h */,
-				FB8946B619F6AFB800339C8A /* lhash.h */,
-				FB8946B719F6AFB800339C8A /* md4.h */,
-				FB8946B819F6AFB800339C8A /* md5.h */,
-				FB8946B919F6AFB800339C8A /* mdc2.h */,
-				FB8946BA19F6AFB800339C8A /* modes.h */,
-				FB8946BB19F6AFB800339C8A /* obj_mac.h */,
-				FB8946BC19F6AFB800339C8A /* objects.h */,
-				FB8946BD19F6AFB800339C8A /* ocsp.h */,
-				FB8946BE19F6AFB800339C8A /* opensslconf.h */,
-				FB8946BF19F6AFB800339C8A /* opensslv.h */,
-				FB8946C019F6AFB800339C8A /* ossl_typ.h */,
-				FB8946C119F6AFB800339C8A /* pem.h */,
-				FB8946C219F6AFB800339C8A /* pem2.h */,
-				FB8946C319F6AFB800339C8A /* pkcs12.h */,
-				FB8946C419F6AFB800339C8A /* pkcs7.h */,
-				FB8946C519F6AFB800339C8A /* pqueue.h */,
-				FB8946C619F6AFB800339C8A /* rand.h */,
-				FB8946C719F6AFB800339C8A /* rc2.h */,
-				FB8946C819F6AFB800339C8A /* rc4.h */,
-				FB8946C919F6AFB800339C8A /* ripemd.h */,
-				FB8946CA19F6AFB800339C8A /* rsa.h */,
-				FB8946CB19F6AFB800339C8A /* safestack.h */,
-				FB8946CC19F6AFB800339C8A /* seed.h */,
-				FB8946CD19F6AFB800339C8A /* sha.h */,
-				FB8946CE19F6AFB800339C8A /* srp.h */,
-				FB8946CF19F6AFB800339C8A /* srtp.h */,
-				FB8946D019F6AFB800339C8A /* ssl.h */,
-				FB8946D119F6AFB800339C8A /* ssl2.h */,
-				FB8946D219F6AFB800339C8A /* ssl23.h */,
-				FB8946D319F6AFB800339C8A /* ssl3.h */,
-				FB8946D419F6AFB800339C8A /* stack.h */,
-				FB8946D519F6AFB800339C8A /* symhacks.h */,
-				FB8946D619F6AFB800339C8A /* tls1.h */,
-				FB8946D719F6AFB800339C8A /* ts.h */,
-				FB8946D819F6AFB800339C8A /* txt_db.h */,
-				FB8946D919F6AFB800339C8A /* ui.h */,
-				FB8946DA19F6AFB800339C8A /* ui_compat.h */,
-				FB8946DB19F6AFB800339C8A /* whrlpool.h */,
-				FB8946DC19F6AFB800339C8A /* x509.h */,
-				FB8946DD19F6AFB800339C8A /* x509_vfy.h */,
-				FB8946DE19F6AFB800339C8A /* x509v3.h */,
-			);
-			path = openssl;
-			sourceTree = "<group>";
-		};
-		FB8946DF19F6AFB800339C8A /* lib */ = {
-			isa = PBXGroup;
-			children = (
-				FB8946E019F6AFB800339C8A /* libcrypto.a */,
-				FB8946E119F6AFB800339C8A /* libssl.a */,
-			);
-			path = lib;
 			sourceTree = "<group>";
 		};
 		FB8946E219F6AFB800339C8A /* opus */ = {
@@ -890,6 +702,9 @@
 				FB1A68172132509800507771 /* PBXTargetDependency */,
 			);
 			name = "Moonlight TV";
+			packageProductDependencies = (
+				F74BEFA32C1A80E400224667 /* OpenSSL */,
+			);
 			productName = "Moonlight TV";
 			productReference = FB1A67532132419700507771 /* Moonlight TV.app */;
 			productType = "com.apple.product-type.application";
@@ -908,6 +723,9 @@
 				98AB2E861CAD468B0089BB98 /* PBXTargetDependency */,
 			);
 			name = Moonlight;
+			packageProductDependencies = (
+				F74BEF9B2C1A705600224667 /* OpenSSL */,
+			);
 			productName = Limelight;
 			productReference = FB290CEE19B2C406004C83CF /* Moonlight.app */;
 			productType = "com.apple.product-type.application";
@@ -946,6 +764,9 @@
 				Base,
 			);
 			mainGroup = FB290CE519B2C406004C83CF;
+			packageReferences = (
+				F74BEF9A2C1A705600224667 /* XCRemoteSwiftPackageReference "OpenSSL-Package" */,
+			);
 			productRefGroup = FB290CEF19B2C406004C83CF /* Products */;
 			projectDirPath = "";
 			projectReferences = (
@@ -1265,6 +1086,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -1320,6 +1142,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -1501,6 +1324,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		F74BEF9A2C1A705600224667 /* XCRemoteSwiftPackageReference "OpenSSL-Package" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/krzyzanowskim/OpenSSL-Package.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.1.5004;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		F74BEF9B2C1A705600224667 /* OpenSSL */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F74BEF9A2C1A705600224667 /* XCRemoteSwiftPackageReference "OpenSSL-Package" */;
+			productName = OpenSSL;
+		};
+		F74BEFA32C1A80E400224667 /* OpenSSL */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F74BEF9A2C1A705600224667 /* XCRemoteSwiftPackageReference "OpenSSL-Package" */;
+			productName = OpenSSL;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		FB290D0519B2C406004C83CF /* Limelight.xcdatamodeld */ = {
