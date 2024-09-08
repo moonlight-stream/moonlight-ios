@@ -42,8 +42,6 @@
 		98F145362667D847004018E3 /* RtpAudioQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 98F145332667D847004018E3 /* RtpAudioQueue.c */; };
 		98F145372667D847004018E3 /* RtpVideoQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 98F145342667D847004018E3 /* RtpVideoQueue.c */; };
 		98F145382667D847004018E3 /* RtpVideoQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 98F145342667D847004018E3 /* RtpVideoQueue.c */; };
-		F74BEF9F2C1A707200224667 /* OpenSSL in Frameworks */ = {isa = PBXBuildFile; productRef = F74BEF9E2C1A707200224667 /* OpenSSL */; };
-		F74BEFA22C1A80D000224667 /* OpenSSL in Frameworks */ = {isa = PBXBuildFile; productRef = F74BEFA12C1A80D000224667 /* OpenSSL */; };
 		FB1A67F821324F4900507771 /* rs.c in Sources */ = {isa = PBXBuildFile; fileRef = 9857AEEE1EBE85E10084F99E /* rs.c */; };
 		FB1A67FA21324F4900507771 /* AudioStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E1A1CAD423B0089BB98 /* AudioStream.c */; };
 		FB1A67FB21324F4900507771 /* ByteBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E1B1CAD423B0089BB98 /* ByteBuffer.c */; };
@@ -165,7 +163,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F74BEFA22C1A80D000224667 /* OpenSSL in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -173,7 +170,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F74BEF9F2C1A707200224667 /* OpenSSL in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -343,7 +339,6 @@
 			);
 			name = "moonlight-common-tv";
 			packageProductDependencies = (
-				F74BEFA12C1A80D000224667 /* OpenSSL */,
 			);
 			productName = "moonlight-common-tv";
 			productReference = FB1A67EF21324EE300507771 /* libmoonlight-common-tv.a */;
@@ -362,7 +357,6 @@
 			);
 			name = "moonlight-common";
 			packageProductDependencies = (
-				F74BEF9E2C1A707200224667 /* OpenSSL */,
 			);
 			productName = "limelight-common";
 			productReference = FB290E2E19B37A4E004C83CF /* libmoonlight-common.a */;
@@ -394,7 +388,6 @@
 			);
 			mainGroup = FB290E2519B37A4E004C83CF;
 			packageReferences = (
-				F74BEF9D2C1A707200224667 /* XCRemoteSwiftPackageReference "OpenSSL-Package" */,
 			);
 			productRefGroup = FB290E2F19B37A4E004C83CF /* Products */;
 			projectDirPath = "";
@@ -736,30 +729,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		F74BEF9D2C1A707200224667 /* XCRemoteSwiftPackageReference "OpenSSL-Package" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/krzyzanowskim/OpenSSL-Package.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 3.1.5004;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		F74BEF9E2C1A707200224667 /* OpenSSL */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F74BEF9D2C1A707200224667 /* XCRemoteSwiftPackageReference "OpenSSL-Package" */;
-			productName = OpenSSL;
-		};
-		F74BEFA12C1A80D000224667 /* OpenSSL */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F74BEF9D2C1A707200224667 /* XCRemoteSwiftPackageReference "OpenSSL-Package" */;
-			productName = OpenSSL;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = FB290E2619B37A4E004C83CF /* Project object */;
 }
