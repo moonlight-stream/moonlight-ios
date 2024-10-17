@@ -117,38 +117,46 @@
 - (void)moveAppUpInList:(NSString *)appId {
     NSUserDefaults *sharedDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.MoonlightTV"];
     NSString *json = [sharedDefaults objectForKey:@"appList"];
-    NSArray *apps = [NSJSONSerialization JSONObjectWithData:[json dataUsingEncoding:NSUTF8StringEncoding] options:0 error:nil];
+    NSData *jsonData = [json dataUsingEncoding:NSUTF8StringEncoding];
+    NSMutableArray *apps = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:nil];
     
-    NSMutableArray *newList = [NSMutableArray arrayWithArray:apps];
-    
-    __block NSUInteger targetIndex = NSNotFound;
-    __block NSUInteger firstIndexForHostApps = NSNotFound;
-    __block NSString *hostUUID = nil;
-
-    [newList enumerateObjectsUsingBlock:^(NSDictionary *app, NSUInteger idx, BOOL * _Nonnull stop) {
+    // Identify the selected app and its index
+    NSDictionary *selectedApp = nil;
+    NSInteger selectedIndex = NSNotFound;
+    for (NSDictionary *app in apps) {
         if ([app[@"id"] isEqualToString:appId]) {
-            targetIndex = idx;
-            hostUUID = app[@"hostUUID"];
+            selectedApp = app;
+            selectedIndex = [apps indexOfObject:app];
+            break;
         }
-    }];
-
-    [newList enumerateObjectsUsingBlock:^(NSDictionary *app, NSUInteger idx, BOOL * _Nonnull stop) {
-        if ([app[@"hostUUID"] isEqualToString:hostUUID] && firstIndexForHostApps == NSNotFound) {
-            firstIndexForHostApps = idx;
-        }
-    }];
-    
-    if (targetIndex != NSNotFound && firstIndexForHostApps != NSNotFound) {
-            // Move target app to the first position within the host's apps
-            NSDictionary *targetApp = newList[targetIndex];
-            [newList removeObjectAtIndex:targetIndex];
-            [newList insertObject:targetApp atIndex:firstIndexForHostApps];
     }
-    
-    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:newList options:0 error:nil];
-        NSString *jsonStr = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-        [sharedDefaults setObject:jsonStr forKey:@"appList"];
+
+    if (selectedApp && selectedIndex != NSNotFound) {
+        // Move the app to the top of the list
+        [apps removeObjectAtIndex:selectedIndex];
+        [apps insertObject:selectedApp atIndex:0];
+
+        // Serialize to JSON and save back to user defaults
+        NSData *newJsonData = [NSJSONSerialization dataWithJSONObject:apps options:0 error:nil];
+        NSString *newJsonStr = [[NSString alloc] initWithData:newJsonData encoding:NSUTF8StringEncoding];
+        [sharedDefaults setObject:newJsonStr forKey:@"appList"];
+        
+        // Update hostUUIDOrder accordingly
+        NSString *hostUUID = selectedApp[@"hostUUID"];
+        NSMutableArray *hostUUIDOrder = [[sharedDefaults objectForKey:@"hostUUIDOrder"] mutableCopy];
+        if (!hostUUIDOrder) {
+            hostUUIDOrder = [NSMutableArray array];
+        }
+        [hostUUIDOrder removeObject:hostUUID];
+        [hostUUIDOrder insertObject:hostUUID atIndex:0];
+        [sharedDefaults setObject:hostUUIDOrder forKey:@"hostUUIDOrder"];
+        
+        // Synchronize changes
         [sharedDefaults synchronize];
+        
+    } else {
+        NSLog(@"App with ID %@ not found.", appId);
+    }
 }
 #endif
 
@@ -240,7 +248,35 @@
     NSArray *hosts = [self fetchRecords:@"Host"];
     NSUserDefaults *sharedDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.MoonlightTV"];
     NSString *existingJson = [sharedDefaults objectForKey:@"appList"];
-
+    
+    // Retrieve the existing order of host UUIDs
+    NSMutableArray *storedUUIDOrder = [[sharedDefaults objectForKey:@"hostUUIDOrder"] mutableCopy];
+    if (!storedUUIDOrder) {
+        storedUUIDOrder = [NSMutableArray array];
+    }
+    // Update storedUUIDOrder if new hosts are added
+    for (Host* host in hosts) {
+        if (![storedUUIDOrder containsObject:host.uuid]) {
+            [storedUUIDOrder addObject:host.uuid];
+        }
+    }
+    // Save the updated order back to User Defaults
+    [sharedDefaults setObject:storedUUIDOrder forKey:@"hostUUIDOrder"];
+    [sharedDefaults synchronize];
+    
+    // Sort hosts by order
+    hosts = [hosts sortedArrayUsingComparator:^NSComparisonResult(Host* a, Host* b) {
+        NSUInteger first = [storedUUIDOrder indexOfObject:a.uuid];
+        NSUInteger second = [storedUUIDOrder indexOfObject:b.uuid];
+        if (first < second) {
+            return NSOrderedAscending;
+        } else if (first > second) {
+            return NSOrderedDescending;
+        } else {
+            return NSOrderedSame;
+        }
+    }];
+    
     NSArray *existingApps;
     if (existingJson != nil) {
         existingApps = [NSJSONSerialization JSONObjectWithData:[existingJson dataUsingEncoding:NSUTF8StringEncoding] options:0 error:nil];
@@ -290,7 +326,33 @@
         return ![currentHostUUIDs containsObject:dict[@"hostUUID"]];
     }];
     [mutableExistingApps removeObjectsAtIndexes:indexesToDelete];
+    
 
+    // Step 1: Partition into separate arrays
+    NSMutableDictionary<NSString *, NSMutableArray *> *hostToAppsMap = [NSMutableDictionary new];
+    for (NSDictionary *app in mutableExistingApps) {
+        NSString *hostUUID = app[@"hostUUID"];
+        if (!hostToAppsMap[hostUUID]) {
+            hostToAppsMap[hostUUID] = [NSMutableArray new];
+        }
+        [hostToAppsMap[hostUUID] addObject:app];
+    }
+
+    // Step 2: Sort these arrays
+    NSArray *sortedKeys = [hostToAppsMap.allKeys sortedArrayUsingComparator:^NSComparisonResult(NSString *a, NSString *b) {
+        NSUInteger first = [storedUUIDOrder indexOfObject:a];
+        NSUInteger second = [storedUUIDOrder indexOfObject:b];
+        return first < second ? NSOrderedAscending : NSOrderedDescending;
+    }];
+
+    // Step 3: Merge them back
+    [mutableExistingApps removeAllObjects];
+    for (NSString *key in sortedKeys) {
+        [mutableExistingApps addObjectsFromArray:hostToAppsMap[key]];
+    }
+    // Order fix 4 END
+
+    
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:mutableExistingApps options:0 error:&error];
     if (jsonData) {
         NSString *jsonStr = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
