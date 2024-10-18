@@ -172,7 +172,7 @@
     
     NSData* serverSecretResp = [Utils hexToBytes:[secretResp getStringTag:@"pairingsecret"]];
     NSData* serverSecret = [serverSecretResp subdataWithRange:NSMakeRange(0, 16)];
-    NSData* serverSignature = [serverSecretResp subdataWithRange:NSMakeRange(16, 256)];
+    NSData* serverSignature = [serverSecretResp subdataWithRange:NSMakeRange(16, serverSecretResp.length - 16)];
     
     if (![cryptoMan verifySignature:serverSecret withSignature:serverSignature andCert:[Utils hexToBytes:plainCert]]) {
         [self finishPairing:bgId forResponse:secretResp withFallbackError:@"Server certificate invalid"];

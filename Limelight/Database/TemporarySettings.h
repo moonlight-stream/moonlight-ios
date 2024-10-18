@@ -19,7 +19,12 @@
 @property (nonatomic, retain) NSNumber * audioConfig;
 @property (nonatomic, retain) NSNumber * onscreenControls;
 @property (nonatomic, retain) NSString * uniqueId;
-@property (nonatomic) BOOL useHevc;
+@property (nonatomic) enum {
+    CODEC_PREF_AUTO,
+    CODEC_PREF_H264,
+    CODEC_PREF_HEVC,
+    CODEC_PREF_AV1,
+} preferredCodec;
 @property (nonatomic) BOOL useFramePacing;
 @property (nonatomic) BOOL multiController;
 @property (nonatomic) BOOL swapABXYButtons;

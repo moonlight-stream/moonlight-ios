@@ -17,6 +17,10 @@ typedef struct {
     int totalFrames;
     int receivedFrames;
     int networkDroppedFrames;
+    int totalHostProcessingLatency;
+    int framesWithHostProcessingLatency;
+    int maxHostProcessingLatency;
+    int minHostProcessingLatency;
 } video_stats_t;
 
 @interface Connection : NSOperation <NSStreamDelegate>

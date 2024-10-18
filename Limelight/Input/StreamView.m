@@ -22,6 +22,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     
     KeyboardInputField* keyInputField;
     BOOL isInputingText;
+    NSMutableSet* keysDown;
     
     float streamAspectRatio;
     
@@ -53,6 +54,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     
     TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
     
+    keysDown = [[NSMutableSet alloc] init];
     keyInputField = [[KeyboardInputField alloc] initWithFrame:CGRectZero];
     [keyInputField setKeyboardType:UIKeyboardTypeDefault];
     [keyInputField setAutocorrectionType:UITextAutocorrectionTypeNo];
@@ -105,6 +107,14 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         continuousMouseWheelRecognizer.allowedTouchTypes = @[@(UITouchTypeIndirectPointer)];
         [self addGestureRecognizer:continuousMouseWheelRecognizer];
     }
+    
+#if defined(__IPHONE_16_1) || defined(__TVOS_16_1)
+    if (@available(iOS 16.1, *)) {
+        UIHoverGestureRecognizer *stylusHoverRecognizer = [[UIHoverGestureRecognizer alloc] initWithTarget:self action:@selector(sendStylusHoverEvent:)];
+        stylusHoverRecognizer.allowedTouchTypes = @[@(UITouchTypePencil)];
+        [self addGestureRecognizer:stylusHoverRecognizer];
+    }
+#endif
 #endif
     
     x1mouse = [[X1Mouse alloc] init];
@@ -166,6 +176,148 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     }
 }
 
+- (CGSize) getVideoAreaSize {
+    if (self.bounds.size.width > self.bounds.size.height * streamAspectRatio) {
+        return CGSizeMake(self.bounds.size.height * streamAspectRatio, self.bounds.size.height);
+    } else {
+        return CGSizeMake(self.bounds.size.width, self.bounds.size.width / streamAspectRatio);
+    }
+}
+
+- (CGPoint) adjustCoordinatesForVideoArea:(CGPoint)point {
+    // These are now relative to the StreamView, however we need to scale them
+    // further to make them relative to the actual video portion.
+    float x = point.x - self.bounds.origin.x;
+    float y = point.y - self.bounds.origin.y;
+    
+    // For some reason, we don't seem to always get to the bounds of the window
+    // so we'll subtract 1 pixel if we're to the left/below of the origin and
+    // and add 1 pixel if we're to the right/above. It should be imperceptible
+    // to the user but it will allow activation of gestures that require contact
+    // with the edge of the screen (like Aero Snap).
+    if (x < self.bounds.size.width / 2) {
+        x--;
+    }
+    else {
+        x++;
+    }
+    if (y < self.bounds.size.height / 2) {
+        y--;
+    }
+    else {
+        y++;
+    }
+    
+    // This logic mimics what iOS does with AVLayerVideoGravityResizeAspect
+    CGSize videoSize = [self getVideoAreaSize];
+    CGPoint videoOrigin = CGPointMake(self.bounds.size.width / 2 - videoSize.width / 2,
+                                      self.bounds.size.height / 2 - videoSize.height / 2);
+    
+    // Confine the cursor to the video region. We don't just discard events outside
+    // the region because we won't always get one exactly when the mouse leaves the region.
+    return CGPointMake(MIN(MAX(x, videoOrigin.x), videoOrigin.x + videoSize.width) - videoOrigin.x,
+                       MIN(MAX(y, videoOrigin.y), videoOrigin.y + videoSize.height) - videoOrigin.y);
+}
+
+#if !TARGET_OS_TV
+
+- (uint16_t)getRotationFromAzimuthAngle:(float)azimuthAngle {
+    // iOS reports azimuth of 0 when the stylus is pointing west, but Moonlight expects
+    // rotation of 0 to mean the stylus is pointing north. Rotate the azimuth angle
+    // clockwise by 90 degrees to convert from iOS to Moonlight rotation conventions.
+    int32_t rotationAngle = (azimuthAngle - M_PI_2) * (180.f / M_PI);
+    if (rotationAngle < 0) {
+        rotationAngle += 360;
+    }
+    return (uint16_t)rotationAngle;
+}
+
+- (uint8_t)getTiltFromAltitudeAngle:(float)altitudeAngle {
+    // iOS reports an altitude of 0 when the stylus is parallel to the touch surface,
+    // while Moonlight expects a tilt of 0 when the stylus is perpendicular to the surface.
+    // Subtract the tilt angle from 90 to convert from iOS to Moonlight tilt conventions.
+    uint8_t altitudeDegs = abs((int16_t)(altitudeAngle * (180.f / M_PI)));
+    return 90 - MIN(90, altitudeDegs);
+}
+
+- (BOOL)sendStylusEvent:(UITouch*)event {
+    uint8_t type;
+    
+    // Don't touch stylus events if the host doesn't support them. We want to pass
+    // them as normal touches for legacy hosts that don't understand pen events.
+    if (!(LiGetHostFeatureFlags() & LI_FF_PEN_TOUCH_EVENTS)) {
+        return NO;
+    }
+    
+    switch (event.phase) {
+        case UITouchPhaseBegan:
+            type = LI_TOUCH_EVENT_DOWN;
+            break;
+        case UITouchPhaseMoved:
+            type = LI_TOUCH_EVENT_MOVE;
+            break;
+        case UITouchPhaseEnded:
+            type = LI_TOUCH_EVENT_UP;
+            break;
+        case UITouchPhaseCancelled:
+            type = LI_TOUCH_EVENT_CANCEL;
+            break;
+        default:
+            return YES;
+    }
+
+    CGPoint location = [self adjustCoordinatesForVideoArea:[event locationInView:self]];
+    CGSize videoSize = [self getVideoAreaSize];
+    
+    return LiSendPenEvent(type, LI_TOOL_TYPE_PEN, 0, location.x / videoSize.width, location.y / videoSize.height,
+                          (event.force / event.maximumPossibleForce) / sin(event.altitudeAngle),
+                          0.0f, 0.0f,
+                          [self getRotationFromAzimuthAngle:[event azimuthAngleInView:self]],
+                          [self getTiltFromAltitudeAngle:event.altitudeAngle]) != LI_ERR_UNSUPPORTED;
+}
+
+- (void)sendStylusHoverEvent:(UIHoverGestureRecognizer*)gesture API_AVAILABLE(ios(13.0)) {
+    uint8_t type;
+    
+    switch (gesture.state) {
+        case UIGestureRecognizerStateBegan:
+        case UIGestureRecognizerStateChanged:
+            type = LI_TOUCH_EVENT_HOVER;
+            break;
+
+        case UIGestureRecognizerStateEnded:
+            type = LI_TOUCH_EVENT_HOVER_LEAVE;
+            break;
+
+        default:
+            return;
+    }
+
+    CGPoint location = [self adjustCoordinatesForVideoArea:[gesture locationInView:self]];
+    CGSize videoSize = [self getVideoAreaSize];
+    
+    float distance = 0.0f;
+#if defined(__IPHONE_16_1) || defined(__TVOS_16_1)
+    if (@available(iOS 16.1, *)) {
+        distance = gesture.zOffset;
+    }
+#endif
+    
+    uint16_t rotationAngle = LI_ROT_UNKNOWN;
+    uint8_t tiltAngle = LI_TILT_UNKNOWN;
+#if defined(__IPHONE_16_4) || defined(__TVOS_16_4)
+    if (@available(iOS 16.4, *)) {
+        rotationAngle = [self getRotationFromAzimuthAngle:[gesture azimuthAngleInView:self]];
+        tiltAngle = [self getTiltFromAltitudeAngle:gesture.altitudeAngle];
+    }
+#endif
+    
+    LiSendPenEvent(type, LI_TOOL_TYPE_PEN, 0, location.x / videoSize.width, location.y / videoSize.height,
+                   distance, 0.0f, 0.0f, rotationAngle, tiltAngle);
+}
+
+#endif
+
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     if ([self handleMouseButtonEvent:BUTTON_ACTION_PRESS
                           forTouches:touches
@@ -178,6 +330,18 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     
     // Notify of user interaction and start expiration timer
     [self startInteractionTimer];
+    
+#if !TARGET_OS_TV
+    if (@available(iOS 13.4, *)) {
+        for (UITouch* touch in touches) {
+            if (touch.type == UITouchTypePencil) {
+                if ([self sendStylusEvent:touch]) {
+                    return;
+                }
+            }
+        }
+    }
+#endif
     
     if (![onScreenControls handleTouchDownEvent:touches]) {
         // We still inform the touch handler even if we're going trigger the
@@ -197,6 +361,23 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
                 // Prepare the textbox used to capture keyboard events.
                 keyInputField.delegate = self;
                 keyInputField.text = @"0";
+#if !TARGET_OS_TV
+                // Prepare the toolbar above the keyboard for more options
+                UIToolbar *customToolbarView = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, 44)];
+                
+                UIBarButtonItem *doneBarButton = [self createButtonWithImageNamed:@"DoneIcon.png" backgroundColor:[UIColor clearColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x00 isToggleable:NO];
+                UIBarButtonItem *windowsBarButton = [self createButtonWithImageNamed:@"WindowsIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x5B isToggleable:YES];
+                UIBarButtonItem *tabBarButton = [self createButtonWithImageNamed:@"TabIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x09 isToggleable:NO];
+                UIBarButtonItem *shiftBarButton = [self createButtonWithImageNamed:@"ShiftIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA0 isToggleable:YES];
+                UIBarButtonItem *escapeBarButton = [self createButtonWithImageNamed:@"EscapeIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x1B isToggleable:NO];
+                UIBarButtonItem *controlBarButton = [self createButtonWithImageNamed:@"ControlIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA2 isToggleable:YES];
+                UIBarButtonItem *altBarButton = [self createButtonWithImageNamed:@"AltIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA4 isToggleable:YES];
+                UIBarButtonItem *deleteBarButton = [self createButtonWithImageNamed:@"DeleteIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x2E isToggleable:NO];
+                UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+                
+                [customToolbarView setItems:[NSArray arrayWithObjects:doneBarButton, windowsBarButton, escapeBarButton, tabBarButton, shiftBarButton, controlBarButton, altBarButton, deleteBarButton, flexibleSpace, nil]];
+                keyInputField.inputAccessoryView = customToolbarView;
+#endif
                 [keyInputField becomeFirstResponder];
                 [keyInputField addTarget:self action:@selector(onKeyboardPressed:) forControlEvents:UIControlEventEditingChanged];
                 
@@ -205,6 +386,63 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
                 
                 isInputingText = true;
             }
+        }
+    }
+}
+
+- (UIBarButtonItem *)createButtonWithImageNamed:(NSString *)imageName backgroundColor:(UIColor *)backgroundColor target:(id)target action:(SEL)action keyCode:(NSInteger)keyCode isToggleable:(BOOL)isToggleable {
+    UIImage *image = [UIImage imageNamed:imageName];
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+    [button setImage:image forState:UIControlStateNormal];
+    button.frame = CGRectMake(0, 0, 30, 30);
+    button.imageView.contentMode = UIViewContentModeScaleAspectFit;
+    button.imageView.backgroundColor = backgroundColor;
+    button.imageView.layer.cornerRadius = 10.0;
+    button.imageEdgeInsets = UIEdgeInsetsMake(6, 6, 6, 6);
+    [button addTarget:target action:action forControlEvents:UIControlEventTouchUpInside];
+    objc_setAssociatedObject(button, "keyCode", @(keyCode), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(button, "isToggleable", @(isToggleable), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(button, "isOn", @(NO), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    UIBarButtonItem *barButton = [[UIBarButtonItem alloc] initWithCustomView:button];
+    return barButton;
+}
+
+- (void)toolbarButtonClicked:(UIButton *)sender {
+    BOOL isToggleable = [objc_getAssociatedObject(sender, "isToggleable") boolValue];
+    BOOL isOn = [objc_getAssociatedObject(sender, "isOn") boolValue];
+    if (isToggleable){
+        isOn = !isOn;
+        // Update the button's appearance based on its new state
+        if (isOn) {
+            sender.imageView.backgroundColor = [UIColor lightGrayColor];
+        } else {
+            sender.imageView.backgroundColor = [UIColor blackColor];
+        }
+    }
+    // Update the new on/off state of the button
+    objc_setAssociatedObject(sender, "isOn", @(isOn), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    // Get the keyCode parameter and convert to short for key press event
+    short keyCode = [objc_getAssociatedObject(sender, "keyCode") shortValue];
+    // Close keyboard if done button clicked
+    if (!keyCode) {
+        [keyInputField resignFirstResponder];
+        isInputingText = false;
+    }
+    else {
+        // Send key press event using keyCode parameter, toggle if necessary
+        if (isToggleable){
+            if (isOn){
+                LiSendKeyboardEvent(keyCode, KEY_ACTION_DOWN, 0);
+                [keysDown addObject:@(keyCode)];
+            } else {
+                LiSendKeyboardEvent(keyCode, KEY_ACTION_UP, 0);
+                [keysDown removeObject:@(keyCode)];
+            }
+        }
+        else {
+            LiSendKeyboardEvent(keyCode, KEY_ACTION_DOWN, 0);
+            usleep(50 * 1000);
+            LiSendKeyboardEvent(keyCode, KEY_ACTION_UP, 0);
         }
     }
 }
@@ -273,6 +511,14 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
 #if !TARGET_OS_TV
     if (@available(iOS 13.4, *)) {
+        for (UITouch* touch in touches) {
+            if (touch.type == UITouchTypePencil) {
+                if ([self sendStylusEvent:touch]) {
+                    return;
+                }
+            }
+        }
+        
         UITouch *touch = [touches anyObject];
         if (touch.type == UITouchTypeIndirectPointer) {
             if (@available(iOS 14.0, *)) {
@@ -308,7 +554,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         for (UIPress* press in presses) {
             // For now, we'll treated it as handled if we handle at least one of the
             // UIPress events inside the set.
-            if (press.key != nil && [KeyboardSupport sendKeyEvent:press.key down:YES]) {
+            if ([KeyboardSupport sendKeyEventForPress:press down:YES]) {
                 // This will prevent the legacy UITextField from receiving the event
                 handled = YES;
             }
@@ -327,7 +573,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         for (UIPress* press in presses) {
             // For now, we'll treated it as handled if we handle at least one of the
             // UIPress events inside the set.
-            if (press.key != nil && [KeyboardSupport sendKeyEvent:press.key down:NO]) {
+            if ([KeyboardSupport sendKeyEventForPress:press down:NO]) {
                 // This will prevent the legacy UITextField from receiving the event
                 handled = YES;
             }
@@ -351,6 +597,18 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     
     hasUserInteracted = YES;
     
+#if !TARGET_OS_TV
+    if (@available(iOS 13.4, *)) {
+        for (UITouch* touch in touches) {
+            if (touch.type == UITouchTypePencil) {
+                if ([self sendStylusEvent:touch]) {
+                    return;
+                }
+            }
+        }
+    }
+#endif
+    
     if (![onScreenControls handleTouchUpEvent:touches]) {
         [touchHandler touchesEnded:touches withEvent:event];
     }
@@ -361,48 +619,21 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     [self handleMouseButtonEvent:BUTTON_ACTION_RELEASE
                       forTouches:touches
                        withEvent:event];
+#if !TARGET_OS_TV
+    if (@available(iOS 13.4, *)) {
+        for (UITouch* touch in touches) {
+            if (touch.type == UITouchTypePencil) {
+                [self sendStylusEvent:touch];
+            }
+        }
+    }
+#endif
 }
 
 #if !TARGET_OS_TV
 - (void) updateCursorLocation:(CGPoint)location isMouse:(BOOL)isMouse {
-    // These are now relative to the StreamView, however we need to scale them
-    // further to make them relative to the actual video portion.
-    float x = location.x - self.bounds.origin.x;
-    float y = location.y - self.bounds.origin.y;
-    
-    // For some reason, we don't seem to always get to the bounds of the window
-    // so we'll subtract 1 pixel if we're to the left/below of the origin and
-    // and add 1 pixel if we're to the right/above. It should be imperceptible
-    // to the user but it will allow activation of gestures that require contact
-    // with the edge of the screen (like Aero Snap).
-    if (x < self.bounds.size.width / 2) {
-        x--;
-    }
-    else {
-        x++;
-    }
-    if (y < self.bounds.size.height / 2) {
-        y--;
-    }
-    else {
-        y++;
-    }
-    
-    // This logic mimics what iOS does with AVLayerVideoGravityResizeAspect
-    CGSize videoSize;
-    CGPoint videoOrigin;
-    if (self.bounds.size.width > self.bounds.size.height * streamAspectRatio) {
-        videoSize = CGSizeMake(self.bounds.size.height * streamAspectRatio, self.bounds.size.height);
-    } else {
-        videoSize = CGSizeMake(self.bounds.size.width, self.bounds.size.width / streamAspectRatio);
-    }
-    videoOrigin = CGPointMake(self.bounds.size.width / 2 - videoSize.width / 2,
-                              self.bounds.size.height / 2 - videoSize.height / 2);
-    
-    // Confine the cursor to the video region. We don't just discard events outside
-    // the region because we won't always get one exactly when the mouse leaves the region.
-    x = MIN(MAX(x, videoOrigin.x), videoOrigin.x + videoSize.width);
-    y = MIN(MAX(y, videoOrigin.y), videoOrigin.y + videoSize.height);
+    CGPoint normalizedLocation = [self adjustCoordinatesForVideoArea:location];
+    CGSize videoSize = [self getVideoAreaSize];
     
     // Send the mouse position relative to the video region if it has changed
     // if we're receiving coordinates from a real mouse.
@@ -411,15 +642,14 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     // send it if the value has changed. We will receive one of these events
     // any time the user presses a modifier key, which can result in errant
     // mouse motion when using a Citrix X1 mouse.
-    if (x != lastMouseX || y != lastMouseY || !isMouse) {
+    if (normalizedLocation.x != lastMouseX || normalizedLocation.y != lastMouseY || !isMouse) {
         if (lastMouseX != 0 || lastMouseY != 0 || !isMouse) {
-            LiSendMousePositionEvent(x - videoOrigin.x, y - videoOrigin.y,
-                                     videoSize.width, videoSize.height);
+            LiSendMousePositionEvent(normalizedLocation.x, normalizedLocation.y, videoSize.width, videoSize.height);
         }
         
         if (isMouse) {
-            lastMouseX = x;
-            lastMouseY = y;
+            lastMouseX = normalizedLocation.x;
+            lastMouseY = normalizedLocation.y;
         }
     }
 }
@@ -474,20 +704,21 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     }
     
     CGPoint currentScrollTranslation = [gesture translationInView:self];
+    const short translationMultiplier = 120 * 20; // WHEEL_DELTA * 20
     
     {
-        short translationDeltaY = ((currentScrollTranslation.y - lastScrollTranslation.y) / self.bounds.size.height) * 120; // WHEEL_DELTA
+        short translationDeltaY = ((currentScrollTranslation.y - lastScrollTranslation.y) / self.bounds.size.height) * translationMultiplier;
         if (translationDeltaY != 0) {
-            LiSendHighResScrollEvent(translationDeltaY * 20);
+            LiSendHighResScrollEvent(translationDeltaY);
             lastScrollTranslation = currentScrollTranslation;
         }
     }
 
     {
-        short translationDeltaX = ((currentScrollTranslation.x - lastScrollTranslation.x) / self.bounds.size.width) * 120; // WHEEL_DELTA
+        short translationDeltaX = ((currentScrollTranslation.x - lastScrollTranslation.x) / self.bounds.size.width) * translationMultiplier;
         if (translationDeltaX != 0) {
             // Direction is reversed from vertical scrolling
-            LiSendHighResHScrollEvent(-translationDeltaX * 20);
+            LiSendHighResHScrollEvent(-translationDeltaX);
             lastScrollTranslation = currentScrollTranslation;
         }
     }
@@ -546,6 +777,13 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     usleep(50 * 1000);
     LiSendKeyboardEvent(0x0d, KEY_ACTION_UP, 0);
     return NO;
+}
+
+- (void)textFieldDidEndEditing:(UITextField *)textField {
+    for (NSNumber* keyCode in keysDown) {
+        LiSendKeyboardEvent([keyCode shortValue], KEY_ACTION_UP, 0);
+    }
+    [keysDown removeAllObjects];
 }
 
 - (void)onKeyboardPressed:(UITextField *)textField {

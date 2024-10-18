@@ -16,11 +16,14 @@
 
 @implementation WakeOnLanManager
 
-static const int numPorts = 7;
-static const int ports[numPorts] = {
+static const int numStaticPorts = 2;
+static const int staticPorts[numStaticPorts] = {
     9, // Standard WOL port (privileged port)
-    47998, 47999, 48000, 48002, 48010, // Ports opened by GFE
     47009, // Port opened by Moonlight Internet Hosting Tool for WoL (non-privileged port)
+};
+static const int numDynamicPorts = 5;
+static const int dynamicPorts[numDynamicPorts] = {
+    47998, 47999, 48000, 48002, 48010, // Ports opened by GFE/Sunshine
 };
 
 + (void) populateAddress:(struct sockaddr_storage*)addr withPort:(unsigned short)port {
@@ -57,8 +60,9 @@ static const int ports[numPorts] = {
             continue;
         }
         
-        // Get the raw address from the address+port string
+        // Get the raw address and base port from the address+port string
         NSString* rawAddress = [Utils addressPortStringToAddress:address];
+        unsigned short basePort = [Utils addressPortStringToPort:address];
         
         memset(&hints, 0, sizeof(hints));
         hints.ai_family = AF_UNSPEC;
@@ -89,15 +93,29 @@ static const int ports[numPorts] = {
             memset(&addr, 0, sizeof(addr));
             memcpy(&addr, curr->ai_addr, curr->ai_addrlen);
             
-            for (int j = 0; j < numPorts; j++) {
-                [WakeOnLanManager populateAddress:&addr withPort:ports[j]];
+            for (int j = 0; j < numStaticPorts; j++) {
+                [WakeOnLanManager populateAddress:&addr withPort:staticPorts[j]];
                 long err = sendto(wolSocket,
                                  [wolPayload bytes],
                                  [wolPayload length],
                                  0,
                                  (struct sockaddr*)&addr,
                                  curr->ai_addrlen);
-                Log(LOG_I, @"Sending WOL packet returned: %ld", err);
+                Log(LOG_I, @"Sending WOL packet to port %u returned: %ld", staticPorts[j], err);
+            }
+            
+            for (int j = 0; j < numDynamicPorts; j++) {
+                // Offset the WoL dynamic ports by the base port
+                unsigned short port = ((int)dynamicPorts[j] - 47989) + basePort;
+                
+                [WakeOnLanManager populateAddress:&addr withPort:port];
+                long err = sendto(wolSocket,
+                                 [wolPayload bytes],
+                                 [wolPayload length],
+                                 0,
+                                 (struct sockaddr*)&addr,
+                                 curr->ai_addrlen);
+                Log(LOG_I, @"Sending WOL packet to port %u returned: %ld", port, err);
             }
             
             close(wolSocket);

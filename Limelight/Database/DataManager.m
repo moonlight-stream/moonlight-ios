@@ -62,7 +62,7 @@
                  multiController:(BOOL)multiController
                  swapABXYButtons:(BOOL)swapABXYButtons
                        audioOnPC:(BOOL)audioOnPC
-                         useHevc:(BOOL)useHevc
+                  preferredCodec:(uint32_t)preferredCodec
                   useFramePacing:(BOOL)useFramePacing
                        enableHdr:(BOOL)enableHdr
                   btMouseSupport:(BOOL)btMouseSupport
@@ -81,7 +81,7 @@
         settingsToSave.multiController = multiController;
         settingsToSave.swapABXYButtons = swapABXYButtons;
         settingsToSave.playAudioOnPC = audioOnPC;
-        settingsToSave.useHevc2 = useHevc;
+        settingsToSave.preferredCodec = preferredCodec;
         settingsToSave.useFramePacing = useFramePacing;
         settingsToSave.enableHdr = enableHdr;
         settingsToSave.btMouseSupport = btMouseSupport;

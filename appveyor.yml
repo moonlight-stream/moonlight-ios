@@ -2,14 +2,23 @@ version: 0.0.0.{build}
 
 clone_depth: 1
 
-image: macOS-BigSur
+environment:
+  matrix:
+    - APPVEYOR_BUILD_WORKER_IMAGE: macOS-Sonoma
+      SCHEME: Moonlight
+      SDK: iphonesimulator
+      PLATFORM: iOS
+    - APPVEYOR_BUILD_WORKER_IMAGE: macOS-Sonoma
+      SCHEME: Moonlight TV
+      SDK: appletvsimulator
+      PLATFORM: tvOS
 
 before_build:
   - 'git submodule update --init --recursive'
+  - sh: 'xcodebuild -downloadPlatform $PLATFORM'
 
 build_script:
-  - sh: set -o pipefail && xcodebuild -project Moonlight.xcodeproj -scheme "Moonlight" -destination "platform=iOS Simulator,OS=15.2,name=iPhone 11 Pro" clean build | xcpretty
-  - sh: set -o pipefail && xcodebuild -project Moonlight.xcodeproj -scheme "Moonlight" -destination "platform=iOS Simulator,OS=15.2,name=iPad Pro (9.7-inch)" clean build | xcpretty
-  - sh: set -o pipefail && xcodebuild -project Moonlight.xcodeproj -scheme "Moonlight TV" -destination "platform=tvOS Simulator,OS=15.2,name=Apple TV 4K (2nd generation)" clean build | xcpretty
+  - sh: xcodebuild -project Moonlight.xcodeproj -scheme "$SCHEME" -configuration Debug -sdk $SDK clean build
+  - sh: xcodebuild -project Moonlight.xcodeproj -scheme "$SCHEME" -configuration Release -sdk $SDK clean build
 
 deploy: off

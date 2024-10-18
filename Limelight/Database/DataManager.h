@@ -23,7 +23,7 @@
                  multiController:(BOOL)multiController
                  swapABXYButtons:(BOOL)swapABXYButtons
                        audioOnPC:(BOOL)audioOnPC
-                         useHevc:(BOOL)useHevc
+                  preferredCodec:(uint32_t)preferredCodec
                   useFramePacing:(BOOL)useFramePacing
                        enableHdr:(BOOL)enableHdr
                   btMouseSupport:(BOOL)btMouseSupport

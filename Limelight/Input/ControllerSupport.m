@@ -37,10 +37,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     float accumulatedScrollY;
     
     OnScreenControls *_osc;
-    
-    // This controller object is shared between on-screen controls
-    // and player 0
-    Controller *_player0osc;
+    Controller *_oscController;
     
 #define EMULATING_SELECT     0x1
 #define EMULATING_SPECIAL    0x2
@@ -55,12 +52,13 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
 #define UPDATE_BUTTON_FLAG(controller, x, y) \
 ((y) ? [self setButtonFlag:controller flags:x] : [self clearButtonFlag:controller flags:x])
 
+#define MAX_MAGNITUDE(x, y) (abs(x) > abs(y) ? (x) : (y))
+
 -(void) rumble:(unsigned short)controllerNumber lowFreqMotor:(unsigned short)lowFreqMotor highFreqMotor:(unsigned short)highFreqMotor
 {
     Controller* controller = [_controllers objectForKey:[NSNumber numberWithInteger:controllerNumber]];
     if (controller == nil && controllerNumber == 0 && _oscEnabled) {
-        // No physical controller, but we have on-screen controls
-        controller = _player0osc;
+        // TODO: Rumble emulation for OSC
     }
     if (controller == nil) {
         // No connected controller for this player
@@ -75,8 +73,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
 {
     Controller* controller = [_controllers objectForKey:[NSNumber numberWithInteger:controllerNumber]];
     if (controller == nil && controllerNumber == 0 && _oscEnabled) {
-        // No physical controller, but we have on-screen controls
-        controller = _player0osc;
+        // TODO: Trigger rumble emulation for OSC
     }
     if (controller == nil) {
         // No connected controller for this player
@@ -124,9 +121,9 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
                             // Convert g to m/s^2
                             LiSendControllerMotionEvent((uint8_t)controllerNumber,
                                                         LI_MOTION_TYPE_ACCEL,
-                                                        accelSample.x * 9.80665f,
-                                                        accelSample.y * 9.80665f,
-                                                        accelSample.z * 9.80665f);
+                                                        accelSample.x * -9.80665f,
+                                                        accelSample.y * -9.80665f,
+                                                        accelSample.z * -9.80665f);
                         }];
                     });
                 }
@@ -155,8 +152,8 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
                             LiSendControllerMotionEvent((uint8_t)controllerNumber,
                                                         LI_MOTION_TYPE_GYRO,
                                                         gyroSample.x * 57.2957795f,
-                                                        gyroSample.y * 57.2957795f,
-                                                        gyroSample.z * 57.2957795f);
+                                                        gyroSample.z * 57.2957795f,
+                                                        gyroSample.y * -57.2957795f);
                         }];
                     });
                 }
@@ -172,6 +169,23 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
                 controller.gamepad.motion.sensorsActive = NO;
             }
         }
+    }
+}
+
+-(void) setControllerLed:(uint16_t)controllerNumber r:(uint8_t)r g:(uint8_t)g b:(uint8_t)b {
+    if (@available(iOS 14.0, tvOS 14.0, *)) {
+        Controller* controller = [_controllers objectForKey:[NSNumber numberWithInteger:controllerNumber]];
+        if (controller == nil) {
+            // No connected controller for this player
+            return;
+        }
+        
+        if (controller.gamepad.light == nil) {
+            // No LED control supported for this controller
+            return;
+        }
+        
+        controller.gamepad.light.color = [[GCColor alloc] initWithRed:(r / 255.0f) green:(g / 255.0f) blue:(b / 255.0f)];
     }
 }
 
@@ -319,15 +333,32 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
             exitRequested = YES;
         }
         
-        // Report the controller arrival to the host if we haven't done so yet
-        if (!controller.reportedArrival && controller.gamepad) {
-            [self reportControllerArrival:controller.gamepad];
-            controller.reportedArrival = YES;
+        // Only send controller events if we successfully reported controller arrival
+        if ([self reportControllerArrival:controller]) {
+            uint32_t buttonFlags = controller.lastButtonFlags;
+            uint8_t leftTrigger = controller.lastLeftTrigger;
+            uint8_t rightTrigger = controller.lastRightTrigger;
+            int16_t leftStickX = controller.lastLeftStickX;
+            int16_t leftStickY = controller.lastLeftStickY;
+            int16_t rightStickX = controller.lastRightStickX;
+            int16_t rightStickY = controller.lastRightStickY;
+            
+            // If this is merged with another controller, combine the inputs
+            if (controller.mergedWithController) {
+                buttonFlags |= controller.mergedWithController.lastButtonFlags;
+                leftTrigger = MAX(leftTrigger, controller.mergedWithController.lastLeftTrigger);
+                rightTrigger = MAX(rightTrigger, controller.mergedWithController.lastRightTrigger);
+                leftStickX = MAX_MAGNITUDE(leftStickX, controller.mergedWithController.lastLeftStickX);
+                leftStickY = MAX_MAGNITUDE(leftStickY, controller.mergedWithController.lastLeftStickY);
+                rightStickX = MAX_MAGNITUDE(rightStickX, controller.mergedWithController.lastRightStickX);
+                rightStickY = MAX_MAGNITUDE(rightStickY, controller.mergedWithController.lastRightStickY);
+            }
+            
+            // Player 1 is always present for OSC
+            LiSendMultiControllerEvent(_multiController ? controller.playerIndex : 0, [self getActiveGamepadMask],
+                                       buttonFlags, leftTrigger, rightTrigger,
+                                       leftStickX, leftStickY, rightStickX, rightStickY);
         }
-        
-        // Player 1 is always present for OSC
-        LiSendMultiControllerEvent(_multiController ? controller.playerIndex : 0, [self getActiveGamepadMask],
-                                   controller.lastButtonFlags, controller.lastLeftTrigger, controller.lastRightTrigger, controller.lastLeftStickX, controller.lastLeftStickY, controller.lastRightStickX, controller.lastRightStickY);
     }
     [_controllerStreamLock unlock];
     
@@ -359,15 +390,12 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
         if (controller.extendedGamepad != NULL) {
             // Re-enable system gestures on the gamepad buttons now
             if (@available(iOS 14.0, tvOS 14.0, *)) {
-                for (GCControllerElement* element in controller.extendedGamepad.allElements) {
+                for (GCControllerElement* element in controller.physicalInputProfile.allElements) {
                     element.preferredSystemGestureState = GCSystemGestureStateEnabled;
                 }
             }
             
             controller.extendedGamepad.valueChangedHandler = NULL;
-        }
-        else if (controller.gamepad != NULL) {
-            controller.gamepad.valueChangedHandler = NULL;
         }
     }
 }
@@ -402,177 +430,250 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     }
 }
 
--(void) reportControllerArrival:(GCController*) controller
+-(void) initializeControllerBattery:(Controller*) controller
 {
-    if (controller == nil || controller.extendedGamepad == nil) {
-        return;
+    if (@available(iOS 14.0, tvOS 14.0, *)) {
+        if (controller.gamepad.battery) {
+            // Poll for updated battery status every 30 seconds
+            controller.batteryTimer = [NSTimer scheduledTimerWithTimeInterval:30 repeats:YES block:^(NSTimer *timer) {
+                if (controller.lastBatteryState != controller.gamepad.battery.batteryState ||
+                    controller.lastBatteryLevel != controller.gamepad.battery.batteryLevel) {
+                    uint8_t batteryState;
+                    
+                    switch (controller.gamepad.battery.batteryState) {
+                        case GCDeviceBatteryStateFull:
+                            batteryState = LI_BATTERY_STATE_FULL;
+                            break;
+                        case GCDeviceBatteryStateCharging:
+                            batteryState = LI_BATTERY_STATE_CHARGING;
+                            break;
+                        case GCDeviceBatteryStateDischarging:
+                            batteryState = LI_BATTERY_STATE_DISCHARGING;
+                            break;
+                        case GCDeviceBatteryStateUnknown:
+                        default:
+                            batteryState = LI_BATTERY_STATE_UNKNOWN;
+                            break;
+                    }
+                    
+                    LiSendControllerBatteryEvent(controller.playerIndex, batteryState, (uint8_t)(controller.gamepad.battery.batteryLevel * 100));
+                    
+                    controller.lastBatteryState = controller.gamepad.battery.batteryState;
+                    controller.lastBatteryLevel = controller.gamepad.battery.batteryLevel;
+                }
+            }];
+            
+            // Fire the timer immediately to send the initial battery state
+            [controller.batteryTimer fire];
+        }
+    }
+}
+
+-(void) cleanupControllerBattery:(Controller*) controller
+{
+    if (@available(iOS 14.0, tvOS 14.0, *)) {
+        [controller.batteryTimer invalidate];
+    }
+}
+
+-(BOOL) reportControllerArrival:(Controller*) limeController
+{
+    // Only report arrival once
+    if (limeController.reportedArrival) {
+        return YES;
     }
     
     uint8_t type = LI_CTYPE_UNKNOWN;
     uint16_t capabilities = 0;
     uint32_t supportedButtonFlags = 0;
     
-    // Start is always present
-    supportedButtonFlags |= PLAY_FLAG;
-    
-    // Detect buttons present in the GCExtendedGamepad profile
-    if (controller.extendedGamepad.dpad) {
-        supportedButtonFlags |= UP_FLAG | DOWN_FLAG | LEFT_FLAG | RIGHT_FLAG;
-    }
-    if (controller.extendedGamepad.leftShoulder) {
-        supportedButtonFlags |= LB_FLAG;
-    }
-    if (controller.extendedGamepad.rightShoulder) {
-        supportedButtonFlags |= RB_FLAG;
-    }
-    if (@available(iOS 13.0, tvOS 13.0, *)) {
-        if (controller.extendedGamepad.buttonOptions) {
-            supportedButtonFlags |= BACK_FLAG;
+    GCController *controller = limeController.gamepad;
+    if (controller) {
+        // This is a physical controller with a corresponding GCController object
+        
+        // Start is always present
+        supportedButtonFlags |= PLAY_FLAG;
+        
+        // Detect buttons present in the GCExtendedGamepad profile
+        if (controller.extendedGamepad.dpad) {
+            supportedButtonFlags |= UP_FLAG | DOWN_FLAG | LEFT_FLAG | RIGHT_FLAG;
         }
-    }
-    if (@available(iOS 14.0, tvOS 14.0, *)) {
-        if (controller.extendedGamepad.buttonHome) {
-            supportedButtonFlags |= SPECIAL_FLAG;
+        if (controller.extendedGamepad.leftShoulder) {
+            supportedButtonFlags |= LB_FLAG;
         }
-    }
-    if (controller.extendedGamepad.buttonA) {
-        supportedButtonFlags |= A_FLAG;
-    }
-    if (controller.extendedGamepad.buttonB) {
-        supportedButtonFlags |= B_FLAG;
-    }
-    if (controller.extendedGamepad.buttonX) {
-        supportedButtonFlags |= X_FLAG;
-    }
-    if (controller.extendedGamepad.buttonY) {
-        supportedButtonFlags |= Y_FLAG;
-    }
-    if (@available(iOS 12.1, tvOS 12.1, *)) {
-        if (controller.extendedGamepad.leftThumbstickButton) {
-            supportedButtonFlags |= LS_CLK_FLAG;
+        if (controller.extendedGamepad.rightShoulder) {
+            supportedButtonFlags |= RB_FLAG;
         }
-        if (controller.extendedGamepad.rightThumbstickButton) {
-            supportedButtonFlags |= RS_CLK_FLAG;
+        if (@available(iOS 13.0, tvOS 13.0, *)) {
+            if (controller.extendedGamepad.buttonOptions) {
+                supportedButtonFlags |= BACK_FLAG;
+            }
         }
-    }
-    
-    if (@available(iOS 14.0, tvOS 14.0, *)) {
-        if ([controller.extendedGamepad isKindOfClass:[GCXboxGamepad class]]) {
-            GCXboxGamepad* xboxGamepad = (GCXboxGamepad*)controller.extendedGamepad;
-            
-            if (xboxGamepad.paddleButton1) {
+        if (@available(iOS 14.0, tvOS 14.0, *)) {
+            if (controller.extendedGamepad.buttonHome) {
+                supportedButtonFlags |= SPECIAL_FLAG;
+            }
+        }
+        if (controller.extendedGamepad.buttonA) {
+            supportedButtonFlags |= A_FLAG;
+        }
+        if (controller.extendedGamepad.buttonB) {
+            supportedButtonFlags |= B_FLAG;
+        }
+        if (controller.extendedGamepad.buttonX) {
+            supportedButtonFlags |= X_FLAG;
+        }
+        if (controller.extendedGamepad.buttonY) {
+            supportedButtonFlags |= Y_FLAG;
+        }
+        if (@available(iOS 12.1, tvOS 12.1, *)) {
+            if (controller.extendedGamepad.leftThumbstickButton) {
+                supportedButtonFlags |= LS_CLK_FLAG;
+            }
+            if (controller.extendedGamepad.rightThumbstickButton) {
+                supportedButtonFlags |= RS_CLK_FLAG;
+            }
+        }
+        
+        if (@available(iOS 14.0, tvOS 14.0, *)) {
+            // Xbox One/Series controller
+            if (controller.physicalInputProfile.buttons[GCInputXboxPaddleOne]) {
                 supportedButtonFlags |= PADDLE1_FLAG;
             }
-            if (xboxGamepad.paddleButton2) {
+            if (controller.physicalInputProfile.buttons[GCInputXboxPaddleTwo]) {
                 supportedButtonFlags |= PADDLE2_FLAG;
             }
-            if (xboxGamepad.paddleButton3) {
+            if (controller.physicalInputProfile.buttons[GCInputXboxPaddleThree]) {
                 supportedButtonFlags |= PADDLE3_FLAG;
             }
-            if (xboxGamepad.paddleButton4) {
+            if (controller.physicalInputProfile.buttons[GCInputXboxPaddleFour]) {
                 supportedButtonFlags |= PADDLE4_FLAG;
             }
-            
             if (@available(iOS 15.0, tvOS 15.0, *)) {
-                if (xboxGamepad.buttonShare) {
+                if (controller.physicalInputProfile.buttons[GCInputButtonShare]) {
                     supportedButtonFlags |= MISC_FLAG;
                 }
             }
             
-            type = LI_CTYPE_XBOX;
-        }
-        else if ([controller.extendedGamepad isKindOfClass:[GCDualShockGamepad class]]) {
-            GCDualShockGamepad* dualShockGamepad = (GCDualShockGamepad*)controller.extendedGamepad;
-            
-            if (dualShockGamepad.touchpadButton) {
+            // DualShock/DualSense controller
+            if (controller.physicalInputProfile.buttons[GCInputDualShockTouchpadButton]) {
                 supportedButtonFlags |= TOUCHPAD_FLAG;
+            }
+            if (controller.physicalInputProfile.dpads[GCInputDualShockTouchpadOne]) {
                 capabilities |= LI_CCAP_TOUCHPAD;
             }
-
-            type = LI_CTYPE_PS;
-        }
-        
-        if (@available(iOS 14.5, tvOS 14.5, *)) {
-            if ([controller.extendedGamepad isKindOfClass:[GCDualSenseGamepad class]]) {
-                GCDualSenseGamepad* dualSenseGamepad = (GCDualSenseGamepad*)controller.extendedGamepad;
-                
-                if (dualSenseGamepad.touchpadButton) {
-                    supportedButtonFlags |= TOUCHPAD_FLAG;
-                    capabilities |= LI_CCAP_TOUCHPAD;
-                }
-                
+            
+            if ([controller.extendedGamepad isKindOfClass:[GCXboxGamepad class]]) {
+                type = LI_CTYPE_XBOX;
+            }
+            else if ([controller.extendedGamepad isKindOfClass:[GCDualShockGamepad class]]) {
                 type = LI_CTYPE_PS;
             }
+            
+            if (@available(iOS 14.5, tvOS 14.5, *)) {
+                if ([controller.extendedGamepad isKindOfClass:[GCDualSenseGamepad class]]) {
+                    type = LI_CTYPE_PS;
+                }
+            }
+            
+            // Detect supported haptics localities
+            if (controller.haptics) {
+                if ([controller.haptics.supportedLocalities containsObject:GCHapticsLocalityHandles]) {
+                    capabilities |= LI_CCAP_RUMBLE;
+                }
+                if ([controller.haptics.supportedLocalities containsObject:GCHapticsLocalityTriggers]) {
+                    capabilities |= LI_CCAP_TRIGGER_RUMBLE;
+                }
+            }
+            
+            // Detect supported motion sensors
+            if (controller.motion) {
+                if (controller.motion.hasGravityAndUserAcceleration) {
+                    capabilities |= LI_CCAP_ACCEL;
+                }
+                if (controller.motion.hasRotationRate) {
+                    capabilities |= LI_CCAP_GYRO;
+                }
+            }
+            
+            // Detect RGB LED support
+            if (controller.light) {
+                capabilities |= LI_CCAP_RGB_LED;
+            }
+            
+            // Detect battery support
+            if (controller.battery) {
+                capabilities |= LI_CCAP_BATTERY_STATE;
+            }
         }
-        
-        // Detect supported haptics localities
-        if (controller.haptics) {
-            if ([controller.haptics.supportedLocalities containsObject:GCHapticsLocalityHandles]) {
-                capabilities |= LI_CCAP_RUMBLE;
-            }
-            if ([controller.haptics.supportedLocalities containsObject:GCHapticsLocalityTriggers]) {
-                capabilities |= LI_CCAP_TRIGGER_RUMBLE;
-            }
+        else {
+            // This is a virtual controller corresponding to our OSC
+
+            // TODO: Support various layouts and button labels on the OSC
+            type = LI_CTYPE_XBOX;
+            capabilities = 0;
+            supportedButtonFlags =
+                PLAY_FLAG | BACK_FLAG | UP_FLAG | DOWN_FLAG | LEFT_FLAG | RIGHT_FLAG |
+                LB_FLAG | RB_FLAG | LS_CLK_FLAG | RS_CLK_FLAG | A_FLAG | B_FLAG | X_FLAG | Y_FLAG;
         }
-        
-        // Detect supported motion sensors
-        if (controller.motion) {
-            if (controller.motion.hasGravityAndUserAcceleration) {
-                capabilities |= LI_CCAP_ACCEL;
-            }
-            if (controller.motion.hasRotationRate) {
-                capabilities |= LI_CCAP_GYRO;
-            }
-        }
-        
-        LiSendControllerArrivalEvent(controller.playerIndex, [self getActiveGamepadMask], type, supportedButtonFlags, capabilities);
     }
+
+    // Report the new controller to the host
+    // NB: This will fail if the connection hasn't been fully established yet
+    // and we will try again later.
+    if (LiSendControllerArrivalEvent(controller.playerIndex,
+                                     [self getActiveGamepadMask],
+                                     type,
+                                     supportedButtonFlags,
+                                     capabilities) != 0) {
+        return NO;
+    }
+    
+    // Begin polling for battery status
+    [self initializeControllerBattery:limeController];
+    
+    // Remember that we've reported arrival already
+    limeController.reportedArrival = YES;
+    return YES;
 }
 
--(void) handleControllerTouchpad:(Controller*)controller primaryTouch:(GCControllerDirectionPad*)primaryTouch secondaryTouch:(GCControllerDirectionPad*)secondaryTouch
+-(void) handleControllerTouchpad:(Controller*)controller touch:(GCControllerDirectionPad*)touch index:(int)index
 {
-    // If we went from a touch to no touch, generate a touch up event
-    if ((controller.lastPrimaryTouchX || controller.lastPrimaryTouchY) && (!primaryTouch.xAxis.value && !primaryTouch.yAxis.value)) {
-        LiSendControllerTouchEvent(controller.playerIndex, LI_TOUCH_EVENT_UP, 0,
-                                   primaryTouch.xAxis.value, primaryTouch.yAxis.value, 1.0f);
-    }
-    else if (primaryTouch.xAxis.value || primaryTouch.yAxis.value) {
-        // If we went from no touch to a touch, generate a touch down event
-        if (!controller.lastPrimaryTouchX && !controller.lastPrimaryTouchY) {
-            LiSendControllerTouchEvent(controller.playerIndex, LI_TOUCH_EVENT_DOWN, 0,
-                                       primaryTouch.xAxis.value, primaryTouch.yAxis.value, 1.0f);
-        }
-        else if (controller.lastPrimaryTouchX != primaryTouch.xAxis.value ||
-                 controller.lastPrimaryTouchY != primaryTouch.yAxis.value) {
-            // Otherwise it's just a move
-            LiSendControllerTouchEvent(controller.playerIndex, LI_TOUCH_EVENT_MOVE, 0,
-                                       primaryTouch.xAxis.value, primaryTouch.yAxis.value, 1.0f);
-        }
-    }
-    controller.lastPrimaryTouchX = primaryTouch.xAxis.value;
-    controller.lastPrimaryTouchY = primaryTouch.yAxis.value;
+    controller_touch_context_t context = index == 0 ? controller.primaryTouch : controller.secondaryTouch;
     
+    // This magic is courtesy of SDL
+    float normalizedX = (1.0f + touch.xAxis.value) * 0.5f;
+    float normalizedY = 1.0f - (1.0f + touch.yAxis.value) * 0.5f;
     
     // If we went from a touch to no touch, generate a touch up event
-    if ((controller.lastSecondaryTouchX || controller.lastSecondaryTouchY) && (!secondaryTouch.xAxis.value && !secondaryTouch.yAxis.value)) {
-        LiSendControllerTouchEvent(controller.playerIndex, LI_TOUCH_EVENT_UP, 1,
-                                   secondaryTouch.xAxis.value, secondaryTouch.yAxis.value, 1.0f);
+    if ((context.lastX || context.lastY) && (!touch.xAxis.value && !touch.yAxis.value)) {
+        LiSendControllerTouchEvent(controller.playerIndex, LI_TOUCH_EVENT_UP, index, normalizedX, normalizedY, 1.0f);
     }
-    else if (secondaryTouch.xAxis.value || secondaryTouch.yAxis.value) {
+    else if (touch.xAxis.value || touch.yAxis.value) {
         // If we went from no touch to a touch, generate a touch down event
-        if (!controller.lastSecondaryTouchX && !controller.lastSecondaryTouchY) {
-            LiSendControllerTouchEvent(controller.playerIndex, LI_TOUCH_EVENT_DOWN, 1,
-                                       secondaryTouch.xAxis.value, secondaryTouch.yAxis.value, 1.0f);
+        if (!context.lastX && !context.lastY) {
+            LiSendControllerTouchEvent(controller.playerIndex, LI_TOUCH_EVENT_DOWN, index, normalizedX, normalizedY, 1.0f);
         }
-        else if (controller.lastSecondaryTouchX != secondaryTouch.xAxis.value ||
-                 controller.lastSecondaryTouchY != secondaryTouch.yAxis.value) {
+        else if (context.lastX != touch.xAxis.value || context.lastY != touch.yAxis.value) {
             // Otherwise it's just a move
-            LiSendControllerTouchEvent(controller.playerIndex, LI_TOUCH_EVENT_MOVE, 1,
-                                       secondaryTouch.xAxis.value, secondaryTouch.yAxis.value, 1.0f);
+            LiSendControllerTouchEvent(controller.playerIndex, LI_TOUCH_EVENT_MOVE, index, normalizedX, normalizedY, 1.0f);
         }
     }
-    controller.lastSecondaryTouchX = secondaryTouch.xAxis.value;
-    controller.lastSecondaryTouchY = secondaryTouch.yAxis.value;
+    
+    // We have to assign the whole struct because this is a property rather than a standard
+    // field that we could modify through a pointer.
+    if (index == 0) {
+        controller.primaryTouch = (controller_touch_context_t) {
+            touch.xAxis.value,
+            touch.yAxis.value
+        };
+    }
+    else {
+        controller.secondaryTouch = (controller_touch_context_t) {
+            touch.xAxis.value,
+            touch.yAxis.value
+        };
+    }
 }
 
 -(void) registerControllerCallbacks:(GCController*) controller
@@ -614,7 +715,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
             // Disable system gestures on the gamepad to avoid interfering
             // with in-game controller actions
             if (@available(iOS 14.0, tvOS 14.0, *)) {
-                for (GCControllerElement* element in controller.extendedGamepad.allElements) {
+                for (GCControllerElement* element in controller.physicalInputProfile.allElements) {
                     element.preferredSystemGestureState = GCSystemGestureStateDisabled;
                 }
             }
@@ -673,53 +774,38 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
                         UPDATE_BUTTON_FLAG(limeController, SPECIAL_FLAG, gamepad.buttonHome.pressed);
                     }
                     
-                    // iOS 14 adds specific profiles for DualShock and Xbox gamepads with additional buttons
-                    if ([gamepad isKindOfClass:[GCXboxGamepad class]]) {
-                        GCXboxGamepad* xboxGamepad = (GCXboxGamepad*)gamepad;
-                        
-                        if (xboxGamepad.paddleButton1) {
-                            UPDATE_BUTTON_FLAG(limeController, PADDLE1_FLAG, xboxGamepad.paddleButton1.pressed);
-                        }
-                        if (xboxGamepad.paddleButton2) {
-                            UPDATE_BUTTON_FLAG(limeController, PADDLE2_FLAG, xboxGamepad.paddleButton2.pressed);
-                        }
-                        if (xboxGamepad.paddleButton3) {
-                            UPDATE_BUTTON_FLAG(limeController, PADDLE3_FLAG, xboxGamepad.paddleButton3.pressed);
-                        }
-                        if (xboxGamepad.paddleButton4) {
-                            UPDATE_BUTTON_FLAG(limeController, PADDLE4_FLAG, xboxGamepad.paddleButton4.pressed);
-                        }
-                        
-                        if (@available(iOS 15.0, tvOS 15.0, *)) {
-                            if (xboxGamepad.buttonShare) {
-                                UPDATE_BUTTON_FLAG(limeController, MISC_FLAG, xboxGamepad.buttonShare.pressed);
-                            }
-                        }
+                    // Xbox One/Series controllers
+                    if (gamepad.controller.physicalInputProfile.buttons[GCInputXboxPaddleOne]) {
+                        UPDATE_BUTTON_FLAG(limeController, PADDLE1_FLAG, gamepad.controller.physicalInputProfile.buttons[GCInputXboxPaddleOne].pressed);
                     }
-                    else if ([gamepad isKindOfClass:[GCDualShockGamepad class]]) {
-                        GCDualShockGamepad* dualShockGamepad = (GCDualShockGamepad*)gamepad;
-                        
-                        if (dualShockGamepad.touchpadButton) {
-                            UPDATE_BUTTON_FLAG(limeController, TOUCHPAD_FLAG, dualShockGamepad.touchpadButton.pressed);
+                    if (gamepad.controller.physicalInputProfile.buttons[GCInputXboxPaddleTwo]) {
+                        UPDATE_BUTTON_FLAG(limeController, PADDLE2_FLAG, gamepad.controller.physicalInputProfile.buttons[GCInputXboxPaddleTwo].pressed);
+                    }
+                    if (gamepad.controller.physicalInputProfile.buttons[GCInputXboxPaddleThree]) {
+                        UPDATE_BUTTON_FLAG(limeController, PADDLE3_FLAG, gamepad.controller.physicalInputProfile.buttons[GCInputXboxPaddleThree].pressed);
+                    }
+                    if (gamepad.controller.physicalInputProfile.buttons[GCInputXboxPaddleFour]) {
+                        UPDATE_BUTTON_FLAG(limeController, PADDLE4_FLAG, gamepad.controller.physicalInputProfile.buttons[GCInputXboxPaddleFour].pressed);
+                    }
+                    if (@available(iOS 15.0, tvOS 15.0, *)) {
+                        if (gamepad.controller.physicalInputProfile.buttons[GCInputButtonShare]) {
+                            UPDATE_BUTTON_FLAG(limeController, MISC_FLAG, gamepad.controller.physicalInputProfile.buttons[GCInputButtonShare].pressed);
                         }
-                        
-                        [self handleControllerTouchpad:limeController
-                                          primaryTouch:dualShockGamepad.touchpadPrimary
-                                        secondaryTouch:dualShockGamepad.touchpadSecondary];
                     }
                     
-                    if (@available(iOS 14.5, tvOS 14.5, *)) {
-                        if ([gamepad isKindOfClass:[GCDualSenseGamepad class]]) {
-                            GCDualSenseGamepad* dualSenseGamepad = (GCDualSenseGamepad*)gamepad;
-                            
-                            if (dualSenseGamepad.touchpadButton) {
-                                UPDATE_BUTTON_FLAG(limeController, TOUCHPAD_FLAG, dualSenseGamepad.touchpadButton.pressed);
-                            }
-                            
-                            [self handleControllerTouchpad:limeController
-                                              primaryTouch:dualSenseGamepad.touchpadPrimary
-                                            secondaryTouch:dualSenseGamepad.touchpadSecondary];
-                        }
+                    // DualShock/DualSense controllers
+                    if (gamepad.controller.physicalInputProfile.buttons[GCInputDualShockTouchpadButton]) {
+                        UPDATE_BUTTON_FLAG(limeController, TOUCHPAD_FLAG, gamepad.controller.physicalInputProfile.buttons[GCInputDualShockTouchpadButton].pressed);
+                    }
+                    if (gamepad.controller.physicalInputProfile.dpads[GCInputDualShockTouchpadOne]) {
+                        [self handleControllerTouchpad:limeController
+                                                 touch:gamepad.controller.physicalInputProfile.dpads[GCInputDualShockTouchpadOne]
+                                                 index:0];
+                    }
+                    if (gamepad.controller.physicalInputProfile.dpads[GCInputDualShockTouchpadTwo]) {
+                        [self handleControllerTouchpad:limeController
+                                                 touch:gamepad.controller.physicalInputProfile.dpads[GCInputDualShockTouchpadTwo]
+                                                 index:1];
                     }
                 }
                 
@@ -735,33 +821,6 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
                 [self updateLeftStick:limeController x:leftStickX y:leftStickY];
                 [self updateRightStick:limeController x:rightStickX y:rightStickY];
                 [self updateTriggers:limeController left:leftTrigger right:rightTrigger];
-                [self updateFinished:limeController];
-            };
-        }
-        else if (controller.gamepad != NULL) {
-            controller.gamepad.valueChangedHandler = ^(GCGamepad *gamepad, GCControllerElement *element) {
-                Controller* limeController = [self->_controllers objectForKey:[NSNumber numberWithInteger:gamepad.controller.playerIndex]];
-                if (self->_swapABXYButtons) {
-                    UPDATE_BUTTON_FLAG(limeController, B_FLAG, gamepad.buttonA.pressed);
-                    UPDATE_BUTTON_FLAG(limeController, A_FLAG, gamepad.buttonB.pressed);
-                    UPDATE_BUTTON_FLAG(limeController, Y_FLAG, gamepad.buttonX.pressed);
-                    UPDATE_BUTTON_FLAG(limeController, X_FLAG, gamepad.buttonY.pressed);
-                }
-                else {
-                    UPDATE_BUTTON_FLAG(limeController, A_FLAG, gamepad.buttonA.pressed);
-                    UPDATE_BUTTON_FLAG(limeController, B_FLAG, gamepad.buttonB.pressed);
-                    UPDATE_BUTTON_FLAG(limeController, X_FLAG, gamepad.buttonX.pressed);
-                    UPDATE_BUTTON_FLAG(limeController, Y_FLAG, gamepad.buttonY.pressed);
-                }
-                
-                UPDATE_BUTTON_FLAG(limeController, UP_FLAG, gamepad.dpad.up.pressed);
-                UPDATE_BUTTON_FLAG(limeController, DOWN_FLAG, gamepad.dpad.down.pressed);
-                UPDATE_BUTTON_FLAG(limeController, LEFT_FLAG, gamepad.dpad.left.pressed);
-                UPDATE_BUTTON_FLAG(limeController, RIGHT_FLAG, gamepad.dpad.right.pressed);
-                
-                UPDATE_BUTTON_FLAG(limeController, LB_FLAG, gamepad.leftShoulder.pressed);
-                UPDATE_BUTTON_FLAG(limeController, RB_FLAG, gamepad.rightShoulder.pressed);
-                
                 [self updateFinished:limeController];
             };
         }
@@ -888,10 +947,6 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
                 }
                 break;
             }
-            else if (controller.gamepad != NULL) {
-                level = OnScreenControlsLevelAutoGCGamepad;
-                break;
-            }
         }
     }
     
@@ -916,24 +971,20 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     [self updateAutoOnScreenControlMode];
 }
 
--(void) assignController:(GCController*)controller {
+-(Controller*) assignController:(GCController*)controller {
     for (int i = 0; i < 4; i++) {
         if (!(_controllerNumbers & (1 << i))) {
             _controllerNumbers |= (1 << i);
             controller.playerIndex = i;
             
-            Controller* limeController;
-
-            if (i == 0) {
-                // Player 0 shares a controller object with the on-screen controls
-                limeController = _player0osc;
-            } else {
-                limeController = [[Controller alloc] init];
-                limeController.playerIndex = i;
-            }
-            
+            Controller* limeController = [[Controller alloc] init];
+            limeController.playerIndex = i;
             limeController.supportedEmulationFlags = EMULATING_SPECIAL | EMULATING_SELECT;
             limeController.gamepad = controller;
+
+            // If this is player 0, it shares state with the OSC
+            limeController.mergedWithController = _oscController;
+            _oscController.mergedWithController = limeController;
             
             if (@available(iOS 13.0, tvOS 13.0, *)) {
                 if (controller.extendedGamepad != nil &&
@@ -957,17 +1008,19 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
             [_controllers setObject:limeController forKey:[NSNumber numberWithInteger:controller.playerIndex]];
             
             Log(LOG_I, @"Assigning controller index: %d", i);
-            break;
+            return limeController;
         }
     }
+    
+    return nil;
 }
 
 -(Controller*) getOscController {
-    return _player0osc;
+    return _oscController;
 }
 
 +(bool) isSupportedGamepad:(GCController*) controller {
-    return controller.extendedGamepad != nil || controller.gamepad != nil;
+    return controller.extendedGamepad != nil;
 }
 
 #pragma clang diagnostic pop
@@ -1031,8 +1084,8 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     _swapABXYButtons = streamConfig.swapABXYButtons;
     _delegate = delegate;
 
-    _player0osc = [[Controller alloc] init];
-    _player0osc.playerIndex = 0;
+    _oscController = [[Controller alloc] init];
+    _oscController.playerIndex = 0;
 
     DataManager* dataMan = [[DataManager alloc] init];
     _oscEnabled = (OnScreenControlsLevel)[[dataMan getSettings].onscreenControls integerValue] != OnScreenControlsLevelOff;
@@ -1066,19 +1119,20 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
             return;
         }
         
-        [self assignController:controller];
-        
-        // Register callbacks on the new controller
-        [self registerControllerCallbacks:controller];
-        
-        // Report the controller arrival to the host
-        [self reportControllerArrival:controller];
-        
-        // Re-evaluate the on-screen control mode
-        [self updateAutoOnScreenControlMode];
-        
-        // Notify the delegate
-        [self->_delegate gamepadPresenceChanged];
+        Controller* limeController = [self assignController:controller];
+        if (limeController) {
+            // Register callbacks on the new controller
+            [self registerControllerCallbacks:controller];
+            
+            // Report the controller arrival to the host if we're connected
+            [self reportControllerArrival:limeController];
+            
+            // Re-evaluate the on-screen control mode
+            [self updateAutoOnScreenControlMode];
+            
+            // Notify the delegate
+            [self->_delegate gamepadPresenceChanged];
+        }
     }];
     _controllerDisconnectObserver = [[NSNotificationCenter defaultCenter] addObserverForName:GCControllerDidDisconnectNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
         Log(LOG_I, @"Controller disconnected!");
@@ -1094,26 +1148,33 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
         self->_controllerNumbers &= ~(1 << controller.playerIndex);
         Log(LOG_I, @"Unassigning controller index: %ld", (long)controller.playerIndex);
         
-        // Unset the GCController on this object (in case it is the OSC, which will persist)
         Controller* limeController = [self->_controllers objectForKey:[NSNumber numberWithInteger:controller.playerIndex]];
-        
-        // Stop haptics on this controller
-        [self cleanupControllerHaptics:limeController];
-        
-        // Stop motion reports on this controller
-        [self cleanupControllerMotion:limeController];
-        
-        limeController.gamepad = nil;
-        
-        // Inform the server of the updated active gamepads before removing this controller
-        [self updateFinished:limeController];
-        [self->_controllers removeObjectForKey:[NSNumber numberWithInteger:controller.playerIndex]];
-
-        // Re-evaluate the on-screen control mode
-        [self updateAutoOnScreenControlMode];
-        
-        // Notify the delegate
-        [self->_delegate gamepadPresenceChanged];
+        if (limeController) {
+            // Stop haptics on this controller
+            [self cleanupControllerHaptics:limeController];
+            
+            // Stop motion reports on this controller
+            [self cleanupControllerMotion:limeController];
+            
+            // Stop battery reports on this controller
+            [self cleanupControllerBattery:limeController];
+            
+            // Disassociate this controller from any controllers merged with it
+            if (limeController.mergedWithController) {
+                assert(limeController.mergedWithController.mergedWithController == limeController);
+                limeController.mergedWithController.mergedWithController = nil;
+            }
+            
+            // Inform the server of the updated active gamepads before removing this controller
+            [self updateFinished:limeController];
+            [self->_controllers removeObjectForKey:[NSNumber numberWithInteger:controller.playerIndex]];
+            
+            // Re-evaluate the on-screen control mode
+            [self updateAutoOnScreenControlMode];
+            
+            // Notify the delegate
+            [self->_delegate gamepadPresenceChanged];
+        }
     }];
     
     if (@available(iOS 14.0, tvOS 14.0, *)) {
@@ -1162,6 +1223,14 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     return self;
 }
 
+-(void) connectionEstablished
+{
+    for (Controller* controller in [_controllers allValues]) {
+        // Report the controller arrival to the host if we haven't done so yet
+        [self reportControllerArrival:controller];
+    }
+}
+
 -(void) cleanup
 {
     [[NSNotificationCenter defaultCenter] removeObserver:_controllerConnectObserver];
@@ -1183,6 +1252,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     for (Controller* controller in [_controllers allValues]) {
         [self cleanupControllerHaptics:controller];
         [self cleanupControllerMotion:controller];
+        [self cleanupControllerBattery:controller];
     }
     [_controllers removeAllObjects];
     

@@ -47,7 +47,7 @@ static VideoDecoderRenderer* renderer;
 
 int DrDecoderSetup(int videoFormat, int width, int height, int redrawRate, void* context, int drFlags)
 {
-    [renderer setupWithVideoFormat:videoFormat frameRate:redrawRate];
+    [renderer setupWithVideoFormat:videoFormat width:width height:height frameRate:redrawRate];
     lastFrameNumber = 0;
     activeVideoFormat = videoFormat;
     memset(&currentVideoStats, 0, sizeof(currentVideoStats));
@@ -95,6 +95,15 @@ void DrStop(void)
             else {
                 return @"HEVC Main 10 SDR";
             }
+        case VIDEO_FORMAT_AV1_MAIN8:
+            return @"AV1";
+        case VIDEO_FORMAT_AV1_MAIN10:
+            if (LiGetCurrentHostDisplayHdrMode()) {
+                return @"AV1 10-bit HDR";
+            }
+            else {
+                return @"AV1 10-bit SDR";
+            }
         default:
             return @"UNKNOWN";
     }
@@ -134,6 +143,19 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit)
         lastFrameNumber = decodeUnit->frameNumber;
     }
     
+    if (decodeUnit->frameHostProcessingLatency != 0) {
+        if (currentVideoStats.minHostProcessingLatency == 0 || decodeUnit->frameHostProcessingLatency < currentVideoStats.minHostProcessingLatency) {
+            currentVideoStats.minHostProcessingLatency = decodeUnit->frameHostProcessingLatency;
+        }
+        
+        if (decodeUnit->frameHostProcessingLatency > currentVideoStats.maxHostProcessingLatency) {
+            currentVideoStats.maxHostProcessingLatency = decodeUnit->frameHostProcessingLatency;
+        }
+        
+        currentVideoStats.framesWithHostProcessingLatency++;
+        currentVideoStats.totalHostProcessingLatency += decodeUnit->frameHostProcessingLatency;
+    }
+    
     currentVideoStats.receivedFrames++;
     currentVideoStats.totalFrames++;
 
@@ -144,8 +166,7 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit)
             ret = [renderer submitDecodeBuffer:(unsigned char*)entry->data
                                         length:entry->length
                                     bufferType:entry->bufferType
-                                     frameType:decodeUnit->frameType
-                                           pts:decodeUnit->presentationTimeMs];
+                                     decodeUnit:decodeUnit];
             if (ret != DR_OK) {
                 free(data);
                 return ret;
@@ -163,8 +184,7 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit)
     return [renderer submitDecodeBuffer:data
                                  length:offset
                              bufferType:BUFFER_TYPE_PICDATA
-                              frameType:decodeUnit->frameType
-                                    pts:decodeUnit->presentationTimeMs];
+                             decodeUnit:decodeUnit];
 }
 
 int ArInit(int audioConfiguration, POPUS_MULTISTREAM_CONFIGURATION opusConfig, void* context, int flags)
@@ -323,6 +343,11 @@ void ClSetMotionEventState(uint16_t controllerNumber, uint8_t motionType, uint16
     [_callbacks setMotionEventState:controllerNumber motionType:motionType reportRateHz:reportRateHz];
 }
 
+void ClSetControllerLED(uint16_t controllerNumber, uint8_t r, uint8_t g, uint8_t b)
+{
+    [_callbacks setControllerLed:controllerNumber r:r g:g b:b];
+}
+
 -(void) terminate
 {
     // Interrupt any action blocking LiStartConnection(). This is
@@ -358,19 +383,19 @@ void ClSetMotionEventState(uint16_t controllerNumber, uint8_t motionType, uint16
     NSString *rawAddress = [Utils addressPortStringToAddress:config.host];
     strncpy(_hostString,
             [rawAddress cStringUsingEncoding:NSUTF8StringEncoding],
-            sizeof(_hostString));
+            sizeof(_hostString) - 1);
     strncpy(_appVersionString,
             [config.appVersion cStringUsingEncoding:NSUTF8StringEncoding],
-            sizeof(_appVersionString));
+            sizeof(_appVersionString) - 1);
     if (config.gfeVersion != nil) {
         strncpy(_gfeVersionString,
                 [config.gfeVersion cStringUsingEncoding:NSUTF8StringEncoding],
-                sizeof(_gfeVersionString));
+                sizeof(_gfeVersionString) - 1);
     }
     if (config.rtspSessionUrl != nil) {
         strncpy(_rtspSessionUrl,
                 [config.rtspSessionUrl cStringUsingEncoding:NSUTF8StringEncoding],
-                sizeof(_rtspSessionUrl));
+                sizeof(_rtspSessionUrl) - 1);
     }
 
     LiInitializeServerInformation(&_serverInfo);
@@ -382,6 +407,7 @@ void ClSetMotionEventState(uint16_t controllerNumber, uint8_t motionType, uint16
     if (config.rtspSessionUrl != nil) {
         _serverInfo.rtspSessionUrl = _rtspSessionUrl;
     }
+    _serverInfo.serverCodecModeSupport = config.serverCodecModeSupport;
 
     renderer = myRenderer;
     _callbacks = callbacks;
@@ -391,17 +417,13 @@ void ClSetMotionEventState(uint16_t controllerNumber, uint8_t motionType, uint16
     _streamConfig.height = config.height;
     _streamConfig.fps = config.frameRate;
     _streamConfig.bitrate = config.bitRate;
-    _streamConfig.enableHdr = config.enableHdr;
+    _streamConfig.supportedVideoFormats = config.supportedVideoFormats;
     _streamConfig.audioConfiguration = config.audioConfiguration;
     
-    // TODO: If/when video encryption is added, we'll probably want to
-    // limit that to devices that support the ARMv8 AES instructions.
-    _streamConfig.encryptionFlags = ENCFLG_AUDIO;
-    
-    // Use some of the HEVC encoding efficiency improvements to
-    // reduce bandwidth usage while still gaining some image
-    // quality improvement.
-    _streamConfig.hevcBitratePercentageMultiplier = 75;
+    // Since we require iOS 12 or above, we're guaranteed to be running
+    // on a 64-bit device with ARMv8 crypto instructions, so we don't
+    // need to check for that here.
+    _streamConfig.encryptionFlags = ENCFLG_ALL;
     
     if ([Utils isActiveNetworkVPN]) {
         // Force remote streaming mode when a VPN is connected
@@ -413,30 +435,6 @@ void ClSetMotionEventState(uint16_t controllerNumber, uint8_t motionType, uint16
         _streamConfig.streamingRemotely = STREAM_CFG_AUTO;
         _streamConfig.packetSize = 1392;
     }
-    
-    // HDR implies HEVC allowed
-    if (config.enableHdr) {
-        config.allowHevc = YES;
-    }
-    
-    // Streaming at resolutions above 4K requires HEVC
-    if (config.width > 4096 || config.height > 4096) {
-        config.allowHevc = YES;
-    }
-
-    // On iOS 11, we can use HEVC if the server supports encoding it
-    // and this device has hardware decode for it (A9 and later).
-    // Additionally, iPhone X had a bug which would cause video
-    // to freeze after a few minutes with HEVC prior to iOS 11.3.
-    // As a result, we will only use HEVC on iOS 11.3 or later.
-    if (@available(iOS 11.3, tvOS 11.3, *)) {
-        _streamConfig.supportsHevc =
-            config.allowHevc &&
-            VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC);
-    }
-    
-    // HEVC must be supported when HDR is enabled
-    assert(!_streamConfig.enableHdr || _streamConfig.supportsHevc);
 
     memcpy(_streamConfig.remoteInputAesKey, [config.riKey bytes], [config.riKey length]);
     memset(_streamConfig.remoteInputAesIv, 0, 16);
@@ -447,7 +445,9 @@ void ClSetMotionEventState(uint16_t controllerNumber, uint8_t motionType, uint16
     _drCallbacks.setup = DrDecoderSetup;
     _drCallbacks.start = DrStart;
     _drCallbacks.stop = DrStop;
-    _drCallbacks.capabilities = CAPABILITY_PULL_RENDERER | CAPABILITY_REFERENCE_FRAME_INVALIDATION_HEVC;
+    _drCallbacks.capabilities = CAPABILITY_PULL_RENDERER |
+                                CAPABILITY_REFERENCE_FRAME_INVALIDATION_HEVC |
+                                CAPABILITY_REFERENCE_FRAME_INVALIDATION_AV1;
 
     LiInitializeAudioCallbacks(&_arCallbacks);
     _arCallbacks.init = ArInit;
@@ -467,6 +467,7 @@ void ClSetMotionEventState(uint16_t controllerNumber, uint8_t motionType, uint16
     _clCallbacks.setHdrMode = ClSetHdrMode;
     _clCallbacks.rumbleTriggers = ClRumbleTriggers;
     _clCallbacks.setMotionEventState = ClSetMotionEventState;
+    _clCallbacks.setControllerLED = ClSetControllerLED;
 
     return self;
 }

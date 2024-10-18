@@ -50,7 +50,7 @@ static const int bitrateTable[] = {
     150000,
 };
 
-const int RESOLUTION_TABLE_SIZE = 5;
+const int RESOLUTION_TABLE_SIZE = 7;
 const int RESOLUTION_TABLE_CUSTOM_INDEX = RESOLUTION_TABLE_SIZE - 1;
 CGSize resolutionTable[RESOLUTION_TABLE_SIZE];
 
@@ -140,17 +140,31 @@ BOOL isCustomResolution(CGSize res) {
     // Ensure we pick a bitrate that falls exactly onto a slider notch
     _bitrate = bitrateTable[[self getSliderValueForBitrate:[currentSettings.bitrate intValue]]];
 
+    // Get the size of the screen with and without safe area insets
+    UIWindow *window = UIApplication.sharedApplication.windows.firstObject;
+    CGFloat screenScale = window.screen.scale;
+    CGFloat safeAreaWidth = (window.frame.size.width - window.safeAreaInsets.left - window.safeAreaInsets.right) * screenScale;
+    CGFloat fullScreenWidth = window.frame.size.width * screenScale;
+    CGFloat fullScreenHeight = window.frame.size.height * screenScale;
+    
+    self.resolutionDisplayView.layer.cornerRadius = 10;
+    self.resolutionDisplayView.clipsToBounds = YES;
+    UITapGestureRecognizer *resolutionDisplayViewTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(resolutionDisplayViewTapped:)];
+    [self.resolutionDisplayView addGestureRecognizer:resolutionDisplayViewTap];
+    
     resolutionTable[0] = CGSizeMake(640, 360);
     resolutionTable[1] = CGSizeMake(1280, 720);
     resolutionTable[2] = CGSizeMake(1920, 1080);
     resolutionTable[3] = CGSizeMake(3840, 2160);
-    resolutionTable[4] = CGSizeMake([currentSettings.width integerValue], [currentSettings.height integerValue]); // custom initial value
+    resolutionTable[4] = CGSizeMake(safeAreaWidth, fullScreenHeight);
+    resolutionTable[5] = CGSizeMake(fullScreenWidth, fullScreenHeight);
+    resolutionTable[6] = CGSizeMake([currentSettings.width integerValue], [currentSettings.height integerValue]); // custom initial value
     
     // Don't populate the custom entry unless we have a custom resolution
-    if (!isCustomResolution(resolutionTable[4])) {
-        resolutionTable[4] = CGSizeMake(0, 0);
+    if (!isCustomResolution(resolutionTable[6])) {
+        resolutionTable[6] = CGSizeMake(0, 0);
     }
-
+    
     NSInteger framerate;
     switch ([currentSettings.framerate integerValue]) {
         case 30:
@@ -184,55 +198,46 @@ BOOL isCustomResolution(CGSize res) {
     if (!enable120Fps) {
         [self.framerateSelector removeSegmentAtIndex:2 animated:NO];
     }
-    
-    // Only show the 4K option for "recent" devices. We'll judge that by whether
-    // they support HEVC decoding (A9 or later).
-    if (@available(iOS 11.0, tvOS 11.0, *)) {
-        if (!VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC)) {
-            [self.resolutionSelector removeSegmentAtIndex:3 animated:NO];
-            if (resolution >= 3) resolution--;
-        }
-    }
-    else {
-        [self.resolutionSelector removeSegmentAtIndex:3 animated:NO];
-        if (resolution >= 3) resolution--;
-    }
 
-    // Disable the HEVC selector if HEVC is not supported by the hardware
-    // or the version of iOS. See comment in Connection.m for reasoning behind
-    // the iOS 11.3 check.
-    if (@available(iOS 11.3, tvOS 11.3, *)) {
-        if (VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC)) {
-            [self.hevcSelector setSelectedSegmentIndex:currentSettings.useHevc ? 1 : 0];
-        }
-        else {
-            [self.hevcSelector removeAllSegments];
-            [self.hevcSelector insertSegmentWithTitle:@"Unsupported on this device" atIndex:0 animated:NO];
-            [self.hevcSelector setEnabled:NO];
-        }
-        
-        // Disable HDR selector if HDR is not supported by the display
-        if (!VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC) || !(AVPlayer.availableHDRModes & AVPlayerHDRModeHDR10)) {
-            [self.hdrSelector removeAllSegments];
-            [self.hdrSelector insertSegmentWithTitle:@"Unsupported on this device" atIndex:0 animated:NO];
-            [self.hdrSelector setEnabled:NO];
-        }
-        else {
-            [self.hdrSelector setSelectedSegmentIndex:currentSettings.enableHdr ? 1 : 0];
-            [self.hdrSelector addTarget:self action:@selector(hdrStateChanged) forControlEvents:UIControlEventValueChanged];
+    // Disable codec selector segments for unsupported codecs
+#if defined(__IPHONE_16_0) || defined(__TVOS_16_0)
+    if (!VTIsHardwareDecodeSupported(kCMVideoCodecType_AV1))
+#endif
+    {
+        [self.codecSelector removeSegmentAtIndex:2 animated:NO];
+    }
+    if (!VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC)) {
+        [self.codecSelector removeSegmentAtIndex:1 animated:NO];
+
+        // Only enable the 4K option for "recent" devices. We'll judge that by whether
+        // they support HEVC decoding (A9 or later).
+        [self.resolutionSelector setEnabled:NO forSegmentAtIndex:3];
+    }
+    switch (currentSettings.preferredCodec) {
+        case CODEC_PREF_AUTO:
+            [self.codecSelector setSelectedSegmentIndex:self.codecSelector.numberOfSegments - 1];
+            break;
             
-            // Manually trigger the hdrStateChanged callback to set the HEVC selector appropriately
-            [self hdrStateChanged];
-        }
+        case CODEC_PREF_AV1:
+            [self.codecSelector setSelectedSegmentIndex:2];
+            break;
+            
+        case CODEC_PREF_HEVC:
+            [self.codecSelector setSelectedSegmentIndex:1];
+            break;
+            
+        case CODEC_PREF_H264:
+            [self.codecSelector setSelectedSegmentIndex:0];
+            break;
+    }
+    
+    if (!VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC) || !(AVPlayer.availableHDRModes & AVPlayerHDRModeHDR10)) {
+        [self.hdrSelector removeAllSegments];
+        [self.hdrSelector insertSegmentWithTitle:@"Unsupported on this device" atIndex:0 animated:NO];
+        [self.hdrSelector setEnabled:NO];
     }
     else {
-        [self.hevcSelector removeAllSegments];
-        [self.hevcSelector insertSegmentWithTitle:@"Requires iOS 11.3 or later" atIndex:0 animated:NO];
-        [self.hevcSelector setEnabled:NO];
-        
-        [self.hdrSelector removeAllSegments];
-        [self.hdrSelector insertSegmentWithTitle:@"Requires iOS 11.3 or later" atIndex:0 animated:NO];
-        [self.hdrSelector setEnabled:NO];
+        [self.hdrSelector setSelectedSegmentIndex:currentSettings.enableHdr ? 1 : 0];
     }
     
     [self.touchModeSelector setSelectedSegmentIndex:currentSettings.absoluteTouchMode ? 1 : 0];
@@ -257,7 +262,7 @@ BOOL isCustomResolution(CGSize res) {
     [self.bitrateSlider setValue:[self getSliderValueForBitrate:_bitrate] animated:YES];
     [self.bitrateSlider addTarget:self action:@selector(bitrateSliderMoved) forControlEvents:UIControlEventValueChanged];
     [self updateBitrateText];
-    [self updateCustomResolutionText];
+    [self updateResolutionDisplayViewText];
 }
 
 - (void) touchModeChanged {
@@ -271,34 +276,57 @@ BOOL isCustomResolution(CGSize res) {
     NSInteger height = [self getChosenStreamHeight];
     NSInteger defaultBitrate;
     
-    // This table prefers 16:10 resolutions because they are
-    // only slightly more pixels than the 16:9 equivalents, so
-    // we don't want to bump those 16:10 resolutions up to the
-    // next 16:9 slot.
-    //
     // This logic is shamelessly stolen from Moonlight Qt:
     // https://github.com/moonlight-stream/moonlight-qt/blob/master/app/settings/streamingpreferences.cpp
     
-    if (width * height <= 640 * 360) {
-        defaultBitrate = 1000 * (fps / 30.0);
+    // Don't scale bitrate linearly beyond 60 FPS. It's definitely not a linear
+    // bitrate increase for frame rate once we get to values that high.
+    float frameRateFactor = (fps <= 60 ? fps : (sqrtf(fps / 60.f) * 60.f)) / 30.f;
+
+    // TODO: Collect some empirical data to see if these defaults make sense.
+    // We're just using the values that the Shield used, as we have for years.
+    struct {
+        NSInteger pixels;
+        int factor;
+    } resTable[] = {
+        { 640 * 360, 1 },
+        { 854 * 480, 2 },
+        { 1280 * 720, 5 },
+        { 1920 * 1080, 10 },
+        { 2560 * 1440, 20 },
+        { 3840 * 2160, 40 },
+        { -1, -1 }
+    };
+
+    // Calculate the resolution factor by linear interpolation of the resolution table
+    float resolutionFactor;
+    NSInteger pixels = width * height;
+    for (int i = 0;; i++) {
+        if (pixels == resTable[i].pixels) {
+            // We can bail immediately for exact matches
+            resolutionFactor = resTable[i].factor;
+            break;
+        }
+        else if (pixels < resTable[i].pixels) {
+            if (i == 0) {
+                // Never go below the lowest resolution entry
+                resolutionFactor = resTable[i].factor;
+            }
+            else {
+                // Interpolate between the entry greater than the chosen resolution (i) and the entry less than the chosen resolution (i-1)
+                resolutionFactor = ((float)(pixels - resTable[i-1].pixels) / (resTable[i].pixels - resTable[i-1].pixels)) * (resTable[i].factor - resTable[i-1].factor) + resTable[i-1].factor;
+            }
+            break;
+        }
+        else if (resTable[i].pixels == -1) {
+            // Never go above the highest resolution entry
+            resolutionFactor = resTable[i-1].factor;
+            break;
+        }
     }
-    // This covers 1280x720 and 1280x800 too
-    else if (width * height <= 1366 * 768) {
-        defaultBitrate = 5000 * (fps / 30.0);
-    }
-    else if (width * height <= 1920 * 1200) {
-        defaultBitrate = 10000 * (fps / 30.0);
-    }
-    else if (width * height <= 2560 * 1600) {
-        defaultBitrate = 20000 * (fps / 30.0);
-    }
-    else /* if (width * height <= 3840 * 2160) */ {
-        defaultBitrate = 40000 * (fps / 30.0);
-    }
-    
-    // We should always be exactly on a slider position with default bitrates
+
+    defaultBitrate = round(resolutionFactor * frameRateFactor) * 1000;
     _bitrate = MIN(defaultBitrate, 100000);
-    assert(bitrateTable[[self getSliderValueForBitrate:_bitrate]] == _bitrate);
     [self.bitrateSlider setValue:[self getSliderValueForBitrate:_bitrate] animated:YES];
     
     [self updateBitrateText];
@@ -311,17 +339,8 @@ BOOL isCustomResolution(CGSize res) {
     }
     else {
         [self updateBitrate];
+        [self updateResolutionDisplayViewText];
         _lastSelectedResolutionIndex = [self.resolutionSelector selectedSegmentIndex];
-    }
-}
-
-- (void) hdrStateChanged {
-    if ([self.hdrSelector selectedSegmentIndex] == 1) {
-        [self.hevcSelector setSelectedSegmentIndex:1];
-        [self.hevcSelector setEnabled:NO];
-    }
-    else {
-        [self.hevcSelector setEnabled:YES];
     }
 }
 
@@ -388,7 +407,7 @@ BOOL isCustomResolution(CGSize res) {
 
         resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX] = CGSizeMake(width, height);
         [self updateBitrate];
-        [self updateCustomResolutionText];
+        [self updateResolutionDisplayViewText];
         self->_lastSelectedResolutionIndex = [self.resolutionSelector selectedSegmentIndex];
         
         UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Custom Resolution Selected" message: @"Custom resolutions are not officially supported by GeForce Experience, so it will not set your host display resolution. You will need to set it manually while in game.\n\nResolutions that are not supported by your client or host PC may cause streaming errors." preferredStyle:UIAlertControllerStyleAlert];
@@ -404,12 +423,37 @@ BOOL isCustomResolution(CGSize res) {
     [self presentViewController:alertController animated:YES completion:nil];
 }
 
-- (void) updateCustomResolutionText {
-    if (isCustomResolution(resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX])) {
-        NSString *newTitle = [NSString stringWithFormat:@"Custom %dx%d", (int) resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX].width, (int) resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX].height];
-        [self.resolutionSelector setTitle:newTitle forSegmentAtIndex:[self.resolutionSelector numberOfSegments] - 1];
-        self.resolutionSelector.apportionsSegmentWidthsByContent = YES; // to update the width
+- (void)resolutionDisplayViewTapped:(UITapGestureRecognizer *)sender {
+    NSURL *url = [NSURL URLWithString:@"https://moonlight-stream.org/custom-resolution"];
+    if ([[UIApplication sharedApplication] canOpenURL:url]) {
+        [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
     }
+}
+
+- (void) updateResolutionDisplayViewText {
+    NSInteger width = [self getChosenStreamWidth];
+    NSInteger height = [self getChosenStreamHeight];
+    CGFloat viewFrameWidth = self.resolutionDisplayView.frame.size.width;
+    CGFloat viewFrameHeight = self.resolutionDisplayView.frame.size.height;
+    CGFloat padding = 10;
+    CGFloat fontSize = [UIFont smallSystemFontSize];
+    
+    for (UIView *subview in self.resolutionDisplayView.subviews) {
+        [subview removeFromSuperview];
+    }
+    UILabel *label1 = [[UILabel alloc] init];
+    label1.text = @"Set PC/Game resolution: ";
+    label1.font = [UIFont systemFontOfSize:fontSize];
+    [label1 sizeToFit];
+    label1.frame = CGRectMake(padding, (viewFrameHeight - label1.frame.size.height) / 2, label1.frame.size.width, label1.frame.size.height);
+
+    UILabel *label2 = [[UILabel alloc] init];
+    label2.text = [NSString stringWithFormat:@"%ld x %ld", (long)width, (long)height];
+    [label2 sizeToFit];
+    label2.frame = CGRectMake(viewFrameWidth - label2.frame.size.width - padding, (viewFrameHeight - label2.frame.size.height) / 2, label2.frame.size.width, label2.frame.size.height);
+
+    [self.resolutionDisplayView addSubview:label1];
+    [self.resolutionDisplayView addSubview:label2];
 }
 
 - (void) bitrateSliderMoved {
@@ -433,6 +477,28 @@ BOOL isCustomResolution(CGSize res) {
             return 120;
         default:
             abort();
+    }
+}
+
+- (uint32_t) getChosenCodecPreference {
+    // Auto is always the last segment
+    if (self.codecSelector.selectedSegmentIndex == self.codecSelector.numberOfSegments - 1) {
+        return CODEC_PREF_AUTO;
+    }
+    else {
+        switch (self.codecSelector.selectedSegmentIndex) {
+            case 0:
+                return CODEC_PREF_H264;
+                
+            case 1:
+                return CODEC_PREF_HEVC;
+                
+            case 2:
+                return CODEC_PREF_AV1;
+                
+            default:
+                abort();
+        }
     }
 }
 
@@ -466,7 +532,7 @@ BOOL isCustomResolution(CGSize res) {
     BOOL multiController = [self.multiControllerSelector selectedSegmentIndex] == 1;
     BOOL swapABXYButtons = [self.swapABXYButtonsSelector selectedSegmentIndex] == 1;
     BOOL audioOnPC = [self.audioOnPCSelector selectedSegmentIndex] == 1;
-    BOOL useHevc = [self.hevcSelector selectedSegmentIndex] == 1;
+    uint32_t preferredCodec = [self getChosenCodecPreference];
     BOOL btMouseSupport = [self.btMouseSelector selectedSegmentIndex] == 1;
     BOOL useFramePacing = [self.framePacingSelector selectedSegmentIndex] == 1;
     BOOL absoluteTouchMode = [self.touchModeSelector selectedSegmentIndex] == 1;
@@ -482,8 +548,8 @@ BOOL isCustomResolution(CGSize res) {
                      multiController:multiController
                      swapABXYButtons:swapABXYButtons
                            audioOnPC:audioOnPC
-                             useHevc:useHevc
-                            useFramePacing:useFramePacing
+                      preferredCodec:preferredCodec
+                      useFramePacing:useFramePacing
                            enableHdr:enableHdr
                       btMouseSupport:btMouseSupport
                    absoluteTouchMode:absoluteTouchMode

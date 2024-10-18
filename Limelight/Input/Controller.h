@@ -13,6 +13,11 @@
 
 @interface Controller : NSObject
 
+typedef struct {
+    float lastX;
+    float lastY;
+} controller_touch_context_t;
+
 @property (nullable, nonatomic, retain) GCController* gamepad;
 @property (nonatomic)                   int playerIndex;
 @property (nonatomic)                   int lastButtonFlags;
@@ -25,10 +30,8 @@
 @property (nonatomic)                   short lastRightStickX;
 @property (nonatomic)                   short lastRightStickY;
 
-@property (nonatomic)                   float lastPrimaryTouchX;
-@property (nonatomic)                   float lastPrimaryTouchY;
-@property (nonatomic)                   float lastSecondaryTouchX;
-@property (nonatomic)                   float lastSecondaryTouchY;
+@property (nonatomic)                   controller_touch_context_t primaryTouch;
+@property (nonatomic)                   controller_touch_context_t secondaryTouch;
 
 @property (nonatomic)                   HapticContext* _Nullable lowFreqMotor;
 @property (nonatomic)                   HapticContext* _Nullable highFreqMotor;
@@ -40,6 +43,11 @@
 @property (nonatomic)                   NSTimer* _Nullable gyroTimer;
 @property (nonatomic)                   GCRotationRate lastGyroSample;
 
+@property (nonatomic)                   NSTimer* _Nullable batteryTimer;
+@property (nonatomic)                   GCDeviceBatteryState lastBatteryState;
+@property (nonatomic)                   float lastBatteryLevel;
+
 @property (nonatomic)                   BOOL reportedArrival;
+@property (nonatomic)                   Controller* _Nullable mergedWithController;
 
 @end

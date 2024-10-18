@@ -650,7 +650,6 @@ static NSMutableSet* hostList;
     _streamConfig.bitRate = [streamSettings.bitrate intValue];
     _streamConfig.optimizeGameSettings = streamSettings.optimizeGames;
     _streamConfig.playAudioOnPC = streamSettings.playAudioOnPC;
-    _streamConfig.allowHevc = streamSettings.useHevc;
     _streamConfig.useFramePacing = streamSettings.useFramePacing;
     _streamConfig.swapABXYButtons = streamSettings.swapABXYButtons;
     
@@ -674,18 +673,46 @@ static NSMutableSet* hostList;
         _streamConfig.audioConfiguration = AUDIO_CONFIGURATION_STEREO;
     }
     
-    // HDR requires HDR10 display and HEVC Main10 decoder on the client.
-    // It additionally requires an HEVC Main10 encoder on the server (GTX 1000+).
-    //
-    // It should also be a user preference, since some games may require higher peak
-    // brightness than the iOS device can support to look correct in HDR mode.
-    if (@available(iOS 11.3, tvOS 11.2, *)) {
-        _streamConfig.enableHdr =
-            (app.host.serverCodecModeSupport & 0x200) != 0 && // HEVC Main10 encoding on host PC GPU
-            VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC) && // Decoder supported
-            (AVPlayer.availableHDRModes & AVPlayerHDRModeHDR10) != 0 && // Display supported
-            streamSettings.enableHdr; // User wants it enabled
+    _streamConfig.serverCodecModeSupport = app.host.serverCodecModeSupport;
+    
+    switch (streamSettings.preferredCodec) {
+        case CODEC_PREF_AV1:
+#if defined(__IPHONE_16_0) || defined(__TVOS_16_0)
+            if (VTIsHardwareDecodeSupported(kCMVideoCodecType_AV1)) {
+                _streamConfig.supportedVideoFormats |= VIDEO_FORMAT_AV1_MAIN8;
+            }
+#endif
+            // Fall-through
+            
+        case CODEC_PREF_AUTO:
+        case CODEC_PREF_HEVC:
+            if (VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC)) {
+                _streamConfig.supportedVideoFormats |= VIDEO_FORMAT_H265;
+            }
+            // Fall-through
+            
+        case CODEC_PREF_H264:
+            _streamConfig.supportedVideoFormats |= VIDEO_FORMAT_H264;
+            break;
     }
+    
+    // HEVC is supported if the user wants it (or it's required by the chosen resolution) and the SoC supports it
+    if ((_streamConfig.width > 4096 || _streamConfig.height > 4096 || streamSettings.enableHdr) && VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC)) {
+        _streamConfig.supportedVideoFormats |= VIDEO_FORMAT_H265;
+        
+        // HEVC Main10 is supported if the user wants it and the display supports it
+        if (streamSettings.enableHdr && (AVPlayer.availableHDRModes & AVPlayerHDRModeHDR10) != 0) {
+            _streamConfig.supportedVideoFormats |= VIDEO_FORMAT_H265_MAIN10;
+        }
+    }
+    
+#if defined(__IPHONE_16_0) || defined(__TVOS_16_0)
+    // Add the AV1 Main10 format if AV1 and HDR are both enabled and supported
+    if ((_streamConfig.supportedVideoFormats & VIDEO_FORMAT_MASK_AV1) && streamSettings.enableHdr &&
+        VTIsHardwareDecodeSupported(kCMVideoCodecType_AV1) && (AVPlayer.availableHDRModes & AVPlayerHDRModeHDR10) != 0) {
+        _streamConfig.supportedVideoFormats |= VIDEO_FORMAT_AV1_MAIN10;
+    }
+#endif
 }
 
 - (void)appLongClicked:(TemporaryApp *)app view:(UIView *)view {
