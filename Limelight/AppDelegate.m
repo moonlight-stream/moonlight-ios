@@ -39,6 +39,30 @@ static NSString* DB_NAME = @"Limelight_iOS.sqlite";
 }
 #endif
 
+- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options {
+    if ([url.host isEqualToString:@"appClicked"]) {
+        NSString *query = [url query];
+        NSArray *params = [query componentsSeparatedByString:@"&"];
+        NSMutableDictionary *queryParameters = [NSMutableDictionary dictionary];
+        
+        for (NSString *param in params) {
+            NSArray *keyValue = [param componentsSeparatedByString:@"="];
+            if ([keyValue count] == 2) {
+                queryParameters[keyValue[0]] = keyValue[1];
+            }
+        }
+        
+        NSString *appId = queryParameters[@"app"];
+        NSString *UUID = queryParameters[@"UUID"];
+        
+        _pcUuidToLoad = UUID;
+        _appToRun = appId;
+
+        return YES;
+    }
+    return NO;
+}
+
 - (void)applicationWillResignActive:(UIApplication *)application
 {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.

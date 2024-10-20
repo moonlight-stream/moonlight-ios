@@ -142,6 +142,23 @@ static UIImage* noImage;
         if (!(appImage.size.width == 130.f && appImage.size.height == 180.f) && // GFE 2.0
             !(appImage.size.width == 628.f && appImage.size.height == 888.f)) { // GFE 3.0
             [_appImage setImage:appImage];
+            
+            // Save to caches for Top Shelf
+            NSURL *url = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:@"group.MoonlightTV"];
+            if (url && appImage) {
+                NSURL *cachesURL = [url URLByAppendingPathComponent:@"Library" isDirectory:YES];
+                cachesURL = [cachesURL URLByAppendingPathComponent:@"Caches" isDirectory:YES];
+                // Construct the file path
+                NSString *filePath = [cachesURL path];
+                filePath = [filePath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-%@", _app.host.uuid, _app.id]];
+                filePath = [filePath stringByAppendingPathExtension:@"png"];
+                // Convert NSString to NSURL
+                NSURL *imageURL = [NSURL fileURLWithPath:filePath];
+                NSData *imageData = UIImagePNGRepresentation(appImage);
+                NSError *error = nil;
+                [imageData writeToURL:imageURL atomically:YES];
+            }
+            
         } else {
             noAppImage = true;
         }
