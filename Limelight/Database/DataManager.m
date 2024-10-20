@@ -327,8 +327,7 @@
     }];
     [mutableExistingApps removeObjectsAtIndexes:indexesToDelete];
     
-
-    // Step 1: Partition into separate arrays
+    // Partition into separate arrays
     NSMutableDictionary<NSString *, NSMutableArray *> *hostToAppsMap = [NSMutableDictionary new];
     for (NSDictionary *app in mutableExistingApps) {
         NSString *hostUUID = app[@"hostUUID"];
@@ -338,20 +337,18 @@
         [hostToAppsMap[hostUUID] addObject:app];
     }
 
-    // Step 2: Sort these arrays
+    // Sort these arrays
     NSArray *sortedKeys = [hostToAppsMap.allKeys sortedArrayUsingComparator:^NSComparisonResult(NSString *a, NSString *b) {
         NSUInteger first = [storedUUIDOrder indexOfObject:a];
         NSUInteger second = [storedUUIDOrder indexOfObject:b];
         return first < second ? NSOrderedAscending : NSOrderedDescending;
     }];
 
-    // Step 3: Merge them back
+    // Merge them back
     [mutableExistingApps removeAllObjects];
     for (NSString *key in sortedKeys) {
         [mutableExistingApps addObjectsFromArray:hostToAppsMap[key]];
     }
-    // Order fix 4 END
-
     
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:mutableExistingApps options:0 error:&error];
     if (jsonData) {
