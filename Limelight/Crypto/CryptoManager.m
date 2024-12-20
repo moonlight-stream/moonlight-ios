@@ -96,6 +96,7 @@ static NSData* p12 = nil;
     
     bio = BIO_new(BIO_s_mem());
     i2d_X509_bio(bio, x509);
+    X509_free(x509);
 
     BUF_MEM* mem;
     BIO_get_mem_ptr(bio, &mem);
@@ -222,6 +223,7 @@ static NSData* p12 = nil;
 + (NSData *)getSignatureFromCert:(NSData *)cert {
     BIO* bio = BIO_new_mem_buf([cert bytes], (int)[cert length]);
     X509* x509 = PEM_read_bio_X509(bio, NULL, NULL, NULL);
+    BIO_free(bio);
     
     if (!x509) {
         Log(LOG_E, @"Unable to parse certificate in memory!");
