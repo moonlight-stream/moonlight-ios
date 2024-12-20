@@ -326,7 +326,7 @@
     
     SecIdentityCopyCertificate(identity, &certificate);
     
-    return [[NSArray alloc] initWithObjects:(__bridge id)certificate, nil];
+    return [[NSArray alloc] initWithObjects:(__bridge_transfer id)certificate, nil];
 }
 
 // Returns the identity
@@ -338,13 +338,14 @@
     const void *keys[] = { kSecImportExportPassphrase };
     const void *values[] = { password };
     CFDictionaryRef options = CFDictionaryCreate(NULL, keys, values, 1, NULL, NULL);
-    CFArrayRef items = CFArrayCreate(NULL, 0, 0, NULL);
+    CFArrayRef items = nil;
     OSStatus securityError = SecPKCS12Import(p12Data, options, &items);
 
     if (securityError == errSecSuccess) {
         //Log(LOG_D, @"Success opening p12 certificate. Items: %ld", CFArrayGetCount(items));
         CFDictionaryRef identityDict = CFArrayGetValueAtIndex(items, 0);
-        identityApp = (SecIdentityRef)CFDictionaryGetValue(identityDict, kSecImportItemIdentity);
+        identityApp = (SecIdentityRef)CFRetain(CFDictionaryGetValue(identityDict, kSecImportItemIdentity));
+        CFRelease(items);
     } else {
         Log(LOG_E, @"Error opening Certificate.");
     }
@@ -398,6 +399,7 @@
         SecIdentityRef identity = [self getClientCertificate];
         NSArray* certArray = [self getCertificate:identity];
         NSURLCredential* newCredential = [NSURLCredential credentialWithIdentity:identity certificates:certArray persistence:NSURLCredentialPersistencePermanent];
+        CFRelease(identity);
         completionHandler(NSURLSessionAuthChallengeUseCredential, newCredential);
     }
     else
