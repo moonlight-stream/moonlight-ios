@@ -116,8 +116,8 @@
         return;
     }
 
-    __block NSData* requestResp;
-    __block NSError* respError;
+    __block NSData* requestResp = nil;
+    __block NSError* respError = nil;
     __block dispatch_semaphore_t requestLock = dispatch_semaphore_create(0);
     
     Log(LOG_D, @"Making Request: %@", request);
