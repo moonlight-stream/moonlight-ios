@@ -91,11 +91,16 @@
     
     if (![[gamepad.haptics supportedLocalities] containsObject:locality]) {
         Log(LOG_W, @"Controller %d does not support haptic locality: %@", gamepad.playerIndex, locality);
+        if (@available(iOS 13.0, *)) {
+        NSError *error = nil;
+        _hapticEngine = [[CHHapticEngine alloc] initAndReturnError:&error]; 
+        }else{
         return nil;
     }
-    
+    }else{
+        _hapticEngine = [gamepad.haptics createEngineWithLocality:locality];
+    }
     _playerIndex = gamepad.playerIndex;
-    _hapticEngine = [gamepad.haptics createEngineWithLocality:locality];
     
     NSError* error;
     [_hapticEngine startAndReturnError:&error];
