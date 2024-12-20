@@ -63,21 +63,9 @@ void mkcert(X509 **x509p, EVP_PKEY **pkeyp, int bits, int serial, int years) {
 }
 
 struct CertKeyPair generateCertKeyPair(void) {
-    BIO *bio_err;
     X509 *x509 = NULL;
     EVP_PKEY *pkey = NULL;
     PKCS12 *p12 = NULL;
-    // OpenSSL3 has default algorithms that iOS refuses to load so we
-    // must load the legacy provider and override all the algorithms
-    // in this cert.
-
-    OSSL_PROVIDER *_legacy = OSSL_PROVIDER_try_load(NULL, "legacy", 1);
-
-    if (_legacy == NULL) {
-        printf("Failed to load Legacy provider\n");
-    }
-   
-    bio_err = BIO_new_fp(stderr, BIO_NOCLOSE);
     
     mkcert(&x509, &pkey, NUM_BITS, SERIAL, NUM_YEARS);
     
@@ -88,7 +76,7 @@ struct CertKeyPair generateCertKeyPair(void) {
                         x509,
                         NULL,
                         NID_pbe_WithSHA1And3_Key_TripleDES_CBC,
-                        NID_pbe_WithSHA1And40BitRC2_CBC,
+                        -1, // disable certificate encryption
                         2048,
                         -1, // disable the automatic MAC
                         0);
@@ -98,8 +86,6 @@ struct CertKeyPair generateCertKeyPair(void) {
     if (p12 == NULL) {
         printf("Error generating a valid PKCS12 certificate.\n");
     }
-    
-    BIO_free(bio_err);
     
     return (CertKeyPair){x509, pkey, p12};
 }
