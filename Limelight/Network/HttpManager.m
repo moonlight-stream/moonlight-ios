@@ -23,20 +23,14 @@
 #define EXTRA_LONG_TIMEOUT_SEC 180
 
 @implementation HttpManager {
-    NSURLSession* _urlSession;
     NSString* _urlSafeHostName;
     NSString* _baseHTTPURL;
     NSString* _uniqueId;
     NSString* _deviceName;
     NSData* _serverCert;
-    NSMutableData* _respData;
-    NSData* _requestResp;
-    dispatch_semaphore_t _requestLock;
     
     TemporaryHost *_host; // May be nil
     NSString* _baseHTTPSURL;
-    
-    NSError* _error;
 }
 
 + (NSData*) fixXmlVersion:(NSData*) xmlData {
@@ -63,10 +57,6 @@
     _uniqueId = @"0123456789ABCDEF";
     _deviceName = deviceName;
     _serverCert = serverCert;
-    _requestLock = dispatch_semaphore_create(0);
-    _respData = [[NSMutableData alloc] init];
-    NSURLSessionConfiguration* config = [NSURLSessionConfiguration ephemeralSessionConfiguration];
-    _urlSession = [NSURLSession sessionWithConfiguration:config delegate:self delegateQueue:nil];
     
     NSString* address = [Utils addressPortStringToAddress:hostAddressPortString];
     unsigned short port = [Utils addressPortStringToPort:hostAddressPortString];
@@ -125,37 +115,40 @@
         
         return;
     }
-    
-    [_respData setLength:0];
-    _error = nil;
+
+    __block NSData* requestResp;
+    __block NSError* respError;
+    __block dispatch_semaphore_t requestLock = dispatch_semaphore_create(0);
     
     Log(LOG_D, @"Making Request: %@", request);
-    [[_urlSession dataTaskWithRequest:request.request completionHandler:^(NSData * __nullable data, NSURLResponse * __nullable response, NSError * __nullable error) {
+    NSURLSession* urlSession = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration ephemeralSessionConfiguration] delegate:self delegateQueue:nil];
+    [[urlSession dataTaskWithRequest:request.request completionHandler:^(NSData * __nullable data, NSURLResponse * __nullable response, NSError * __nullable error) {
         
         if (error != NULL) {
             Log(LOG_D, @"Connection error: %@", error);
-            self->_error = error;
+            respError = error;
         }
         else {
             Log(LOG_D, @"Received response: %@", response);
 
             if (data != NULL) {
                 Log(LOG_D, @"\n\nReceived data: %@\n\n", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
-                [self->_respData appendData:data];
-                if ([[NSString alloc] initWithData:self->_respData encoding:NSUTF8StringEncoding] != nil) {
-                    self->_requestResp = [HttpManager fixXmlVersion:self->_respData];
+                if ([[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] != nil) {
+                    requestResp = [HttpManager fixXmlVersion:data];
                 } else {
-                    self->_requestResp = self->_respData;
+                    requestResp = data;
                 }
             }
         }
         
-        dispatch_semaphore_signal(self->_requestLock);
+        dispatch_semaphore_signal(requestLock);
     }] resume];
-    dispatch_semaphore_wait(_requestLock, DISPATCH_TIME_FOREVER);
     
-    if (!_error && request.response) {
-        [request.response populateWithData:_requestResp];
+    dispatch_semaphore_wait(requestLock, DISPATCH_TIME_FOREVER);
+    [urlSession invalidateAndCancel];
+    
+    if (!respError && request.response) {
+        [request.response populateWithData:requestResp];
         
         // If the fallback error code was detected, issue the fallback request
         if (request.response.statusCode == request.fallbackError && request.fallbackRequest != NULL) {
@@ -166,7 +159,7 @@
             [self executeRequestSynchronously:request];
         }
     }
-    else if (_error && [_error code] == NSURLErrorServerCertificateUntrusted) {
+    else if (respError && [respError code] == NSURLErrorServerCertificateUntrusted) {
         // We must have a pinned cert for HTTPS. If we fail, it must be due to
         // a non-matching cert, not because we had no cert at all.
         assert(_serverCert != nil);
@@ -181,9 +174,9 @@
             [self executeRequestSynchronously:request];
         }
     }
-    else if (_error && request.response) {
-        request.response.statusCode = [_error code];
-        request.response.statusMessage = [_error localizedDescription];
+    else if (respError && request.response) {
+        request.response.statusCode = [respError code];
+        request.response.statusMessage = [respError localizedDescription];
     }
 }
 
