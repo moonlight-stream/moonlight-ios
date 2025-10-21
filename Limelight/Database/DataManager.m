@@ -108,6 +108,58 @@
     }];
 }
 
+#if TARGET_OS_TV
+
+- (NSDictionary *)dictionaryFromApp:(App *)app {
+    return @{@"hostUUID": app.host.uuid, @"hostName": app.host.name, @"name": app.name, @"id": app.id };
+}
+
+- (void)moveAppUpInList:(NSString *)appId {
+    NSUserDefaults *sharedDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.MoonlightTV"];
+    NSString *json = [sharedDefaults objectForKey:@"appList"];
+    NSData *jsonData = [json dataUsingEncoding:NSUTF8StringEncoding];
+    NSMutableArray *apps = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:nil];
+    
+    // Identify the selected app and its index
+    NSDictionary *selectedApp = nil;
+    NSInteger selectedIndex = NSNotFound;
+    for (NSDictionary *app in apps) {
+        if ([app[@"id"] isEqualToString:appId]) {
+            selectedApp = app;
+            selectedIndex = [apps indexOfObject:app];
+            break;
+        }
+    }
+
+    if (selectedApp && selectedIndex != NSNotFound) {
+        // Move the app to the top of the list
+        [apps removeObjectAtIndex:selectedIndex];
+        [apps insertObject:selectedApp atIndex:0];
+
+        // Serialize to JSON and save back to user defaults
+        NSData *newJsonData = [NSJSONSerialization dataWithJSONObject:apps options:0 error:nil];
+        NSString *newJsonStr = [[NSString alloc] initWithData:newJsonData encoding:NSUTF8StringEncoding];
+        [sharedDefaults setObject:newJsonStr forKey:@"appList"];
+        
+        // Update hostUUIDOrder accordingly
+        NSString *hostUUID = selectedApp[@"hostUUID"];
+        NSMutableArray *hostUUIDOrder = [[sharedDefaults objectForKey:@"hostUUIDOrder"] mutableCopy];
+        if (!hostUUIDOrder) {
+            hostUUIDOrder = [NSMutableArray array];
+        }
+        [hostUUIDOrder removeObject:hostUUID];
+        [hostUUIDOrder insertObject:hostUUID atIndex:0];
+        [sharedDefaults setObject:hostUUIDOrder forKey:@"hostUUIDOrder"];
+        
+        // Synchronize changes
+        [sharedDefaults synchronize];
+        
+    } else {
+        NSLog(@"App with ID %@ not found.", appId);
+    }
+}
+#endif
+
 - (void) updateAppsForExistingHost:(TemporaryHost *)host {
     [_managedObjectContext performBlockAndWait:^{
         Host* parent = [self getHostForTemporaryHost:host withHostRecords:[self fetchRecords:@"Host"]];
@@ -177,6 +229,8 @@
         if (managedHost != nil) {
             [self->_managedObjectContext deleteObject:managedHost];
             [self saveData];
+            
+            
         }
     }];
 }
@@ -186,8 +240,124 @@
     if ([_managedObjectContext hasChanges] && ![_managedObjectContext save:&error]) {
         Log(LOG_E, @"Unable to save hosts to database: %@", error);
     }
-
     [_appDelegate saveContext];
+    
+
+#if TARGET_OS_TV
+    // Save hosts/apps for Top Shelf
+    NSArray *hosts = [self fetchRecords:@"Host"];
+    NSUserDefaults *sharedDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.MoonlightTV"];
+    NSString *existingJson = [sharedDefaults objectForKey:@"appList"];
+    
+    // Retrieve the existing order of host UUIDs
+    NSMutableArray *storedUUIDOrder = [[sharedDefaults objectForKey:@"hostUUIDOrder"] mutableCopy];
+    if (!storedUUIDOrder) {
+        storedUUIDOrder = [NSMutableArray array];
+    }
+    // Update storedUUIDOrder if new hosts are added
+    for (Host* host in hosts) {
+        if (![storedUUIDOrder containsObject:host.uuid]) {
+            [storedUUIDOrder addObject:host.uuid];
+        }
+    }
+    // Save the updated order back to User Defaults
+    [sharedDefaults setObject:storedUUIDOrder forKey:@"hostUUIDOrder"];
+    [sharedDefaults synchronize];
+    
+    // Sort hosts by order
+    hosts = [hosts sortedArrayUsingComparator:^NSComparisonResult(Host* a, Host* b) {
+        NSUInteger first = [storedUUIDOrder indexOfObject:a.uuid];
+        NSUInteger second = [storedUUIDOrder indexOfObject:b.uuid];
+        if (first < second) {
+            return NSOrderedAscending;
+        } else if (first > second) {
+            return NSOrderedDescending;
+        } else {
+            return NSOrderedSame;
+        }
+    }];
+    
+    NSArray *existingApps;
+    if (existingJson != nil) {
+        existingApps = [NSJSONSerialization JSONObjectWithData:[existingJson dataUsingEncoding:NSUTF8StringEncoding] options:0 error:nil];
+    } else {
+        existingApps = [NSArray array];
+    }
+
+    NSMutableArray *mutableExistingApps = [existingApps mutableCopy];
+    NSMutableSet *currentHostUUIDs = [NSMutableSet set];
+
+    for (Host* host in hosts) {
+        
+        [currentHostUUIDs addObject:host.uuid];
+        
+        if ([host.appList count]>0) {
+            NSMutableDictionary *hostAppMap = [NSMutableDictionary dictionary];
+            for (NSDictionary *app in existingApps) {
+                hostAppMap[app[@"hostUUID"]] = app;
+            }
+            
+            NSMutableSet *currentAppIds = [NSMutableSet set];
+            
+            for (App *app in host.appList) {
+                [currentAppIds addObject:app.id];
+                NSDictionary *newAppDict = [self dictionaryFromApp:app];
+                NSUInteger existingIndex = [mutableExistingApps indexOfObjectPassingTest:^BOOL(NSDictionary *dict, NSUInteger idx, BOOL *stop) {
+                    return [dict[@"id"] isEqualToString:app.id];
+                }];
+                
+                if (existingIndex != NSNotFound) {
+                    mutableExistingApps[existingIndex] = newAppDict;
+                } else {
+                    [mutableExistingApps addObject:newAppDict];
+                }
+            }
+                        
+            // Removing apps not in source list for this host
+            NSIndexSet *indexesToDelete = [mutableExistingApps indexesOfObjectsPassingTest:^BOOL(NSDictionary *dict, NSUInteger idx, BOOL *stop) {
+                return ![currentAppIds containsObject:dict[@"id"]] && [dict[@"hostUUID"] isEqualToString:host.uuid];
+            }];
+            [mutableExistingApps removeObjectsAtIndexes:indexesToDelete];
+        }
+    }
+    
+    // Remove apps belonging to hosts that are no longer there
+    NSIndexSet *indexesToDelete = [mutableExistingApps indexesOfObjectsPassingTest:^BOOL(NSDictionary *dict, NSUInteger idx, BOOL *stop) {
+        return ![currentHostUUIDs containsObject:dict[@"hostUUID"]];
+    }];
+    [mutableExistingApps removeObjectsAtIndexes:indexesToDelete];
+    
+    // Partition into separate arrays
+    NSMutableDictionary<NSString *, NSMutableArray *> *hostToAppsMap = [NSMutableDictionary new];
+    for (NSDictionary *app in mutableExistingApps) {
+        NSString *hostUUID = app[@"hostUUID"];
+        if (!hostToAppsMap[hostUUID]) {
+            hostToAppsMap[hostUUID] = [NSMutableArray new];
+        }
+        [hostToAppsMap[hostUUID] addObject:app];
+    }
+
+    // Sort these arrays
+    NSArray *sortedKeys = [hostToAppsMap.allKeys sortedArrayUsingComparator:^NSComparisonResult(NSString *a, NSString *b) {
+        NSUInteger first = [storedUUIDOrder indexOfObject:a];
+        NSUInteger second = [storedUUIDOrder indexOfObject:b];
+        return first < second ? NSOrderedAscending : NSOrderedDescending;
+    }];
+
+    // Merge them back
+    [mutableExistingApps removeAllObjects];
+    for (NSString *key in sortedKeys) {
+        [mutableExistingApps addObjectsFromArray:hostToAppsMap[key]];
+    }
+    
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:mutableExistingApps options:0 error:&error];
+    if (jsonData) {
+        NSString *jsonStr = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+        [sharedDefaults setObject:jsonStr forKey:@"appList"];
+        [sharedDefaults synchronize];
+    }
+
+#endif
 }
 
 - (NSArray*) getHosts {

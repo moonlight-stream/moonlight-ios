@@ -204,6 +204,19 @@ static NSMutableSet* hostList;
                 [self->_appManager stopRetrieving];
                 [self->_appManager retrieveAssetsFromHost:host];
                 [self hideLoadingFrame: nil];
+                
+                AppDelegate* delegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
+                if (delegate.appToRun != nil)
+                {
+                    for (TemporaryApp *app in host.appList) {
+                        if ([app.id isEqualToString:delegate.appToRun]) {
+                            [self appClicked:app view:nil];
+                            break;
+                        }
+                    }     
+                    delegate.appToRun = nil;               
+                }
+                
             });
         }
     });
@@ -850,8 +863,13 @@ static NSMutableSet* hostList;
         // before we call prepareToStreamApp.
         [[self revealViewController] revealToggleAnimated:NO];
     }
-#endif
     
+#else
+    
+    DataManager* database = [[DataManager alloc] init];
+    [database moveAppUpInList:app.id];
+#endif
+
     if ([self findRunningApp:app.host]) {
         // If there's a running app, display a menu
         [self appLongClicked:app view:view];
