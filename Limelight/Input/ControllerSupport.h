@@ -8,6 +8,7 @@
 
 #import "StreamConfiguration.h"
 #import "Controller.h"
+#import "GamepadMouseHandler.h"
 
 @class OnScreenControls;
 
@@ -16,10 +17,16 @@
 - (void) gamepadPresenceChanged;
 - (void) mousePresenceChanged;
 - (void) streamExitRequested;
+// 新增：鼠标模式状态变化
+- (void) mouseModeDidChange:(BOOL)enabled;
+// 新增：请求显示/隐藏虚拟键盘
+- (void) requestToggleKeyboard;
 
 @end
 
 @interface ControllerSupport : NSObject
+
+@property (nonatomic, readonly) GamepadMouseHandler *gamepadMouseHandler;
 
 -(id) initWithConfig:(StreamConfiguration*)streamConfig delegate:(id<ControllerSupportDelegate>)delegate;
 -(void) connectionEstablished;

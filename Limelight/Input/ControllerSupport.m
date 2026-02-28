@@ -19,6 +19,9 @@
 
 static const double MOUSE_SPEED_DIVISOR = 1.25;
 
+@interface ControllerSupport () <GamepadMouseDelegate>
+@end
+
 @implementation ControllerSupport {
     id _controllerConnectObserver;
     id _controllerDisconnectObserver;
@@ -332,7 +335,20 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
             controller.lastButtonFlags = 0;
             exitRequested = YES;
         }
-        
+
+        // 检测鼠标模式切换组合键（LB+RB）
+        if ([_gamepadMouseHandler shouldToggleMouseMode:controller]) {
+            [_gamepadMouseHandler toggleMouseMode];
+            [_controllerStreamLock unlock];
+            return;
+        }
+
+        // 鼠标模式下处理手柄输入（摇杆→鼠标移动，按钮→鼠标按键）
+        if ([_gamepadMouseHandler handleGamepadInput:controller]) {
+            [_controllerStreamLock unlock];
+            return;
+        }
+
         // Only send controller events if we successfully reported controller arrival
         if ([self reportControllerArrival:controller]) {
             uint32_t buttonFlags = controller.lastButtonFlags;
@@ -1078,6 +1094,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     self = [super init];
     
     _controllerStreamLock = [[NSLock alloc] init];
+    _gamepadMouseHandler = [[GamepadMouseHandler alloc] initWithDelegate:self];
     _controllers = [[NSMutableDictionary alloc] init];
     _controllerNumbers = 0;
     _multiController = streamConfig.multiController;
@@ -1233,6 +1250,8 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
 
 -(void) cleanup
 {
+    [_gamepadMouseHandler cleanup];
+
     [[NSNotificationCenter defaultCenter] removeObserver:_controllerConnectObserver];
     [[NSNotificationCenter defaultCenter] removeObserver:_controllerDisconnectObserver];
     [[NSNotificationCenter defaultCenter] removeObserver:_mouseConnectObserver];
@@ -1267,6 +1286,16 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
             [self unregisterMouseCallbacks:mouse];
         }
     }
+}
+
+#pragma mark - GamepadMouseDelegate
+
+- (void)mouseModeDidChange:(BOOL)enabled {
+    [_delegate mouseModeDidChange:enabled];
+}
+
+- (void)requestToggleKeyboard {
+    [_delegate requestToggleKeyboard];
 }
 
 @end

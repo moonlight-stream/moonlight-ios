@@ -649,8 +649,18 @@
 
 - (void) streamExitRequested {
     Log(LOG_I, @"Gamepad combo requested stream exit");
-    
+
     [self returnToMainFrame];
+}
+
+// 鼠标模式状态变化回调（Task 5 中完善实现）
+- (void) mouseModeDidChange:(BOOL)enabled {
+    Log(LOG_I, @"Mouse mode changed: %@", enabled ? @"ON" : @"OFF");
+}
+
+// 请求显示/隐藏虚拟键盘（Task 5 中完善实现）
+- (void) requestToggleKeyboard {
+    Log(LOG_I, @"Keyboard toggle requested");
 }
 
 - (void)userInteractionBegan {
