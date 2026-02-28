@@ -12,6 +12,7 @@
 #import "StreamManager.h"
 #import "ControllerSupport.h"
 #import "DataManager.h"
+#import "KeyboardOverlayView.h"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -47,7 +48,12 @@
     UIScrollView *_scrollView;
     BOOL _userIsInteracting;
     CGSize _keyboardSize;
-    
+
+    // 新增：鼠标模式和虚拟键盘
+    KeyboardOverlayView *_keyboardOverlay;
+    UILabel *_toastLabel;
+    NSTimer *_toastTimer;
+
 #if !TARGET_OS_TV
     UIScreenEdgePanGestureRecognizer *_exitSwipeRecognizer;
 #endif
@@ -63,7 +69,12 @@
 }
 
 #if TARGET_OS_TV
-- (void)controllerPauseButtonPressed:(id)sender { }
+- (void)controllerPauseButtonPressed:(id)sender {
+    // 鼠标模式下 Menu 单击切换虚拟键盘
+    if (_controllerSupport.gamepadMouseHandler.mouseMode) {
+        [self requestToggleKeyboard];
+    }
+}
 - (void)controllerPauseButtonDoublePressed:(id)sender {
     Log(LOG_I, @"Menu double-pressed -- backing out of stream");
     [self returnToMainFrame];
@@ -205,7 +216,35 @@
         // Add StreamView directly in relative mode
         [self.view addSubview:_streamView];
     }
-    
+
+    // === 虚拟键盘覆盖层 ===
+    _keyboardOverlay = [[KeyboardOverlayView alloc] initWithFrame:self.view.bounds];
+    _keyboardOverlay.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    [self.view addSubview:_keyboardOverlay];
+
+    // === Toast 提示标签 ===
+    _toastLabel = [[UILabel alloc] init];
+    _toastLabel.textColor = [UIColor whiteColor];
+    _toastLabel.backgroundColor = [UIColor colorWithWhite:0 alpha:0.7];
+    _toastLabel.textAlignment = NSTextAlignmentCenter;
+#if TARGET_OS_TV
+    _toastLabel.font = [UIFont systemFontOfSize:28];
+#else
+    _toastLabel.font = [UIFont systemFontOfSize:14];
+#endif
+    _toastLabel.layer.cornerRadius = 8;
+    _toastLabel.clipsToBounds = YES;
+    _toastLabel.alpha = 0;
+    _toastLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.view addSubview:_toastLabel];
+
+    [NSLayoutConstraint activateConstraints:@[
+        [_toastLabel.centerXAnchor constraintEqualToAnchor:self.view.centerXAnchor],
+        [_toastLabel.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:20],
+        [_toastLabel.widthAnchor constraintGreaterThanOrEqualToConstant:200],
+        [_toastLabel.heightAnchor constraintEqualToConstant:40],
+    ]];
+
     [self.view addSubview:_stageLabel];
     [self.view addSubview:_spinner];
     [self.view addSubview:_tipLabel];
@@ -225,6 +264,8 @@
             [_inactivityTimer invalidate];
             _inactivityTimer = nil;
         }
+        [_toastTimer invalidate];
+        _toastTimer = nil;
         [[NSNotificationCenter defaultCenter] removeObserver:self];
     }
 }
@@ -653,14 +694,60 @@
     [self returnToMainFrame];
 }
 
-// 鼠标模式状态变化回调（Task 5 中完善实现）
-- (void) mouseModeDidChange:(BOOL)enabled {
-    Log(LOG_I, @"Mouse mode changed: %@", enabled ? @"ON" : @"OFF");
+// 鼠标模式状态变化回调
+- (void)mouseModeDidChange:(BOOL)enabled {
+    NSString *message = enabled ? @"Mouse Mode ON" : @"Gamepad Mode";
+    [self showToast:message];
+
+    if (!enabled) {
+        [_keyboardOverlay dismissAnimated:YES];
+        [_controllerSupport.gamepadMouseHandler setKeyboardVisible:NO];
+    }
+
+#if TARGET_OS_TV
+    [self setNeedsFocusUpdate];
+#endif
 }
 
-// 请求显示/隐藏虚拟键盘（Task 5 中完善实现）
-- (void) requestToggleKeyboard {
-    Log(LOG_I, @"Keyboard toggle requested");
+// 请求显示/隐藏虚拟键盘
+- (void)requestToggleKeyboard {
+    if (_keyboardOverlay.isVisible) {
+        [_keyboardOverlay dismissAnimated:YES];
+        [_controllerSupport.gamepadMouseHandler setKeyboardVisible:NO];
+    } else {
+        [_keyboardOverlay showAnimated:YES];
+        [_controllerSupport.gamepadMouseHandler setKeyboardVisible:YES];
+    }
+
+#if TARGET_OS_TV
+    [self setNeedsFocusUpdate];
+#endif
+}
+
+#pragma mark - Toast 提示
+
+- (void)showToast:(NSString *)message {
+    NSString *paddedMessage = [NSString stringWithFormat:@"  %@  ", message];
+    _toastLabel.text = paddedMessage;
+
+    [_toastTimer invalidate];
+
+    [UIView animateWithDuration:0.3 animations:^{
+        self->_toastLabel.alpha = 1;
+    }];
+
+    _toastTimer = [NSTimer scheduledTimerWithTimeInterval:2.0
+                                                  target:self
+                                                selector:@selector(hideToast)
+                                                userInfo:nil
+                                                 repeats:NO];
+}
+
+- (void)hideToast {
+    [UIView animateWithDuration:0.5 animations:^{
+        self->_toastLabel.alpha = 0;
+    }];
+    _toastTimer = nil;
 }
 
 - (void)userInteractionBegan {
@@ -718,6 +805,15 @@
     // GCMouse is horribly broken on iOS 14.0 for certain mice. Only lock
     // the cursor if there is a GCMouse present.
     return [GCMouse mice].count > 0;
+}
+#endif
+
+#if TARGET_OS_TV
+- (NSArray<id<UIFocusEnvironment>> *)preferredFocusEnvironments {
+    if (_keyboardOverlay.isVisible) {
+        return @[_keyboardOverlay];
+    }
+    return @[self.view];
 }
 #endif
 
