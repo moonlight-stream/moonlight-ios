@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		D3271365A8DD40DDBB72915A /* GamepadMouseHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = D3271364A8DD40DDBB729159 /* GamepadMouseHandler.m */; };
 		D3271366A8DD40DDBB72915B /* GamepadMouseHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = D3271364A8DD40DDBB729159 /* GamepadMouseHandler.m */; };
+		D3271369A8DD40DDBB72915E /* KeyboardOverlayView.m in Sources */ = {isa = PBXBuildFile; fileRef = D3271368A8DD40DDBB72915D /* KeyboardOverlayView.m */; };
+		D327136AA8DD40DDBB72915F /* KeyboardOverlayView.m in Sources */ = {isa = PBXBuildFile; fileRef = D3271368A8DD40DDBB72915D /* KeyboardOverlayView.m */; };
 		693B3A9B218638CD00982F7B /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 693B3A9A218638CD00982F7B /* Settings.bundle */; };
 		98181BE92791277400E43572 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98181BE82791275D00E43572 /* libSDL2.a */; };
 		98181BEB2791278F00E43572 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98181BEA2791278300E43572 /* libSDL2.a */; };
@@ -189,6 +191,8 @@
 		D3271362A8DD40DDBB729157 /* GamepadMouseConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GamepadMouseConfig.h; sourceTree = "<group>"; };
 		D3271363A8DD40DDBB729158 /* GamepadMouseHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GamepadMouseHandler.h; sourceTree = "<group>"; };
 		D3271364A8DD40DDBB729159 /* GamepadMouseHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GamepadMouseHandler.m; sourceTree = "<group>"; };
+		D3271367A8DD40DDBB72915C /* KeyboardOverlayView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KeyboardOverlayView.h; sourceTree = "<group>"; };
+		D3271368A8DD40DDBB72915D /* KeyboardOverlayView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KeyboardOverlayView.m; sourceTree = "<group>"; };
 		9832D1341BBCD5C50036EF48 /* TemporaryApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TemporaryApp.h; path = Database/TemporaryApp.h; sourceTree = "<group>"; };
 		9832D1351BBCD5C50036EF48 /* TemporaryApp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TemporaryApp.m; path = Database/TemporaryApp.m; sourceTree = "<group>"; };
 		984CD023288A310D0097D2D4 /* Moonlight v1.8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Moonlight v1.8.xcdatamodel"; sourceTree = "<group>"; };
@@ -527,6 +531,8 @@
 				D3271362A8DD40DDBB729157 /* GamepadMouseConfig.h */,
 				D3271363A8DD40DDBB729158 /* GamepadMouseHandler.h */,
 				D3271364A8DD40DDBB729159 /* GamepadMouseHandler.m */,
+				D3271367A8DD40DDBB72915C /* KeyboardOverlayView.h */,
+				D3271368A8DD40DDBB72915D /* KeyboardOverlayView.m */,
 			);
 			path = Input;
 			sourceTree = "<group>";
@@ -855,6 +861,7 @@
 				FB1A67E02132460A00507771 /* Logger.m in Sources */,
 				FB1A67D52132460400507771 /* ControllerSupport.m in Sources */,
 				D3271366A8DD40DDBB72915B /* GamepadMouseHandler.m in Sources */,
+				D327136AA8DD40DDBB72915F /* KeyboardOverlayView.m in Sources */,
 				FB1A67D82132460400507771 /* StreamView.m in Sources */,
 				9896219A23D56E8100211983 /* X1Kit.swift in Sources */,
 				FB1A67DA2132460400507771 /* OnScreenControls.m in Sources */,
@@ -937,6 +944,7 @@
 				FB6549561A57907E001C8F39 /* DiscoveryWorker.m in Sources */,
 				FB89462A19F646E200339C8A /* ControllerSupport.m in Sources */,
 				D3271365A8DD40DDBB72915A /* GamepadMouseHandler.m in Sources */,
+				D3271369A8DD40DDBB72915E /* KeyboardOverlayView.m in Sources */,
 				FB9AFD3D1A7E111600872C98 /* AppAssetResponse.m in Sources */,
 				FBD349621A0089F6002D2A60 /* DataManager.m in Sources */,
 				FB4A23B81A9D3637004D2EF2 /* LoadingFrameViewController.m in Sources */,
