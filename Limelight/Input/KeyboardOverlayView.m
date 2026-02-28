@@ -541,9 +541,11 @@ static const int kRow5Count = sizeof(kRow5) / sizeof(kRow5[0]);
                     // OEM 键：从 accessibilityIdentifier 恢复原始 label
                     [button setTitle:originalLabel forState:UIControlStateNormal];
                 } else {
-                    // 字母键和功能键：转为小写
+                    // 仅对单字母键转为小写（避免 ESC/F1/Tab 等功能键被错误小写）
                     NSString *currentTitle = [button titleForState:UIControlStateNormal];
-                    [button setTitle:[currentTitle lowercaseString] forState:UIControlStateNormal];
+                    if (currentTitle.length == 1) {
+                        [button setTitle:[currentTitle lowercaseString] forState:UIControlStateNormal];
+                    }
                 }
             }
         }

@@ -353,8 +353,12 @@
 }
 
 - (void)stopPollTimer {
-    [_pollTimer invalidate];
+    // 定时器在主线程创建，需要在主线程失效
+    NSTimer *timer = _pollTimer;
     _pollTimer = nil;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [timer invalidate];
+    });
 }
 
 #pragma mark - 状态重置

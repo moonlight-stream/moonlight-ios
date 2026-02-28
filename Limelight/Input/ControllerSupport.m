@@ -336,17 +336,20 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
             exitRequested = YES;
         }
 
-        // 检测鼠标模式切换组合键（LB+RB）
-        if ([_gamepadMouseHandler shouldToggleMouseMode:controller]) {
-            [_gamepadMouseHandler toggleMouseMode];
-            [_controllerStreamLock unlock];
-            return;
-        }
+        // 退出组合键始终优先，跳过鼠标模式拦截
+        if (!exitRequested) {
+            // 检测鼠标模式切换组合键（LB+RB）
+            if ([_gamepadMouseHandler shouldToggleMouseMode:controller]) {
+                [_gamepadMouseHandler toggleMouseMode];
+                [_controllerStreamLock unlock];
+                return;
+            }
 
-        // 鼠标模式下处理手柄输入（摇杆→鼠标移动，按钮→鼠标按键）
-        if ([_gamepadMouseHandler handleGamepadInput:controller]) {
-            [_controllerStreamLock unlock];
-            return;
+            // 鼠标模式下处理手柄输入（摇杆→鼠标移动，按钮→鼠标按键）
+            if ([_gamepadMouseHandler handleGamepadInput:controller]) {
+                [_controllerStreamLock unlock];
+                return;
+            }
         }
 
         // Only send controller events if we successfully reported controller arrival
