@@ -56,19 +56,24 @@
 #pragma mark - 模式切换
 
 - (void)toggleMouseMode {
-    _mouseMode = !_mouseMode;
+    @synchronized (self) {
+        _mouseMode = !_mouseMode;
 
-    if (_mouseMode) {
-        // 进入鼠标模式：启动轮询定时器
-        [self startPollTimer];
-    } else {
-        // 退出鼠标模式：停止定时器，释放所有已按下的鼠标按钮
-        [self stopPollTimer];
-        [self releaseAllButtons];
+        if (_mouseMode) {
+            // 进入鼠标模式：启动轮询定时器
+            [self startPollTimer];
+        } else {
+            // 退出鼠标模式：停止定时器，释放所有已按下的鼠标按钮
+            [self stopPollTimer];
+            // 注意顺序：releaseAllButtons 必须在 resetAllState 之前调用，
+            // 因为 releaseAllButtons 依赖 _aPressed/_xPressed/_ltPressed/_rtPressed
+            // 状态来判断哪些按钮需要释放，resetAllState 会清除这些标志。
+            [self releaseAllButtons];
+        }
+
+        // 重置累积器和按钮状态
+        [self resetAllState];
     }
-
-    // 重置累积器和按钮状态
-    [self resetAllState];
 
     // 在主线程通知委托
     __weak typeof(self) weakSelf = self;
@@ -81,64 +86,70 @@
 }
 
 - (void)setKeyboardVisible:(BOOL)visible {
-    _keyboardVisible = visible;
+    @synchronized (self) {
+        _keyboardVisible = visible;
+    }
 }
 
 #pragma mark - LB+RB 组合键检测
 
 - (BOOL)shouldToggleMouseMode:(Controller*)controller {
-    int flags = controller.lastButtonFlags;
-    BOOL lbPressed = (flags & LB_FLAG) != 0;
-    BOOL rbPressed = (flags & RB_FLAG) != 0;
+    @synchronized (self) {
+        int flags = controller.lastButtonFlags;
+        BOOL lbPressed = (flags & LB_FLAG) != 0;
+        BOOL rbPressed = (flags & RB_FLAG) != 0;
 
-    // 检查是否只按了 LB+RB，没有其他按钮
-    int otherButtonMask = ~(LB_FLAG | RB_FLAG);
-    BOOL noOtherButtons = (flags & otherButtonMask) == 0;
+        // 检查是否只按了 LB+RB，没有其他按钮
+        int otherButtonMask = ~(LB_FLAG | RB_FLAG);
+        BOOL noOtherButtons = (flags & otherButtonMask) == 0;
 
-    // 检查摇杆是否在中立位置（绝对值 < 3000）
-    BOOL sticksNeutral = (abs(controller.lastLeftStickX) < 3000) &&
-                         (abs(controller.lastLeftStickY) < 3000) &&
-                         (abs(controller.lastRightStickX) < 3000) &&
-                         (abs(controller.lastRightStickY) < 3000);
+        // 检查摇杆是否在中立位置（绝对值 < 3000）
+        BOOL sticksNeutral = (abs(controller.lastLeftStickX) < 3000) &&
+                             (abs(controller.lastLeftStickY) < 3000) &&
+                             (abs(controller.lastRightStickX) < 3000) &&
+                             (abs(controller.lastRightStickY) < 3000);
 
-    // 检查扳机是否在中立位置（< 128）
-    BOOL triggersNeutral = (controller.lastLeftTrigger < 128) &&
-                           (controller.lastRightTrigger < 128);
+        // 检查扳机是否在中立位置（< 128）
+        BOOL triggersNeutral = (controller.lastLeftTrigger < 128) &&
+                               (controller.lastRightTrigger < 128);
 
-    if (lbPressed && rbPressed && noOtherButtons && sticksNeutral && triggersNeutral) {
-        if (!_toggleCooldown) {
-            // 首次检测到组合键，设置防抖标志并触发切换
-            _toggleCooldown = YES;
-            return YES;
+        if (lbPressed && rbPressed && noOtherButtons && sticksNeutral && triggersNeutral) {
+            if (!_toggleCooldown) {
+                // 首次检测到组合键，设置防抖标志并触发切换
+                _toggleCooldown = YES;
+                return YES;
+            }
+        } else {
+            // 组合键释放后重置防抖标志，允许下次触发
+            _toggleCooldown = NO;
         }
-    } else {
-        // 组合键释放后重置防抖标志，允许下次触发
-        _toggleCooldown = NO;
-    }
 
-    return NO;
+        return NO;
+    }
 }
 
 #pragma mark - 手柄输入处理入口
 
 - (BOOL)handleGamepadInput:(Controller*)controller {
-    if (!_mouseMode) {
-        return NO;
-    }
+    @synchronized (self) {
+        if (!_mouseMode) {
+            return NO;
+        }
 
-    // 缓存手柄引用，供定时器回调使用
-    _currentController = controller;
+        // 缓存手柄引用，供定时器回调使用
+        _currentController = controller;
 
-    // 虚拟键盘可见时，消费输入但不处理按钮事件
-    // （避免误触导致鼠标点击干扰键盘操作）
-    if (_keyboardVisible) {
+        // 虚拟键盘可见时，消费输入但不处理按钮事件
+        // （避免误触导致鼠标点击干扰键盘操作）
+        if (_keyboardVisible) {
+            return YES;
+        }
+
+        // 处理按钮事件（边缘检测）
+        [self handleButtonEvents:controller];
+
         return YES;
     }
-
-    // 处理按钮事件（边缘检测）
-    [self handleButtonEvents:controller];
-
-    return YES;
 }
 
 #pragma mark - 按钮事件处理（边缘检测）
@@ -206,21 +217,23 @@
 
 /// 定时器回调：读取摇杆状态，计算鼠标移动和滚轮事件
 - (void)pollMouseMovement {
-    // 虚拟键盘可见时暂停鼠标移动
-    if (_keyboardVisible) {
-        return;
+    @synchronized (self) {
+        // 虚拟键盘可见时暂停鼠标移动
+        if (_keyboardVisible) {
+            return;
+        }
+
+        Controller *controller = _currentController;
+        if (controller == nil) {
+            return;
+        }
+
+        // === 左摇杆 → 鼠标移动 ===
+        [self processMouseMovement:controller];
+
+        // === 右摇杆 → 滚轮 ===
+        [self processScrollWheel:controller];
     }
-
-    Controller *controller = _currentController;
-    if (controller == nil) {
-        return;
-    }
-
-    // === 左摇杆 → 鼠标移动 ===
-    [self processMouseMovement:controller];
-
-    // === 右摇杆 → 滚轮 ===
-    [self processScrollWheel:controller];
 }
 
 /// 处理左摇杆到鼠标移动的转换
@@ -316,13 +329,27 @@
 - (void)startPollTimer {
     [self stopPollTimer];
 
-    _pollTimer = [NSTimer timerWithTimeInterval:_config.pollInterval
-                                         target:self
-                                       selector:@selector(pollMouseMovement)
-                                       userInfo:nil
-                                        repeats:YES];
-    // 加入 CommonModes 确保在滚动等场景下仍能触发
-    [[NSRunLoop currentRunLoop] addTimer:_pollTimer forMode:NSRunLoopCommonModes];
+    // 必须在主线程创建并加入 mainRunLoop，因为 toggleMouseMode 可能在
+    // GCController 回调的后台队列上调用，后台队列没有活跃的 NSRunLoop，
+    // 定时器无法触发。使用 block-based API 避免 target:selector: 的循环引用。
+    __weak typeof(self) weakSelf = self;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf || !strongSelf.mouseMode) return;
+
+        strongSelf->_pollTimer = [NSTimer timerWithTimeInterval:strongSelf->_config.pollInterval
+                                                        repeats:YES
+                                                          block:^(NSTimer *timer) {
+            __strong typeof(weakSelf) strongSelf2 = weakSelf;
+            if (strongSelf2) {
+                [strongSelf2 pollMouseMovement];
+            } else {
+                [timer invalidate];
+            }
+        }];
+        // 加入 CommonModes 确保在滚动等场景下仍能触发
+        [[NSRunLoop mainRunLoop] addTimer:strongSelf->_pollTimer forMode:NSRunLoopCommonModes];
+    });
 }
 
 - (void)stopPollTimer {
@@ -334,55 +361,61 @@
 
 /// 重置所有累积器和按钮状态
 - (void)resetAllState {
-    _accumulatedMouseX = 0.0f;
-    _accumulatedMouseY = 0.0f;
-    _accumulatedScrollX = 0.0f;
-    _accumulatedScrollY = 0.0f;
+    @synchronized (self) {
+        _accumulatedMouseX = 0.0f;
+        _accumulatedMouseY = 0.0f;
+        _accumulatedScrollX = 0.0f;
+        _accumulatedScrollY = 0.0f;
 
-    _aPressed = NO;
-    _xPressed = NO;
-    _yPressed = NO;
-    _ltPressed = NO;
-    _rtPressed = NO;
+        _aPressed = NO;
+        _xPressed = NO;
+        _yPressed = NO;
+        _ltPressed = NO;
+        _rtPressed = NO;
 
-    _toggleCooldown = NO;
+        _toggleCooldown = NO;
+    }
 }
 
 /// 释放所有当前已按下的鼠标按钮，防止鼠标键卡住
 - (void)releaseAllButtons {
-    if (_aPressed) {
-        LiSendMouseButtonEvent(BUTTON_ACTION_RELEASE, BUTTON_LEFT);
-        _aPressed = NO;
-    }
-    if (_xPressed) {
-        LiSendMouseButtonEvent(BUTTON_ACTION_RELEASE, BUTTON_RIGHT);
-        _xPressed = NO;
-    }
-    if (_ltPressed) {
-        LiSendMouseButtonEvent(BUTTON_ACTION_RELEASE, BUTTON_LEFT);
-        _ltPressed = NO;
-    }
-    if (_rtPressed) {
-        LiSendMouseButtonEvent(BUTTON_ACTION_RELEASE, BUTTON_RIGHT);
-        _rtPressed = NO;
+    @synchronized (self) {
+        if (_aPressed) {
+            LiSendMouseButtonEvent(BUTTON_ACTION_RELEASE, BUTTON_LEFT);
+            _aPressed = NO;
+        }
+        if (_xPressed) {
+            LiSendMouseButtonEvent(BUTTON_ACTION_RELEASE, BUTTON_RIGHT);
+            _xPressed = NO;
+        }
+        if (_ltPressed) {
+            LiSendMouseButtonEvent(BUTTON_ACTION_RELEASE, BUTTON_LEFT);
+            _ltPressed = NO;
+        }
+        if (_rtPressed) {
+            LiSendMouseButtonEvent(BUTTON_ACTION_RELEASE, BUTTON_RIGHT);
+            _rtPressed = NO;
+        }
     }
 }
 
 #pragma mark - 资源清理
 
 - (void)cleanup {
-    [self stopPollTimer];
+    @synchronized (self) {
+        [self stopPollTimer];
 
-    // 退出前释放所有按钮，避免远端鼠标键卡住
-    if (_mouseMode) {
-        [self releaseAllButtons];
+        // 退出前释放所有按钮，避免远端鼠标键卡住
+        if (_mouseMode) {
+            [self releaseAllButtons];
+        }
+
+        [self resetAllState];
+        _mouseMode = NO;
+        _keyboardVisible = NO;
+        _currentController = nil;
+        _delegate = nil;
     }
-
-    [self resetAllState];
-    _mouseMode = NO;
-    _keyboardVisible = NO;
-    _currentController = nil;
-    _delegate = nil;
 }
 
 - (void)dealloc {
