@@ -7,6 +7,7 @@
 //
 
 #import "AppDelegate.h"
+#import "Moonlight-Swift.h"
 
 @implementation AppDelegate
 
@@ -29,6 +30,13 @@ static NSString* DB_NAME = @"Limelight_iOS.sqlite";
         _pcUuidToLoad = (NSString*)[shortcut.userInfo objectForKey:@"UUID"];
     }
 #endif
+
+    // Handle cold-start deep link
+    NSURL *url = launchOptions[UIApplicationLaunchOptionsURLKey];
+    if (url != nil) {
+        (void)[DeepLinkManager handleURL:url application:application appDelegate:self];
+    }
+
     return YES;
 }
 
@@ -54,6 +62,14 @@ static NSString* DB_NAME = @"Limelight_iOS.sqlite";
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
     // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
+}
+
+
+- (BOOL)application:(UIApplication *)application
+            openURL:(NSURL *)url
+            options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options
+{
+    return [DeepLinkManager handleURL:url application:application appDelegate:self];
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application

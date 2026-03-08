@@ -59,3 +59,7 @@ void LogTagv(LogLevel level, NSString* tag, NSString* fmt, va_list args) {
     }
     NSLogv(prefixedString, args);
 }
+
+void LogTagSwift(LogLevel level, NSString *tag, NSString *message) {
+    LogTag(level, tag, message);
+}

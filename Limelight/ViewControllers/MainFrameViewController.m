@@ -754,66 +754,13 @@ static NSMutableSet* hostList;
     if (currentApp != nil) {
         [alertController addAction:[UIAlertAction actionWithTitle:
                                     [app.id isEqualToString:currentApp.id] ? @"Quit App" : @"Quit Running App and Start" style:UIAlertActionStyleDestructive handler:^(UIAlertAction* action){
-                                        Log(LOG_I, @"Quitting application: %@", currentApp.name);
-                                        [self showLoadingFrame: ^{
-                                            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                                                HttpManager* hMan = [[HttpManager alloc] initWithHost:app.host];
-                                                HttpResponse* quitResponse = [[HttpResponse alloc] init];
-                                                HttpRequest* quitRequest = [HttpRequest requestForResponse: quitResponse withUrlRequest:[hMan newQuitAppRequest]];
-                                                
-                                                // Exempt this host from discovery while handling the quit operation
-                                                [self->_discMan pauseDiscoveryForHost:app.host];
-                                                [hMan executeRequestSynchronously:quitRequest];
-                                                if (quitResponse.statusCode == 200) {
-                                                    ServerInfoResponse* serverInfoResp = [[ServerInfoResponse alloc] init];
-                                                    [hMan executeRequestSynchronously:[HttpRequest requestForResponse:serverInfoResp withUrlRequest:[hMan newServerInfoRequest:false]
-                                                                                                        fallbackError:401 fallbackRequest:[hMan newHttpServerInfoRequest]]];
-                                                    if (![serverInfoResp isStatusOk] || [[serverInfoResp getStringTag:@"state"] hasSuffix:@"_SERVER_BUSY"]) {
-                                                        // On newer GFE versions, the quit request succeeds even though the app doesn't
-                                                        // really quit if another client tries to kill your app. We'll patch the response
-                                                        // to look like the old error in that case, so the UI behaves.
-                                                        quitResponse.statusCode = 599;
-                                                    }
-                                                    else if ([serverInfoResp isStatusOk]) {
-                                                        // Update the host object with this info
-                                                        [serverInfoResp populateHost:app.host];
-                                                    }
-                                                }
-                                                [self->_discMan resumeDiscoveryForHost:app.host];
-
-                                                // If it fails, display an error and stop the current operation
-                                                if (quitResponse.statusCode != 200) {
-                                                    UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Quitting App Failed"
-                                                                                                message:@"Failed to quit app. If this app was started by "
-                                                             "another device, you'll need to quit from that device."
-                                                                                         preferredStyle:UIAlertControllerStyleAlert];
-                                                    [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
-                                                    dispatch_async(dispatch_get_main_queue(), ^{
-                                                        [self updateAppsForHost:app.host];
-                                                        [self hideLoadingFrame: ^{
-                                                            [[self activeViewController] presentViewController:alert animated:YES completion:nil];
-                                                        }];
-                                                    });
-                                                }
-                                                else {
-                                                    app.host.currentGame = @"0";
-                                                    dispatch_async(dispatch_get_main_queue(), ^{
-                                                        // If it succeeds and we're to start streaming, segue to the stream
-                                                        if (![app.id isEqualToString:currentApp.id]) {
-                                                            [self prepareToStreamApp:app];
-                                                            [self hideLoadingFrame: ^{
-                                                                [self performSegueWithIdentifier:@"createStreamFrame" sender:nil];
-                                                            }];
-                                                        }
-                                                        else {
-                                                            // Otherwise, just hide the loading icon
-                                                            [self hideLoadingFrame:nil];
-                                                        }
-                                                    });
-                                                }
-                                            });
-                                        }];
-                                        
+                                        if ([app.id isEqualToString:currentApp.id]) {
+                                            Log(LOG_I, @"Quitting application: %@", currentApp.name);
+                                            [self quitRunningAppOnHost:app completion:nil];
+                                        }
+                                        else {
+                                            [self quitRunningApp:currentApp andLaunchApp:app];
+                                        }
                                     }]];
     }
 
@@ -836,6 +783,76 @@ static NSMutableSet* hostList;
     
     alertController.popoverPresentationController.sourceRect = CGRectMake(view.bounds.size.width / 2.0, view.bounds.size.height / 2.0, 1.0, 1.0); // center of the view
     [[self activeViewController] presentViewController:alertController animated:YES completion:nil];
+}
+
+- (void)quitRunningAppOnHost:(TemporaryApp*)app completion:(void (^)(BOOL success))completion
+{
+    [self showLoadingFrame: ^{
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            HttpManager* hMan = [[HttpManager alloc] initWithHost:app.host];
+            HttpResponse* quitResponse = [[HttpResponse alloc] init];
+            HttpRequest* quitRequest = [HttpRequest requestForResponse: quitResponse withUrlRequest:[hMan newQuitAppRequest]];
+            
+            // Exempt this host from discovery while handling the quit operation
+            [self->_discMan pauseDiscoveryForHost:app.host];
+            [hMan executeRequestSynchronously:quitRequest];
+            if (quitResponse.statusCode == 200) {
+                ServerInfoResponse* serverInfoResp = [[ServerInfoResponse alloc] init];
+                [hMan executeRequestSynchronously:[HttpRequest requestForResponse:serverInfoResp withUrlRequest:[hMan newServerInfoRequest:false]
+                                                                    fallbackError:401 fallbackRequest:[hMan newHttpServerInfoRequest]]];
+                if (![serverInfoResp isStatusOk] || [[serverInfoResp getStringTag:@"state"] hasSuffix:@"_SERVER_BUSY"]) {
+                    // On newer GFE versions, the quit request succeeds even though the app doesn't
+                    // really quit if another client tries to kill your app. We'll patch the response
+                    // to look like the old error in that case, so the UI behaves.
+                    quitResponse.statusCode = 599;
+                }
+                else if ([serverInfoResp isStatusOk]) {
+                    // Update the host object with this info
+                    [serverInfoResp populateHost:app.host];
+                }
+            }
+            [self->_discMan resumeDiscoveryForHost:app.host];
+            
+                // If it fails, display an error and stop the current operation
+                if (quitResponse.statusCode != 200) {
+                    UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Quitting App Failed"
+                                                             message:@"Failed to quit app. If this app was started by "
+                                                             "another device, you'll need to quit from that device."
+                                                     preferredStyle:UIAlertControllerStyleAlert];
+                    [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self updateAppsForHost:app.host];
+                        [self hideLoadingFrame: ^{
+                            [[self activeViewController] presentViewController:alert animated:YES completion:nil];
+                            if (completion != nil) {
+                                completion(NO);
+                            }
+                        }];
+                    });
+                }
+                else {
+                    app.host.currentGame = @"0";
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self hideLoadingFrame:^{
+                            if (completion != nil) {
+                                completion(YES);
+                            }
+                        }];
+                    });
+                }
+            });
+    }];
+}
+
+- (void)quitRunningApp:(TemporaryApp*)currentApp andLaunchApp:(TemporaryApp*)targetApp
+{
+    Log(LOG_I, @"Quitting application: %@ (from host %@) to launch %@ (from host %@)", currentApp.name, currentApp.host.name, targetApp.name, targetApp.host.name);
+    [self quitRunningAppOnHost:currentApp completion:^(BOOL success) {
+        if (success) {
+            [self prepareToStreamApp:targetApp];
+            [self performSegueWithIdentifier:@"createStreamFrame" sender:nil];
+        }
+    }];
 }
 
 - (void) appClicked:(TemporaryApp *)app view:(UIView *)view {
@@ -1073,6 +1090,48 @@ static NSMutableSet* hostList;
             [self hostClicked:matchingHost view:nil];
         }
     }
+}
+
+- (void)handlePendingAppShortcutAction
+{
+    AppDelegate* delegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
+    
+
+    if (delegate.pendingAppIdToLoad == nil || _selectedHost == nil || _sortedAppList == nil) {
+
+        return;
+    }
+
+    TemporaryApp *target = nil;
+    for (TemporaryApp *app in _sortedAppList) {
+        if ([app.id isEqualToString:delegate.pendingAppIdToLoad]) {
+            target = app;
+            break;
+        }
+    }
+    
+    delegate.pendingAppIdToLoad = nil;
+    
+    if (target == nil) {
+        Log(LOG_W, @"App id %@ not found in current list", delegate.pendingAppIdToLoad);
+           return;
+       }
+
+   TemporaryApp* currentApp = [self findRunningApp:target.host];
+
+   if (currentApp == nil) {
+       Log(LOG_I, @"Launching app %@ on host %@", target.name, target.host.name);
+       [self prepareToStreamApp:target];
+       [self performSegueWithIdentifier:@"createStreamFrame" sender:nil];
+   }
+   else if ([currentApp.id isEqualToString:target.id]) {
+       Log(LOG_I, @"Resuming app %@ on host %@", currentApp.name, currentApp.host.name);
+       [self prepareToStreamApp:currentApp];
+       [self performSegueWithIdentifier:@"createStreamFrame" sender:nil];
+   }
+   else {
+       [self quitRunningApp:currentApp andLaunchApp:target];
+   }
 }
 
 -(void)handleReturnToForeground
@@ -1341,6 +1400,7 @@ static NSMutableSet* hostList;
     
     [hostScrollView removeFromSuperview];
     [self.collectionView reloadData];
+    [self handlePendingAppShortcutAction];
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {

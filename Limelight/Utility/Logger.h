@@ -25,5 +25,6 @@ typedef enum {
 
 void Log(LogLevel level, NSString* fmt, ...);
 void LogTag(LogLevel level, NSString* tag, NSString* fmt, ...);
+void LogTagSwift(LogLevel level, NSString* tag, NSString* message);
 
 #endif

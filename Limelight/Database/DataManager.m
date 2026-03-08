@@ -9,6 +9,7 @@
 #import "DataManager.h"
 #import "TemporaryApp.h"
 #import "TemporarySettings.h"
+#import "Moonlight-Swift.h"
 
 @implementation DataManager {
     NSManagedObjectContext *_managedObjectContext;
@@ -188,6 +189,8 @@
     }
 
     [_appDelegate saveContext];
+    
+    [WidgetSnapshot exportSnapshotFromHosts:[self getHosts]];
 }
 
 - (NSArray*) getHosts {
