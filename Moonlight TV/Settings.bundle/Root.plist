@@ -79,6 +79,11 @@
 				<string>80 Mbps</string>
 				<string>100 Mbps</string>
 				<string>150 Mbps</string>
+				<string>200 Mbps</string>
+				<string>250 Mbps</string>
+				<string>300 Mbps</string>
+				<string>400 Mbps</string>
+				<string>500 Mbps</string>
 			</array>
 			<key>Values</key>
 			<array>
@@ -94,6 +99,11 @@
 				<string>80000</string>
 				<string>100000</string>
 				<string>150000</string>
+				<string>200000</string>
+				<string>250000</string>
+				<string>300000</string>
+				<string>400000</string>
+				<string>500000</string>
 			</array>
 		</dict>
 		<dict>
