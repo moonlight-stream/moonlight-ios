@@ -12,6 +12,8 @@
 
 #import <VideoToolbox/VideoToolbox.h>
 #import <AVFoundation/AVFoundation.h>
+#import <CoreHaptics/CoreHaptics.h>
+#import <CoreMotion/CoreMotion.h>
 
 @implementation SettingsViewController {
     NSInteger _bitrate;
@@ -53,6 +55,26 @@ static const int bitrateTable[] = {
 const int RESOLUTION_TABLE_SIZE = 7;
 const int RESOLUTION_TABLE_CUSTOM_INDEX = RESOLUTION_TABLE_SIZE - 1;
 CGSize resolutionTable[RESOLUTION_TABLE_SIZE];
+
+static BOOL deviceSupportsCoreHaptics(void) {
+#if TARGET_OS_TV
+    return NO;
+#else
+    if (@available(iOS 13.0, *)) {
+        return [CHHapticEngine capabilitiesForHardware].supportsHaptics;
+    }
+
+    return NO;
+#endif
+}
+
+static BOOL deviceSupportsGyro(void) {
+#if TARGET_OS_TV
+    return NO;
+#else
+    return [[CMMotionManager alloc] init].gyroAvailable;
+#endif
+}
 
 -(int)getSliderValueForBitrate:(NSInteger)bitrate {
     int i;
@@ -249,6 +271,26 @@ BOOL isCustomResolution(CGSize res) {
     [self.multiControllerSelector setSelectedSegmentIndex:currentSettings.multiController ? 1 : 0];
     [self.swapABXYButtonsSelector setSelectedSegmentIndex:currentSettings.swapABXYButtons ? 1 : 0];
     [self.audioOnPCSelector setSelectedSegmentIndex:currentSettings.playAudioOnPC ? 1 : 0];
+    if (deviceSupportsCoreHaptics()) {
+        [self.deviceHapticsSelector setSelectedSegmentIndex:currentSettings.deviceHaptics ? 1 : 0];
+    }
+    else {
+        [self.deviceHapticsSelector removeAllSegments];
+        [self.deviceHapticsSelector insertSegmentWithTitle:@"Unsupported on this device" atIndex:0 animated:NO];
+        [self.deviceHapticsSelector setEnabled:NO];
+    }
+    if (deviceSupportsGyro()) {
+        NSInteger deviceGyroMode = currentSettings.deviceGyroMode;
+        if (deviceGyroMode < 0 || deviceGyroMode >= self.deviceGyroSelector.numberOfSegments) {
+            deviceGyroMode = DeviceGyroModeOff;
+        }
+        [self.deviceGyroSelector setSelectedSegmentIndex:deviceGyroMode];
+    }
+    else {
+        [self.deviceGyroSelector removeAllSegments];
+        [self.deviceGyroSelector insertSegmentWithTitle:@"Unsupported on this device" atIndex:0 animated:NO];
+        [self.deviceGyroSelector setEnabled:NO];
+    }
     NSInteger onscreenControls = [currentSettings.onscreenControls integerValue];
     _lastSelectedResolutionIndex = resolution;
     [self.resolutionSelector setSelectedSegmentIndex:resolution];
@@ -537,6 +579,8 @@ BOOL isCustomResolution(CGSize res) {
     BOOL useFramePacing = [self.framePacingSelector selectedSegmentIndex] == 1;
     BOOL absoluteTouchMode = [self.touchModeSelector selectedSegmentIndex] == 1;
     BOOL statsOverlay = [self.statsOverlaySelector selectedSegmentIndex] == 1;
+    BOOL deviceHaptics = deviceSupportsCoreHaptics() && [self.deviceHapticsSelector selectedSegmentIndex] == 1;
+    NSInteger deviceGyroMode = deviceSupportsGyro() ? [self.deviceGyroSelector selectedSegmentIndex] : DeviceGyroModeOff;
     BOOL enableHdr = [self.hdrSelector selectedSegmentIndex] == 1;
     [dataMan saveSettingsWithBitrate:_bitrate
                            framerate:framerate
@@ -552,6 +596,8 @@ BOOL isCustomResolution(CGSize res) {
                       useFramePacing:useFramePacing
                            enableHdr:enableHdr
                       btMouseSupport:btMouseSupport
+                       deviceHaptics:deviceHaptics
+                      deviceGyroMode:deviceGyroMode
                    absoluteTouchMode:absoluteTouchMode
                         statsOverlay:statsOverlay];
 }

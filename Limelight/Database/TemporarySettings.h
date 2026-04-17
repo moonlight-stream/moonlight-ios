@@ -8,6 +8,11 @@
 
 #import "Settings+CoreDataClass.h"
 
+typedef NS_ENUM(NSInteger, DeviceGyroMode) {
+    DeviceGyroModeOff = 0,
+    DeviceGyroModeDualShock = 1,
+};
+
 @interface TemporarySettings : NSObject
 
 @property (nonatomic, retain) Settings * parent;
@@ -34,6 +39,8 @@
 @property (nonatomic) BOOL btMouseSupport;
 @property (nonatomic) BOOL absoluteTouchMode;
 @property (nonatomic) BOOL statsOverlay;
+@property (nonatomic) BOOL deviceHaptics;
+@property (nonatomic) DeviceGyroMode deviceGyroMode;
 
 - (id) initFromSettings:(Settings*)settings;
 

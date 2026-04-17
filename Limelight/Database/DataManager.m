@@ -10,6 +10,9 @@
 #import "TemporaryApp.h"
 #import "TemporarySettings.h"
 
+static NSString* const kDeviceHapticsKey = @"deviceHaptics";
+static NSString* const kDeviceGyroModeKey = @"deviceGyroMode";
+
 @implementation DataManager {
     NSManagedObjectContext *_managedObjectContext;
     AppDelegate *_appDelegate;
@@ -66,6 +69,8 @@
                   useFramePacing:(BOOL)useFramePacing
                        enableHdr:(BOOL)enableHdr
                   btMouseSupport:(BOOL)btMouseSupport
+                   deviceHaptics:(BOOL)deviceHaptics
+                  deviceGyroMode:(NSInteger)deviceGyroMode
                absoluteTouchMode:(BOOL)absoluteTouchMode
                     statsOverlay:(BOOL)statsOverlay {
     
@@ -87,6 +92,10 @@
         settingsToSave.btMouseSupport = btMouseSupport;
         settingsToSave.absoluteTouchMode = absoluteTouchMode;
         settingsToSave.statsOverlay = statsOverlay;
+
+        NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+        [defaults setBool:deviceHaptics forKey:kDeviceHapticsKey];
+        [defaults setInteger:deviceGyroMode forKey:kDeviceGyroModeKey];
         
         [self saveData];
     }];
@@ -242,4 +251,3 @@
 }
 
 @end
-

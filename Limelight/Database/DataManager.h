@@ -27,6 +27,8 @@
                   useFramePacing:(BOOL)useFramePacing
                        enableHdr:(BOOL)enableHdr
                   btMouseSupport:(BOOL)btMouseSupport
+                   deviceHaptics:(BOOL)deviceHaptics
+                  deviceGyroMode:(NSInteger)deviceGyroMode
                absoluteTouchMode:(BOOL)absoluteTouchMode
                     statsOverlay:(BOOL)statsOverlay;
 
