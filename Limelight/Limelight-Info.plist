@@ -34,7 +34,7 @@
 		</dict>
 	</array>
 	<key>GCSupportsControllerUserInteraction</key>
-	<true/>
+		<true/>
 	<key>LSSupportsGameMode</key>
 	<true/>
 	<key>ITSAppUsesNonExemptEncryption</key>
@@ -59,6 +59,8 @@
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Moonlight uses the local network to connect to your gaming PC for streaming.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>UIDesignRequiresCompatibility</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>Launch Screen</string>
