@@ -58,6 +58,10 @@
         [_callbacks launchFailed:@"Failed to connect to PC"];
         return;
     }
+
+    // Preserve the shared placeholder UID for GFE, but allow non-GFE hosts
+    // to identify and manage this client using its real persisted UID.
+    [hMan setUseTrueUid:![serverState containsString:@"MJOLNIR"]];
     
     if (![pairStatus isEqualToString:@"1"]) {
         // Not paired

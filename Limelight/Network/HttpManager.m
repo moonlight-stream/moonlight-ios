@@ -9,6 +9,7 @@
 #import "HttpManager.h"
 #import "HttpRequest.h"
 #import "CryptoManager.h"
+#import "IdManager.h"
 #import "TemporaryApp.h"
 #import "ServerInfoResponse.h"
 
@@ -44,17 +45,32 @@
     _serverCert = serverCert;
 }
 
+- (void) setUseTrueUid:(BOOL) useTrueUid {
+    _uniqueId = useTrueUid ? [IdManager getUniqueId] : @"0123456789ABCDEF";
+}
+
 - (id) initWithHost:(TemporaryHost*) host {
-    self = [self initWithAddress:host.activeAddress httpsPort:host.httpsPort serverCert:host.serverCert];
+    self = [self initWithAddress:host.activeAddress
+                      httpsPort:host.httpsPort
+                     serverCert:host.serverCert
+                     useTrueUid:!host.isNvidiaServerSoftware];
     _host = host;
     return self;
 }
 
 - (id) initWithAddress:(NSString*) hostAddressPortString httpsPort:(unsigned short)httpsPort serverCert:(NSData*) serverCert {
+    return [self initWithAddress:hostAddressPortString
+                      httpsPort:httpsPort
+                     serverCert:serverCert
+                     useTrueUid:NO];
+}
+
+- (id) initWithAddress:(NSString*) hostAddressPortString
+             httpsPort:(unsigned short)httpsPort
+            serverCert:(NSData*) serverCert
+            useTrueUid:(BOOL)useTrueUid {
     self = [super init];
-    // Use the same UID for all Moonlight clients to allow them
-    // quit games started on another Moonlight client.
-    _uniqueId = @"0123456789ABCDEF";
+    [self setUseTrueUid:useTrueUid];
     _deviceName = deviceName;
     _serverCert = serverCert;
     
