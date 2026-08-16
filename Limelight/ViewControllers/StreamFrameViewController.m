@@ -587,7 +587,19 @@
 - (void) updatePreferredDisplayMode:(BOOL)streamActive {
 #if TARGET_OS_TV
     if (@available(tvOS 11.2, *)) {
-        UIWindow* window = [[[UIApplication sharedApplication] delegate] window];
+        // Under the UIScene lifecycle the window belongs to the scene, not the app
+        // delegate (whose -window is nil), so get it from our own view. If our view
+        // isn't attached to a window yet (e.g. setHdrMode fired before the push
+        // animation finished), use the window of the connected window scene.
+        UIWindow* window = self.view.window;
+        if (window == nil) {
+            for (UIScene* scene in [UIApplication sharedApplication].connectedScenes) {
+                if ([scene isKindOfClass:[UIWindowScene class]]) {
+                    window = ((UIWindowScene*)scene).windows.firstObject;
+                    break;
+                }
+            }
+        }
         AVDisplayManager* displayManager = [window avDisplayManager];
         
         // This logic comes from Kodi and MrMC

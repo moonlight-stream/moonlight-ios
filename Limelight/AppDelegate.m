@@ -8,6 +8,30 @@
 
 #import "AppDelegate.h"
 
+#if TARGET_OS_TV
+// tvOS 27's SDK enforces the UIScene lifecycle, so provide a minimal window-scene
+// delegate that builds the window from the Main storyboard. Declared here (already in
+// the tvOS target) to avoid adding a new source file to the project.
+API_AVAILABLE(tvos(13.0))
+@interface SceneDelegate : UIResponder <UIWindowSceneDelegate>
+@property (strong, nonatomic) UIWindow *window;
+@end
+
+@implementation SceneDelegate
+- (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions {
+    if (![scene isKindOfClass:[UIWindowScene class]]) {
+        return;
+    }
+    UIWindowScene *windowScene = (UIWindowScene *)scene;
+    UIWindow *window = [[UIWindow alloc] initWithWindowScene:windowScene];
+    UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    window.rootViewController = [storyboard instantiateInitialViewController];
+    self.window = window;
+    [window makeKeyAndVisible];
+}
+@end
+#endif
+
 @implementation AppDelegate
 
 @synthesize managedObjectContext = _managedObjectContext;
