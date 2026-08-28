@@ -65,8 +65,13 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
         return;
     }
     
+if (controller.lowFreqMotor != nil && controller.highFreqMotor == nil) {
+    [controller.lowFreqMotor setMotorAmplitude:MAX(lowFreqMotor, highFreqMotor)];
+}
+else {
     [controller.lowFreqMotor setMotorAmplitude:lowFreqMotor];
     [controller.highFreqMotor setMotorAmplitude:highFreqMotor];
+}
 }
 
 -(void) rumbleTriggers:(uint16_t)controllerNumber leftTrigger:(uint16_t)leftTrigger rightTrigger:(uint16_t)rightTrigger
@@ -576,16 +581,26 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
                 }
             }
             
-            // Detect supported haptics localities
-            if (controller.haptics) {
-                if ([controller.haptics.supportedLocalities containsObject:GCHapticsLocalityHandles]) {
-                    capabilities |= LI_CCAP_RUMBLE;
-                }
-                if ([controller.haptics.supportedLocalities containsObject:GCHapticsLocalityTriggers]) {
-                    capabilities |= LI_CCAP_TRIGGER_RUMBLE;
-                }
-            }
-            
+// Force rumble capability so Sunshine always sends rumble packets
+
+NSLog(@"[KISHI DEBUG] Controller name: %@", controller.vendorName);
+
+if (controller.haptics) {
+    NSLog(@"[KISHI DEBUG] Haptics: YES");
+    NSLog(@"[KISHI DEBUG] Supported localities: %@", controller.haptics.supportedLocalities);
+}
+else {
+    NSLog(@"[KISHI DEBUG] Haptics: NO");
+}
+
+// Force rumble capability so Sunshine always sends rumble packets
+capabilities |= LI_CCAP_RUMBLE;
+
+if (controller.haptics) {
+    if ([controller.haptics.supportedLocalities containsObject:GCHapticsLocalityTriggers]) {
+        capabilities |= LI_CCAP_TRIGGER_RUMBLE;
+    }
+}
             // Detect supported motion sensors
             if (controller.motion) {
                 if (controller.motion.hasGravityAndUserAcceleration) {

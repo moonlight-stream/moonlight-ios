@@ -142,7 +142,29 @@
 
 +(HapticContext*) createContextForLowFreqMotor:(GCController*)gamepad {
     if (@available(iOS 14.0, tvOS 14.0, *)) {
-        return [[HapticContext alloc] initWithGamepad:gamepad locality:GCHapticsLocalityLeftHandle];
+
+        if (gamepad.haptics == nil) {
+            return nil;
+        }
+
+        // Best case: dedicated left motor
+        if ([gamepad.haptics.supportedLocalities containsObject:GCHapticsLocalityLeftHandle]) {
+            return [[HapticContext alloc]
+                    initWithGamepad:gamepad
+                    locality:GCHapticsLocalityLeftHandle];
+        }
+
+        // Some controllers expose both handles as one locality
+        if ([gamepad.haptics.supportedLocalities containsObject:GCHapticsLocalityHandles]) {
+            return [[HapticContext alloc]
+                    initWithGamepad:gamepad
+                    locality:GCHapticsLocalityHandles];
+        }
+
+        // Generic controller haptic actuator
+        return [[HapticContext alloc]
+                initWithGamepad:gamepad
+                locality:GCHapticsLocalityDefault];
     }
     else {
         return nil;
