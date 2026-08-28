@@ -1,0 +1,60 @@
+name: Build Moonlight Kishi IPA
+
+on:
+  push:
+    branches:
+      - kishi-haptics
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Build Moonlight
+        run: |
+          xcodebuild \
+            -project Moonlight.xcodeproj \
+            -scheme Moonlight \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM="" \
+            PRODUCT_BUNDLE_IDENTIFIER=com.aceuploaderbot.moonlightkishi \
+            build
+
+      - name: Create IPA
+        run: |
+          APP_PATH=$(find build/Build/Products -type d -name "Moonlight.app" | head -n 1)
+
+          echo "Found app at: $APP_PATH"
+
+          if [ -z "$APP_PATH" ]; then
+            echo "ERROR: Moonlight.app was not found"
+            exit 1
+          fi
+
+          mkdir -p Payload
+          cp -R "$APP_PATH" Payload/Moonlight.app
+          zip -qry Moonlight-Kishi.ipa Payload
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: Moonlight-Kishi-IPA
+          path: Moonlight-Kishi.ipa
