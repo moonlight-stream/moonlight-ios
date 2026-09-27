@@ -47,7 +47,10 @@
     UIScrollView *_scrollView;
     BOOL _userIsInteracting;
     CGSize _keyboardSize;
-    
+    UIWindow *_extWindow;
+    UIView *_renderView;
+    UIWindow *_deviceWindow;
+
 #if !TARGET_OS_TV
     UIScreenEdgePanGestureRecognizer *_exitSwipeRecognizer;
 #endif
@@ -56,8 +59,27 @@
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    
+
 #if !TARGET_OS_TV
+    _deviceWindow = self.view.window;
+
+    if (UIScreen.screens.count > 1) {
+        [self prepExtScreen:UIScreen.screens.lastObject];
+    } else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.view insertSubview:self->_renderView atIndex:0];
+        });
+    }
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(extScreenDidConnect:)
+                                                 name:UIScreenDidConnectNotification
+                                               object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(extScreenDidDisconnect:)
+                                                 name:UIScreenDidDisconnectNotification
+                                               object:nil];
+
     [[self revealViewController] setPrimaryViewController:self];
 #endif
 }
@@ -109,6 +131,7 @@
     
     _streamView = [[StreamView alloc] initWithFrame:self.view.frame];
     [_streamView setupStreamView:_controllerSupport interactionDelegate:self config:self.streamConfig];
+    _renderView = [[UIView alloc] initWithFrame:self.view.frame];
     
 #if TARGET_OS_TV
     if (!_menuTapGestureRecognizer || !_menuDoubleTapGestureRecognizer || !_playPauseTapGestureRecognizer) {
@@ -152,7 +175,7 @@
     _tipLabel.center = CGPointMake(self.view.frame.size.width / 2, self.view.frame.size.height * 0.9);
     
     _streamMan = [[StreamManager alloc] initWithConfig:self.streamConfig
-                                            renderView:_streamView
+                                            renderView:_renderView
                                    connectionCallbacks:self];
     NSOperationQueue* opQueue = [[NSOperationQueue alloc] init];
     [opQueue addOperation:_streamMan];
@@ -308,12 +331,53 @@
 - (void) returnToMainFrame {
     // Reset display mode back to default
     [self updatePreferredDisplayMode:NO];
-    
+
     [_statsUpdateTimer invalidate];
     _statsUpdateTimer = nil;
-    
+
+    _extWindow = nil;
     [self.navigationController popToRootViewControllerAnimated:YES];
 }
+
+#if !TARGET_OS_TV
+- (void)extScreenDidConnect:(NSNotification *)notification {
+    Log(LOG_I, @"External Screen Connected");
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self prepExtScreen:notification.object];
+    });
+}
+
+- (void)extScreenDidDisconnect:(NSNotification *)notification {
+    Log(LOG_I, @"External Screen Disconnected");
+    if (UIScreen.screens.count < 2) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self removeExtScreen];
+        });
+    }
+}
+
+- (void)prepExtScreen:(UIScreen*)extScreen {
+    Log(LOG_I, @"Preparing External Screen");
+    CGRect frame = extScreen.bounds;
+    extScreen.overscanCompensation = UIScreenOverscanCompensationNone;
+    _extWindow = [[UIWindow alloc] initWithFrame:frame];
+    _extWindow.screen = extScreen;
+    _renderView.bounds = frame;
+    _renderView.frame = frame;
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"ScreenConnected" object:self];
+    [_extWindow addSubview:_renderView];
+    _extWindow.hidden = NO;
+}
+
+- (void)removeExtScreen {
+    Log(LOG_I, @"Removing External Screen");
+    _extWindow.hidden = YES;
+    _renderView.bounds = _deviceWindow.bounds;
+    _renderView.frame = _deviceWindow.frame;
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"ScreenDisconnected" object:self];
+    [self.view insertSubview:_renderView atIndex:0];
+}
+#endif
 
 // This will fire if the user opens control center or gets a low battery message
 - (void)applicationWillResignActive:(NSNotification *)notification {
