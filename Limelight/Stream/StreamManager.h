@@ -15,6 +15,8 @@
 
 - (void) stopStream;
 
+- (void) transitionStreamViewSize;
+
 - (NSString*) getStatsOverlayText;
 
 @end

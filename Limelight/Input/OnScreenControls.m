@@ -178,6 +178,22 @@ static float L3_Y;
     return _level;
 }
 
+- (void)transitionStreamViewSize {
+    _controlArea = CGRectMake(0, 0, _view.frame.size.width, _view.frame.size.height);
+    if (_iPad)
+    {
+        // Cut down the control area on an iPad so the controls are more reachable
+        _controlArea.size.height = _view.frame.size.height / 2.0;
+        _controlArea.origin.y = _view.frame.size.height - _controlArea.size.height;
+    }
+    else
+    {
+        _controlArea.origin.x = _controlArea.size.width * EDGE_WIDTH;
+        _controlArea.size.width -= _controlArea.origin.x * 2;
+    }
+    [self updateControls];
+}
+
 - (void) updateControls {
     switch (_level) {
         case OnScreenControlsLevelOff:

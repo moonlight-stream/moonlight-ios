@@ -919,6 +919,13 @@ static NSMutableSet* hostList;
     [self adjustScrollViewForSafeArea:self->hostScrollView];
 }
 
+- (void) viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+    NSLog(@"transitioning from %f to %f", hostScrollView.frame.size.height, size.height / 2);
+    hostScrollView.frame = CGRectMake(0, self.navigationController.navigationBar.frame.origin.y + self.navigationController.navigationBar.frame.size.height, size.width, size.height / 2);
+    [self updateHosts];
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];

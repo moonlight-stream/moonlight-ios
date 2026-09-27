@@ -167,6 +167,12 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 #endif
 }
 
+- (void) refreshOnScreenControls {
+#if !TARGET_OS_TV
+    [onScreenControls transitionStreamViewSize];
+#endif
+}
+
 - (OnScreenControlsLevel) getCurrentOscState {
     if (onScreenControls == nil) {
         return OnScreenControlsLevelOff;

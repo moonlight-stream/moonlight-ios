@@ -647,6 +647,13 @@
 #endif
 }
 
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+    _streamView.frame = CGRectMake(_streamView.frame.origin.x, _streamView.frame.origin.y, size.width, size.height);
+    [_streamView refreshOnScreenControls];
+    [_streamMan transitionStreamViewSize];
+}
+
 - (void) streamExitRequested {
     Log(LOG_I, @"Gamepad combo requested stream exit");
     
