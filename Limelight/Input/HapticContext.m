@@ -18,7 +18,15 @@
     BOOL _playing;
 }
 
--(void)cleanup API_AVAILABLE(ios(14.0), tvos(14.0)) {
+-(NSString*) hapticTargetDescription {
+    if (_playerIndex == GCControllerPlayerIndexUnset) {
+        return @"Device haptics";
+    }
+
+    return [NSString stringWithFormat:@"Controller %ld", (long)_playerIndex];
+}
+
+-(void)cleanup API_AVAILABLE(ios(13.0), tvos(14.0)) {
     if (_hapticPlayer != nil) {
         [_hapticPlayer cancelAndReturnError:nil];
         _hapticPlayer = nil;
@@ -29,7 +37,7 @@
     }
 }
 
--(void)setMotorAmplitude:(unsigned short)amplitude API_AVAILABLE(ios(14.0), tvos(14.0)) {
+-(void)setMotorAmplitude:(unsigned short)amplitude API_AVAILABLE(ios(13.0), tvos(14.0)) {
     NSError* error;
 
     // Check if the haptic engine died
@@ -53,13 +61,13 @@
         CHHapticEvent* hapticEvent = [[CHHapticEvent alloc] initWithEventType:CHHapticEventTypeHapticContinuous parameters:[NSArray arrayWithObject:intensityParameter] relativeTime:0 duration:GCHapticDurationInfinite];
         CHHapticPattern* hapticPattern = [[CHHapticPattern alloc] initWithEvents:[NSArray arrayWithObject:hapticEvent] parameters:[[NSArray alloc] init] error:&error];
         if (error != nil) {
-            Log(LOG_W, @"Controller %d: Haptic pattern creation failed: %@", _playerIndex, error);
+            Log(LOG_W, @"%@: Haptic pattern creation failed: %@", [self hapticTargetDescription], error);
             return;
         }
         
         _hapticPlayer = [_hapticEngine createPlayerWithPattern:hapticPattern error:&error];
         if (error != nil) {
-            Log(LOG_W, @"Controller %d: Haptic player creation failed: %@", _playerIndex, error);
+            Log(LOG_W, @"%@: Haptic player creation failed: %@", [self hapticTargetDescription], error);
             return;
         }
     }
@@ -67,7 +75,7 @@
     CHHapticDynamicParameter* intensityParameter = [[CHHapticDynamicParameter alloc] initWithParameterID:CHHapticDynamicParameterIDHapticIntensityControl value:amplitude / 65535.0f relativeTime:0];
     [_hapticPlayer sendParameters:[NSArray arrayWithObject:intensityParameter] atTime:CHHapticTimeImmediate error:&error];
     if (error != nil) {
-        Log(LOG_W, @"Controller %d: Haptic player parameter update failed: %@", _playerIndex, error);
+        Log(LOG_W, @"%@: Haptic player parameter update failed: %@", [self hapticTargetDescription], error);
         return;
     }
     
@@ -75,7 +83,7 @@
         [_hapticPlayer startAtTime:0 error:&error];
         if (error != nil) {
             _hapticPlayer = nil;
-            Log(LOG_W, @"Controller %d: Haptic playback start failed: %@", _playerIndex, error);
+            Log(LOG_W, @"%@: Haptic playback start failed: %@", [self hapticTargetDescription], error);
             return;
         }
         
@@ -83,24 +91,25 @@
     }
 }
 
--(id) initWithGamepad:(GCController*)gamepad locality:(GCHapticsLocality)locality API_AVAILABLE(ios(14.0), tvos(14.0)) {
-    if (gamepad.haptics == nil) {
-        Log(LOG_W, @"Controller %d does not support haptics", gamepad.playerIndex);
+-(id) initWithHapticEngine:(CHHapticEngine*)hapticEngine playerIndex:(GCControllerPlayerIndex)playerIndex API_AVAILABLE(ios(13.0), tvos(14.0)) {
+    self = [super init];
+    if (self == nil || hapticEngine == nil) {
         return nil;
     }
-    
-    if (![[gamepad.haptics supportedLocalities] containsObject:locality]) {
-        Log(LOG_W, @"Controller %d does not support haptic locality: %@", gamepad.playerIndex, locality);
-        return nil;
+
+    _playerIndex = playerIndex;
+    _hapticEngine = hapticEngine;
+
+#if !TARGET_OS_TV
+    if (_playerIndex == GCControllerPlayerIndexUnset) {
+        _hapticEngine.playsHapticsOnly = YES;
     }
-    
-    _playerIndex = gamepad.playerIndex;
-    _hapticEngine = [gamepad.haptics createEngineWithLocality:locality];
+#endif
     
     NSError* error;
     [_hapticEngine startAndReturnError:&error];
     if (error != nil) {
-        Log(LOG_W, @"Controller %d: Haptic engine failed to start: %@", gamepad.playerIndex, error);
+        Log(LOG_W, @"%@: Haptic engine failed to start: %@", [self hapticTargetDescription], error);
         return nil;
     }
     
@@ -110,8 +119,8 @@
         if (me == nil) {
             return;
         }
-        
-        Log(LOG_W, @"Controller %d: Haptic engine stopped: %p", me->_playerIndex, stoppedReason);
+
+        Log(LOG_W, @"%@: Haptic engine stopped: %ld", [me hapticTargetDescription], (long)stoppedReason);
         me->_hapticPlayer = nil;
         me->_hapticEngine = nil;
         me->_playing = NO;
@@ -121,14 +130,29 @@
         if (me == nil) {
             return;
         }
-        
-        Log(LOG_W, @"Controller %d: Haptic engine reset", me->_playerIndex);
+
+        Log(LOG_W, @"%@: Haptic engine reset", [me hapticTargetDescription]);
         me->_hapticPlayer = nil;
         me->_playing = NO;
         [me->_hapticEngine startAndReturnError:nil];
     };
     
     return self;
+}
+
+-(id) initWithGamepad:(GCController*)gamepad locality:(GCHapticsLocality)locality API_AVAILABLE(ios(14.0), tvos(14.0)) {
+    if (gamepad.haptics == nil) {
+        Log(LOG_W, @"Controller %d does not support haptics", gamepad.playerIndex);
+        return nil;
+    }
+
+    if (![[gamepad.haptics supportedLocalities] containsObject:locality]) {
+        Log(LOG_W, @"Controller %d does not support haptic locality: %@", gamepad.playerIndex, locality);
+        return nil;
+    }
+
+    return [self initWithHapticEngine:[gamepad.haptics createEngineWithLocality:locality]
+                          playerIndex:gamepad.playerIndex];
 }
 
 +(HapticContext*) createContextForHighFreqMotor:(GCController*)gamepad {
@@ -165,6 +189,32 @@
     else {
         return nil;
     }
+}
+
++(HapticContext*) createContextForDeviceHaptics {
+#if TARGET_OS_TV
+    return nil;
+#else
+    if (@available(iOS 13.0, *)) {
+        if (![CHHapticEngine capabilitiesForHardware].supportsHaptics) {
+            Log(LOG_W, @"Device haptics are not supported on this hardware");
+            return nil;
+        }
+
+        NSError* error = nil;
+        CHHapticEngine* hapticEngine = [[CHHapticEngine alloc] initAndReturnError:&error];
+        if (error != nil) {
+            Log(LOG_W, @"Device haptics: Haptic engine creation failed: %@", error);
+            return nil;
+        }
+
+        return [[HapticContext alloc] initWithHapticEngine:hapticEngine
+                                                playerIndex:GCControllerPlayerIndexUnset];
+    }
+    else {
+        return nil;
+    }
+#endif
 }
 
 @end

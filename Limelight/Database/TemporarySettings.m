@@ -9,6 +9,9 @@
 #import "TemporarySettings.h"
 #import "OnScreenControls.h"
 
+static NSString* const kDeviceHapticsKey = @"deviceHaptics";
+static NSString* const kDeviceGyroModeKey = @"deviceGyroMode";
+
 @implementation TemporarySettings
 
 - (id) initFromSettings:(Settings*)settings {
@@ -45,6 +48,8 @@
     self.swapABXYButtons = [[NSUserDefaults standardUserDefaults] boolForKey:@"swapABXYButtons"];
     self.btMouseSupport = [[NSUserDefaults standardUserDefaults] boolForKey:@"btMouseSupport"];
     self.statsOverlay = [[NSUserDefaults standardUserDefaults] boolForKey:@"statsOverlay"];
+    self.deviceHaptics = [[NSUserDefaults standardUserDefaults] boolForKey:kDeviceHapticsKey];
+    self.deviceGyroMode = (DeviceGyroMode)[[NSUserDefaults standardUserDefaults] integerForKey:kDeviceGyroModeKey];
     
     NSInteger _screenSize = [[NSUserDefaults standardUserDefaults] integerForKey:@"streamResolution"];
     switch (_screenSize) {
@@ -85,6 +90,9 @@
     self.btMouseSupport = settings.btMouseSupport;
     self.absoluteTouchMode = settings.absoluteTouchMode;
     self.statsOverlay = settings.statsOverlay;
+    NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+    self.deviceHaptics = [defaults boolForKey:kDeviceHapticsKey];
+    self.deviceGyroMode = (DeviceGyroMode)[defaults integerForKey:kDeviceGyroModeKey];
 #endif
     self.uniqueId = settings.uniqueId;
     

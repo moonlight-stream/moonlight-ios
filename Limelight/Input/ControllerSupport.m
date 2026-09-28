@@ -16,8 +16,16 @@
 
 @import GameController;
 @import AudioToolbox;
+#if !TARGET_OS_TV
+@import CoreMotion;
+#endif
 
 static const double MOUSE_SPEED_DIVISOR = 1.25;
+
+#if !TARGET_OS_TV
+static NSString* const kDeviceHapticsKey = @"deviceHaptics";
+static NSString* const kDeviceGyroModeKey = @"deviceGyroMode";
+#endif
 
 @implementation ControllerSupport {
     id _controllerConnectObserver;
@@ -26,6 +34,9 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     id _mouseDisconnectObserver;
     id _keyboardConnectObserver;
     id _keyboardDisconnectObserver;
+#if !TARGET_OS_TV
+    id _defaultsObserver;
+#endif
     
     NSLock *_controllerStreamLock;
     NSMutableDictionary *_controllers;
@@ -38,7 +49,25 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     
     OnScreenControls *_osc;
     Controller *_oscController;
-    
+    OnScreenControlsLevel _oscPreference;
+    bool _absoluteTouchMode;
+#if !TARGET_OS_TV
+    HapticContext *_deviceHaptics;
+    bool _deviceHapticsEnabled;
+    DeviceGyroMode _deviceGyroMode;
+    CMMotionManager *_deviceMotionManager;
+    uint16_t _deviceGyroReportRateHz;
+    BOOL _deviceGyroReportRateInitialized;
+    uint16_t _deviceAccelReportRateHz;
+    BOOL _deviceAccelReportRateInitialized;
+    CMAcceleration _lastDeviceAccelSample;
+    CMRotationRate _lastDeviceGyroSample;
+    unsigned short _deviceLowFreqMotor;
+    unsigned short _deviceHighFreqMotor;
+    unsigned short _deviceLeftTriggerMotor;
+    unsigned short _deviceRightTriggerMotor;
+#endif
+
 #define EMULATING_SELECT     0x1
 #define EMULATING_SPECIAL    0x2
     
@@ -54,12 +83,411 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
 
 #define MAX_MAGNITUDE(x, y) (abs(x) > abs(y) ? (x) : (y))
 
+-(BOOL) isOscControllerActive
+{
+#if TARGET_OS_TV
+    return NO;
+#else
+    // Keep virtual controller advertising aligned with the actual OSC visibility rules.
+    if (_absoluteTouchMode || !_oscEnabled) {
+        return NO;
+    }
+
+    if (_osc != nil) {
+        return [_osc getLevel] != OnScreenControlsLevelOff;
+    }
+
+    if (_oscPreference == OnScreenControlsLevelAuto) {
+        return ![ControllerSupport hasKeyboardOrMouse];
+    }
+
+    return YES;
+#endif
+}
+
+#if !TARGET_OS_TV
+-(BOOL) shouldUseDeviceHapticsForPlayerIndex:(uint16_t)playerIndex hasController:(BOOL)hasController
+{
+    if (!_deviceHapticsEnabled || playerIndex != 0) {
+        return NO;
+    }
+
+    return hasController || [self isOscControllerActive];
+}
+
+-(BOOL) shouldUseDeviceHapticsForControllerNumber:(uint16_t)controllerNumber controller:(Controller*)controller
+{
+    return [self shouldUseDeviceHapticsForPlayerIndex:controllerNumber hasController:controller != nil];
+}
+
+-(BOOL) shouldUseDeviceHapticsForController:(Controller*)controller
+{
+    return [self shouldUseDeviceHapticsForPlayerIndex:controller.playerIndex hasController:controller.gamepad != nil];
+}
+
+-(BOOL) shouldUseDeviceGyroForPlayerIndex:(uint16_t)playerIndex hasController:(BOOL)hasController
+{
+    if (_deviceGyroMode != DeviceGyroModeDualShock || playerIndex != 0) {
+        return NO;
+    }
+
+    return hasController || [self isOscControllerActive];
+}
+
+-(BOOL) shouldUseDeviceGyroForControllerNumber:(uint16_t)controllerNumber controller:(Controller*)controller
+{
+    return [self shouldUseDeviceGyroForPlayerIndex:controllerNumber hasController:controller != nil];
+}
+
+-(BOOL) shouldUseDeviceGyroForController:(Controller*)controller
+{
+    return [self shouldUseDeviceGyroForPlayerIndex:controller.playerIndex hasController:controller.gamepad != nil];
+}
+
+-(Controller*) activeControllerForPlayerZero
+{
+    Controller* controller = [_controllers objectForKey:[NSNumber numberWithInteger:0]];
+    if (controller != nil) {
+        return controller;
+    }
+
+    return [self isOscControllerActive] ? _oscController : nil;
+}
+
+-(void) rereportControllerArrival:(Controller*)controller
+{
+    if (controller == nil) {
+        return;
+    }
+
+    [self cleanupControllerBattery:controller];
+    controller.reportedArrival = NO;
+    if ([self reportControllerArrival:controller]) {
+        [self updateFinished:controller];
+    }
+}
+
+-(void) refreshPlayerZeroDeviceStateAndControllerArrival:(BOOL)shouldRereport
+{
+    Controller* controller = [_controllers objectForKey:[NSNumber numberWithInteger:0]];
+    [self refreshDeviceHapticsStateForControllerNumber:0 controller:controller];
+    [self refreshDeviceAccelStateForControllerNumber:0 controller:controller];
+    [self refreshDeviceGyroStateForControllerNumber:0 controller:controller];
+
+    if (shouldRereport) {
+        // Clear stale host motion state so a newly reported gyro capability can
+        // begin sending samples even if the host doesn't immediately reconfigure rates.
+        _deviceAccelReportRateInitialized = NO;
+        _deviceGyroReportRateInitialized = NO;
+        [self rereportControllerArrival:[self activeControllerForPlayerZero]];
+    }
+}
+
+-(void) reloadDeviceInputSettingsFromDefaults:(BOOL)shouldRereportPlayerZero
+{
+    NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+    BOOL wasDeviceHapticsEnabled = _deviceHapticsEnabled;
+    DeviceGyroMode previousDeviceGyroMode = _deviceGyroMode;
+
+    BOOL wantsDeviceHaptics = [defaults boolForKey:kDeviceHapticsKey];
+    if (!wantsDeviceHaptics) {
+        [self resetDeviceHaptics];
+        [_deviceHaptics cleanup];
+        _deviceHaptics = nil;
+        _deviceHapticsEnabled = NO;
+    }
+    else if (_deviceHaptics == nil) {
+        _deviceHaptics = [HapticContext createContextForDeviceHaptics];
+        _deviceHapticsEnabled = _deviceHaptics != nil;
+    }
+    else {
+        _deviceHapticsEnabled = YES;
+    }
+
+    DeviceGyroMode requestedDeviceGyroMode = (DeviceGyroMode)[defaults integerForKey:kDeviceGyroModeKey];
+    if (requestedDeviceGyroMode == DeviceGyroModeOff) {
+        [self stopDeviceAccelUpdates];
+        [self stopDeviceGyroUpdates];
+        _deviceMotionManager = nil;
+        _deviceGyroMode = DeviceGyroModeOff;
+    }
+    else {
+        if (_deviceMotionManager == nil) {
+            _deviceMotionManager = [[CMMotionManager alloc] init];
+        }
+
+        if (_deviceMotionManager.gyroAvailable) {
+            _deviceGyroMode = requestedDeviceGyroMode;
+        }
+        else {
+            [self stopDeviceAccelUpdates];
+            [self stopDeviceGyroUpdates];
+            _deviceMotionManager = nil;
+            _deviceGyroMode = DeviceGyroModeOff;
+        }
+    }
+
+    if (shouldRereportPlayerZero &&
+        (wasDeviceHapticsEnabled != _deviceHapticsEnabled || previousDeviceGyroMode != _deviceGyroMode)) {
+        [self refreshPlayerZeroDeviceStateAndControllerArrival:YES];
+    }
+}
+
+-(void) updateDeviceHaptics
+{
+    unsigned short amplitude = MAX(MAX(_deviceLowFreqMotor, _deviceHighFreqMotor),
+                                   MAX(_deviceLeftTriggerMotor, _deviceRightTriggerMotor));
+    [_deviceHaptics setMotorAmplitude:amplitude];
+}
+
+-(void) resetDeviceHaptics
+{
+    _deviceLowFreqMotor = 0;
+    _deviceHighFreqMotor = 0;
+    _deviceLeftTriggerMotor = 0;
+    _deviceRightTriggerMotor = 0;
+    [self updateDeviceHaptics];
+}
+
+-(void) refreshDeviceHapticsStateForControllerNumber:(uint16_t)controllerNumber controller:(Controller*)controller
+{
+    if (![self shouldUseDeviceHapticsForControllerNumber:controllerNumber controller:controller]) {
+        [self resetDeviceHaptics];
+    }
+}
+
+-(void) updateDeviceRumbleForController:(Controller*)controller
+                       controllerNumber:(uint16_t)controllerNumber
+                           lowFreqMotor:(uint16_t)lowFreqMotor
+                          highFreqMotor:(uint16_t)highFreqMotor
+{
+    if (![self shouldUseDeviceHapticsForControllerNumber:controllerNumber controller:controller]) {
+        return;
+    }
+
+    _deviceLowFreqMotor = (controller == nil || controller.lowFreqMotor == nil) ? lowFreqMotor : 0;
+    _deviceHighFreqMotor = (controller == nil || controller.highFreqMotor == nil) ? highFreqMotor : 0;
+    [self updateDeviceHaptics];
+}
+
+-(void) updateDeviceTriggerRumbleForController:(Controller*)controller
+                               controllerNumber:(uint16_t)controllerNumber
+                                    leftTrigger:(uint16_t)leftTrigger
+                                   rightTrigger:(uint16_t)rightTrigger
+{
+    if (![self shouldUseDeviceHapticsForControllerNumber:controllerNumber controller:controller]) {
+        return;
+    }
+
+    _deviceLeftTriggerMotor = (controller == nil || controller.leftTriggerMotor == nil) ? leftTrigger : 0;
+    _deviceRightTriggerMotor = (controller == nil || controller.rightTriggerMotor == nil) ? rightTrigger : 0;
+    [self updateDeviceHaptics];
+}
+
+-(UIInterfaceOrientation) currentInterfaceOrientation
+{
+    if (![NSThread isMainThread]) {
+        __block UIInterfaceOrientation interfaceOrientation = UIInterfaceOrientationUnknown;
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            interfaceOrientation = [self currentInterfaceOrientation];
+        });
+        return interfaceOrientation;
+    }
+
+    if (@available(iOS 13.0, *)) {
+        UIWindowScene* windowScene = nil;
+        for (UIScene* scene in UIApplication.sharedApplication.connectedScenes) {
+            if (![scene isKindOfClass:[UIWindowScene class]]) {
+                continue;
+            }
+
+            UIWindowScene* candidate = (UIWindowScene*)scene;
+            if (candidate.activationState != UISceneActivationStateForegroundActive) {
+                continue;
+            }
+
+            for (UIWindow* window in candidate.windows) {
+                if (window.isKeyWindow) {
+                    windowScene = candidate;
+                    break;
+                }
+            }
+
+            if (windowScene == nil) {
+                windowScene = candidate;
+            }
+
+            if (windowScene != nil) {
+                break;
+            }
+        }
+
+        if (windowScene != nil) {
+            return windowScene.interfaceOrientation;
+        }
+    }
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    return UIApplication.sharedApplication.statusBarOrientation;
+#pragma clang diagnostic pop
+}
+
+-(CMRotationRate) rotateDeviceGyroSample:(CMRotationRate)rotationRate
+{
+    switch ([self currentInterfaceOrientation]) {
+        case UIInterfaceOrientationLandscapeLeft:
+            return (CMRotationRate){ .x = -rotationRate.y, .y = rotationRate.x, .z = rotationRate.z };
+        case UIInterfaceOrientationLandscapeRight:
+            return (CMRotationRate){ .x = rotationRate.y, .y = -rotationRate.x, .z = rotationRate.z };
+        default:
+            return rotationRate;
+    }
+}
+
+-(CMAcceleration) rotateDeviceAccelSample:(CMAcceleration)acceleration
+{
+    switch ([self currentInterfaceOrientation]) {
+        case UIInterfaceOrientationLandscapeLeft:
+            return (CMAcceleration){ .x = -acceleration.y, .y = acceleration.x, .z = acceleration.z };
+        case UIInterfaceOrientationLandscapeRight:
+            return (CMAcceleration){ .x = acceleration.y, .y = -acceleration.x, .z = acceleration.z };
+        default:
+            return acceleration;
+    }
+}
+
+-(void) stopDeviceAccelUpdates
+{
+    if (_deviceMotionManager.accelerometerActive) {
+        [_deviceMotionManager stopAccelerometerUpdates];
+    }
+
+    _lastDeviceAccelSample = (CMAcceleration){};
+}
+
+-(void) refreshDeviceAccelStateForControllerNumber:(uint16_t)controllerNumber controller:(Controller*)controller
+{
+    BOOL controllerHasAccel = NO;
+    if (@available(iOS 14.0, *)) {
+        controllerHasAccel = controller != nil && controller.gamepad.motion != nil && controller.gamepad.motion.hasGravityAndUserAcceleration;
+    }
+
+    if ([self shouldUseDeviceGyroForControllerNumber:controllerNumber controller:controller] && !controllerHasAccel) {
+        // Keep the fallback report rate aligned with host state when available.
+        uint16_t reportRateHz = _deviceAccelReportRateInitialized ? _deviceAccelReportRateHz : 100;
+        [self setDeviceAccelEventState:controllerNumber reportRateHz:reportRateHz];
+    }
+    else {
+        [self stopDeviceAccelUpdates];
+    }
+}
+
+-(void) setDeviceAccelEventState:(uint16_t)controllerNumber reportRateHz:(uint16_t)reportRateHz
+{
+    [self stopDeviceAccelUpdates];
+
+    if (reportRateHz == 0) {
+        return;
+    }
+    if (_deviceMotionManager == nil) {
+        return;
+    }
+    if (!_deviceMotionManager.accelerometerAvailable) {
+        return;
+    }
+
+    _deviceMotionManager.accelerometerUpdateInterval = 1.0 / reportRateHz;
+    [_deviceMotionManager startAccelerometerUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMAccelerometerData *accelData, NSError *error) {
+        if (accelData == nil) {
+            return;
+        }
+
+        CMAcceleration accelSample = [self rotateDeviceAccelSample:accelData.acceleration];
+        if (memcmp(&accelSample, &self->_lastDeviceAccelSample, sizeof(accelSample)) == 0) {
+            return;
+        }
+
+        self->_lastDeviceAccelSample = accelSample;
+        LiSendControllerMotionEvent((uint8_t)controllerNumber,
+                                    LI_MOTION_TYPE_ACCEL,
+                                    accelSample.x * -9.80665f,
+                                    accelSample.y * -9.80665f,
+                                    accelSample.z * -9.80665f);
+    }];
+}
+
+-(void) stopDeviceGyroUpdates
+{
+    if (_deviceMotionManager.gyroActive) {
+        [_deviceMotionManager stopGyroUpdates];
+    }
+
+    _lastDeviceGyroSample = (CMRotationRate){};
+}
+
+-(void) refreshDeviceGyroStateForControllerNumber:(uint16_t)controllerNumber controller:(Controller*)controller
+{
+    BOOL controllerHasGyro = NO;
+    if (@available(iOS 14.0, *)) {
+        controllerHasGyro = controller != nil && controller.gamepad.motion != nil && controller.gamepad.motion.hasRotationRate;
+    }
+
+    if ([self shouldUseDeviceGyroForControllerNumber:controllerNumber controller:controller] && !controllerHasGyro) {
+        // Some hosts don't immediately send SetMotionEventState after dynamic controller
+        // capability changes, so provide a safe default until the host specifies a rate.
+        uint16_t reportRateHz = _deviceGyroReportRateInitialized ? _deviceGyroReportRateHz : 100;
+        [self setDeviceGyroEventState:controllerNumber reportRateHz:reportRateHz];
+    }
+    else {
+        [self stopDeviceGyroUpdates];
+    }
+}
+
+-(void) setDeviceGyroEventState:(uint16_t)controllerNumber reportRateHz:(uint16_t)reportRateHz
+{
+    [self stopDeviceGyroUpdates];
+
+    if (reportRateHz == 0) {
+        return;
+    }
+    if (_deviceMotionManager == nil) {
+        return;
+    }
+    if (!_deviceMotionManager.gyroAvailable) {
+        return;
+    }
+
+    _deviceMotionManager.gyroUpdateInterval = 1.0 / reportRateHz;
+    [_deviceMotionManager startGyroUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMGyroData *gyroData, NSError *error) {
+        if (gyroData == nil) {
+            return;
+        }
+
+        CMRotationRate gyroSample = [self rotateDeviceGyroSample:gyroData.rotationRate];
+        if (memcmp(&gyroSample, &self->_lastDeviceGyroSample, sizeof(gyroSample)) == 0) {
+            return;
+        }
+
+        self->_lastDeviceGyroSample = gyroSample;
+        LiSendControllerMotionEvent((uint8_t)controllerNumber,
+                                    LI_MOTION_TYPE_GYRO,
+                                    gyroSample.x * 57.2957795f,
+                                    gyroSample.z * 57.2957795f,
+                                    gyroSample.y * -57.2957795f);
+    }];
+}
+#endif
+
 -(void) rumble:(unsigned short)controllerNumber lowFreqMotor:(unsigned short)lowFreqMotor highFreqMotor:(unsigned short)highFreqMotor
 {
     Controller* controller = [_controllers objectForKey:[NSNumber numberWithInteger:controllerNumber]];
-    if (controller == nil && controllerNumber == 0 && _oscEnabled) {
-        // TODO: Rumble emulation for OSC
-    }
+#if !TARGET_OS_TV
+    [self updateDeviceRumbleForController:controller
+                         controllerNumber:controllerNumber
+                             lowFreqMotor:lowFreqMotor
+                            highFreqMotor:highFreqMotor];
+#endif
     if (controller == nil) {
         // No connected controller for this player
         return;
@@ -72,9 +500,12 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
 -(void) rumbleTriggers:(uint16_t)controllerNumber leftTrigger:(uint16_t)leftTrigger rightTrigger:(uint16_t)rightTrigger
 {
     Controller* controller = [_controllers objectForKey:[NSNumber numberWithInteger:controllerNumber]];
-    if (controller == nil && controllerNumber == 0 && _oscEnabled) {
-        // TODO: Trigger rumble emulation for OSC
-    }
+#if !TARGET_OS_TV
+    [self updateDeviceTriggerRumbleForController:controller
+                                controllerNumber:controllerNumber
+                                     leftTrigger:leftTrigger
+                                    rightTrigger:rightTrigger];
+#endif
     if (controller == nil) {
         // No connected controller for this player
         return;
@@ -86,8 +517,50 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
 
 - (void) setMotionEventState:(uint16_t)controllerNumber motionType:(uint8_t)motionType reportRateHz:(uint16_t)reportRateHz
 {
+    Controller* controller = [_controllers objectForKey:[NSNumber numberWithInteger:controllerNumber]];
+
+#if !TARGET_OS_TV
+    if (motionType == LI_MOTION_TYPE_ACCEL && controllerNumber == 0) {
+        BOOL controllerHasAccel = NO;
+        if (@available(iOS 14.0, *)) {
+            controllerHasAccel = controller != nil && controller.gamepad.motion != nil && controller.gamepad.motion.hasGravityAndUserAcceleration;
+        }
+
+        if ([self shouldUseDeviceGyroForControllerNumber:controllerNumber controller:controller] &&
+            !controllerHasAccel &&
+            reportRateHz == 0) {
+            _deviceAccelReportRateInitialized = NO;
+        }
+        else {
+            _deviceAccelReportRateHz = reportRateHz;
+            _deviceAccelReportRateInitialized = YES;
+        }
+        [self refreshDeviceAccelStateForControllerNumber:controllerNumber controller:controller];
+    }
+
+    if (motionType == LI_MOTION_TYPE_GYRO && controllerNumber == 0) {
+        BOOL controllerHasGyro = NO;
+        if (@available(iOS 14.0, *)) {
+            controllerHasGyro = controller != nil && controller.gamepad.motion != nil && controller.gamepad.motion.hasRotationRate;
+        }
+
+        // Some hosts may send an initial 0 Hz state before they process a refreshed
+        // controller arrival with gyro capability. Keep fallback device gyro running
+        // for non-gyro controllers in that case instead of getting stuck disabled.
+        if ([self shouldUseDeviceGyroForControllerNumber:controllerNumber controller:controller] &&
+            !controllerHasGyro &&
+            reportRateHz == 0) {
+            _deviceGyroReportRateInitialized = NO;
+        }
+        else {
+            _deviceGyroReportRateHz = reportRateHz;
+            _deviceGyroReportRateInitialized = YES;
+        }
+        [self refreshDeviceGyroStateForControllerNumber:controllerNumber controller:controller];
+    }
+#endif
+
     if (@available(iOS 14.0, tvOS 14.0, *)) {
-        Controller* controller = [_controllers objectForKey:[NSNumber numberWithInteger:controllerNumber]];
         if (controller == nil) {
             // No connected controller for this player
             return;
@@ -318,7 +791,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
 
 -(uint16_t) getActiveGamepadMask
 {
-    return (_multiController ? _controllerNumbers : 1) | (_oscEnabled ? 1 : 0);
+    return (_multiController ? _controllerNumbers : 1) | ([self isOscControllerActive] ? 1 : 0);
 }
 
 -(void) updateFinished:(Controller*)controller
@@ -606,22 +1079,31 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
                 capabilities |= LI_CCAP_BATTERY_STATE;
             }
         }
-        else {
-            // This is a virtual controller corresponding to our OSC
-
-            // TODO: Support various layouts and button labels on the OSC
-            type = LI_CTYPE_XBOX;
-            capabilities = 0;
-            supportedButtonFlags =
-                PLAY_FLAG | BACK_FLAG | UP_FLAG | DOWN_FLAG | LEFT_FLAG | RIGHT_FLAG |
-                LB_FLAG | RB_FLAG | LS_CLK_FLAG | RS_CLK_FLAG | A_FLAG | B_FLAG | X_FLAG | Y_FLAG;
-        }
+    }
+    else {
+        // TODO: Support various layouts and button labels on the OSC
+        type = LI_CTYPE_XBOX;
+        supportedButtonFlags =
+            PLAY_FLAG | BACK_FLAG | UP_FLAG | DOWN_FLAG | LEFT_FLAG | RIGHT_FLAG |
+            LB_FLAG | RB_FLAG | LS_CLK_FLAG | RS_CLK_FLAG | A_FLAG | B_FLAG | X_FLAG | Y_FLAG;
     }
 
+#if !TARGET_OS_TV
+    // Advertise fallback capabilities only for features this player can satisfy locally.
+    // Device gyro and device haptics can augment player 0 when the attached controller
+    // lacks the requested hardware capabilities, or when player 0 is backed by the OSC.
+    if ([self shouldUseDeviceHapticsForController:limeController]) {
+        capabilities |= LI_CCAP_RUMBLE | LI_CCAP_TRIGGER_RUMBLE;
+    }
+    if ([self shouldUseDeviceGyroForController:limeController]) {
+        type = LI_CTYPE_PS;
+        capabilities |= LI_CCAP_ACCEL | LI_CCAP_GYRO;
+    }
+#endif
     // Report the new controller to the host
     // NB: This will fail if the connection hasn't been fully established yet
     // and we will try again later.
-    if (LiSendControllerArrivalEvent(controller.playerIndex,
+    if (LiSendControllerArrivalEvent(limeController.playerIndex,
                                      [self getActiveGamepadMask],
                                      type,
                                      supportedButtonFlags,
@@ -922,6 +1404,10 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     if (_osc == NULL) {
         return;
     }
+
+#if !TARGET_OS_TV
+    BOOL wasOscControllerActive = [self isOscControllerActive];
+#endif
     
     OnScreenControlsLevel level = OnScreenControlsLevelFull;
     
@@ -962,6 +1448,18 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     }
     
     [_osc setLevel:level];
+
+#if !TARGET_OS_TV
+    BOOL isOscControllerActive = [self isOscControllerActive];
+    if (wasOscControllerActive && !isOscControllerActive) {
+        [self resetDeviceHaptics];
+        [self stopDeviceAccelUpdates];
+        [self stopDeviceGyroUpdates];
+    }
+    if (wasOscControllerActive != isOscControllerActive) {
+        [self refreshPlayerZeroDeviceStateAndControllerArrival:YES];
+    }
+#endif
 }
 
 -(void) initAutoOnScreenControlMode:(OnScreenControls*)osc
@@ -1004,6 +1502,13 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
             
             // Prepare controller haptics for use
             [self initializeControllerHaptics:limeController];
+#if !TARGET_OS_TV
+            if (i == 0) {
+                [self refreshDeviceHapticsStateForControllerNumber:i controller:limeController];
+                [self refreshDeviceAccelStateForControllerNumber:i controller:limeController];
+                [self refreshDeviceGyroStateForControllerNumber:i controller:limeController];
+            }
+#endif
 
             [_controllers setObject:limeController forKey:[NSNumber numberWithInteger:controller.playerIndex]];
             
@@ -1088,7 +1593,15 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     _oscController.playerIndex = 0;
 
     DataManager* dataMan = [[DataManager alloc] init];
-    _oscEnabled = (OnScreenControlsLevel)[[dataMan getSettings].onscreenControls integerValue] != OnScreenControlsLevelOff;
+    TemporarySettings* settings = [dataMan getSettings];
+    _oscPreference = (OnScreenControlsLevel)[settings.onscreenControls integerValue];
+    _absoluteTouchMode = settings.absoluteTouchMode;
+    _oscEnabled = _oscPreference != OnScreenControlsLevelOff;
+#if !TARGET_OS_TV
+    _deviceHapticsEnabled = NO;
+    _deviceGyroMode = DeviceGyroModeOff;
+    [self reloadDeviceInputSettingsFromDefaults:NO];
+#endif
     
     Log(LOG_I, @"Number of supported controllers connected: %d", [ControllerSupport getGamepadCount]);
     Log(LOG_I, @"Multi-controller: %d", _multiController);
@@ -1148,6 +1661,9 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
         self->_controllerNumbers &= ~(1 << controller.playerIndex);
         Log(LOG_I, @"Unassigning controller index: %ld", (long)controller.playerIndex);
         
+#if !TARGET_OS_TV
+        BOOL wasOscControllerActive = [self isOscControllerActive];
+#endif
         Controller* limeController = [self->_controllers objectForKey:[NSNumber numberWithInteger:controller.playerIndex]];
         if (limeController) {
             // Stop haptics on this controller
@@ -1171,6 +1687,12 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
             
             // Re-evaluate the on-screen control mode
             [self updateAutoOnScreenControlMode];
+
+#if !TARGET_OS_TV
+            if (controller.playerIndex == 0 && wasOscControllerActive == [self isOscControllerActive]) {
+                [self refreshPlayerZeroDeviceStateAndControllerArrival:YES];
+            }
+#endif
             
             // Notify the delegate
             [self->_delegate gamepadPresenceChanged];
@@ -1218,6 +1740,12 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
             // Re-evaluate the on-screen control mode
             [self updateAutoOnScreenControlMode];
         }];
+
+#if !TARGET_OS_TV
+        _defaultsObserver = [[NSNotificationCenter defaultCenter] addObserverForName:NSUserDefaultsDidChangeNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
+            [self reloadDeviceInputSettingsFromDefaults:YES];
+        }];
+#endif
     }
     
     return self;
@@ -1225,6 +1753,10 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
 
 -(void) connectionEstablished
 {
+    if ([_controllers objectForKey:[NSNumber numberWithInteger:0]] == nil && [self isOscControllerActive]) {
+        [self reportControllerArrival:_oscController];
+    }
+
     for (Controller* controller in [_controllers allValues]) {
         // Report the controller arrival to the host if we haven't done so yet
         [self reportControllerArrival:controller];
@@ -1249,6 +1781,17 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     
     _controllerNumbers = 0;
     
+#if !TARGET_OS_TV
+    [self resetDeviceHaptics];
+    [_deviceHaptics cleanup];
+    _deviceHaptics = nil;
+    [self stopDeviceAccelUpdates];
+    [self stopDeviceGyroUpdates];
+    _deviceMotionManager = nil;
+    [[NSNotificationCenter defaultCenter] removeObserver:_defaultsObserver];
+    _defaultsObserver = nil;
+#endif
+
     for (Controller* controller in [_controllers allValues]) {
         [self cleanupControllerHaptics:controller];
         [self cleanupControllerMotion:controller];
