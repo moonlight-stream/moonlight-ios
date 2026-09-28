@@ -82,6 +82,7 @@
     self.multiController = settings.multiController;
     self.swapABXYButtons = settings.swapABXYButtons;
     self.onscreenControls = settings.onscreenControls;
+    self.motionMode = settings.motionMode;
     self.btMouseSupport = settings.btMouseSupport;
     self.absoluteTouchMode = settings.absoluteTouchMode;
     self.statsOverlay = settings.statsOverlay;

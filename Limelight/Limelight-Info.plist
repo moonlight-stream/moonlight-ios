@@ -58,6 +58,8 @@
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Moonlight uses the local network to connect to your gaming PC for streaming.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Moonlight uses the device Gyro and Acceleration data to emulate motion controls when streaming.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

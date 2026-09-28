@@ -58,6 +58,7 @@
                            width:(NSInteger)width
                      audioConfig:(NSInteger)audioConfig
                 onscreenControls:(NSInteger)onscreenControls
+                      motionMode:(NSInteger)motionMode
                    optimizeGames:(BOOL)optimizeGames
                  multiController:(BOOL)multiController
                  swapABXYButtons:(BOOL)swapABXYButtons
@@ -77,6 +78,7 @@
         settingsToSave.width = [NSNumber numberWithInteger:width];
         settingsToSave.audioConfig = [NSNumber numberWithInteger:audioConfig];
         settingsToSave.onscreenControls = [NSNumber numberWithInteger:onscreenControls];
+        settingsToSave.motionMode = [NSNumber numberWithInteger:motionMode];
         settingsToSave.optimizeGames = optimizeGames;
         settingsToSave.multiController = multiController;
         settingsToSave.swapABXYButtons = swapABXYButtons;

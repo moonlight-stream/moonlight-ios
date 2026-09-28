@@ -11,6 +11,9 @@
 #import "ControllerSupport.h"
 #import "Controller.h"
 #include "Limelight.h"
+#if !TARGET_OS_TV
+    #import <CoreMotion/CoreMotion.h>
+#endif
 
 #define UPDATE_BUTTON(x, y) (buttonFlags = \
 (y) ? (buttonFlags | (x)) : (buttonFlags & ~(x)))
