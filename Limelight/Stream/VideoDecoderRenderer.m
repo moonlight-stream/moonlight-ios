@@ -8,6 +8,9 @@
 
 #import "VideoDecoderRenderer.h"
 #import "StreamView.h"
+#import "VideoSuperResolution.h"
+
+@import VideoToolbox;
 
 #include <libavcodec/avcodec.h>
 #include <libavcodec/cbs.h>
@@ -19,6 +22,8 @@
 extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
                               int write_seq_header);
 
+static const void* kVideoSuperResolutionQueueKey = &kVideoSuperResolutionQueueKey;
+
 @implementation VideoDecoderRenderer {
     StreamView* _view;
     id<ConnectionCallbacks> _callbacks;
@@ -27,11 +32,19 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     AVSampleBufferDisplayLayer* displayLayer;
     int videoFormat;
     int frameRate;
+    int videoWidth;
+    int videoHeight;
     
     NSMutableArray *parameterSetBuffers;
     NSData *masteringDisplayColorVolume;
     NSData *contentLightLevelInfo;
     CMVideoFormatDescriptionRef formatDesc;
+    VideoSuperResolution* _videoSuperResolution;
+    BOOL _useVideoSuperResolution;
+    BOOL _videoSuperResolutionHdrEnabled;
+    dispatch_queue_t _videoSuperResolutionQueue;
+    VTDecompressionSessionRef _decompressionSession;
+    CGSize _videoSuperResolutionTargetSize;
     
     CADisplayLink* _displayLink;
     BOOL framePacing;
@@ -85,18 +98,199 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     _callbacks = callbacks;
     _streamAspectRatio = aspectRatio;
     framePacing = useFramePacing;
+    _useVideoSuperResolution = [[NSUserDefaults standardUserDefaults] boolForKey:@"videoSuperResolution"];
     
     parameterSetBuffers = [[NSMutableArray alloc] init];
+    if (_useVideoSuperResolution) {
+        _videoSuperResolution = [[VideoSuperResolution alloc] init];
+        // Build the long-lived GPU state once up front. Size-dependent resources are configured later.
+        [_videoSuperResolution initializeResources];
+        [_videoSuperResolution setHdrEnabled:NO];
+
+        // Keep the optional VSR decode/conversion path off the main thread.
+        _videoSuperResolutionQueue = dispatch_queue_create("com.moonlight.VideoSuperResolution", DISPATCH_QUEUE_SERIAL);
+
+        // Tag the queue so we can safely invalidate the VT session from either the queue itself
+        // or another thread without introducing a cross-thread lifetime bug.
+        dispatch_queue_set_specific(_videoSuperResolutionQueue, kVideoSuperResolutionQueueKey, (void*)kVideoSuperResolutionQueueKey, NULL);
+    }
     
     [self reinitializeDisplayLayer];
     
     return self;
 }
 
+- (CGSize)videoSuperResolutionTargetSize
+{
+    __block CGRect displayBounds = CGRectZero;
+    __block CGFloat screenScale = 1.0;
+    void (^readUIState)(void) = ^{
+        UIScreen* screen = self->_view.window.screen ?: UIScreen.mainScreen;
+
+        // The display layer bounds define the actual presentation size after aspect-ratio fitting.
+        displayBounds = self->displayLayer.bounds;
+        screenScale = screen.nativeScale > 0.0 ? screen.nativeScale : screen.scale;
+    };
+    
+    if ([NSThread isMainThread]) {
+        readUIState();
+    }
+    else {
+        dispatch_sync(dispatch_get_main_queue(), readUIState);
+    }
+    
+    return CGSizeMake(MAX(1.0, CGRectGetWidth(displayBounds) * screenScale),
+                      MAX(1.0, CGRectGetHeight(displayBounds) * screenScale));
+}
+
+- (void)invalidateVideoSuperResolutionDecoder
+{
+    if (_videoSuperResolutionQueue == NULL) {
+        if (_decompressionSession != NULL) {
+            VTDecompressionSessionInvalidate(_decompressionSession);
+            CFRelease(_decompressionSession);
+            _decompressionSession = NULL;
+        }
+        return;
+    }
+
+    // The decompression session is owned by the VSR queue, so all invalidation must run there.
+    void (^invalidateBlock)(void) = ^{
+        if (self->_decompressionSession != NULL) {
+            VTDecompressionSessionInvalidate(self->_decompressionSession);
+            CFRelease(self->_decompressionSession);
+            self->_decompressionSession = NULL;
+        }
+    };
+
+    if (dispatch_get_specific(kVideoSuperResolutionQueueKey) == kVideoSuperResolutionQueueKey) {
+        invalidateBlock();
+    }
+    else {
+        dispatch_sync(_videoSuperResolutionQueue, invalidateBlock);
+    }
+}
+
+- (BOOL)setupVideoSuperResolutionDecoder
+{
+    if (!_useVideoSuperResolution || formatDesc == NULL) {
+        return NO;
+    }
+
+    // Rebuild the secondary decode session when the stream format or HDR mode changes.
+    [self invalidateVideoSuperResolutionDecoder];
+
+    NSDictionary* imageBufferAttributes = @{
+        // Request a Metal-compatible decoder output so VideoSuperResolution can wrap it directly
+        // as a CVMetalTexture without an extra CPU copy.
+        (id)kCVPixelBufferPixelFormatTypeKey : @(_videoSuperResolutionHdrEnabled ? kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange : kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange),
+        (id)kCVPixelBufferMetalCompatibilityKey : @YES,
+        (id)kCVPixelBufferIOSurfacePropertiesKey : @{},
+    };
+
+    OSStatus status = VTDecompressionSessionCreate(kCFAllocatorDefault,
+                                                   formatDesc,
+                                                   NULL,
+                                                   (__bridge CFDictionaryRef)imageBufferAttributes,
+                                                   NULL,
+                                                   &_decompressionSession);
+    if (status != noErr || _decompressionSession == NULL) {
+        Log(LOG_E, @"Failed to create VideoSuperResolution decompression session: %d", (int)status);
+        [self invalidateVideoSuperResolutionDecoder];
+        return NO;
+    }
+
+    return YES;
+}
+
+- (BOOL)enqueueVideoSuperResolutionSampleBuffer:(CMSampleBufferRef)sampleBuffer decodeUnit:(PDECODE_UNIT)du
+{
+    BOOL isIDRFrame = du->frameType == FRAME_TYPE_IDR;
+    CFRetain(sampleBuffer);
+    
+    dispatch_async(_videoSuperResolutionQueue, ^{
+        @autoreleasepool {
+            // Lazily create the secondary VT session on the queue that will own and use it.
+            if (self->_decompressionSession == NULL && ![self setupVideoSuperResolutionDecoder]) {
+                CFRelease(sampleBuffer);
+                return;
+            }
+
+            __block CMSampleBufferRef rgbSampleBuffer = NULL;
+            __block BOOL decodeCompleted = NO;
+            VTDecodeInfoFlags infoFlags = 0;
+            
+            // Decode into a Metal-compatible pixel buffer, then hand that image buffer to the
+            // VSR path for YUV->RGB conversion and optional MetalFX scaling.
+            OSStatus status = VTDecompressionSessionDecodeFrameWithOutputHandler(self->_decompressionSession,
+                                                                                 sampleBuffer,
+                                                                                 0,
+                                                                                 &infoFlags,
+                                                                                 ^(OSStatus decodeStatus,
+                                                                                   VTDecodeInfoFlags decodeInfoFlags,
+                                                                                   CVImageBufferRef  _Nullable imageBuffer,
+                                                                                   CMTime presentationTimeStamp,
+                                                                                   CMTime presentationDuration) {
+                decodeCompleted = YES;
+
+                if (decodeStatus != noErr || imageBuffer == nil) {
+                    Log(LOG_E, @"VideoSuperResolution decode failed: %d flags: %u", (int)decodeStatus, (unsigned int)decodeInfoFlags);
+                    return;
+                }
+
+                // The source sample buffer is passed through so the RGB output can inherit its
+                // HDR and color attachments before it is enqueued for display.
+                rgbSampleBuffer = [self->_videoSuperResolution copyRGBSampleBufferFromImageBuffer:imageBuffer
+                                                                                 sourceSampleBuffer:sampleBuffer
+                                                                             presentationTimeStamp:presentationTimeStamp
+                                                                                          duration:presentationDuration];
+            });
+            
+            CFRelease(sampleBuffer);
+            
+            if (status != noErr) {
+                Log(LOG_E, @"VTDecompressionSessionDecodeFrame failed: %d", (int)status);
+                [self invalidateVideoSuperResolutionDecoder];
+                return;
+            }
+
+            if (!decodeCompleted || rgbSampleBuffer == NULL) {
+                return;
+            }
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                // AVSampleBufferDisplayLayer remains a main-thread-facing object even though
+                // decoding and conversion happen on the dedicated VSR queue.
+                [self->displayLayer enqueueSampleBuffer:rgbSampleBuffer];
+
+                if (isIDRFrame) {
+                    self->displayLayer.hidden = NO;
+                    [self->_callbacks videoContentShown];
+                }
+                
+                CFRelease(rgbSampleBuffer);
+            });
+        }
+    });
+    
+    return YES;
+}
+
 - (void)setupWithVideoFormat:(int)videoFormat width:(int)videoWidth height:(int)videoHeight frameRate:(int)frameRate
 {
     self->videoFormat = videoFormat;
+    self->videoWidth = videoWidth;
+    self->videoHeight = videoHeight;
     self->frameRate = frameRate;
+    
+    if (_useVideoSuperResolution) {
+        _videoSuperResolutionTargetSize = [self videoSuperResolutionTargetSize];
+        [_videoSuperResolution setHdrEnabled:_videoSuperResolutionHdrEnabled];
+        if (![_videoSuperResolution configureWithInputSize:CGSizeMake(self->videoWidth, self->videoHeight)
+                                                outputSize:_videoSuperResolutionTargetSize]) {
+            Log(LOG_W, @"VideoSuperResolution session resource configuration failed");
+        }
+    }
 }
 
 - (void)start
@@ -142,6 +336,12 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
 
 - (void)stop
 {
+    if (_videoSuperResolutionQueue != NULL) {
+        dispatch_sync(_videoSuperResolutionQueue, ^{
+        });
+    }
+    
+    [self invalidateVideoSuperResolutionDecoder];
     [_displayLink invalidate];
 }
 
@@ -507,6 +707,10 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
             // Unsupported codec!
             abort();
         }
+
+        if (_useVideoSuperResolution && ![self setupVideoSuperResolutionDecoder]) {
+            Log(LOG_W, @"VideoSuperResolution setup failed. Falling back to default display pipeline.");
+        }
     }
     
     if (formatDesc == NULL) {
@@ -594,15 +798,18 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
         return DR_NEED_IDR;
     }
 
-    // Enqueue the next frame
-    [self->displayLayer enqueueSampleBuffer:sampleBuffer];
-    
-    if (du->frameType == FRAME_TYPE_IDR) {
-        // Ensure the layer is visible now
-        self->displayLayer.hidden = NO;
+    if (!_useVideoSuperResolution || ![self enqueueVideoSuperResolutionSampleBuffer:sampleBuffer decodeUnit:du]) {
+        // Enqueue the next frame on the existing path if VideoSuperResolution is disabled
+        // or if the optional YUV-to-RGB path couldn't process this frame.
+        [self->displayLayer enqueueSampleBuffer:sampleBuffer];
         
-        // Tell our parent VC to hide the progress indicator
-        [self->_callbacks videoContentShown];
+        if (du->frameType == FRAME_TYPE_IDR) {
+            // Ensure the layer is visible now
+            self->displayLayer.hidden = NO;
+            
+            // Tell our parent VC to hide the progress indicator
+            [self->_callbacks videoContentShown];
+        }
     }
     
     // Dereference the buffers
@@ -615,6 +822,19 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
 
 - (void)setHdrMode:(BOOL)enabled {
     SS_HDR_METADATA hdrMetadata;
+    
+    if (_useVideoSuperResolution && _videoSuperResolutionHdrEnabled != enabled) {
+        _videoSuperResolutionHdrEnabled = enabled;
+        [_videoSuperResolution setHdrEnabled:enabled];
+        
+        if (displayLayer != nil && videoWidth > 0 && videoHeight > 0) {
+            _videoSuperResolutionTargetSize = [self videoSuperResolutionTargetSize];
+            [_videoSuperResolution configureWithInputSize:CGSizeMake(videoWidth, videoHeight)
+                                               outputSize:_videoSuperResolutionTargetSize];
+        }
+        
+        [self invalidateVideoSuperResolutionDecoder];
+    }
     
     BOOL hasMetadata = enabled && LiGetHdrMetadata(&hdrMetadata);
     BOOL metadataChanged = NO;

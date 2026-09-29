@@ -41,6 +41,8 @@
 		98CFB82F1CAD481B0048EF74 /* libmoonlight-common.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98AB2E841CAD46840089BB98 /* libmoonlight-common.a */; };
 		98D5856D1C0EA79600F6CC00 /* TemporaryHost.m in Sources */ = {isa = PBXBuildFile; fileRef = 98D5856C1C0EA79600F6CC00 /* TemporaryHost.m */; };
 		98D585701C0ED0E800F6CC00 /* TemporarySettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 98D5856F1C0ED0E800F6CC00 /* TemporarySettings.m */; };
+		A1D986BF2F8417100030618A /* VideoSuperResolution.m in Sources */ = {isa = PBXBuildFile; fileRef = A1D986BE2F8417100030618A /* VideoSuperResolution.m */; };
+		A1D986C02F8417100030618A /* VideoSuperResolution.m in Sources */ = {isa = PBXBuildFile; fileRef = A1D986BE2F8417100030618A /* VideoSuperResolution.m */; };
 		DC1F5A07206436B20037755F /* ConnectionHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = DC1F5A06206436B20037755F /* ConnectionHelper.m */; };
 		F74BEF9C2C1A705600224667 /* OpenSSL in Frameworks */ = {isa = PBXBuildFile; productRef = F74BEF9B2C1A705600224667 /* OpenSSL */; };
 		F74BEFA42C1A80E400224667 /* OpenSSL in Frameworks */ = {isa = PBXBuildFile; productRef = F74BEFA32C1A80E400224667 /* OpenSSL */; };
@@ -212,6 +214,9 @@
 		98D5856C1C0EA79600F6CC00 /* TemporaryHost.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TemporaryHost.m; path = Database/TemporaryHost.m; sourceTree = "<group>"; };
 		98D5856E1C0ED0E800F6CC00 /* TemporarySettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TemporarySettings.h; path = Database/TemporarySettings.h; sourceTree = "<group>"; };
 		98D5856F1C0ED0E800F6CC00 /* TemporarySettings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TemporarySettings.m; path = Database/TemporarySettings.m; sourceTree = "<group>"; };
+		A1C4B35C2D8E100100A1B2C3 /* MetalFX.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalFX.framework; path = System/Library/Frameworks/MetalFX.framework; sourceTree = SDKROOT; };
+		A1D986BD2F8417100030618A /* VideoSuperResolution.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VideoSuperResolution.h; sourceTree = "<group>"; };
+		A1D986BE2F8417100030618A /* VideoSuperResolution.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VideoSuperResolution.m; sourceTree = "<group>"; };
 		D4746EEA1CBC740C006FB401 /* Moonlight-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "Moonlight-Bridging-Header.h"; path = "Input/Moonlight-Bridging-Header.h"; sourceTree = "<group>"; };
 		DC1F5A05206436B10037755F /* ConnectionHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionHelper.h; sourceTree = "<group>"; };
 		DC1F5A06206436B20037755F /* ConnectionHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionHelper.m; sourceTree = "<group>"; };
@@ -425,6 +430,7 @@
 				98882A042AF60F5300C5A11C /* libavutil.a */,
 				98882A092AF60F9000C5A11C /* libavutil.a */,
 				98B9CE6C27B2144B00B473C4 /* AVKit.framework */,
+				A1C4B35C2D8E100100A1B2C3 /* MetalFX.framework */,
 				98181BEC2791281100E43572 /* CoreMotion.framework */,
 				98181BE82791275D00E43572 /* libSDL2.a */,
 				98181BEA2791278300E43572 /* libSDL2.a */,
@@ -551,6 +557,8 @@
 				FB89461C19F646E200339C8A /* VideoDecoderRenderer.h */,
 				FB89461D19F646E200339C8A /* VideoDecoderRenderer.m */,
 				9803CCAB254F9EAF00EE185E /* ConnectionCallbacks.h */,
+				A1D986BD2F8417100030618A /* VideoSuperResolution.h */,
+				A1D986BE2F8417100030618A /* VideoSuperResolution.m */,
 			);
 			path = Stream;
 			sourceTree = "<group>";
@@ -853,6 +861,7 @@
 				FB1A67DC2132460400507771 /* KeyboardSupport.m in Sources */,
 				FB1A67CD213245F800507771 /* DataManager.m in Sources */,
 				FB1A67CF213245F800507771 /* TemporaryApp.m in Sources */,
+				A1D986C02F8417100030618A /* VideoSuperResolution.m in Sources */,
 				FB1A67D1213245F800507771 /* TemporaryHost.m in Sources */,
 				FB1A67D3213245F800507771 /* TemporarySettings.m in Sources */,
 				FB1A67C3213245EA00507771 /* AppAssetManager.m in Sources */,
@@ -894,6 +903,7 @@
 				FB9AFD401A7E127D00872C98 /* AppListResponse.m in Sources */,
 				FB89463419F646E200339C8A /* Utils.m in Sources */,
 				FBDE86E619F82297001C18A8 /* UIAppView.m in Sources */,
+				A1D986BF2F8417100030618A /* VideoSuperResolution.m in Sources */,
 				FB89462F19F646E200339C8A /* Connection.m in Sources */,
 				FB9AFD321A7D867C00872C98 /* AppAssetRetriever.m in Sources */,
 				FB4678FF1A565DAC00377732 /* WakeOnLanManager.m in Sources */,

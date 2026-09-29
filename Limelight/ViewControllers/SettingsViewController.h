@@ -11,6 +11,7 @@
 
 @interface SettingsViewController : UIViewController
 @property (strong, nonatomic) IBOutlet UILabel *bitrateLabel;
+@property (strong, nonatomic) IBOutlet UILabel *videoSuperResolutionLabel;
 @property (strong, nonatomic) IBOutlet UISlider *bitrateSlider;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *framerateSelector;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *resolutionSelector;
@@ -23,6 +24,7 @@
 @property (strong, nonatomic) IBOutlet UISegmentedControl *audioOnPCSelector;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *codecSelector;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *hdrSelector;
+@property (strong, nonatomic) IBOutlet UISegmentedControl *videoSuperResolutionSelector;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *framePacingSelector;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *btMouseSelector;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *statsOverlaySelector;

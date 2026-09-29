@@ -13,9 +13,17 @@
 #import <VideoToolbox/VideoToolbox.h>
 #import <AVFoundation/AVFoundation.h>
 
+#if __has_include(<MetalFX/MetalFX.h>)
+#import <MetalFX/MetalFX.h>
+#define MOONLIGHT_HAS_METALFX 1
+#else
+#define MOONLIGHT_HAS_METALFX 0
+#endif
+
 @implementation SettingsViewController {
     NSInteger _bitrate;
     NSInteger _lastSelectedResolutionIndex;
+    BOOL _videoSuperResolutionSupported;
 }
 
 @dynamic overrideUserInterfaceStyle;
@@ -124,6 +132,19 @@ BOOL isCustomResolution(CGSize res) {
     }
     
     return YES;
+}
+
+- (BOOL)isVideoSuperResolutionSupported {
+#if !MOONLIGHT_HAS_METALFX
+    return NO;
+#else
+    if (@available(iOS 16.0, tvOS 16.0, *)) {
+        id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+        return device != nil && [MTLFXSpatialScalerDescriptor supportsDevice:device];
+    }
+    
+    return NO;
+#endif
 }
 
 - (void)viewDidLoad {
@@ -238,6 +259,16 @@ BOOL isCustomResolution(CGSize res) {
     }
     else {
         [self.hdrSelector setSelectedSegmentIndex:currentSettings.enableHdr ? 1 : 0];
+    }
+    _videoSuperResolutionSupported = [self isVideoSuperResolutionSupported];
+    if (_videoSuperResolutionSupported) {
+        [self.videoSuperResolutionSelector setSelectedSegmentIndex:currentSettings.videoSuperResolution ? 1 : 0];
+    }
+    else {
+        [self.videoSuperResolutionSelector setSelectedSegmentIndex:0];
+        [self.videoSuperResolutionSelector setHidden:YES];
+        [self.videoSuperResolutionLabel setHidden:YES];
+        [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"videoSuperResolution"];
     }
     
     [self.touchModeSelector setSelectedSegmentIndex:currentSettings.absoluteTouchMode ? 1 : 0];
@@ -538,6 +569,8 @@ BOOL isCustomResolution(CGSize res) {
     BOOL absoluteTouchMode = [self.touchModeSelector selectedSegmentIndex] == 1;
     BOOL statsOverlay = [self.statsOverlaySelector selectedSegmentIndex] == 1;
     BOOL enableHdr = [self.hdrSelector selectedSegmentIndex] == 1;
+    BOOL videoSuperResolution = _videoSuperResolutionSupported && [self.videoSuperResolutionSelector selectedSegmentIndex] == 1;
+    [[NSUserDefaults standardUserDefaults] setBool:videoSuperResolution forKey:@"videoSuperResolution"];
     [dataMan saveSettingsWithBitrate:_bitrate
                            framerate:framerate
                               height:height

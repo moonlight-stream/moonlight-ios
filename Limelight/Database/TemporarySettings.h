@@ -31,6 +31,7 @@
 @property (nonatomic) BOOL playAudioOnPC;
 @property (nonatomic) BOOL optimizeGames;
 @property (nonatomic) BOOL enableHdr;
+@property (nonatomic) BOOL videoSuperResolution;
 @property (nonatomic) BOOL btMouseSupport;
 @property (nonatomic) BOOL absoluteTouchMode;
 @property (nonatomic) BOOL statsOverlay;
