@@ -8,8 +8,17 @@
 
 #import "TemporaryHost.h"
 
+typedef enum {
+    WAKE_ERROR   = -1,
+    WAKE_SENT    = 0,
+    WAKE_SKIPPED = 1
+} WakeStatus;
+
+typedef WakeStatus (^WakeBlock)(struct ifaddrs *ifa);
+
 @interface WakeOnLanManager : NSObject
 
++ (void) getIPv4NetworkInterfacesWithVisitor:(WakeBlock)visitor;
 + (void) wakeHost:(TemporaryHost*)host;
 
 @end

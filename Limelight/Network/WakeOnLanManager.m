@@ -9,6 +9,8 @@
 #import "WakeOnLanManager.h"
 #import "Utils.h"
 #import <CoreFoundation/CoreFoundation.h>
+#import <net/if.h>
+#import <ifaddrs.h>
 #import <sys/socket.h>
 #import <netinet/in.h>
 #import <arpa/inet.h>
@@ -16,112 +18,101 @@
 
 @implementation WakeOnLanManager
 
-static const int numStaticPorts = 2;
-static const int staticPorts[numStaticPorts] = {
-    9, // Standard WOL port (privileged port)
-    47009, // Port opened by Moonlight Internet Hosting Tool for WoL (non-privileged port)
-};
-static const int numDynamicPorts = 5;
-static const int dynamicPorts[numDynamicPorts] = {
-    47998, 47999, 48000, 48002, 48010, // Ports opened by GFE/Sunshine
-};
+static const int WOL_PORT = 9;
 
-+ (void) populateAddress:(struct sockaddr_storage*)addr withPort:(unsigned short)port {
-    if (addr->ss_family == AF_INET) {
-        struct sockaddr_in *sin = (struct sockaddr_in*)addr;
-        sin->sin_port = htons(port);
++ (void) getIPv4NetworkInterfacesWithVisitor:(WakeBlock)visitor {
+    struct ifaddrs *ifaddr, *ifa;
+
+    if (getifaddrs(&ifaddr) == -1) {
+        Log(LOG_E, @"WakeOnLanManager: Unable to get the list of network interfaces");
+        return;
     }
-    else if (addr->ss_family == AF_INET6) {
-        struct sockaddr_in6 *sin6 = (struct sockaddr_in6*)addr;
-        sin6->sin6_port = htons(port);
+
+    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr->sa_family == AF_INET) {
+            visitor(ifa);
+            logInterfaceDetails(ifa);
+        }
+    }
+
+    freeifaddrs(ifaddr);
+}
+
+static void logInterfaceDetails(struct ifaddrs *ifa) {
+    int family;
+    char addr_str[INET_ADDRSTRLEN];
+    char netmask_str[INET_ADDRSTRLEN];
+    char broadcast_str[INET_ADDRSTRLEN];
+
+    family = ifa->ifa_addr->sa_family;
+
+    if (family == AF_INET) {
+        struct sockaddr_in *addr = (struct sockaddr_in *)ifa->ifa_addr;
+        inet_ntop(AF_INET, &addr->sin_addr, addr_str, sizeof(addr_str));
+
+        if (ifa->ifa_netmask) {
+            struct sockaddr_in *netmask = (struct sockaddr_in *)ifa->ifa_netmask;
+            inet_ntop(AF_INET, &netmask->sin_addr, netmask_str, sizeof(netmask_str));
+        }
+
+        if (ifa->ifa_broadaddr) {
+            struct sockaddr_in *broadcast = (struct sockaddr_in *)ifa->ifa_broadaddr;
+            inet_ntop(AF_INET, &broadcast->sin_addr, broadcast_str, sizeof(broadcast_str));
+        }
+
+        Log(LOG_D, @"WakeOnLanManager: Interface %s ip4:%s mask:%s bcast:%s", ifa->ifa_name, addr_str, netmask_str, broadcast_str);
     }
 }
 
 + (void) wakeHost:(TemporaryHost*)host {
     NSData* wolPayload = [WakeOnLanManager createPayload:host];
-    
-    for (int i = 0; i < 5; i++) {
-        NSString* address;
-        struct addrinfo hints, *res, *curr;
-        
-        // try all ip addresses
-        if (i == 0 && host.localAddress != nil) {
-            address = host.localAddress;
-        } else if (i == 1 && host.externalAddress != nil) {
-            address = host.externalAddress;
-        } else if (i == 2 && host.address != nil) {
-            address = host.address;
-        } else if (i == 3 && host.ipv6Address != nil) {
-            address = host.ipv6Address;
-        } else if (i == 4) {
-            address = @"255.255.255.255";
-        } else {
-            // Requested address wasn't present
-            continue;
+
+    [WakeOnLanManager getIPv4NetworkInterfacesWithVisitor:(WakeBlock)^(struct ifaddrs *ifa) {
+        if (ifa->ifa_addr->sa_family != AF_INET) return WAKE_SKIPPED; // we can only wake over IPv4
+        if (!(ifa->ifa_flags & IFF_UP))          return WAKE_SKIPPED; // interface is not up
+        if (!(ifa->ifa_flags & IFF_BROADCAST))   return WAKE_SKIPPED; // broadcast address is not valid
+
+        int success;
+        ssize_t bytesSent = 0;
+        struct sockaddr_in destAddr;
+        char broadcast_str[INET_ADDRSTRLEN];
+
+        int fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+        static const int kOne = 1;
+        success = setsockopt(fd, SOL_SOCKET, SO_BROADCAST, &kOne, sizeof(kOne)) == 0;
+        if (success < 0) {
+            Log(LOG_W, @"Wake-on-LAN packet for %@ failed to set SO_BROADCAST, error: %s", host.mac, strerror(errno));
+            return WAKE_ERROR;
         }
-        
-        // Get the raw address and base port from the address+port string
-        NSString* rawAddress = [Utils addressPortStringToAddress:address];
-        unsigned short basePort = [Utils addressPortStringToPort:address];
-        
-        memset(&hints, 0, sizeof(hints));
-        hints.ai_family = AF_UNSPEC;
-        hints.ai_flags = AI_ADDRCONFIG;
-        if (getaddrinfo([rawAddress UTF8String], NULL, &hints, &res) != 0 || res == NULL) {
-            // Failed to resolve address
-            Log(LOG_E, @"Failed to resolve WOL address");
-            continue;
+
+        int ifIndex = if_nametoindex(ifa->ifa_name);
+        success = setsockopt(fd, IPPROTO_IP, IP_BOUND_IF, &ifIndex, sizeof(ifIndex)) == 0;
+        if (success < 0) {
+            Log(LOG_W, @"Wake-on-LAN packet for %@ failed to IP_BOUND_IF, error: %s", host.mac, strerror(errno));
+            return WAKE_ERROR;
         }
-        
-        // Try all addresses that this DNS name resolves to. We have
-        // to create a new socket each time because the addresses
-        // may be different address families.
-        for (curr = res; curr != NULL; curr = curr->ai_next) {
-            int wolSocket;
-            int val;
-            
-            wolSocket = socket(curr->ai_family, SOCK_DGRAM, IPPROTO_UDP);
-            if (wolSocket < 0) {
-                Log(LOG_E, @"Failed to create WOL socket");
-                continue;
-            }
-            
-            val = 1;
-            setsockopt(wolSocket, SOL_SOCKET, SO_BROADCAST, &val, sizeof(val));
-            
-            struct sockaddr_storage addr;
-            memset(&addr, 0, sizeof(addr));
-            memcpy(&addr, curr->ai_addr, curr->ai_addrlen);
-            
-            for (int j = 0; j < numStaticPorts; j++) {
-                [WakeOnLanManager populateAddress:&addr withPort:staticPorts[j]];
-                long err = sendto(wolSocket,
-                                 [wolPayload bytes],
-                                 [wolPayload length],
-                                 0,
-                                 (struct sockaddr*)&addr,
-                                 curr->ai_addrlen);
-                Log(LOG_I, @"Sending WOL packet to port %u returned: %ld", staticPorts[j], err);
-            }
-            
-            for (int j = 0; j < numDynamicPorts; j++) {
-                // Offset the WoL dynamic ports by the base port
-                unsigned short port = ((int)dynamicPorts[j] - 47989) + basePort;
-                
-                [WakeOnLanManager populateAddress:&addr withPort:port];
-                long err = sendto(wolSocket,
-                                 [wolPayload bytes],
-                                 [wolPayload length],
-                                 0,
-                                 (struct sockaddr*)&addr,
-                                 curr->ai_addrlen);
-                Log(LOG_I, @"Sending WOL packet to port %u returned: %ld", port, err);
-            }
-            
-            close(wolSocket);
+
+        struct sockaddr_in *broadcast = (struct sockaddr_in *)ifa->ifa_broadaddr;
+        inet_ntop(AF_INET, &broadcast->sin_addr, broadcast_str, sizeof(broadcast_str));
+
+        // send the packet to the subnet's broadcast address on UDP port 9
+        memset(&destAddr, 0, sizeof(destAddr));
+        destAddr.sin_family = AF_INET;
+        destAddr.sin_len = sizeof(destAddr);
+        inet_pton(AF_INET, broadcast_str, &destAddr.sin_addr.s_addr);
+        destAddr.sin_port = htons(WOL_PORT);
+
+        bytesSent = sendto(fd, [wolPayload bytes], [wolPayload length], 0, (const struct sockaddr *)&destAddr, sizeof(destAddr));
+        if (bytesSent >= 0) {
+            Log(LOG_I, @"Wake-on-LAN packet for %@ sent out interface %s to broadcast %s", host.mac, ifa->ifa_name, broadcast_str);
         }
-        freeaddrinfo(res);
-    }
+        else {
+            Log(LOG_W, @"Wake-on-LAN packet for %@ failed to send, error: %d", host.mac, strerror(errno));
+            return WAKE_ERROR;
+        }
+        close(fd);
+        return WAKE_SENT;
+    }];
 }
 
 + (NSData*) createPayload:(TemporaryHost*)host {
@@ -138,7 +129,7 @@ static const int dynamicPorts[numDynamicPorts] = {
     for (int j = 0; j < 16; j++) {
         [payload appendData:macAddress];
     }
-    
+
     return payload;
 }
 
