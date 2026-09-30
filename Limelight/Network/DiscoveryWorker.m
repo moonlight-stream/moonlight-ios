@@ -126,7 +126,13 @@ static const float POLL_RATE = 2.0f; // Poll every 2 seconds
 }
 
 - (ServerInfoResponse*) requestInfoAtAddress:(NSString*)address cert:(NSData*)cert {
-    HttpManager* hMan = [[HttpManager alloc] initWithAddress:address httpsPort:0 serverCert:cert];
+    // Use the placeholder UID for initial discovery, then switch to the real
+    // client UID after identifying a non-GFE host.
+    BOOL useTrueUid = _host.uuid.length > 0 && !_host.isNvidiaServerSoftware;
+    HttpManager* hMan = [[HttpManager alloc] initWithAddress:address
+                                                  httpsPort:0
+                                                 serverCert:cert
+                                                 useTrueUid:useTrueUid];
     ServerInfoResponse* response = [[ServerInfoResponse alloc] init];
     [hMan executeRequestSynchronously:[HttpRequest requestForResponse:response
                                                        withUrlRequest:[hMan newServerInfoRequest:true]

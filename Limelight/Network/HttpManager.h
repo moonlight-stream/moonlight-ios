@@ -15,7 +15,12 @@
 
 - (id) initWithHost:(TemporaryHost*) host;
 - (id) initWithAddress:(NSString*) hostAddressPortString httpsPort:(unsigned short) httpsPort serverCert:(NSData*) serverCert;
+- (id) initWithAddress:(NSString*) hostAddressPortString
+             httpsPort:(unsigned short) httpsPort
+            serverCert:(NSData*) serverCert
+            useTrueUid:(BOOL) useTrueUid;
 - (void) setServerCert:(NSData*) serverCert;
+- (void) setUseTrueUid:(BOOL) useTrueUid;
 - (NSURLRequest*) newPairRequest:(NSData*)salt clientCert:(NSData*)clientCert;
 - (NSURLRequest*) newUnpairRequest;
 - (NSURLRequest*) newChallengeRequest:(NSData*)challenge;
@@ -32,5 +37,4 @@
 - (void) executeRequestSynchronously:(HttpRequest*)request;
 
 @end
-
 
