@@ -17,7 +17,7 @@
 @import GameController;
 @import AudioToolbox;
 
-static const double MOUSE_SPEED_DIVISOR = 1.25;
+static const double MOUSE_SPEED_DIVISOR = 1;
 
 @implementation ControllerSupport {
     id _controllerConnectObserver;
