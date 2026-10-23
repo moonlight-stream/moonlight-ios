@@ -37,13 +37,8 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     BOOL framePacing;
 }
 
-- (void)reinitializeDisplayLayer
+- (void)layoutDisplayLayer
 {
-    CALayer *oldLayer = displayLayer;
-    
-    displayLayer = [[AVSampleBufferDisplayLayer alloc] init];
-    displayLayer.backgroundColor = [UIColor blackColor].CGColor;
-    
     // Ensure the AVSampleBufferDisplayLayer is sized to preserve the aspect ratio
     // of the video stream. We used to use AVLayerVideoGravityResizeAspect, but that
     // respects the PAR encoded in the SPS which causes our computed video-relative
@@ -57,6 +52,29 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     }
     displayLayer.position = CGPointMake(CGRectGetMidX(_view.bounds), CGRectGetMidY(_view.bounds));
     displayLayer.bounds = CGRectMake(0, 0, videoSize.width, videoSize.height);
+}
+
+// Called when the view size changes (e.g. folding or unfolding iPhone Duo)
+- (void)updateDisplayLayerLayout
+{
+    if (displayLayer == nil) {
+        return;
+    }
+
+    [CATransaction begin];
+    [CATransaction setDisableActions:YES];
+    [self layoutDisplayLayer];
+    [CATransaction commit];
+}
+
+- (void)reinitializeDisplayLayer
+{
+    CALayer *oldLayer = displayLayer;
+    
+    displayLayer = [[AVSampleBufferDisplayLayer alloc] init];
+    displayLayer.backgroundColor = [UIColor blackColor].CGColor;
+    
+    [self layoutDisplayLayer];
     displayLayer.videoGravity = AVLayerVideoGravityResize;
 
     // Hide the layer until we get an IDR frame. This ensures we
