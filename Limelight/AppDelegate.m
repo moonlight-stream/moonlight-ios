@@ -212,3 +212,42 @@ static NSString* DB_NAME = @"Limelight_iOS.sqlite";
 }
 
 @end
+
+#if !TARGET_OS_TV
+@implementation SceneDelegate
+
+- (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions {
+    if (![scene isKindOfClass:[UIWindowScene class]]) {
+        return;
+    }
+
+    AppDelegate* appDelegate = (AppDelegate*)UIApplication.sharedApplication.delegate;
+
+    // Shortcut used to launch the app (previously in the launch options)
+    UIApplicationShortcutItem* shortcut = connectionOptions.shortcutItem;
+    if (shortcut != nil) {
+        appDelegate.pcUuidToLoad = (NSString*)[shortcut.userInfo objectForKey:@"UUID"];
+    }
+
+    // Same storyboards as UIMainStoryboardFile / UIMainStoryboardFile~ipad
+    NSString* storyboardName = UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad ? @"iPad" : @"iPhone";
+    UIStoryboard* storyboard = [UIStoryboard storyboardWithName:storyboardName bundle:nil];
+
+    self.window = [[UIWindow alloc] initWithWindowScene:(UIWindowScene*)scene];
+    self.window.rootViewController = [storyboard instantiateInitialViewController];
+    appDelegate.window = self.window;
+    [self.window makeKeyAndVisible];
+}
+
+- (void)windowScene:(UIWindowScene *)windowScene performActionForShortcutItem:(UIApplicationShortcutItem *)shortcutItem completionHandler:(void (^)(BOOL succeeded))completionHandler {
+    [(AppDelegate*)UIApplication.sharedApplication.delegate application:UIApplication.sharedApplication
+                                                performActionForShortcutItem:shortcutItem
+                                                           completionHandler:completionHandler];
+}
+
+- (void)sceneDidEnterBackground:(UIScene *)scene {
+    [(AppDelegate*)UIApplication.sharedApplication.delegate saveContext];
+}
+
+@end
+#endif

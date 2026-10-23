@@ -44,6 +44,7 @@
     UILabel *_tipLabel;
     UIActivityIndicatorView *_spinner;
     StreamView *_streamView;
+    CGSize _lastLayoutSize;
     UIScrollView *_scrollView;
     BOOL _userIsInteracting;
     CGSize _keyboardSize;
@@ -107,7 +108,8 @@
     _controllerSupport = [[ControllerSupport alloc] initWithConfig:self.streamConfig delegate:self];
     _inactivityTimer = nil;
     
-    _streamView = [[StreamView alloc] initWithFrame:self.view.frame];
+    _streamView = [[StreamView alloc] initWithFrame:self.view.bounds];
+    _streamView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     [_streamView setupStreamView:_controllerSupport interactionDelegate:self config:self.streamConfig];
     
 #if TARGET_OS_TV
@@ -188,7 +190,8 @@
     
     // Only enable scroll and zoom in absolute touch mode
     if (_settings.absoluteTouchMode) {
-        _scrollView = [[UIScrollView alloc] initWithFrame:self.view.frame];
+        _scrollView = [[UIScrollView alloc] initWithFrame:self.view.bounds];
+        _scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 #if !TARGET_OS_TV
         [_scrollView.panGestureRecognizer setMinimumNumberOfTouches:2];
 #endif
@@ -213,6 +216,31 @@
 
 - (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView {
     return _streamView;
+}
+
+// The window can change size during a stream, for example when folding or
+// unfolding iPhone Duo. Keep the stream view and video layer filling it.
+- (void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
+
+    CGSize size = self.view.bounds.size;
+    if (CGSizeEqualToSize(size, _lastLayoutSize)) {
+        return;
+    }
+    _lastLayoutSize = size;
+
+    if (_scrollView != nil) {
+        // Reset any zoom so the stream view can match the new size
+        [_scrollView setZoomScale:1.0f animated:NO];
+        _streamView.frame = _scrollView.bounds;
+        _scrollView.contentSize = _scrollView.bounds.size;
+    }
+
+    _stageLabel.center = CGPointMake(size.width / 2, _stageLabel.center.y);
+    _spinner.center = CGPointMake(size.width / 2, _spinner.center.y);
+    _tipLabel.center = CGPointMake(size.width / 2, _tipLabel.center.y);
+
+    [_streamMan updateRendererLayout];
 }
 
 - (void)willMoveToParentViewController:(UIViewController *)parent {

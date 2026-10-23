@@ -15,6 +15,8 @@
 
 - (void) stopStream;
 
+- (void) updateRendererLayout;
+
 - (NSString*) getStatsOverlayText;
 
 @end
