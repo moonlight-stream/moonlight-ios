@@ -32,5 +32,6 @@ typedef NS_ENUM(NSInteger, OnScreenControlsLevel) {
 - (void) setLevel:(OnScreenControlsLevel)level;
 - (OnScreenControlsLevel) getLevel;
 - (void) show;
+- (void) updateLayout;
 
 @end

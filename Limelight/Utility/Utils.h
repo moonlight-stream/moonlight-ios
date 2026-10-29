@@ -31,6 +31,7 @@ FOUNDATION_EXPORT NSString *const deviceName;
 + (NSString*) addressPortStringToAddress:(NSString*)addressPort;
 + (unsigned short) addressPortStringToPort:(NSString*)addressPort;
 + (NSString*) addressAndPortToAddressPortString:(NSString*)address port:(unsigned short)port;
++ (CGSize) getDisplayResolutionForWindow:(UIWindow*)window safeArea:(BOOL)safeArea;
 
 #if !TARGET_OS_TV
 + (void) launchUrl:(NSString*)urlString;

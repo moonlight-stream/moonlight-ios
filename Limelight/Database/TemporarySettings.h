@@ -8,6 +8,12 @@
 
 #import "Settings+CoreDataClass.h"
 
+// Special values for the width and height settings that select the full screen or
+// safe area resolution of whichever display the stream is started on. These allow
+// a single setting to match both the inner and outer displays of iPhone Duo.
+#define RESOLUTION_MATCH_DISPLAY_FULL -1
+#define RESOLUTION_MATCH_DISPLAY_SAFE_AREA -2
+
 @interface TemporarySettings : NSObject
 
 @property (nonatomic, retain) Settings * parent;
@@ -34,6 +40,11 @@
 @property (nonatomic) BOOL btMouseSupport;
 @property (nonatomic) BOOL absoluteTouchMode;
 @property (nonatomic) BOOL statsOverlay;
+@property (nonatomic) enum {
+    VIDEO_SCALING_FIT,
+    VIDEO_SCALING_FILL,
+    VIDEO_SCALING_STRETCH,
+} videoScalingMode;
 
 - (id) initFromSettings:(Settings*)settings;
 

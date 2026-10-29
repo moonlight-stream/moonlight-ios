@@ -50,4 +50,7 @@
 
 -(NSUInteger) getConnectedGamepadCount;
 
+// Whether GCMouse has delivered mouse button events since a mouse was last disconnected
+-(BOOL) hasReceivedMouseButtonEvents;
+
 @end

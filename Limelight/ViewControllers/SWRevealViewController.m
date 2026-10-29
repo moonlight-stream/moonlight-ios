@@ -1393,6 +1393,11 @@ const int FrontViewPositionNone = 0xff;
     if (@available(iOS 14.0, *)) {
         [self setNeedsUpdateOfPrefersPointerLocked];
     }
+#if defined(__IPHONE_27_1)
+    if (@available(iOS 27.1, *)) {
+        [self setNeedsUpdateOfVerticalBarConfiguration];
+    }
+#endif
 }
 
 - (UIViewController*)childViewControllerForHomeIndicatorAutoHidden
@@ -1409,6 +1414,13 @@ const int FrontViewPositionNone = 0xff;
 {
     return _primaryViewController;
 }
+
+#if defined(__IPHONE_27_1)
+- (UIViewController*)childViewControllerForPreferredVerticalBarBehavior
+{
+    return _primaryViewController;
+}
+#endif
 
 #pragma mark Animated view controller deployment and layout
 

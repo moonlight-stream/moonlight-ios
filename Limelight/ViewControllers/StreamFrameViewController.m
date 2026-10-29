@@ -30,6 +30,13 @@
 - (id)initWithRefreshRate:(float)arg1 videoDynamicRange:(int)arg2;
 @end
 
+#if !TARGET_OS_TV
+// How far a swipe from the left edge must go to end the stream. Taps and short
+// drags near the edge (like on a dock at the side of the host's desktop) stay
+// well under this, while a deliberate swipe easily covers it.
+static const CGFloat MIN_EXIT_SWIPE_DISTANCE = 100;
+#endif
+
 @implementation StreamFrameViewController {
     ControllerSupport *_controllerSupport;
     StreamManager *_streamMan;
@@ -129,8 +136,13 @@
     [self.view addGestureRecognizer:_playPauseTapGestureRecognizer];
 
 #else
-    _exitSwipeRecognizer = [[UIScreenEdgePanGestureRecognizer alloc] initWithTarget:self action:@selector(edgeSwiped)];
+    _exitSwipeRecognizer = [[UIScreenEdgePanGestureRecognizer alloc] initWithTarget:self action:@selector(edgeSwiped:)];
     _exitSwipeRecognizer.edges = UIRectEdgeLeft;
+    
+    // Only a finger can swipe to end the stream, so dragging a mouse
+    // along the edge of the screen won't end it
+    _exitSwipeRecognizer.allowedTouchTypes = @[@(UITouchTypeDirect)];
+    
     _exitSwipeRecognizer.delaysTouchesBegan = NO;
     _exitSwipeRecognizer.delaysTouchesEnded = NO;
     
@@ -209,6 +221,33 @@
     [self.view addSubview:_stageLabel];
     [self.view addSubview:_spinner];
     [self.view addSubview:_tipLabel];
+}
+
+- (void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
+
+    // Our view can change size mid-stream (rotation, iPad multitasking, or
+    // folding and unfolding a foldable like iPhone Duo), so keep the stream
+    // filling it. The StreamView will adapt the video and on-screen controls.
+    CGRect bounds = self.view.bounds;
+    if (_scrollView != nil) {
+        if (!CGRectEqualToRect(_scrollView.frame, bounds)) {
+            [_scrollView setZoomScale:1.0f animated:NO];
+            _scrollView.frame = bounds;
+            _streamView.frame = bounds;
+            _scrollView.contentSize = bounds.size;
+        }
+    }
+    else if (!CGRectEqualToRect(_streamView.frame, bounds)) {
+        _streamView.frame = bounds;
+    }
+
+    _stageLabel.center = CGPointMake(bounds.size.width / 2, bounds.size.height / 2);
+    _spinner.center = CGPointMake(bounds.size.width / 2, bounds.size.height / 2 - _stageLabel.frame.size.height - _spinner.frame.size.height);
+    _tipLabel.center = CGPointMake(bounds.size.width / 2, bounds.size.height * 0.9);
+    if (_overlayView != nil) {
+        _overlayView.center = CGPointMake(bounds.size.width / 2, _overlayView.frame.size.height / 2);
+    }
 }
 
 - (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView {
@@ -361,11 +400,21 @@
     [self returnToMainFrame];
 }
 
-- (void)edgeSwiped {
+#if !TARGET_OS_TV
+- (void)edgeSwiped:(UIScreenEdgePanGestureRecognizer*)gesture {
+    // Wait for a deliberate swipe, so a tap or short drag near the edge of
+    // the screen (like on a dock at the side of the host's desktop) doesn't
+    // end the stream
+    if (gesture.state != UIGestureRecognizerStateEnded ||
+        [gesture translationInView:self.view].x < MIN_EXIT_SWIPE_DISTANCE) {
+        return;
+    }
+    
     Log(LOG_I, @"User swiped to end stream");
     
     [self returnToMainFrame];
 }
+#endif
 
 - (void) connectionStarted {
     Log(LOG_I, @"Connection started");
@@ -702,6 +751,14 @@
 - (BOOL)shouldAutorotate {
     return YES;
 }
+
+#if defined(__IPHONE_27_1) && !TARGET_OS_TV
+- (UIVerticalBarBehavior)preferredVerticalBarBehavior API_AVAILABLE(ios(27.1)) {
+    // The stream is fullscreen video, so keep the vertical bar on
+    // displays like the inner display of iPhone Duo out of the way
+    return UIVerticalBarBehaviorDisabled;
+}
+#endif
 
 - (BOOL)prefersPointerLocked {
     // Pointer lock breaks the UIKit mouse APIs, which is a problem because

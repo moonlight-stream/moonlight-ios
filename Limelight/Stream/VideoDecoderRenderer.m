@@ -22,8 +22,7 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
 @implementation VideoDecoderRenderer {
     StreamView* _view;
     id<ConnectionCallbacks> _callbacks;
-    float _streamAspectRatio;
-    
+
     AVSampleBufferDisplayLayer* displayLayer;
     int videoFormat;
     int frameRate;
@@ -44,17 +43,14 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     displayLayer = [[AVSampleBufferDisplayLayer alloc] init];
     displayLayer.backgroundColor = [UIColor blackColor].CGColor;
     
-    // Ensure the AVSampleBufferDisplayLayer is sized to preserve the aspect ratio
-    // of the video stream. We used to use AVLayerVideoGravityResizeAspect, but that
-    // respects the PAR encoded in the SPS which causes our computed video-relative
-    // touch location to be wrong in StreamView if the aspect ratio of the host
-    // desktop doesn't match the aspect ratio of the stream.
-    CGSize videoSize;
-    if (_view.bounds.size.width > _view.bounds.size.height * _streamAspectRatio) {
-        videoSize = CGSizeMake(_view.bounds.size.height * _streamAspectRatio, _view.bounds.size.height);
-    } else {
-        videoSize = CGSizeMake(_view.bounds.size.width, _view.bounds.size.width / _streamAspectRatio);
-    }
+    // Ensure the AVSampleBufferDisplayLayer is sized to the video region that
+    // StreamView uses for computing video-relative touch locations, which also
+    // honors the user's video scaling preference. We used to use
+    // AVLayerVideoGravityResizeAspect, but that respects the PAR encoded in the
+    // SPS which causes our computed video-relative touch location to be wrong in
+    // StreamView if the aspect ratio of the host desktop doesn't match the aspect
+    // ratio of the stream.
+    CGSize videoSize = [_view getVideoAreaSize];
     displayLayer.position = CGPointMake(CGRectGetMidX(_view.bounds), CGRectGetMidY(_view.bounds));
     displayLayer.bounds = CGRectMake(0, 0, videoSize.width, videoSize.height);
     displayLayer.videoGravity = AVLayerVideoGravityResize;
@@ -77,13 +73,12 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     }
 }
 
-- (id)initWithView:(StreamView*)view callbacks:(id<ConnectionCallbacks>)callbacks streamAspectRatio:(float)aspectRatio useFramePacing:(BOOL)useFramePacing
+- (id)initWithView:(StreamView*)view callbacks:(id<ConnectionCallbacks>)callbacks useFramePacing:(BOOL)useFramePacing
 {
     self = [super init];
     
     _view = view;
     _callbacks = callbacks;
-    _streamAspectRatio = aspectRatio;
     framePacing = useFramePacing;
     
     parameterSetBuffers = [[NSMutableArray alloc] init];
@@ -99,16 +94,39 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     self->frameRate = frameRate;
 }
 
+- (CADisplayLink*)createDisplayLink
+{
+#if defined(__IPHONE_27_0) || defined(__TVOS_27_0)
+    if (@available(iOS 27.0, tvOS 27.0, *)) {
+        // Prefer a display link from our window scene, which is retargeted if the scene
+        // moves to another display (like when an iPhone Duo is folded or unfolded)
+        UIWindowScene* windowScene = _view.window.windowScene;
+        if (windowScene != nil) {
+            CADisplayLink* displayLink = [windowScene displayLinkWithTarget:self selector:@selector(displayLinkCallback:)];
+            if (displayLink != nil) {
+                return displayLink;
+            }
+        }
+    }
+#endif
+    return [CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkCallback:)];
+}
+
 - (void)start
 {
-    _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkCallback:)];
-    if (@available(iOS 15.0, tvOS 15.0, *)) {
-        _displayLink.preferredFrameRateRange = CAFrameRateRangeMake(self->frameRate, self->frameRate, self->frameRate);
-    }
-    else {
-        _displayLink.preferredFramesPerSecond = self->frameRate;
-    }
-    [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+    // We're called on a thread inside common, but we need the main thread to get our
+    // window scene. The display link fires on the main thread, so this also ensures we
+    // don't race with stop, which is always called after start.
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self->_displayLink = [self createDisplayLink];
+        if (@available(iOS 15.0, tvOS 15.0, *)) {
+            self->_displayLink.preferredFrameRateRange = CAFrameRateRangeMake(self->frameRate, self->frameRate, self->frameRate);
+        }
+        else {
+            self->_displayLink.preferredFramesPerSecond = self->frameRate;
+        }
+        [self->_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+    });
 }
 
 // TODO: Refactor this
@@ -142,7 +160,17 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
 
 - (void)stop
 {
-    [_displayLink invalidate];
+    // Invalidate the display link on the main thread where it is created and fires.
+    // This also ensures no callback can run after we return. LiStopConnection() is
+    // always called on a background queue, so the main thread is never waiting on us.
+    if ([NSThread isMainThread]) {
+        [_displayLink invalidate];
+    }
+    else {
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            [self->_displayLink invalidate];
+        });
+    }
 }
 
 #define NALU_START_PREFIX_SIZE 3

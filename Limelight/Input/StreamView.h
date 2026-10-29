@@ -29,6 +29,7 @@
                   config:(StreamConfiguration*)streamConfig;
 - (void) showOnScreenControls;
 - (OnScreenControlsLevel) getCurrentOscState;
+- (CGSize) getVideoAreaSize;
 
 #if !TARGET_OS_TV
 - (void) updateCursorLocation:(CGPoint)location isMouse:(BOOL)isMouse;

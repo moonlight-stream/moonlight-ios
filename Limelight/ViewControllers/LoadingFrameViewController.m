@@ -18,9 +18,25 @@
     self.loadingSpinner.center = CGPointMake(self.view.frame.size.width / 2, self.view.frame.size.height / 2);
 }
 
+- (void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
+    // keep the loading spinner centered if our size changes
+    self.loadingSpinner.center = CGPointMake(self.view.bounds.size.width / 2, self.view.bounds.size.height / 2);
+}
+
 - (UIViewController*) activeViewController {
-    UIViewController *topController = [UIApplication sharedApplication].keyWindow.rootViewController;
-    
+    UIWindow *window = [UIApplication sharedApplication].keyWindow;
+    if (window == nil) {
+        // There may not be a key window yet if we're shown during launch
+        for (UIScene *scene in [UIApplication sharedApplication].connectedScenes) {
+            if ([scene isKindOfClass:[UIWindowScene class]]) {
+                window = ((UIWindowScene*)scene).windows.firstObject;
+                break;
+            }
+        }
+    }
+    UIViewController *topController = window.rootViewController;
+
     while (topController.presentedViewController) {
         topController = topController.presentedViewController;
     }

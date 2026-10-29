@@ -31,6 +31,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     NSMutableDictionary *_controllers;
     id<ControllerSupportDelegate> _delegate;
     
+    BOOL _receivedMouseButtonEvents;
     float accumulatedDeltaX;
     float accumulatedDeltaY;
     float accumulatedScrollX;
@@ -863,23 +864,28 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     };
     
     mouse.mouseInput.leftButton.pressedChangedHandler = ^(GCControllerButtonInput * _Nonnull button, float value, BOOL pressed) {
+        self->_receivedMouseButtonEvents = YES;
         LiSendMouseButtonEvent(pressed ? BUTTON_ACTION_PRESS : BUTTON_ACTION_RELEASE, BUTTON_LEFT);
     };
     mouse.mouseInput.middleButton.pressedChangedHandler = ^(GCControllerButtonInput * _Nonnull button, float value, BOOL pressed) {
+        self->_receivedMouseButtonEvents = YES;
         LiSendMouseButtonEvent(pressed ? BUTTON_ACTION_PRESS : BUTTON_ACTION_RELEASE, BUTTON_MIDDLE);
     };
     mouse.mouseInput.rightButton.pressedChangedHandler = ^(GCControllerButtonInput * _Nonnull button, float value, BOOL pressed) {
+        self->_receivedMouseButtonEvents = YES;
         LiSendMouseButtonEvent(pressed ? BUTTON_ACTION_PRESS : BUTTON_ACTION_RELEASE, BUTTON_RIGHT);
     };
     
     if (mouse.mouseInput.auxiliaryButtons != nil) {
         if (mouse.mouseInput.auxiliaryButtons.count >= 1) {
             mouse.mouseInput.auxiliaryButtons[0].pressedChangedHandler = ^(GCControllerButtonInput * _Nonnull button, float value, BOOL pressed) {
+                self->_receivedMouseButtonEvents = YES;
                 LiSendMouseButtonEvent(pressed ? BUTTON_ACTION_PRESS : BUTTON_ACTION_RELEASE, BUTTON_X1);
             };
         }
         if (mouse.mouseInput.auxiliaryButtons.count >= 2) {
             mouse.mouseInput.auxiliaryButtons[1].pressedChangedHandler = ^(GCControllerButtonInput * _Nonnull button, float value, BOOL pressed) {
+                self->_receivedMouseButtonEvents = YES;
                 LiSendMouseButtonEvent(pressed ? BUTTON_ACTION_PRESS : BUTTON_ACTION_RELEASE, BUTTON_X2);
             };
         }
@@ -1068,6 +1074,11 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
     return mask;
 }
 
+-(BOOL) hasReceivedMouseButtonEvents
+{
+    return _receivedMouseButtonEvents;
+}
+
 -(NSUInteger) getConnectedGamepadCount
 {
     return _controllers.count;
@@ -1199,6 +1210,7 @@ static const double MOUSE_SPEED_DIVISOR = 1.25;
             
             // Unregister for mouse events
             [self unregisterMouseCallbacks: mouse];
+            self->_receivedMouseButtonEvents = NO;
 
             // Re-evaluate the on-screen control mode
             [self updateAutoOnScreenControlMode];

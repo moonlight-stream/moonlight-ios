@@ -146,6 +146,32 @@ NSString *const deviceName = @"roth";
     }
 }
 
++ (CGSize) getDisplayResolutionForWindow:(UIWindow*)window safeArea:(BOOL)safeArea {
+    if (window == nil) {
+        // The caller may not be in a window yet, so use the first one we can find
+        for (UIScene* scene in [UIApplication sharedApplication].connectedScenes) {
+            if ([scene isKindOfClass:[UIWindowScene class]]) {
+                window = ((UIWindowScene*)scene).windows.firstObject;
+                break;
+            }
+        }
+    }
+
+    CGFloat width = window.bounds.size.width;
+    if (safeArea) {
+        // The video is centered, so leave room for the larger inset on both sides
+        // (the insets are one-sided on displays like those of iPhone Duo)
+        width -= 2 * MAX(window.safeAreaInsets.left, window.safeAreaInsets.right);
+    }
+
+    // Use the native scale rather than the UI scale, so we match the physical pixels
+    // of displays that downsample the UI (like the inner display of iPhone Duo, which
+    // renders at 3x but has a 2670x1878 panel). Video encoders require even dimensions.
+    CGFloat nativeScale = (window.windowScene.screen ?: window.screen).nativeScale;
+    return CGSizeMake(lround(width * nativeScale) & ~1,
+                      lround(window.bounds.size.height * nativeScale) & ~1);
+}
+
 @end
 
 @implementation NSString (NSStringWithTrim)

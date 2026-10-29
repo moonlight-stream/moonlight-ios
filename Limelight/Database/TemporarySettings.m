@@ -85,6 +85,7 @@
     self.btMouseSupport = settings.btMouseSupport;
     self.absoluteTouchMode = settings.absoluteTouchMode;
     self.statsOverlay = settings.statsOverlay;
+    self.videoScalingMode = (typeof(self.videoScalingMode))settings.videoScalingMode;
 #endif
     self.uniqueId = settings.uniqueId;
     

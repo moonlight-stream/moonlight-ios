@@ -9,6 +9,7 @@
 #import "SettingsViewController.h"
 #import "TemporarySettings.h"
 #import "DataManager.h"
+#import "Utils.h"
 
 #import <VideoToolbox/VideoToolbox.h>
 #import <AVFoundation/AVFoundation.h>
@@ -16,6 +17,7 @@
 @implementation SettingsViewController {
     NSInteger _bitrate;
     NSInteger _lastSelectedResolutionIndex;
+    BOOL _safeAreaPadded;
 }
 
 @dynamic overrideUserInterfaceStyle;
@@ -51,8 +53,11 @@ static const int bitrateTable[] = {
 };
 
 const int RESOLUTION_TABLE_SIZE = 7;
+const int RESOLUTION_TABLE_SAFE_AREA_INDEX = 4;
+const int RESOLUTION_TABLE_FULL_INDEX = 5;
 const int RESOLUTION_TABLE_CUSTOM_INDEX = RESOLUTION_TABLE_SIZE - 1;
 CGSize resolutionTable[RESOLUTION_TABLE_SIZE];
+CGSize resolutionTableWindowSize;
 
 -(int)getSliderValueForBitrate:(NSInteger)bitrate {
     int i;
@@ -67,9 +72,32 @@ CGSize resolutionTable[RESOLUTION_TABLE_SIZE];
     return i - 1;
 }
 
+// The safe area and full screen resolutions depend on the display we're
+// shown on, which can change while we're alive (like when an iPhone Duo is
+// folded or unfolded), so we recompute them whenever our window size changes.
+- (void)updateDisplayResolutions {
+    UIWindow *window = self.view.window ?: UIApplication.sharedApplication.windows.firstObject;
+    if (window == nil || CGSizeEqualToSize(window.bounds.size, resolutionTableWindowSize)) {
+        return;
+    }
+    resolutionTableWindowSize = window.bounds.size;
+
+    resolutionTable[RESOLUTION_TABLE_SAFE_AREA_INDEX] = [Utils getDisplayResolutionForWindow:window safeArea:YES];
+    resolutionTable[RESOLUTION_TABLE_FULL_INDEX] = [Utils getDisplayResolutionForWindow:window safeArea:NO];
+}
+
 // This view is rooted at a ScrollView. To make it scrollable,
 // we'll update content size here.
 -(void)viewDidLayoutSubviews {
+    NSInteger selectedResolution = [self.resolutionSelector selectedSegmentIndex];
+    BOOL lastSegmentSelected = selectedResolution + 1 == [self.resolutionSelector numberOfSegments];
+    CGSize oldWindowSize = resolutionTableWindowSize;
+    [self updateDisplayResolutions];
+    if (!CGSizeEqualToSize(oldWindowSize, resolutionTableWindowSize) && !lastSegmentSelected &&
+        (selectedResolution == RESOLUTION_TABLE_SAFE_AREA_INDEX || selectedResolution == RESOLUTION_TABLE_FULL_INDEX)) {
+        [self updateResolutionDisplayViewText];
+    }
+
     CGFloat highestViewY = 0;
     
     // Enumerate the scroll view's subviews looking for the
@@ -101,29 +129,48 @@ CGSize resolutionTable[RESOLUTION_TABLE_SIZE];
     [super viewSafeAreaInsetsDidChange];
     
     if (@available(iOS 11.0, *)) {
-        for (UIView* view in self.view.subviews) {
-            // HACK: The official safe area is much too large for our purposes
-            // so we'll just use the presence of any safe area to indicate we should
-            // pad by 20.
-            if (self.view.safeAreaInsets.left >= 20 || self.view.safeAreaInsets.right >= 20) {
-                view.frame = CGRectMake(view.frame.origin.x + 20, view.frame.origin.y, view.frame.size.width, view.frame.size.height);
+        // HACK: The official safe area is much too large for our purposes
+        // so we'll just use the presence of any safe area to indicate we should
+        // pad by 20. The safe area can change many times (like when an iPhone Duo
+        // is folded or unfolded), so only pad once and remove it when not needed.
+        BOOL needsPadding = self.view.safeAreaInsets.left >= 20 || self.view.safeAreaInsets.right >= 20;
+        if (needsPadding != _safeAreaPadded) {
+            for (UIView* view in self.view.subviews) {
+                view.frame = CGRectOffset(view.frame, needsPadding ? 20 : -20, 0);
             }
+            _safeAreaPadded = needsPadding;
         }
     }
 }
 
 BOOL isCustomResolution(CGSize res) {
-    if (res.width == 0 && res.height == 0) {
+    // Also excludes the special display-matching values, which are negative
+    if (res.width <= 0 || res.height <= 0) {
         return NO;
     }
-    
-    for (int i = 0; i < RESOLUTION_TABLE_CUSTOM_INDEX; i++) {
+
+    // Only compare against the fixed resolutions, since a custom resolution
+    // can match the display-dependent ones on some displays but not others
+    for (int i = 0; i < RESOLUTION_TABLE_SAFE_AREA_INDEX; i++) {
         if (res.width == resolutionTable[i].width && res.height == resolutionTable[i].height) {
             return NO;
         }
     }
     
     return YES;
+}
+
+// Older versions saved the safe area and full screen resolutions as the size of
+// the display they were chosen on, computed from the window size and UI scale.
+- (BOOL)isLegacyDisplayResolution:(CGSize)res safeArea:(BOOL)safeArea {
+    UIWindow *window = self.view.window ?: UIApplication.sharedApplication.windows.firstObject;
+    CGFloat width = window.frame.size.width;
+    if (safeArea) {
+        width -= window.safeAreaInsets.left + window.safeAreaInsets.right;
+    }
+    return window != nil &&
+        (NSInteger)res.width == (NSInteger)(width * window.screen.scale) &&
+        (NSInteger)res.height == (NSInteger)(window.frame.size.height * window.screen.scale);
 }
 
 - (void)viewDidLoad {
@@ -140,13 +187,6 @@ BOOL isCustomResolution(CGSize res) {
     // Ensure we pick a bitrate that falls exactly onto a slider notch
     _bitrate = bitrateTable[[self getSliderValueForBitrate:[currentSettings.bitrate intValue]]];
 
-    // Get the size of the screen with and without safe area insets
-    UIWindow *window = UIApplication.sharedApplication.windows.firstObject;
-    CGFloat screenScale = window.screen.scale;
-    CGFloat safeAreaWidth = (window.frame.size.width - window.safeAreaInsets.left - window.safeAreaInsets.right) * screenScale;
-    CGFloat fullScreenWidth = window.frame.size.width * screenScale;
-    CGFloat fullScreenHeight = window.frame.size.height * screenScale;
-    
     self.resolutionDisplayView.layer.cornerRadius = 10;
     self.resolutionDisplayView.clipsToBounds = YES;
     UITapGestureRecognizer *resolutionDisplayViewTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(resolutionDisplayViewTapped:)];
@@ -156,12 +196,16 @@ BOOL isCustomResolution(CGSize res) {
     resolutionTable[1] = CGSizeMake(1280, 720);
     resolutionTable[2] = CGSizeMake(1920, 1080);
     resolutionTable[3] = CGSizeMake(3840, 2160);
-    resolutionTable[4] = CGSizeMake(safeAreaWidth, fullScreenHeight);
-    resolutionTable[5] = CGSizeMake(fullScreenWidth, fullScreenHeight);
+    [self updateDisplayResolutions]; // safe area and full screen
     resolutionTable[6] = CGSizeMake([currentSettings.width integerValue], [currentSettings.height integerValue]); // custom initial value
-    
+
+    // Treat display sizes saved by older versions as the display-matching options
+    // they were chosen from, so they're saved as such and follow the display
+    BOOL legacyFull = isCustomResolution(resolutionTable[6]) && [self isLegacyDisplayResolution:resolutionTable[6] safeArea:NO];
+    BOOL legacySafeArea = isCustomResolution(resolutionTable[6]) && !legacyFull && [self isLegacyDisplayResolution:resolutionTable[6] safeArea:YES];
+
     // Don't populate the custom entry unless we have a custom resolution
-    if (!isCustomResolution(resolutionTable[6])) {
+    if (!isCustomResolution(resolutionTable[6]) || legacyFull || legacySafeArea) {
         resolutionTable[6] = CGSizeMake(0, 0);
     }
     
@@ -180,11 +224,22 @@ BOOL isCustomResolution(CGSize res) {
     }
 
     NSInteger resolution = 1;
-    for (int i = 0; i < RESOLUTION_TABLE_SIZE; i++) {
-        if ((int) resolutionTable[i].height == [currentSettings.height intValue]
-            && (int) resolutionTable[i].width == [currentSettings.width intValue]) {
-            resolution = i;
-            break;
+    if ([currentSettings.width intValue] == RESOLUTION_MATCH_DISPLAY_SAFE_AREA || legacySafeArea) {
+        resolution = RESOLUTION_TABLE_SAFE_AREA_INDEX;
+    }
+    else if ([currentSettings.width intValue] == RESOLUTION_MATCH_DISPLAY_FULL || legacyFull) {
+        resolution = RESOLUTION_TABLE_FULL_INDEX;
+    }
+    else if (isCustomResolution(resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX])) {
+        resolution = RESOLUTION_TABLE_CUSTOM_INDEX;
+    }
+    else {
+        for (int i = 0; i < RESOLUTION_TABLE_SAFE_AREA_INDEX; i++) {
+            if ((int) resolutionTable[i].height == [currentSettings.height intValue]
+                && (int) resolutionTable[i].width == [currentSettings.width intValue]) {
+                resolution = i;
+                break;
+            }
         }
     }
 
@@ -240,6 +295,7 @@ BOOL isCustomResolution(CGSize res) {
         [self.hdrSelector setSelectedSegmentIndex:currentSettings.enableHdr ? 1 : 0];
     }
     
+    [self.videoScalingSelector setSelectedSegmentIndex:currentSettings.videoScalingMode];
     [self.touchModeSelector setSelectedSegmentIndex:currentSettings.absoluteTouchMode ? 1 : 0];
     [self.touchModeSelector addTarget:self action:@selector(touchModeChanged) forControlEvents:UIControlEventValueChanged];
     [self.statsOverlaySelector setSelectedSegmentIndex:currentSettings.statsOverlay ? 1 : 0];
@@ -405,6 +461,10 @@ BOOL isCustomResolution(CGSize res) {
         width = MAX(width, 256);
         height = MAX(height, 256);
 
+        // Video encoders require even dimensions
+        width &= ~1;
+        height &= ~1;
+
         resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX] = CGSizeMake(width, height);
         [self updateBitrate];
         [self updateResolutionDisplayViewText];
@@ -527,6 +587,18 @@ BOOL isCustomResolution(CGSize res) {
     NSInteger framerate = [self getChosenFrameRate];
     NSInteger height = [self getChosenStreamHeight];
     NSInteger width = [self getChosenStreamWidth];
+
+    // Save the safe area and full screen options as special values, so they will
+    // match whichever display the stream is started on rather than this one
+    NSInteger selectedResolution = [self.resolutionSelector selectedSegmentIndex];
+    BOOL lastSegmentSelected = selectedResolution + 1 == [self.resolutionSelector numberOfSegments];
+    if (!lastSegmentSelected && selectedResolution == RESOLUTION_TABLE_SAFE_AREA_INDEX) {
+        width = height = RESOLUTION_MATCH_DISPLAY_SAFE_AREA;
+    }
+    else if (!lastSegmentSelected && selectedResolution == RESOLUTION_TABLE_FULL_INDEX) {
+        width = height = RESOLUTION_MATCH_DISPLAY_FULL;
+    }
+
     NSInteger onscreenControls = [self.onscreenControlSelector selectedSegmentIndex];
     BOOL optimizeGames = [self.optimizeSettingsSelector selectedSegmentIndex] == 1;
     BOOL multiController = [self.multiControllerSelector selectedSegmentIndex] == 1;
@@ -538,6 +610,7 @@ BOOL isCustomResolution(CGSize res) {
     BOOL absoluteTouchMode = [self.touchModeSelector selectedSegmentIndex] == 1;
     BOOL statsOverlay = [self.statsOverlaySelector selectedSegmentIndex] == 1;
     BOOL enableHdr = [self.hdrSelector selectedSegmentIndex] == 1;
+    uint32_t videoScalingMode = (uint32_t)[self.videoScalingSelector selectedSegmentIndex];
     [dataMan saveSettingsWithBitrate:_bitrate
                            framerate:framerate
                               height:height
@@ -553,7 +626,8 @@ BOOL isCustomResolution(CGSize res) {
                            enableHdr:enableHdr
                       btMouseSupport:btMouseSupport
                    absoluteTouchMode:absoluteTouchMode
-                        statsOverlay:statsOverlay];
+                        statsOverlay:statsOverlay
+                    videoScalingMode:videoScalingMode];
 }
 
 - (void)didReceiveMemoryWarning {

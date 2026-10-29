@@ -28,7 +28,8 @@
                        enableHdr:(BOOL)enableHdr
                   btMouseSupport:(BOOL)btMouseSupport
                absoluteTouchMode:(BOOL)absoluteTouchMode
-                    statsOverlay:(BOOL)statsOverlay;
+                    statsOverlay:(BOOL)statsOverlay
+                videoScalingMode:(uint32_t)videoScalingMode;
 
 - (NSArray*) getHosts;
 - (void) updateHost:(TemporaryHost*)host;

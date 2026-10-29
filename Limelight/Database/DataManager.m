@@ -67,7 +67,8 @@
                        enableHdr:(BOOL)enableHdr
                   btMouseSupport:(BOOL)btMouseSupport
                absoluteTouchMode:(BOOL)absoluteTouchMode
-                    statsOverlay:(BOOL)statsOverlay {
+                    statsOverlay:(BOOL)statsOverlay
+                videoScalingMode:(uint32_t)videoScalingMode {
     
     [_managedObjectContext performBlockAndWait:^{
         Settings* settingsToSave = [self retrieveSettings];
@@ -87,7 +88,8 @@
         settingsToSave.btMouseSupport = btMouseSupport;
         settingsToSave.absoluteTouchMode = absoluteTouchMode;
         settingsToSave.statsOverlay = statsOverlay;
-        
+        settingsToSave.videoScalingMode = videoScalingMode;
+
         [self saveData];
     }];
 }

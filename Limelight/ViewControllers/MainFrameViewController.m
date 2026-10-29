@@ -53,6 +53,7 @@
     NSArray* _sortedAppList;
     NSCache* _boxArtCache;
     bool _background;
+    BOOL _largeAppTiles;
 #if TARGET_OS_TV
     UITapGestureRecognizer* _menuRecognizer;
 #endif
@@ -436,7 +437,9 @@ static NSMutableSet* hostList;
 }
 
 - (UIViewController*) activeViewController {
-    UIViewController *topController = [UIApplication sharedApplication].keyWindow.rootViewController;
+    // Prefer our own window, since there may not be a key window yet during launch
+    UIWindow *window = self.view.window ?: [UIApplication sharedApplication].keyWindow;
+    UIViewController *topController = window.rootViewController;
 
     while (topController.presentedViewController) {
         topController = topController.presentedViewController;
@@ -614,15 +617,28 @@ static NSMutableSet* hostList;
     
     _streamConfig.frameRate = [streamSettings.framerate intValue];
     if (@available(iOS 10.3, *)) {
-        // Don't stream more FPS than the display can show
-        if (_streamConfig.frameRate > [UIScreen mainScreen].maximumFramesPerSecond) {
-            _streamConfig.frameRate = (int)[UIScreen mainScreen].maximumFramesPerSecond;
+        // Don't stream more FPS than the display can show. The main screen isn't
+        // necessarily the one we're on (like with the inner display of iPhone Duo).
+        UIScreen* screen = self.view.window.windowScene.screen ?: [UIScreen mainScreen];
+        if (_streamConfig.frameRate > screen.maximumFramesPerSecond) {
+            _streamConfig.frameRate = (int)screen.maximumFramesPerSecond;
             Log(LOG_W, @"Clamping FPS to maximum refresh rate: %d", _streamConfig.frameRate);
         }
     }
     
-    _streamConfig.height = [streamSettings.height intValue];
-    _streamConfig.width = [streamSettings.width intValue];
+    if ([streamSettings.width intValue] == RESOLUTION_MATCH_DISPLAY_FULL ||
+        [streamSettings.width intValue] == RESOLUTION_MATCH_DISPLAY_SAFE_AREA) {
+        // Match the display we're about to stream on
+        CGSize displayResolution = [Utils getDisplayResolutionForWindow:self.view.window
+                                                               safeArea:[streamSettings.width intValue] == RESOLUTION_MATCH_DISPLAY_SAFE_AREA];
+        _streamConfig.width = displayResolution.width;
+        _streamConfig.height = displayResolution.height;
+        Log(LOG_I, @"Matching display resolution: %dx%d", _streamConfig.width, _streamConfig.height);
+    }
+    else {
+        _streamConfig.height = [streamSettings.height intValue];
+        _streamConfig.width = [streamSettings.width intValue];
+    }
 #if TARGET_OS_TV
     // Don't allow streaming 4K on the Apple TV HD
     struct utsname systemInfo;
@@ -919,6 +935,46 @@ static NSMutableSet* hostList;
     [self adjustScrollViewForSafeArea:self->hostScrollView];
 }
 
+- (void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
+
+    // Our view can change size (like when an iPhone Duo is folded or unfolded),
+    // so keep the host list sized to it and lay the hosts out again if it changes.
+    CGRect hostFrame = CGRectMake(0, self.navigationController.navigationBar.frame.origin.y + self.navigationController.navigationBar.frame.size.height, self.view.frame.size.width, self.view.frame.size.height / 2);
+    if (hostScrollView != nil && !CGSizeEqualToSize(hostScrollView.frame.size, hostFrame.size)) {
+        hostScrollView.frame = hostFrame;
+        [self updateHosts];
+    }
+
+#if !TARGET_OS_TV
+    // The app tiles are scaled when their cells are configured, so reload them
+    // if a display change means we now need a different tile size.
+    BOOL largeAppTiles = [self shouldUseLargeAppTiles];
+    if (largeAppTiles != _largeAppTiles) {
+        _largeAppTiles = largeAppTiles;
+        [self.collectionView reloadData];
+    }
+#endif
+}
+
+#if !TARGET_OS_TV
+- (BOOL)shouldUseLargeAppTiles {
+    // Use iPad-sized tiles on displays that are regular-sized in both dimensions, like
+    // the inner display of iPhone Duo, rather than phone-sized tiles.
+    return self.traitCollection.horizontalSizeClass == UIUserInterfaceSizeClassRegular &&
+        self.traitCollection.verticalSizeClass == UIUserInterfaceSizeClassRegular;
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath {
+    CGSize itemSize = ((UICollectionViewFlowLayout*)collectionViewLayout).itemSize;
+    if ([self shouldUseLargeAppTiles] && itemSize.width < 150) {
+        // Same size as the iPad storyboard's tiles and our app views
+        return CGSizeMake(150, 200);
+    }
+    return itemSize;
+}
+#endif
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -942,6 +998,11 @@ static NSMutableSet* hostList;
     // Disable bounce-back on reveal VC otherwise the settings will snap closed
     // if the user drags all the way off the screen opposite the settings pane.
     self.revealViewController.bounceBackOnOverdraw = NO;
+
+    // The navigation bar can sit below a reserved area at the top of the screen even
+    // with the status bar hidden (like on iPhone Duo), so fill that area with the bar
+    // color instead of leaving a black band above the bar.
+    self.navigationController.view.backgroundColor = self.navigationController.navigationBar.barTintColor;
 #else
     // The settings button will direct the user into the Settings app on tvOS
     [_settingsButton setTarget:self];

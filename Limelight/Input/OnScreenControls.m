@@ -59,8 +59,10 @@
     BOOL l3Set;
     BOOL r3Set;
     
-    BOOL _iPad;
+    BOOL _largeScreen;
     CGRect _controlArea;
+    CGSize _layoutSize;
+    NSArray<NSValue*>* _divisionFrames;
     UIView* _view;
     OnScreenControlsLevel _level;
     BOOL _visible;
@@ -119,21 +121,9 @@ static float L3_Y;
     _controller = [controllerSupport getOscController];
     _deadTouches = [[NSMutableArray alloc] init];
     _swapABXY = streamConfig.swapABXYButtons;
-    
-    _iPad = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad);
-    _controlArea = CGRectMake(0, 0, _view.frame.size.width, _view.frame.size.height);
-    if (_iPad)
-    {
-        // Cut down the control area on an iPad so the controls are more reachable
-        _controlArea.size.height = _view.frame.size.height / 2.0;
-        _controlArea.origin.y = _view.frame.size.height - _controlArea.size.height;
-    }
-    else
-    {
-        _controlArea.origin.x = _controlArea.size.width * EDGE_WIDTH;
-        _controlArea.size.width -= _controlArea.origin.x * 2;
-    }
-    
+
+    [self updateControlArea];
+
     _aButton = [CALayer layer];
     _bButton = [CALayer layer];
     _xButton = [CALayer layer];
@@ -156,6 +146,125 @@ static float L3_Y;
     _rightStick = [CALayer layer];
     
     return self;
+}
+
+- (BOOL) isLargeScreen {
+    // Use the large screen layout on iPads and on other displays that are regular-sized
+    // in both dimensions, like the inner display of iPhone Duo. The phone layout would
+    // put the controls far from the user's thumbs and close to the fold on those displays.
+    return [UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad ||
+        (_view.traitCollection.horizontalSizeClass == UIUserInterfaceSizeClassRegular &&
+         _view.traitCollection.verticalSizeClass == UIUserInterfaceSizeClassRegular);
+}
+
+- (void) updateControlArea {
+    _largeScreen = [self isLargeScreen];
+    _controlArea = CGRectMake(0, 0, _view.frame.size.width, _view.frame.size.height);
+    if (_largeScreen)
+    {
+        // Cut down the control area on large screens so the controls are more reachable
+        _controlArea.size.height = _view.frame.size.height / 2.0;
+        _controlArea.origin.y = _view.frame.size.height - _controlArea.size.height;
+    }
+    else
+    {
+        _controlArea.origin.x = _controlArea.size.width * EDGE_WIDTH;
+        _controlArea.size.width -= _controlArea.origin.x * 2;
+    }
+}
+
+// Returns the frames of the active vertical division regions of our view, like the
+// fold of iPhone Duo's inner display. Divisions are only active while partially folded.
+- (NSArray<NSValue*>*) getDivisionFrames {
+    NSMutableArray<NSValue*>* frames = [[NSMutableArray alloc] init];
+#if defined(__IPHONE_27_1) && !TARGET_OS_TV
+    if (@available(iOS 27.1, *)) {
+        for (UIViewReservedRegion* region in [_view reservedRegionsOfKind:[UIViewReservedRegionKind divisionRegionKind]]) {
+            // We only move controls horizontally, so ignore horizontal divisions
+            if (region.frame.size.height > region.frame.size.width) {
+                [frames addObject:[NSValue valueWithCGRect:region.frame]];
+            }
+        }
+    }
+#endif
+    return frames;
+}
+
+// This must be called from our view's layoutSubviews. UIKit lays the view out again
+// when the reserved regions read during layout change, so this also gets called when
+// the device is folded or unfolded without the size of the view changing.
+- (void) updateLayout {
+    NSArray<NSValue*>* divisionFrames = [self getDivisionFrames];
+    if (CGSizeEqualToSize(_view.bounds.size, _layoutSize) &&
+        [divisionFrames isEqualToArray:_divisionFrames] &&
+        [self isLargeScreen] == _largeScreen) {
+        return;
+    }
+    _layoutSize = _view.bounds.size;
+    _divisionFrames = divisionFrames;
+
+    [self updateControlArea];
+
+    // Only update controls if we're showing, otherwise
+    // show will do it for us.
+    if (_visible) {
+        // Move the controls immediately rather than animating them, since
+        // touches are hit tested against their on-screen positions
+        [CATransaction begin];
+        [CATransaction setDisableActions:YES];
+        [self updateControls];
+
+        // Redrawing the sticks centers them, so put any held stick back
+        // under the user's finger
+        NSMutableSet* stickTouches = [[NSMutableSet alloc] init];
+        if (_lsTouch != nil) {
+            [stickTouches addObject:_lsTouch];
+        }
+        if (_rsTouch != nil) {
+            [stickTouches addObject:_rsTouch];
+        }
+        if (stickTouches.count > 0) {
+            [self handleTouchMovedEvent:stickTouches];
+        }
+        [CATransaction commit];
+    }
+}
+
+// Returns an X coordinate for a control of the given width that keeps it off of
+// the division regions found during our last layout.
+- (float) xAvoidingDivisions:(float)x width:(float)width {
+    for (NSValue* value in _divisionFrames) {
+        CGRect regionFrame = value.CGRectValue;
+        if (x + width / 2 > CGRectGetMinX(regionFrame) && x - width / 2 < CGRectGetMaxX(regionFrame)) {
+            // Move the control to whichever side of the division its center is on
+            if (x < CGRectGetMidX(regionFrame)) {
+                x = CGRectGetMinX(regionFrame) - width / 2;
+            }
+            else {
+                x = CGRectGetMaxX(regionFrame) + width / 2;
+            }
+        }
+    }
+    return x;
+}
+
+- (void) avoidDivisionRegions {
+    float dpadWidth = (D_PAD_DIST + [UIImage imageNamed:@"LeftButton"].size.width) * 2;
+    float buttonsWidth = (BUTTON_DIST + [UIImage imageNamed:@"XButton"].size.width) * 2;
+    float stickWidth = [UIImage imageNamed:@"StickOuter"].size.width;
+
+    D_PAD_CENTER_X = [self xAvoidingDivisions:D_PAD_CENTER_X width:dpadWidth];
+    BUTTON_CENTER_X = [self xAvoidingDivisions:BUTTON_CENTER_X width:buttonsWidth];
+    LS_CENTER_X = [self xAvoidingDivisions:LS_CENTER_X width:stickWidth];
+    RS_CENTER_X = [self xAvoidingDivisions:RS_CENTER_X width:stickWidth];
+    START_X = [self xAvoidingDivisions:START_X width:[UIImage imageNamed:@"StartButton"].size.width];
+    SELECT_X = [self xAvoidingDivisions:SELECT_X width:[UIImage imageNamed:@"SelectButton"].size.width];
+    L1_X = [self xAvoidingDivisions:L1_X width:[UIImage imageNamed:@"L1"].size.width];
+    R1_X = [self xAvoidingDivisions:R1_X width:[UIImage imageNamed:@"R1"].size.width];
+    L2_X = [self xAvoidingDivisions:L2_X width:[UIImage imageNamed:@"L2"].size.width];
+    R2_X = [self xAvoidingDivisions:R2_X width:[UIImage imageNamed:@"R2"].size.width];
+    L3_X = [self xAvoidingDivisions:L3_X width:[UIImage imageNamed:@"L3"].size.width];
+    R3_X = [self xAvoidingDivisions:R3_X width:[UIImage imageNamed:@"R3"].size.width];
 }
 
 - (void) show {
@@ -192,7 +301,8 @@ static float L3_Y;
             // GCGamepad is missing triggers, both analog sticks,
             // and the select button
             [self setupGamepadControls];
-            
+            [self avoidDivisionRegions];
+
             [self hideButtons];
             [self hideBumpers];
             [self hideL3R3];
@@ -203,7 +313,8 @@ static float L3_Y;
         case OnScreenControlsLevelAutoGCExtendedGamepad:
             // GCExtendedGamepad is missing R3, L3, and select
             [self setupExtendedGamepadControls];
-            
+            [self avoidDivisionRegions];
+
             [self hideButtons];
             [self hideBumpers];
             [self hideTriggers];
@@ -215,7 +326,8 @@ static float L3_Y;
             // This variant of GCExtendedGamepad has L3 and R3 but
             // is still missing Select
             [self setupExtendedGamepadControls];
-            
+            [self avoidDivisionRegions];
+
             [self hideButtons];
             [self hideBumpers];
             [self hideTriggers];
@@ -225,7 +337,8 @@ static float L3_Y;
             break;
         case OnScreenControlsLevelSimple:
             [self setupSimpleControls];
-            
+            [self avoidDivisionRegions];
+
             [self hideTriggers];
             [self hideL3R3];
             [self hideBumpers];
@@ -235,7 +348,8 @@ static float L3_Y;
             break;
         case OnScreenControlsLevelFull:
             [self setupComplexControls];
-            
+            [self avoidDivisionRegions];
+
             [self drawButtons];
             [self drawStartSelect];
             [self drawBumpers];
@@ -262,7 +376,7 @@ static float L3_Y;
     L3_Y = _controlArea.size.height * .85 + _controlArea.origin.y;
     R3_Y = _controlArea.size.height * .85 + _controlArea.origin.y;
     
-    if (_iPad) {
+    if (_largeScreen) {
         L3_X = _controlArea.size.width * .15 + _controlArea.origin.x;
         R3_X = _controlArea.size.width * .85 + _controlArea.origin.x;
     }
@@ -289,8 +403,8 @@ static float L3_Y;
     SELECT_X = _controlArea.size.width * .05 + _controlArea.origin.x;
     SELECT_Y = _controlArea.size.height * .95 + _controlArea.origin.y;
     
-    if (_iPad) {
-        // The analog sticks are kept closer to the sides on iPad
+    if (_largeScreen) {
+        // The analog sticks are kept closer to the sides on large screens
         LS_CENTER_X = _controlArea.size.width * .15 + _controlArea.origin.x;
         RS_CENTER_X = _controlArea.size.width * .85 + _controlArea.origin.x;
     }
@@ -310,8 +424,8 @@ static float L3_Y;
     R2_Y = _controlArea.size.height * .9 + _controlArea.origin.y;
     R2_X = _controlArea.size.width * .9 + _controlArea.origin.x;
     
-    if (_iPad) {
-        // Lower the D-pad and buttons on iPad
+    if (_largeScreen) {
+        // Lower the D-pad and buttons on large screens
         D_PAD_CENTER_Y = _controlArea.size.height * .75 + _controlArea.origin.y;
         BUTTON_CENTER_Y = _controlArea.size.height * .75 + _controlArea.origin.y;
         
@@ -332,9 +446,9 @@ static float L3_Y;
     BUTTON_CENTER_X = _controlArea.size.width * .9 + _controlArea.origin.x;
     BUTTON_CENTER_Y = _controlArea.size.height * .60 + _controlArea.origin.y;
     
-    if (_iPad)
+    if (_largeScreen)
     {
-        // The analog sticks are kept closer to the sides on iPad
+        // The analog sticks are kept closer to the sides on large screens
         LS_CENTER_X = _controlArea.size.width * .22 + _controlArea.origin.x;
         LS_CENTER_Y = _controlArea.size.height * .80 + _controlArea.origin.y;
         RS_CENTER_X = _controlArea.size.width * .77 + _controlArea.origin.x;
@@ -358,8 +472,8 @@ static float L3_Y;
     R1_Y = _controlArea.size.height * .27 + _controlArea.origin.y;
     R2_Y = _controlArea.size.height * .1 + _controlArea.origin.y;
     
-    if (_iPad) {
-        // Move L/R buttons closer to the side on iPad
+    if (_largeScreen) {
+        // Move L/R buttons closer to the side on large screens
         L1_X = _controlArea.size.width * .05 + _controlArea.origin.x;
         L2_X = _controlArea.size.width * .05 + _controlArea.origin.x;
         R1_X = _controlArea.size.width * .95 + _controlArea.origin.x;
