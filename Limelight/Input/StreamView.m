@@ -24,6 +24,14 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     BOOL isInputingText;
     NSMutableSet* keysDown;
     
+    // Text (after the sentinel) that has already been sent to the host from the
+    // on-screen keyboard. Edits are sent as a diff against this, so IMEs that
+    // compose by rewriting the previous character (like Korean) work.
+    NSString* sentKeyboardText;
+    
+    // Serial queue so backspaces and the text that replaces them can't be reordered
+    dispatch_queue_t keyboardTextQueue;
+    
     float streamAspectRatio;
     
     // iOS 13.4 mouse support
@@ -55,6 +63,8 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
     
     keysDown = [[NSMutableSet alloc] init];
+    sentKeyboardText = @"";
+    keyboardTextQueue = dispatch_queue_create("com.moonlight.keyboard-text", DISPATCH_QUEUE_SERIAL);
     keyInputField = [[KeyboardInputField alloc] initWithFrame:CGRectZero];
     [keyInputField setKeyboardType:UIKeyboardTypeDefault];
     [keyInputField setAutocorrectionType:UITextAutocorrectionTypeNo];
@@ -361,6 +371,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
                 // Prepare the textbox used to capture keyboard events.
                 keyInputField.delegate = self;
                 keyInputField.text = @"0";
+                sentKeyboardText = @"";
 #if !TARGET_OS_TV
                 // Prepare the toolbar above the keyboard for more options
                 UIToolbar *customToolbarView = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, 44)];
@@ -773,9 +784,20 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
     // This method is called when the "Return" key is pressed.
-    LiSendKeyboardEvent(0x0d, KEY_ACTION_DOWN, 0);
-    usleep(50 * 1000);
-    LiSendKeyboardEvent(0x0d, KEY_ACTION_UP, 0);
+    
+    // Commit any in-progress IME composition and send it before the Return key
+    if (textField.markedTextRange != nil) {
+        [textField unmarkText];
+    }
+    [self onKeyboardPressed:textField];
+    
+    dispatch_async(keyboardTextQueue, ^{
+        LiSendKeyboardEvent(0x0d, KEY_ACTION_DOWN, 0);
+        usleep(50 * 1000);
+        LiSendKeyboardEvent(0x0d, KEY_ACTION_UP, 0);
+    });
+    
+    [self resetKeyboardTextField:textField];
     return NO;
 }
 
@@ -786,45 +808,146 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     [keysDown removeAllObjects];
 }
 
-- (void)onKeyboardPressed:(UITextField *)textField {
-    NSString* inputText = textField.text;
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-        // If the text became empty, we know the user pressed the backspace key.
-        if ([inputText isEqual:@""]) {
-            LiSendKeyboardEvent(0x08, KEY_ACTION_DOWN, 0);
-            usleep(50 * 1000);
-            LiSendKeyboardEvent(0x08, KEY_ACTION_UP, 0);
-        } else {
-            // Character 0 will be our known sentinel value
-            
-            // Check if any characters exist which can't be represented in a basic key event
-            for (int i = 1; i < [inputText length]; i++) {
-                struct KeyEvent event = [KeyboardSupport translateKeyEvent:[inputText characterAtIndex:i] withModifierFlags:0];
-                if (event.keycode == 0) {
-                    // We found an unknown key, so send the entire string as UTF-8
-                    const char* utf8String = [inputText UTF8String];
-                    
-                    // Skip the first character which is our sentinel
-                    LiSendUtf8TextEvent(utf8String + 1, (int)strlen(utf8String) - 1);
-                    return;
-                }
-            }
-            
-            // We didn't find any unknown characters, so send them all as basic key events
-            for (int i = 1; i < [inputText length]; i++) {
-                struct KeyEvent event = [KeyboardSupport translateKeyEvent:[inputText characterAtIndex:i] withModifierFlags:0];
-                assert(event.keycode != 0);
-                [self sendLowLevelEvent:event];
-            }
+// Returns YES if the string is non-empty and made up only of Hangul syllables and jamo
+static BOOL isHangul(NSString* string) {
+    if (string.length == 0) {
+        return NO;
+    }
+    for (NSUInteger i = 0; i < string.length; i++) {
+        unichar c = [string characterAtIndex:i];
+        if (!((c >= 0x1100 && c <= 0x11FF) ||   // Hangul Jamo
+              (c >= 0x3130 && c <= 0x318F) ||   // Hangul Compatibility Jamo
+              (c >= 0xA960 && c <= 0xA97F) ||   // Hangul Jamo Extended-A
+              (c >= 0xAC00 && c <= 0xD7A3) ||   // Hangul Syllables
+              (c >= 0xD7B0 && c <= 0xD7FF))) {  // Hangul Jamo Extended-B
+            return NO;
         }
-    });
-    
-    // Reset text field back to known state
+    }
+    return YES;
+}
+
+// Splits a string into user-perceived characters (a Hangul syllable or an emoji is one character)
+static NSArray<NSString*>* composedCharacters(NSString* string) {
+    NSMutableArray<NSString*>* characters = [[NSMutableArray alloc] init];
+    [string enumerateSubstringsInRange:NSMakeRange(0, string.length)
+                               options:NSStringEnumerationByComposedCharacterSequences
+                            usingBlock:^(NSString* substring, NSRange substringRange, NSRange enclosingRange, BOOL* stop) {
+        [characters addObject:substring];
+    }];
+    return characters;
+}
+
+- (void)resetKeyboardTextField:(UITextField *)textField {
+    // Reset text field back to known state. Character 0 is our known sentinel value.
     textField.text = @"0";
+    sentKeyboardText = @"";
     
     // Move the insertion point back to the end of the text box
     UITextRange *textRange = [textField textRangeFromPosition:textField.endOfDocument toPosition:textField.endOfDocument];
     [textField setSelectedTextRange:textRange];
+}
+
+// Must be called on keyboardTextQueue
+- (void)sendKeyboardText:(NSString*)text {
+    if (text.length == 0) {
+        return;
+    }
+    
+    // Check if any characters exist which can't be represented in a basic key event
+    for (NSUInteger i = 0; i < text.length; i++) {
+        struct KeyEvent event = [KeyboardSupport translateKeyEvent:[text characterAtIndex:i] withModifierFlags:0];
+        if (event.keycode == 0) {
+            // We found an unknown key, so send the entire string as UTF-8
+            const char* utf8String = [text UTF8String];
+            LiSendUtf8TextEvent(utf8String, (int)strlen(utf8String));
+            return;
+        }
+    }
+    
+    // We didn't find any unknown characters, so send them all as basic key events
+    for (NSUInteger i = 0; i < text.length; i++) {
+        struct KeyEvent event = [KeyboardSupport translateKeyEvent:[text characterAtIndex:i] withModifierFlags:0];
+        assert(event.keycode != 0);
+        [self sendLowLevelEventNow:event];
+    }
+}
+
+- (void)onKeyboardPressed:(UITextField *)textField {
+    NSString* inputText = textField.text ?: @"";
+    
+    // While an IME is composing, the marked text isn't final yet. For most IMEs
+    // (Japanese, Chinese) it can contain Latin letters that must not reach the host,
+    // so only consider the committed text before it and send the rest once it's
+    // committed. Hangul being composed is real text that only gets replaced, so
+    // send it right away and let the diff below fix it up as it changes.
+    UITextRange* markedTextRange = textField.markedTextRange;
+    if (markedTextRange != nil && !isHangul([textField textInRange:markedTextRange])) {
+        NSInteger committedLength = [textField offsetFromPosition:textField.beginningOfDocument toPosition:markedTextRange.start];
+        if (committedLength <= 0 || committedLength > (NSInteger)inputText.length) {
+            return;
+        }
+        inputText = [inputText substringToIndex:committedLength];
+    }
+    
+    // If the text became empty, the user pressed backspace past our sentinel.
+    // Normally the field held only the sentinel, so that's one backspace on the host.
+    // If it still held sent text (holding backspace deletes a whole word at once),
+    // delete that text on the host instead.
+    if (inputText.length == 0) {
+        NSUInteger backspaces = MAX(composedCharacters(sentKeyboardText).count, (NSUInteger)1);
+        dispatch_async(keyboardTextQueue, ^{
+            for (NSUInteger i = 0; i < backspaces; i++) {
+                LiSendKeyboardEvent(0x08, KEY_ACTION_DOWN, 0);
+                usleep(50 * 1000);
+                LiSendKeyboardEvent(0x08, KEY_ACTION_UP, 0);
+            }
+        });
+        [self resetKeyboardTextField:textField];
+        return;
+    }
+    
+    // Strip our sentinel
+    NSString* currentText = [inputText hasPrefix:@"0"] ? [inputText substringFromIndex:1] : inputText;
+    
+    // Some IMEs (like Korean) compose by replacing the characters they just typed
+    // (ㅎ -> 하 -> 한), so we can't just send what was appended. Instead, find what
+    // changed since the last update and send backspaces for the removed characters
+    // followed by the new ones.
+    NSArray<NSString*>* sentCharacters = composedCharacters(sentKeyboardText);
+    NSArray<NSString*>* currentCharacters = composedCharacters(currentText);
+    NSUInteger commonLength = 0;
+    while (commonLength < sentCharacters.count &&
+           commonLength < currentCharacters.count &&
+           [sentCharacters[commonLength] isEqualToString:currentCharacters[commonLength]]) {
+        commonLength++;
+    }
+    
+    NSUInteger backspaces = sentCharacters.count - commonLength;
+    NSString* addedText = [[currentCharacters subarrayWithRange:NSMakeRange(commonLength, currentCharacters.count - commonLength)] componentsJoinedByString:@""];
+    sentKeyboardText = currentText;
+    
+    if (backspaces > 0 || addedText.length > 0) {
+        dispatch_async(keyboardTextQueue, ^{
+            for (NSUInteger i = 0; i < backspaces; i++) {
+                LiSendKeyboardEvent(0x08, KEY_ACTION_DOWN, 0);
+                usleep(50 * 1000);
+                LiSendKeyboardEvent(0x08, KEY_ACTION_UP, 0);
+            }
+            [self sendKeyboardText:addedText];
+        });
+    }
+    
+    // Reset the text field once the user reaches a point where no IME could still
+    // be composing (whitespace or punctuation), or if the text gets long.
+    // Resetting after every character breaks IMEs that rewrite previous characters.
+    if (markedTextRange == nil && currentText.length > 0) {
+        unichar lastCharacter = [currentText characterAtIndex:currentText.length - 1];
+        if (currentText.length >= 256 ||
+            [[NSCharacterSet whitespaceAndNewlineCharacterSet] characterIsMember:lastCharacter] ||
+            [[NSCharacterSet punctuationCharacterSet] characterIsMember:lastCharacter]) {
+            [self resetKeyboardTextField:textField];
+        }
+    }
 }
 
 - (void)specialCharPressed:(UIKeyCommand *)cmd {
@@ -840,19 +963,24 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
 - (void)sendLowLevelEvent:(struct KeyEvent)event {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-        // When we want to send a modified key (like uppercase letters) we need to send the
-        // modifier ("shift") seperately from the key itself.
-        if (event.modifier != 0) {
-            LiSendKeyboardEvent(event.modifierKeycode, KEY_ACTION_DOWN, event.modifier);
-        }
-        // Let the host know these are not (necessarily) normalized to US English scancodes
-        LiSendKeyboardEvent2(event.keycode, KEY_ACTION_DOWN, event.modifier, SS_KBE_FLAG_NON_NORMALIZED);
-        usleep(50 * 1000);
-        LiSendKeyboardEvent2(event.keycode, KEY_ACTION_UP, event.modifier, SS_KBE_FLAG_NON_NORMALIZED);
-        if (event.modifier != 0) {
-            LiSendKeyboardEvent(event.modifierKeycode, KEY_ACTION_UP, event.modifier);
-        }
+        [self sendLowLevelEventNow:event];
     });
+}
+
+// Sends the key event synchronously on the calling thread
+- (void)sendLowLevelEventNow:(struct KeyEvent)event {
+    // When we want to send a modified key (like uppercase letters) we need to send the
+    // modifier ("shift") seperately from the key itself.
+    if (event.modifier != 0) {
+        LiSendKeyboardEvent(event.modifierKeycode, KEY_ACTION_DOWN, event.modifier);
+    }
+    // Let the host know these are not (necessarily) normalized to US English scancodes
+    LiSendKeyboardEvent2(event.keycode, KEY_ACTION_DOWN, event.modifier, SS_KBE_FLAG_NON_NORMALIZED);
+    usleep(50 * 1000);
+    LiSendKeyboardEvent2(event.keycode, KEY_ACTION_UP, event.modifier, SS_KBE_FLAG_NON_NORMALIZED);
+    if (event.modifier != 0) {
+        LiSendKeyboardEvent(event.modifierKeycode, KEY_ACTION_UP, event.modifier);
+    }
 }
 
 - (BOOL)canBecomeFirstResponder {
