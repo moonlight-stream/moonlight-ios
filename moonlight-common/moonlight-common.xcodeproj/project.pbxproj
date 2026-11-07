@@ -30,6 +30,7 @@
 		98AB2E4D1CAD425A0089BB98 /* SdpGenerator.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E3B1CAD423B0089BB98 /* SdpGenerator.c */; };
 		98AB2E4E1CAD425A0089BB98 /* VideoDepacketizer.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E3D1CAD423B0089BB98 /* VideoDepacketizer.c */; };
 		98AB2E4F1CAD425A0089BB98 /* VideoStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E3E1CAD423B0089BB98 /* VideoStream.c */; };
+		D836F126BEB34CD7B04E3E9B /* NativeMicStream.c in Sources */ = {isa = PBXBuildFile; fileRef = F11F0AD711634D1B80B488FC /* NativeMicStream.c */; };
 		98AB2E501CAD427A0089BB98 /* callbacks.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2DF01CAD422B0089BB98 /* callbacks.c */; };
 		98AB2E511CAD427A0089BB98 /* compress.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2DF31CAD422B0089BB98 /* compress.c */; };
 		98AB2E521CAD427A0089BB98 /* host.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E001CAD422B0089BB98 /* host.c */; };
@@ -64,6 +65,7 @@
 		FB1A680721324F4900507771 /* SdpGenerator.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E3B1CAD423B0089BB98 /* SdpGenerator.c */; };
 		FB1A680821324F4900507771 /* VideoDepacketizer.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E3D1CAD423B0089BB98 /* VideoDepacketizer.c */; };
 		FB1A680921324F4900507771 /* VideoStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E3E1CAD423B0089BB98 /* VideoStream.c */; };
+		250B5B5384F14AD28BEFD7D2 /* NativeMicStream.c in Sources */ = {isa = PBXBuildFile; fileRef = F11F0AD711634D1B80B488FC /* NativeMicStream.c */; };
 		FB1A680A21324F4900507771 /* callbacks.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2DF01CAD422B0089BB98 /* callbacks.c */; };
 		FB1A680B21324F4900507771 /* compress.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2DF31CAD422B0089BB98 /* compress.c */; };
 		FB1A680C21324F4900507771 /* host.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E001CAD422B0089BB98 /* host.c */; };
@@ -155,6 +157,7 @@
 		98AB2E3C1CAD423B0089BB98 /* Video.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Video.h; sourceTree = "<group>"; };
 		98AB2E3D1CAD423B0089BB98 /* VideoDepacketizer.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = VideoDepacketizer.c; sourceTree = "<group>"; };
 		98AB2E3E1CAD423B0089BB98 /* VideoStream.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = VideoStream.c; sourceTree = "<group>"; };
+		F11F0AD711634D1B80B488FC /* NativeMicStream.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = NativeMicStream.c; sourceTree = "<group>"; };
 		98B8C2B5262BC1220027F659 /* PlatformCrypto.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = PlatformCrypto.c; sourceTree = "<group>"; };
 		98B8C2BA262BC12F0027F659 /* PlatformCrypto.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PlatformCrypto.h; sourceTree = "<group>"; };
 		98C1FC11218404030023FDDF /* SimpleStun.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SimpleStun.c; sourceTree = "<group>"; };
@@ -310,6 +313,7 @@
 				98AB2E3C1CAD423B0089BB98 /* Video.h */,
 				98AB2E3D1CAD423B0089BB98 /* VideoDepacketizer.c */,
 				98AB2E3E1CAD423B0089BB98 /* VideoStream.c */,
+				F11F0AD711634D1B80B488FC /* NativeMicStream.c */,
 			);
 			name = src;
 			path = "moonlight-common-c/src";
@@ -440,6 +444,7 @@
 				98F145382667D847004018E3 /* RtpVideoQueue.c in Sources */,
 				FB1A680821324F4900507771 /* VideoDepacketizer.c in Sources */,
 				FB1A680921324F4900507771 /* VideoStream.c in Sources */,
+				250B5B5384F14AD28BEFD7D2 /* NativeMicStream.c in Sources */,
 				98B8C2B7262BC1220027F659 /* PlatformCrypto.c in Sources */,
 				FB1A680A21324F4900507771 /* callbacks.c in Sources */,
 				FB1A680B21324F4900507771 /* compress.c in Sources */,
@@ -480,6 +485,7 @@
 				98F145372667D847004018E3 /* RtpVideoQueue.c in Sources */,
 				98AB2E4E1CAD425A0089BB98 /* VideoDepacketizer.c in Sources */,
 				98AB2E4F1CAD425A0089BB98 /* VideoStream.c in Sources */,
+				D836F126BEB34CD7B04E3E9B /* NativeMicStream.c in Sources */,
 				98B8C2B6262BC1220027F659 /* PlatformCrypto.c in Sources */,
 				98AB2E501CAD427A0089BB98 /* callbacks.c in Sources */,
 				98AB2E511CAD427A0089BB98 /* compress.c in Sources */,

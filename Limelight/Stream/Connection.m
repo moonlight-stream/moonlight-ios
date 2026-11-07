@@ -8,6 +8,8 @@
 
 #import "Connection.h"
 #import "Utils.h"
+#import "NativeAppleMic.h"
+#import <AVFoundation/AVFoundation.h>
 
 #import <VideoToolbox/VideoToolbox.h>
 
@@ -18,6 +20,9 @@
 #include "opus_multistream.h"
 
 @implementation Connection {
+    StreamConfiguration* _micConfig;
+    __weak id<ConnectionCallbacks> _microphoneCallbacks;
+    NativeAppleMic* _nativeMicrophone;
     SERVER_INFORMATION _serverInfo;
     STREAM_CONFIGURATION _streamConfig;
     CONNECTION_LISTENER_CALLBACKS _clCallbacks;
@@ -371,8 +376,54 @@ void ClSetControllerLED(uint16_t controllerNumber, uint8_t r, uint8_t g, uint8_t
     [_callbacks setControllerLed:controllerNumber r:r g:g b:b];
 }
 
+-(void) stopMicrophone
+{
+    [self stopMicrophoneWithStatus:NativeMicrophoneStatusOff];
+}
+
+-(void) microphoneUnavailable
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (self->_micConfig.requestNativeMicrophone) {
+            [self stopMicrophoneWithStatus:NativeMicrophoneStatusUnavailable];
+        }
+    });
+}
+
+-(void) stopMicrophoneWithStatus:(NativeMicrophoneStatus)status
+{
+    _micConfig.requestNativeMicrophone = NO;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self->_microphoneCallbacks microphoneStatusChanged:status];
+    });
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+        [initLock lock];
+        [self->_nativeMicrophone stop];
+        self->_nativeMicrophone = nil;
+        [initLock unlock];
+    });
+}
+
+-(void) microphoneInterrupted:(NSNotification*)notification
+{
+    if ([notification.userInfo[AVAudioSessionInterruptionTypeKey] unsignedIntegerValue] ==
+            AVAudioSessionInterruptionTypeBegan) {
+        [self stopMicrophone];
+    }
+}
+
+-(void) microphoneRouteChanged:(NSNotification*)notification
+{
+    NSUInteger reason = [notification.userInfo[AVAudioSessionRouteChangeReasonKey] unsignedIntegerValue];
+    if (reason == AVAudioSessionRouteChangeReasonOldDeviceUnavailable ||
+        reason == AVAudioSessionRouteChangeReasonNoSuitableRouteForCategory) {
+        [self microphoneUnavailable];
+    }
+}
+
 -(void) terminate
 {
+    _micConfig.requestNativeMicrophone = NO;
     // Interrupt any action blocking LiStartConnection(). This is
     // thread-safe and done outside initLock on purpose, since we
     // won't be able to acquire it if LiStartConnection is in
@@ -384,6 +435,8 @@ void ClSetControllerLED(uint16_t controllerNumber, uint8_t r, uint8_t g, uint8_t
     // blocking on the caller's thread waiting to acquire initLock.
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
         [initLock lock];
+        [self->_nativeMicrophone stop];
+        self->_nativeMicrophone = nil;
         LiStopConnection();
         [initLock unlock];
     });
@@ -435,6 +488,14 @@ void ClSetControllerLED(uint16_t controllerNumber, uint8_t r, uint8_t g, uint8_t
     renderer = myRenderer;
     _callbacks = callbacks;
 
+    _micConfig = config;
+    _microphoneCallbacks = callbacks;
+    if (config.requestNativeMicrophone) {
+        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(microphoneInterrupted:)
+                                                   name:AVAudioSessionInterruptionNotification object:nil];
+        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(microphoneRouteChanged:)
+                                                   name:AVAudioSessionRouteChangeNotification object:nil];
+    }
     LiInitializeStreamConfiguration(&_streamConfig);
     _streamConfig.width = config.width;
     _streamConfig.height = config.height;
@@ -498,13 +559,33 @@ void ClSetControllerLED(uint16_t controllerNumber, uint8_t r, uint8_t g, uint8_t
 -(void) main
 {
     [initLock lock];
-    LiStartConnection(&_serverInfo,
+    _streamConfig.requestNativeMic = _micConfig.requestNativeMicrophone;
+    int result = LiStartConnection(&_serverInfo,
                       &_streamConfig,
                       &_clCallbacks,
                       &_drCallbacks,
                       &_arCallbacks,
                       NULL, 0,
                       NULL, 0);
+    if (result == 0 && _micConfig.requestNativeMicrophone) {
+        _nativeMicrophone = [[NativeAppleMic alloc] init];
+        __weak Connection* weakSelf = self;
+        StreamConfiguration* config = _micConfig;
+        if (![_nativeMicrophone startWhileAllowed:^BOOL {
+            return config.requestNativeMicrophone;
+        } onFailure:^{
+            [weakSelf microphoneUnavailable];
+        }]) {
+            _nativeMicrophone = nil;
+            [self microphoneUnavailable];
+        } else {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (config.requestNativeMicrophone) {
+                    [self->_microphoneCallbacks microphoneStatusChanged:NativeMicrophoneStatusActive];
+                }
+            });
+        }
+    }
     [initLock unlock];
 }
 

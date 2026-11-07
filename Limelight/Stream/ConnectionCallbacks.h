@@ -6,7 +6,14 @@
 //  Copyright © 2020 Moonlight Game Streaming Project. All rights reserved.
 //
 
+typedef NS_ENUM(NSInteger, NativeMicrophoneStatus) {
+    NativeMicrophoneStatusActive,
+    NativeMicrophoneStatusUnavailable,
+    NativeMicrophoneStatusOff,
+};
+
 @protocol ConnectionCallbacks <NSObject>
+- (void)microphoneStatusChanged:(NativeMicrophoneStatus)status;
 
 - (void) connectionStarted;
 - (void) connectionTerminated:(int)errorCode;
