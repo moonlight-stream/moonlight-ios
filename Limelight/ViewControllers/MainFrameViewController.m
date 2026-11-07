@@ -21,6 +21,7 @@
 #import "AppListResponse.h"
 #import "ServerInfoResponse.h"
 #import "StreamFrameViewController.h"
+#import <AVFoundation/AVFoundation.h>
 #import "LoadingFrameViewController.h"
 #import "ComputerScrollView.h"
 #import "TemporaryApp.h"
@@ -46,6 +47,7 @@
     DiscoveryManager* _discMan;
     AppAssetManager* _appManager;
     StreamConfiguration* _streamConfig;
+    NSUInteger _microphoneLaunchGeneration;
     UIAlertController* _pairAlert;
     LoadingFrameViewController* _loadingFrame;
     UIScrollView* hostScrollView;
@@ -602,6 +604,7 @@ static NSMutableSet* hostList;
 }
 
 - (void) prepareToStreamApp:(TemporaryApp *)app {
+    ++_microphoneLaunchGeneration;
     _streamConfig = [[StreamConfiguration alloc] init];
     _streamConfig.host = app.host.activeAddress;
     _streamConfig.httpsPort = app.host.httpsPort;
@@ -751,6 +754,39 @@ static NSMutableSet* hostList;
         [self performSegueWithIdentifier:@"createStreamFrame" sender:nil];
     }]];
     
+    if (@available(iOS 17.0, tvOS 17.0, *)) {
+        TemporaryApp* microphoneApp = currentApp ?: app;
+        NSString* microphoneAction = [NSString stringWithFormat:currentApp ? @"Resume %@ with Microphone" :
+                                                                            @"Launch %@ with Microphone",
+                                                                microphoneApp.name];
+        [alertController addAction:[UIAlertAction actionWithTitle:microphoneAction
+            style:UIAlertActionStyleDefault handler:^(UIAlertAction* action) {
+                NSUInteger generation = ++self->_microphoneLaunchGeneration;
+                [AVAudioApplication requestRecordPermissionWithCompletionHandler:^(BOOL granted) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        if (!self.view.window || self->_selectedHost != app.host ||
+                            UIApplication.sharedApplication.applicationState != UIApplicationStateActive ||
+                            self->_microphoneLaunchGeneration != generation) {
+                            return;
+                        }
+                        if (!granted) {
+                            UIAlertController* permissionAlert = [UIAlertController
+                                alertControllerWithTitle:@"Microphone unavailable"
+                                message:@"Allow microphone access in Settings to stream with your microphone."
+                                preferredStyle:UIAlertControllerStyleAlert];
+                            [permissionAlert addAction:[UIAlertAction actionWithTitle:@"OK"
+                                style:UIAlertActionStyleCancel handler:nil]];
+                            [[self activeViewController] presentViewController:permissionAlert animated:YES completion:nil];
+                            return;
+                        }
+                        [self prepareToStreamApp:microphoneApp];
+                        self->_streamConfig.requestNativeMicrophone = YES;
+                        [self performSegueWithIdentifier:@"createStreamFrame" sender:nil];
+                    });
+                }];
+            }]];
+    }
+
     if (currentApp != nil) {
         [alertController addAction:[UIAlertAction actionWithTitle:
                                     [app.id isEqualToString:currentApp.id] ? @"Quit App" : @"Quit Running App and Start" style:UIAlertActionStyleDestructive handler:^(UIAlertAction* action){

@@ -106,8 +106,15 @@
     });
 }
 
+- (void) stopMicrophone
+{
+    _config.requestNativeMicrophone = NO;
+    [_connection stopMicrophone];
+}
+
 - (void) stopStream
 {
+    _config.requestNativeMicrophone = NO;
     [_connection terminate];
 }
 

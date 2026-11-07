@@ -42,6 +42,7 @@
     UITextView *_overlayView;
     UILabel *_stageLabel;
     UILabel *_tipLabel;
+    UILabel *_microphoneLabel;
     UIActivityIndicatorView *_spinner;
     StreamView *_streamView;
     UIScrollView *_scrollView;
@@ -154,8 +155,6 @@
     _streamMan = [[StreamManager alloc] initWithConfig:self.streamConfig
                                             renderView:_streamView
                                    connectionCallbacks:self];
-    NSOperationQueue* opQueue = [[NSOperationQueue alloc] init];
-    [opQueue addOperation:_streamMan];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillResignActive:)
@@ -209,6 +208,27 @@
     [self.view addSubview:_stageLabel];
     [self.view addSubview:_spinner];
     [self.view addSubview:_tipLabel];
+    if (self.streamConfig.requestNativeMicrophone) {
+        _microphoneLabel = [[UILabel alloc] init];
+        _microphoneLabel.translatesAutoresizingMaskIntoConstraints = NO;
+        _microphoneLabel.userInteractionEnabled = NO;
+        _microphoneLabel.textAlignment = NSTextAlignmentCenter;
+        _microphoneLabel.textColor = UIColor.whiteColor;
+        _microphoneLabel.backgroundColor = [UIColor colorWithWhite:0 alpha:0.8];
+        _microphoneLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleFootnote];
+        _microphoneLabel.numberOfLines = 0;
+        _microphoneLabel.text = @"Starting microphone…";
+        [self.view addSubview:_microphoneLabel];
+        UILayoutGuide* safeArea = self.view.safeAreaLayoutGuide;
+        [NSLayoutConstraint activateConstraints:@[
+            [_microphoneLabel.centerXAnchor constraintEqualToAnchor:safeArea.centerXAnchor],
+            [_microphoneLabel.topAnchor constraintEqualToAnchor:safeArea.topAnchor constant:8],
+            [_microphoneLabel.leadingAnchor constraintGreaterThanOrEqualToAnchor:safeArea.leadingAnchor constant:8],
+            [_microphoneLabel.trailingAnchor constraintLessThanOrEqualToAnchor:safeArea.trailingAnchor constant:-8],
+        ]];
+    }
+    NSOperationQueue* opQueue = [[NSOperationQueue alloc] init];
+    [opQueue addOperation:_streamMan];
 }
 
 - (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView {
@@ -316,7 +336,23 @@
 }
 
 // This will fire if the user opens control center or gets a low battery message
+- (void)microphoneStatusChanged:(NativeMicrophoneStatus)status {
+    switch (status) {
+        case NativeMicrophoneStatusActive:
+            _microphoneLabel.text = @"  Microphone on · Leave stream to stop  ";
+            break;
+        case NativeMicrophoneStatusUnavailable:
+            _microphoneLabel.text = @"  Microphone unavailable · Stream continues  ";
+            break;
+        case NativeMicrophoneStatusOff:
+            _microphoneLabel.text = @"  Microphone off  ";
+            break;
+    }
+}
+
 - (void)applicationWillResignActive:(NSNotification *)notification {
+    [_streamMan stopMicrophone];
+    [self microphoneStatusChanged:NativeMicrophoneStatusOff];
     if (_inactivityTimer != nil) {
         [_inactivityTimer invalidate];
     }
@@ -390,6 +426,7 @@
 }
 
 - (void)connectionTerminated:(int)errorCode {
+    [_streamMan stopMicrophone];
     Log(LOG_I, @"Connection terminated: %d", errorCode);
     
     unsigned int portFlags = LiGetPortFlagsFromTerminationErrorCode(errorCode);
