@@ -17,6 +17,13 @@
 
 static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
+// A three finger tap (open/close the keyboard) must stay this still and this short
+static const CGFloat THREE_FINGER_TAP_MAX_MOVEMENT = 20.0;
+static const NSTimeInterval THREE_FINGER_TAP_MAX_DURATION = 0.8;
+
+@interface StreamView () <UIGestureRecognizerDelegate>
+@end
+
 @implementation StreamView {
     OnScreenControls* onScreenControls;
     
@@ -38,6 +45,16 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     double accumulatedMouseDeltaY;
     
     UIResponder* touchHandler;
+
+    // Touchscreen (absolute touch) mode gestures
+    BOOL absoluteTouchMode;
+    UIPanGestureRecognizer* twoFingerScrollRecognizer;
+    // Where each finger seen by twoFingerScrollRecognizer first landed (window coordinates)
+    NSMapTable<UITouch*, NSValue*>* twoFingerTouchStarts;
+    CGPoint twoFingerScrollLastTranslation;
+    BOOL threeFingerTapPending;
+    NSTimeInterval threeFingerTapStartTime;
+    NSMutableDictionary<NSValue*, NSValue*>* threeFingerStartPoints;
     
     id<UserInteractionDelegate> interactionDelegate;
     NSTimer* interactionTimer;
@@ -53,7 +70,8 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     self->streamAspectRatio = (float)streamConfig.width / (float)streamConfig.height;
     
     TemporarySettings* settings = [[[DataManager alloc] init] getSettings];
-    
+    absoluteTouchMode = settings.absoluteTouchMode;
+
     keysDown = [[NSMutableSet alloc] init];
     keyInputField = [[KeyboardInputField alloc] initWithFrame:CGRectZero];
     [keyInputField setKeyboardType:UIKeyboardTypeDefault];
@@ -108,6 +126,17 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         [self addGestureRecognizer:continuousMouseWheelRecognizer];
     }
     
+    if (settings.absoluteTouchMode) {
+        // Two fingers moving together scroll the host. Pinching still zooms the view.
+        twoFingerScrollRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(twoFingerScrolled:)];
+        twoFingerScrollRecognizer.minimumNumberOfTouches = 2;
+        twoFingerScrollRecognizer.maximumNumberOfTouches = 2;
+        twoFingerScrollRecognizer.allowedTouchTypes = @[@(UITouchTypeDirect)];
+        twoFingerScrollRecognizer.cancelsTouchesInView = NO;
+        twoFingerScrollRecognizer.delegate = self;
+        [self addGestureRecognizer:twoFingerScrollRecognizer];
+    }
+
 #if defined(__IPHONE_16_1) || defined(__TVOS_16_1)
     if (@available(iOS 16.1, *)) {
         UIHoverGestureRecognizer *stylusHoverRecognizer = [[UIHoverGestureRecognizer alloc] initWithTarget:self action:@selector(sendStylusHoverEvent:)];
@@ -352,42 +381,77 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         [touchHandler touchesBegan:touches withEvent:event];
         
         if ([[event allTouches] count] == 3) {
-            if (isInputingText) {
-                Log(LOG_D, @"Closing the keyboard");
-                [keyInputField resignFirstResponder];
-                isInputingText = false;
-            } else {
-                Log(LOG_D, @"Opening the keyboard");
-                // Prepare the textbox used to capture keyboard events.
-                keyInputField.delegate = self;
-                keyInputField.text = @"0";
-#if !TARGET_OS_TV
-                // Prepare the toolbar above the keyboard for more options
-                UIToolbar *customToolbarView = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, 44)];
-                
-                UIBarButtonItem *doneBarButton = [self createButtonWithImageNamed:@"DoneIcon.png" backgroundColor:[UIColor clearColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x00 isToggleable:NO];
-                UIBarButtonItem *windowsBarButton = [self createButtonWithImageNamed:@"WindowsIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x5B isToggleable:YES];
-                UIBarButtonItem *tabBarButton = [self createButtonWithImageNamed:@"TabIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x09 isToggleable:NO];
-                UIBarButtonItem *shiftBarButton = [self createButtonWithImageNamed:@"ShiftIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA0 isToggleable:YES];
-                UIBarButtonItem *escapeBarButton = [self createButtonWithImageNamed:@"EscapeIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x1B isToggleable:NO];
-                UIBarButtonItem *controlBarButton = [self createButtonWithImageNamed:@"ControlIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA2 isToggleable:YES];
-                UIBarButtonItem *altBarButton = [self createButtonWithImageNamed:@"AltIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA4 isToggleable:YES];
-                UIBarButtonItem *deleteBarButton = [self createButtonWithImageNamed:@"DeleteIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x2E isToggleable:NO];
-                UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
-                
-                [customToolbarView setItems:[NSArray arrayWithObjects:doneBarButton, windowsBarButton, escapeBarButton, tabBarButton, shiftBarButton, controlBarButton, altBarButton, deleteBarButton, flexibleSpace, nil]];
-                keyInputField.inputAccessoryView = customToolbarView;
-#endif
-                [keyInputField becomeFirstResponder];
-                [keyInputField addTarget:self action:@selector(onKeyboardPressed:) forControlEvents:UIControlEventEditingChanged];
-                
-                // Undo causes issues for our state management, so turn it off
-                [keyInputField.undoManager disableUndoRegistration];
-                
-                isInputingText = true;
+            if (absoluteTouchMode) {
+                // In touchscreen mode three fingers also pan a zoomed view, so only a
+                // tap (fingers lifted without having moved) opens the keyboard.
+                threeFingerTapPending = YES;
+                threeFingerTapStartTime = event.timestamp;
+                if (threeFingerStartPoints == nil) {
+                    threeFingerStartPoints = [[NSMutableDictionary alloc] init];
+                }
+                [threeFingerStartPoints removeAllObjects];
+                for (UITouch* t in [event allTouches]) {
+                    threeFingerStartPoints[[NSValue valueWithNonretainedObject:t]] = [NSValue valueWithCGPoint:[t locationInView:self]];
+                }
+            }
+            else {
+                [self toggleKeyboard];
             }
         }
+        else {
+            // Not exactly three fingers going down: this can't be a three finger tap
+            threeFingerTapPending = NO;
+        }
     }
+}
+
+- (void)toggleKeyboard {
+    if (isInputingText) {
+        Log(LOG_D, @"Closing the keyboard");
+        [keyInputField resignFirstResponder];
+        isInputingText = false;
+    } else {
+        Log(LOG_D, @"Opening the keyboard");
+        // Prepare the textbox used to capture keyboard events.
+        keyInputField.delegate = self;
+        keyInputField.text = @"0";
+#if !TARGET_OS_TV
+        // Prepare the toolbar above the keyboard for more options
+        UIToolbar *customToolbarView = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, 44)];
+        
+        UIBarButtonItem *doneBarButton = [self createButtonWithImageNamed:@"DoneIcon.png" backgroundColor:[UIColor clearColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x00 isToggleable:NO];
+        UIBarButtonItem *windowsBarButton = [self createButtonWithImageNamed:@"WindowsIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x5B isToggleable:YES];
+        UIBarButtonItem *tabBarButton = [self createButtonWithImageNamed:@"TabIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x09 isToggleable:NO];
+        UIBarButtonItem *shiftBarButton = [self createButtonWithImageNamed:@"ShiftIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA0 isToggleable:YES];
+        UIBarButtonItem *escapeBarButton = [self createButtonWithImageNamed:@"EscapeIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x1B isToggleable:NO];
+        UIBarButtonItem *controlBarButton = [self createButtonWithImageNamed:@"ControlIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA2 isToggleable:YES];
+        UIBarButtonItem *altBarButton = [self createButtonWithImageNamed:@"AltIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA4 isToggleable:YES];
+        UIBarButtonItem *deleteBarButton = [self createButtonWithImageNamed:@"DeleteIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x2E isToggleable:NO];
+        UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+        
+        [customToolbarView setItems:[NSArray arrayWithObjects:doneBarButton, windowsBarButton, escapeBarButton, tabBarButton, shiftBarButton, controlBarButton, altBarButton, deleteBarButton, flexibleSpace, nil]];
+        keyInputField.inputAccessoryView = customToolbarView;
+#endif
+        [keyInputField becomeFirstResponder];
+        [keyInputField addTarget:self action:@selector(onKeyboardPressed:) forControlEvents:UIControlEventEditingChanged];
+        
+        // Undo causes issues for our state management, so turn it off
+        [keyInputField.undoManager disableUndoRegistration];
+        
+        isInputingText = true;
+    }
+}
+
+- (BOOL)allOtherTouchesEnded:(UIEvent *)event ending:(NSSet *)ending {
+    for (UITouch* t in [event allTouches]) {
+        if ([ending containsObject:t]) {
+            continue;
+        }
+        if (t.phase == UITouchPhaseBegan || t.phase == UITouchPhaseMoved || t.phase == UITouchPhaseStationary) {
+            return NO;
+        }
+    }
+    return YES;
 }
 
 - (UIBarButtonItem *)createButtonWithImageNamed:(NSString *)imageName backgroundColor:(UIColor *)backgroundColor target:(id)target action:(SEL)action keyCode:(NSInteger)keyCode isToggleable:(BOOL)isToggleable {
@@ -542,6 +606,19 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     
     hasUserInteracted = YES;
     
+    if (threeFingerTapPending) {
+        for (UITouch* t in touches) {
+            NSValue* start = threeFingerStartPoints[[NSValue valueWithNonretainedObject:t]];
+            if (start != nil) {
+                CGPoint now = [t locationInView:self];
+                if (hypot(now.x - start.CGPointValue.x, now.y - start.CGPointValue.y) > THREE_FINGER_TAP_MAX_MOVEMENT) {
+                    threeFingerTapPending = NO;
+                    break;
+                }
+            }
+        }
+    }
+
     if (![onScreenControls handleTouchMovedEvent:touches]) {
         [touchHandler touchesMoved:touches withEvent:event];
     }
@@ -609,12 +686,20 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     }
 #endif
     
+    if (threeFingerTapPending && [self allOtherTouchesEnded:event ending:touches]) {
+        threeFingerTapPending = NO;
+        if (event.timestamp - threeFingerTapStartTime < THREE_FINGER_TAP_MAX_DURATION) {
+            [self toggleKeyboard];
+        }
+    }
+
     if (![onScreenControls handleTouchUpEvent:touches]) {
         [touchHandler touchesEnded:touches withEvent:event];
     }
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
+    threeFingerTapPending = NO;
     [touchHandler touchesCancelled:touches withEvent:event];
     [self handleMouseButtonEvent:BUTTON_ACTION_RELEASE
                       forTouches:touches
@@ -759,9 +844,104 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     lastScrollTranslation = currentScrollTranslation;
 }
 
+- (void)twoFingerScrolled:(UIPanGestureRecognizer *)gesture {
+    switch (gesture.state) {
+        case UIGestureRecognizerStateBegan:
+            twoFingerScrollLastTranslation = CGPointMake(0, 0);
+            // The enclosing scroll view's pinch recognizer may already have started on a
+            // tiny change in finger spacing. This is a scroll, so stop any zoom now.
+            if ([self.superview isKindOfClass:[UIScrollView class]]) {
+                UIPinchGestureRecognizer* pinch = ((UIScrollView*)self.superview).pinchGestureRecognizer;
+                pinch.enabled = NO;
+                pinch.enabled = YES;
+            }
+            break;
+
+        case UIGestureRecognizerStateChanged:
+            break;
+
+        default:
+            twoFingerScrollLastTranslation = CGPointMake(0, 0);
+            return;
+    }
+
+    // Measure in window (screen) coordinates so scrolling feels the same at any zoom level
+    CGPoint translation = [gesture translationInView:nil];
+    CGSize area = self.window.bounds.size;
+    if (area.width <= 0 || area.height <= 0) {
+        return;
+    }
+    const short translationMultiplier = 120 * 20; // WHEEL_DELTA * 20
+
+    short deltaY = ((translation.y - twoFingerScrollLastTranslation.y) / area.height) * translationMultiplier;
+    if (deltaY != 0) {
+        LiSendHighResScrollEvent(deltaY);
+        twoFingerScrollLastTranslation.y = translation.y;
+    }
+
+    short deltaX = ((translation.x - twoFingerScrollLastTranslation.x) / area.width) * translationMultiplier;
+    if (deltaX != 0) {
+        // Direction is reversed from vertical scrolling
+        LiSendHighResHScrollEvent(-deltaX);
+        twoFingerScrollLastTranslation.x = translation.x;
+    }
+}
+
 #endif
 
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+    // Let our scroll recognizer run alongside the scroll view's pinch-to-zoom
+    return gestureRecognizer == twoFingerScrollRecognizer;
+}
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch {
+    if (gestureRecognizer == twoFingerScrollRecognizer) {
+        // Called as each finger lands, before the recognizer sees it
+        if (twoFingerTouchStarts == nil) {
+            twoFingerTouchStarts = [NSMapTable weakToStrongObjectsMapTable];
+        }
+        for (UITouch* t in [[twoFingerTouchStarts keyEnumerator] allObjects]) {
+            if (t.phase == UITouchPhaseEnded || t.phase == UITouchPhaseCancelled) {
+                [twoFingerTouchStarts removeObjectForKey:t];
+            }
+        }
+        [twoFingerTouchStarts setObject:[NSValue valueWithCGPoint:[touch locationInView:nil]] forKey:touch];
+    }
+    return YES;
+}
+
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
+    if (gestureRecognizer == twoFingerScrollRecognizer) {
+        if (gestureRecognizer.numberOfTouches != 2) {
+            return NO;
+        }
+        // Spacing of the two fingers where they first landed. This is taken from the
+        // recognizer's own touches: the enclosing UIScrollView delays touchesBegan to
+        // this view, so touchesBegan can arrive after the recognizer wants to begin.
+        NSMutableArray<NSValue*>* starts = [[NSMutableArray alloc] init];
+        for (UITouch* t in twoFingerTouchStarts) {
+            if (t.phase != UITouchPhaseEnded && t.phase != UITouchPhaseCancelled) {
+                [starts addObject:[twoFingerTouchStarts objectForKey:t]];
+            }
+        }
+        if (starts.count != 2) {
+            return YES;
+        }
+        CGPoint s0 = starts[0].CGPointValue;
+        CGPoint s1 = starts[1].CGPointValue;
+        CGFloat initialDistance = hypot(s0.x - s1.x, s0.y - s1.y);
+
+        // If the fingers moved apart or together, this is a pinch, not a scroll
+        CGPoint p0 = [gestureRecognizer locationOfTouch:0 inView:nil];
+        CGPoint p1 = [gestureRecognizer locationOfTouch:1 inView:nil];
+        CGFloat distance = hypot(p0.x - p1.x, p0.y - p1.y);
+        if (initialDistance > 0 &&
+            fabs(distance - initialDistance) > MAX(initialDistance * 0.12, 12.0)) {
+            return NO;
+        }
+        return YES;
+    }
+
     if (@available(iOS 13.0, *)) {
         // Disable the 3 finger tap gestures that trigger the copy/paste/undo toolbar on iOS 13+
         return gestureRecognizer.name == nil || ![gestureRecognizer.name hasPrefix:@"kbProductivity."];
