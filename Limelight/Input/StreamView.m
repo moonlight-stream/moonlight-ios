@@ -368,14 +368,20 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
                 UIBarButtonItem *doneBarButton = [self createButtonWithImageNamed:@"DoneIcon.png" backgroundColor:[UIColor clearColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x00 isToggleable:NO];
                 UIBarButtonItem *windowsBarButton = [self createButtonWithImageNamed:@"WindowsIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x5B isToggleable:YES];
                 UIBarButtonItem *tabBarButton = [self createButtonWithImageNamed:@"TabIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x09 isToggleable:NO];
+                // Caps Lock also switches a Japanese IME on the host between alphanumeric and kana
+                UIBarButtonItem *capsLockBarButton = [self createButtonWithImageNamed:@"capslock" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x14 isToggleable:NO];
                 UIBarButtonItem *shiftBarButton = [self createButtonWithImageNamed:@"ShiftIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA0 isToggleable:YES];
                 UIBarButtonItem *escapeBarButton = [self createButtonWithImageNamed:@"EscapeIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x1B isToggleable:NO];
                 UIBarButtonItem *controlBarButton = [self createButtonWithImageNamed:@"ControlIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA2 isToggleable:YES];
                 UIBarButtonItem *altBarButton = [self createButtonWithImageNamed:@"AltIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0xA4 isToggleable:YES];
                 UIBarButtonItem *deleteBarButton = [self createButtonWithImageNamed:@"DeleteIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x2E isToggleable:NO];
+                UIBarButtonItem *leftBarButton = [self createButtonWithImageNamed:@"arrow.left" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x25 isToggleable:NO];
+                UIBarButtonItem *downBarButton = [self createButtonWithImageNamed:@"arrow.down" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x28 isToggleable:NO];
+                UIBarButtonItem *upBarButton = [self createButtonWithImageNamed:@"arrow.up" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x26 isToggleable:NO];
+                UIBarButtonItem *rightBarButton = [self createButtonWithImageNamed:@"arrow.right" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x27 isToggleable:NO];
                 UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
                 
-                [customToolbarView setItems:[NSArray arrayWithObjects:doneBarButton, windowsBarButton, escapeBarButton, tabBarButton, shiftBarButton, controlBarButton, altBarButton, deleteBarButton, flexibleSpace, nil]];
+                [customToolbarView setItems:[NSArray arrayWithObjects:doneBarButton, windowsBarButton, escapeBarButton, tabBarButton, capsLockBarButton, shiftBarButton, controlBarButton, altBarButton, deleteBarButton, leftBarButton, downBarButton, upBarButton, rightBarButton, flexibleSpace, nil]];
                 keyInputField.inputAccessoryView = customToolbarView;
 #endif
                 [keyInputField becomeFirstResponder];
@@ -392,9 +398,19 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
 - (UIBarButtonItem *)createButtonWithImageNamed:(NSString *)imageName backgroundColor:(UIColor *)backgroundColor target:(id)target action:(SEL)action keyCode:(NSInteger)keyCode isToggleable:(BOOL)isToggleable {
     UIImage *image = [UIImage imageNamed:imageName];
+    if (image == nil) {
+        // Not in the asset catalog, so use the SF Symbol of that name. Draw it white
+        // as a plain image like the PNG icons, since the toolbar recolors template images.
+        UIImageSymbolConfiguration *config = [UIImageSymbolConfiguration configurationWithPointSize:16 weight:UIImageSymbolWeightSemibold];
+        image = [[UIImage systemImageNamed:imageName withConfiguration:config] imageWithTintColor:[UIColor whiteColor] renderingMode:UIImageRenderingModeAlwaysOriginal];
+    }
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
     [button setImage:image forState:UIControlStateNormal];
     button.frame = CGRectMake(0, 0, 30, 30);
+    // Bar items lay out custom views with Auto Layout, so the frame alone doesn't
+    // limit the size. Without these the 90px icons show at full size.
+    [button.widthAnchor constraintEqualToConstant:30].active = YES;
+    [button.heightAnchor constraintEqualToConstant:30].active = YES;
     button.imageView.contentMode = UIViewContentModeScaleAspectFit;
     button.imageView.backgroundColor = backgroundColor;
     button.imageView.layer.cornerRadius = 10.0;
